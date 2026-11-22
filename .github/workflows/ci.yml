@@ -101,7 +101,9 @@ jobs:
         run: sed 's/@IFACE@/wlan0/' packaging/appliance/captive.nft > /tmp/captive.nft && sudo nft -c -f /tmp/captive.nft
 
   build:
-    if: ${{ inputs.package != false }}
+    # On its own CI always packages; when the release workflow calls it
+    # (github.workflow is then "Release"), only if asked to.
+    if: ${{ github.workflow == 'CI' || inputs.package }}
     runs-on: ubuntu-latest
     needs: [test]
     steps:
