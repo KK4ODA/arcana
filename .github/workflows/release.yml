@@ -80,8 +80,11 @@ jobs:
           cat "$tmp/version.txt"
           grep -q "^arcana $VERSION " "$tmp/version.txt"
           test -f "$tmp/Arcana/licenses/SOURCES.txt"
-          tar -tf "arcana-$VERSION-kiwix-sources.tar" > "$tmp/sources.txt"
-          grep -q kiwix-tools-3.8.2.tar.xz "$tmp/sources.txt"
+          # The sources download is complete: every file it lists is there
+          # with the pinned content.
+          mkdir "$tmp/src"
+          tar -xf "arcana-$VERSION-kiwix-sources.tar" -C "$tmp/src"
+          (cd "$tmp/src" && sha256sum -c --quiet SHA256SUMS && test -f SOURCES.txt && test -f kiwix-tools-3.8.2.tar.xz)
       - name: Check the update signatures
         if: ${{ env.HAS_SIGNING_KEY == 'true' }}
         run: |

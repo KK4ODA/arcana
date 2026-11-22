@@ -29,18 +29,34 @@ All direct Go dependencies are BSD-3-Clause or MIT, which are compatible.
   - include a written offer, valid for three years; **or**
   - point to the source on a network server under §6(d) while ensuring it
     stays available.
-- **Implemented (0.6.0).** `scripts/fetch-kiwix-sources.sh` downloads, with
-  pinned SHA-256 values, the source of every GPL component inside the
-  shipped binaries in the exact versions they report: kiwix-tools 3.8.2 and
-  3.8.1, libkiwix 14.2.0 and 14.1.1, libzim 9.5.0 and 9.4.0, and Xapian
-  1.4.23. `scripts/package.sh` puts the matching kiwix-tools source and
-  `licenses/SOURCES.txt` in every archive and publishes all of them as
-  `arcana-<version>-kiwix-sources.tar` next to the binaries on the release
-  page (§6(d): same place, clear directions). `SOURCES.txt` points to
-  kiwix-build for build recipes and patches and lists the other (non-GPL)
-  static libraries. **Maintainer review:** whether the non-GPL static
-  libraries (libmicrohttpd is LGPL-2.1) and kiwix-build's patches also have
-  to be shipped rather than referenced.
+- **Implemented (0.6.0): all sources published.** The maintainer decided to
+  publish the complete source of everything inside the shipped binaries,
+  not only the GPL components. `scripts/fetch-kiwix-sources.sh` downloads,
+  each checked against a pinned SHA-256 or commit:
+  - kiwix-tools, libkiwix and libzim for both builds (3.8.2 for Linux and
+    macOS, 3.8.1 for Windows);
+  - the kiwix-build recipes and patches at the commits that released them
+    (f4325ef and 6f3a27d);
+  - every library those recipes link in, in the recipes' versions, with
+    their Meson build files: Xapian (and openzim/xapian-meson for Windows),
+    libcurl, libmicrohttpd, zlib, xz/liblzma (including the copy libzim
+    builds on Windows), zstd, ICU (including the 74.1 source of the Windows
+    DLLs), pugixml, Mustache, docopt.cpp, Boost.Regex and libuuid;
+  - the GNU C library linked into the static Linux builds: Ubuntu's glibc
+    2.35-0ubuntu3.11 (read from Kiwix's build image) for x86_64, and glibc
+    2.31 with the crosstool-NG patches and toolchain configuration for
+    arm64.
+
+  GCC's runtime libraries are not included (GCC Runtime Library Exception);
+  macOS and Windows builds use the operating system's libraries.
+  `scripts/package.sh` puts the matching kiwix-tools source and
+  `licenses/SOURCES.txt` in every archive and publishes the whole set,
+  with a SHA256SUMS list, as `arcana-<version>-kiwix-sources.tar` next to
+  the binaries on the release page (§6(d): same place, clear directions).
+  The release workflow checks the set against that list. `SOURCES.txt`
+  explains which file belongs to which build, and how each version was
+  established. When kiwix-tools is updated, the pins are re-read from the
+  kiwix-build commit that released it.
 - **Notices.** `bin/<platform>/kiwix/NOTICE.txt` and
   `THIRD_PARTY_NOTICES.md` identify the program, its license and its
   source.
@@ -110,7 +126,8 @@ in the export manifest.
 1. Run `go list -deps` and refresh `THIRD_PARTY_NOTICES.md`. Copy every
    license text into `licenses/` in the bundle.
 2. Include the kiwix sources and `SOURCES.txt` (automated by
-   `scripts/package.sh`; update the pins when kiwix-tools changes).
+   `scripts/package.sh`; when kiwix-tools changes, re-read every pin from
+   the kiwix-build commit that released it, as described in `SOURCES.txt`).
 3. Confirm the bundled catalog's license records against the publishers'
    current pages, and update `lastVerified`.
 4. Make sure no restricted content ships inside the bundle. Today only the

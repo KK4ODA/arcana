@@ -137,9 +137,9 @@ user's documents, host only).
    `scripts/release-notes.sh`.
 
 Release files: one archive per platform, the all-platform portable zip (also
-the in-app update archive), `arcana-X.Y.Z-kiwix-sources.tar` (source of the
-GPL components of kiwix-serve, required because the binaries ship beside
-Arcana), `release.json` and `SHA256SUMS`. Build them locally with
+the in-app update archive), `arcana-X.Y.Z-kiwix-sources.tar` (the complete
+source of kiwix-serve and every library built into it, with Kiwix's build
+recipes, about 170 MB; see `packaging/SOURCES.txt`), `release.json` and `SHA256SUMS`. Build them locally with
 `scripts/package.sh X.Y.Z` (needs `zip`; downloads kiwix-serve binaries and
 sources, all checked against pinned SHA-256 values).
 

@@ -5,8 +5,9 @@
 #   arcana-<version>-portable.zip           the same folder zipped; also the
 #                                           archive in-app updates download
 #   arcana-<version>-<platform>.tar.gz/.zip one platform only (smaller)
-#   arcana-<version>-kiwix-sources.tar      source of the GPL components of
-#                                           kiwix-serve (GPL-3.0 section 6)
+#   arcana-<version>-kiwix-sources.tar      complete source of kiwix-serve and
+#                                           everything built into it, with
+#                                           Kiwix's recipes (SOURCES.txt)
 #   release.json [+ release.json.sig]       update manifest (signed when
 #                                           ARCANA_SIGNING_KEY is set)
 #   SHA256SUMS                              checksums of all of the above
@@ -71,7 +72,10 @@ cp "$ROOT/packaging/SOURCES.txt" "$OUT/licenses/SOURCES.txt"
 SRC="$ROOT/third_party/kiwix-src"
 cp "$SRC/kiwix-tools-3.8.2.tar.xz" "$OUT/licenses/"
 case " $PLATFORMS " in *" windows-amd64 "*) cp "$SRC/kiwix-tools-3.8.1.tar.xz" "$OUT/licenses/" ;; esac
-(cd "$SRC" && tar -cf "$DIST/arcana-$VERSION-kiwix-sources.tar" -C "$ROOT/packaging" SOURCES.txt -C "$SRC" ./*.tar.xz)
+# The sources download: SOURCES.txt, the checksum list and every file in it.
+# shellcheck disable=SC2046 # file names from SHA256SUMS contain no spaces
+tar -cf "$DIST/arcana-$VERSION-kiwix-sources.tar" -C "$ROOT/packaging" SOURCES.txt \
+	-C "$SRC" SHA256SUMS $(awk '{print $2}' "$SRC/SHA256SUMS")
 
 HOSTBIN=$(mktemp -d)
 SCRATCH=$(mktemp -d)

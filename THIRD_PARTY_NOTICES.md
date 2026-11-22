@@ -48,11 +48,15 @@ The full license texts are in each module's source, available from
 
 kiwix-serve is statically linked by the Kiwix project against libkiwix
 (GPL-3.0-or-later), libzim (GPL-2.0-or-later), Xapian (GPL-2.0-or-later),
-ICU (Unicode License), libmicrohttpd (LGPL-2.1-or-later), zstd and xz/liblzma,
-pugixml (MIT), libcurl (curl license) and others. Arcana redistributes the
-official, unmodified binaries published by Kiwix. Release archives must
-include, or point to with a written offer, the corresponding source code;
-see `docs/design/08-licensing.md` for the release checklist.
+ICU (Unicode License), libmicrohttpd (LGPL-2.1-or-later), libcurl (curl
+license), zlib (Zlib), zstd (BSD-3-Clause), xz/liblzma (public domain),
+pugixml (MIT), Mustache (BSL-1.0), docopt.cpp (MIT or BSL-1.0), Boost.Regex
+(BSL-1.0, Windows), libuuid (BSD-3-Clause, Linux) and, on Linux, the GNU C
+Library (LGPL-2.1-or-later). Arcana redistributes the official, unmodified
+binaries published by Kiwix. The complete source of all of these, with
+Kiwix's build recipes, is published with every release as
+`arcana-<version>-kiwix-sources.tar`; `licenses/SOURCES.txt` lists each
+file and the build it belongs to.
 
 ## Content
 

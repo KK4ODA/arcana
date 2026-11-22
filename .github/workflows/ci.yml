@@ -111,12 +111,23 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      # kiwix-serve binaries and their sources (about 170 MB), pinned by
+      # the fetch scripts: download them once per change of the pins.
+      - uses: actions/cache@v4
+        with:
+          path: |
+            third_party/kiwix
+            third_party/kiwix-src
+          key: kiwix-${{ hashFiles('scripts/fetch-kiwix.sh', 'scripts/fetch-kiwix-sources.sh') }}
       - name: Package release files (all platforms)
         run: scripts/package.sh "0.0.0-ci.${GITHUB_RUN_NUMBER}"
       - uses: actions/upload-artifact@v4
         with:
           name: arcana-ci-build
+          # The sources archive is published with releases; leave it out of
+          # the per-push artifact.
           path: |
             dist/arcana-*
+            !dist/arcana-*-kiwix-sources.tar
             dist/SHA256SUMS
           retention-days: 14

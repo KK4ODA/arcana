@@ -25,7 +25,7 @@ the maintainers.
 
 | ID | Risk | L | I | Score | Mitigation | Status |
 |---|---|---|---|---|---|---|
-| L1 | GPL source obligations for redistributed kiwix-serve not met in a release | 2 | 3 | 6 | Ship the source tarball and SOURCES.txt; releases stay drafts until the checklist in 08-licensing.md is done | Open: maintainer action |
+| L1 | GPL source obligations for redistributed kiwix-serve not met in a release | 2 | 3 | 6 | Every release publishes the complete source set (all components, recipes, C library) with SHA256SUMS; the release workflow verifies it | Mitigated (0.6.0) |
 | L2 | Catalog misstates a license; users redistribute NC/ND content commercially | 2 | 2 | 4 | Per-family reviewed mapping; unreviewed = "unknown"; export warnings (Phase 2); content-source issue template requires a license link | Mitigated |
 | L3 | TED usage policy conflicts with offline redistribution | 3 | 1 | 3 | Marked "restricted" (personal use); not in any preset | Mitigated |
 | L4 | ODbL share-alike for Arcana-built derived databases | 2 | 2 | 4 | Publish build scripts and attribution; keep derived DBs separate from user data | Planned |

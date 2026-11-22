@@ -15,40 +15,105 @@ official build published by the Kiwix project (https://kiwix.org), licensed
 under the GNU General Public License, version 3 or later. Arcana starts it
 as a separate program and does not link to it.
 
-Kiwix builds kiwix-serve statically. The source code of its GPL components,
-in the exact versions shipped, is published next to these binaries on the
-same release page, as "arcana-<version>-kiwix-sources.tar":
+Kiwix builds kiwix-serve statically with its build tool, kiwix-build, so
+each kiwix-serve program contains several libraries. The complete source
+code of all of them, in the exact versions shipped, together with the build
+recipes and patches Kiwix used, is published next to these binaries on the
+same release page as "arcana-<version>-kiwix-sources.tar". That archive
+contains this file, a SHA256SUMS list, and the files named below. The
+kiwix-tools source of the build for each platform is also included in this
+archive's licenses/ folder.
 
-  Linux and macOS: kiwix-serve from kiwix-tools 3.8.2
-    kiwix-tools-3.8.2.tar.xz   (GPL-3.0-or-later)
-    libkiwix-14.2.0.tar.xz     (GPL-3.0-or-later)
-    libzim-9.5.0.tar.xz        (GPL-2.0-or-later)
-    xapian-core-1.4.23.tar.xz  (GPL-2.0-or-later)
+Builds
+------
+  Linux, macOS  kiwix-tools 3.8.2, built by kiwix-build at commit f4325ef
+                ("Release kiwix-tools 3.8.2", 2 March 2026)
+  Windows       kiwix-tools 3.8.1, built by kiwix-build at commit 6f3a27d
+                ("Release kiwix-tools 3.8.1", 2 December 2025)
 
-  Windows: kiwix-serve from kiwix-tools 3.8.1
-    kiwix-tools-3.8.1.tar.xz   (GPL-3.0-or-later)
-    libkiwix-14.1.1.tar.xz     (GPL-3.0-or-later)
-    libzim-9.4.0.tar.xz        (GPL-2.0-or-later)
-    xapian-core-1.4.23.tar.xz  (GPL-2.0-or-later)
+Kiwix's recipes and patches (kiwixbuild/dependencies/, kiwixbuild/patches/):
+  kiwix-build-f4325ef.tar.gz, kiwix-build-6f3a27d.tar.gz
 
-The kiwix-tools source of the build for each platform is also included in
-this archive's licenses/ folder.
+Components and their source files
+---------------------------------
+Component         Version      License               Builds      Source files
+kiwix-tools       3.8.2        GPL-3.0-or-later      Linux/macOS kiwix-tools-3.8.2.tar.xz
+                  3.8.1                              Windows     kiwix-tools-3.8.1.tar.xz
+libkiwix          14.2.0       GPL-3.0-or-later      Linux/macOS libkiwix-14.2.0.tar.xz
+                  14.1.1                             Windows     libkiwix-14.1.1.tar.xz
+libzim            9.5.0        GPL-2.0-or-later      Linux/macOS libzim-9.5.0.tar.xz
+                  9.4.0                              Windows     libzim-9.4.0.tar.xz
+Xapian core       1.4.23       GPL-2.0-or-later      Linux/macOS xapian-core-1.4.23.tar.xz
+                  1.4.23                             Windows     xapian-meson-d3efba1.tar.gz (1)
+libcurl           8.4.0        curl                  all         curl-8.4.0.tar.xz, curl_8.4.0-2_patch.zip
+libmicrohttpd     0.9.76       LGPL-2.1-or-later     all         libmicrohttpd-0.9.76.tar.gz,
+                                                                 libmicrohttpd_0.9.76-3_patch.zip
+zlib              1.3.1        Zlib                  all         zlib-1.3.1.tar.gz, zlib_1.3.1-1_patch.zip
+xz / liblzma      5.2.6        public domain         Linux/macOS xz-5.2.6.tar.gz, liblzma_5.2.6-3_patch.zip
+                  5.2.11                             Windows     xz-5.2.11.tar.xz, liblzma_5.2.11-2_patch.zip (2)
+zstd              1.5.7        BSD-3-Clause          Linux/macOS zstd-1.5.7.tar.gz
+                  1.5.5                              Windows     zstd-1.5.5.tar.gz (3)
+ICU               73.2         Unicode               Linux/macOS icu4c-73_2-src.tgz, icu4c-73_2-data.zip
+                  74.1                               Windows     icu4c-74_1-src.tgz (4)
+pugixml           1.15         MIT                   all         pugixml-1.15.tar.gz
+Mustache          4.1          BSL-1.0               all         Mustache-4.1.tar.gz
+docopt.cpp        0.6.3        MIT or BSL-1.0        all         docopt.cpp-0.6.3.tar.gz (3),
+                                                                 docopt_0.6.3-3_patch.zip
+Boost.Regex       1.86.0       BSL-1.0               Windows     boost-regex-1.86.0.tar.gz (3)
+libuuid           1.47.3       BSD-3-Clause          Linux       e2fsprogs-1.47.3.tar.xz
+GNU C Library     2.35         LGPL-2.1-or-later     Linux x86_64 glibc_2.35.orig.tar.xz,
+                  (Ubuntu 2.35-0ubuntu3.11)                      glibc_2.35-0ubuntu3.11.debian.tar.xz,
+                                                                 glibc_2.35-0ubuntu3.11.dsc (5)
+                  2.31                               Linux arm64 glibc-2.31.tar.xz,
+                                                                 crosstool-ng-f390dba.tar.gz,
+                                                                 docker-arm-cross-toolchain-1.1.0.tar.gz (6)
 
-The binaries also contain these libraries, under their own licenses:
-  libcurl 8.4.0 (curl license), libmicrohttpd 0.9.76 (LGPL-2.1-or-later),
-  zlib 1.3.1 (zlib license), ICU 73.2 (Linux, macOS) / 74 (Windows, as
-  separate DLLs) (Unicode license), pugixml 1.15 (MIT), zstd 1.5.7 / 1.5.5
-  (BSD-3-Clause), xz/liblzma 5.2.6 / 5.2.11 (public domain / 0BSD),
-  Mustache (Boost), and others listed by "kiwix-serve --version".
+The *_patch.zip files are the Meson build files Kiwix adds to these
+libraries (from the Meson WrapDB); Kiwix's own patches are in the
+kiwix-build archives under kiwixbuild/patches/.
 
-How Kiwix builds these binaries, including the exact dependency versions
-and any patches, is recorded in kiwix-build:
-  https://github.com/kiwix/kiwix-build
-The upstream source releases are at:
-  https://download.kiwix.org/release/kiwix-tools/
-  https://download.kiwix.org/release/libkiwix/
-  https://download.openzim.org/release/libzim/
-  https://xapian.org/download
+(1) On Windows, Kiwix builds Xapian 1.4.23 from openzim/xapian-meson, a copy
+    of Xapian with Meson build files (commit d3efba1, the latest on its
+    main branch since August 2024).
+(2) On Windows, libzim 9.4.0 builds liblzma itself, from its Meson wrap
+    (subprojects/liblzma.wrap in the libzim source).
+(3) kiwix-build downloads these as GitHub-generated archives of the release
+    tags (zstd v1.5.5, docopt.cpp v0.6.3, Boost.Regex boost-1.86.0). The
+    same tagged sources are provided here as the zstd project's release
+    tarball and as snapshots of the tagged commits (docopt.cpp 42ebcec,
+    Boost.Regex 4cbcd30).
+(4) The Windows build ships ICU as separate DLLs (icu*74.dll), which
+    kiwix-build takes from the Unicode Consortium's prebuilt
+    icu4c-74_1-Win64-MSVC2022.zip; this is their source.
+(5) The Linux x86_64 build runs in Kiwix's build image
+    kiwix-build_ci_jammy:2025-11-05 (Ubuntu 22.04), which has glibc
+    2.35-0ubuntu3.11: the upstream glibc 2.35 source plus Ubuntu's patches.
+(6) The Linux arm64 build uses the aarch64-rpi3-linux-gnu cross toolchain
+    1.1.0 (github.com/tttapa/docker-arm-cross-toolchain), built with
+    crosstool-NG at commit f390dba; its glibc 2.31 is the upstream source
+    plus the patches under packages/glibc/2.31/ in crosstool-NG.
+
+Not included
+------------
+- GCC's runtime libraries (libstdc++, libgcc), linked into the Linux
+  builds, are covered by the GCC Runtime Library Exception, which does
+  not require their source to be distributed. They come from GCC
+  11.4.0-1ubuntu1~22.04.2 (Ubuntu 22.04, x86_64) and GCC 12.5.0
+  (crosstool-NG, arm64); see https://gcc.gnu.org.
+- The macOS and Windows builds use the operating system's own C and C++
+  libraries, which are not distributed with Arcana. On Windows, kiwix-serve
+  needs the Microsoft Visual C++ runtime (VCRUNTIME140.dll, MSVCP140.dll)
+  to be installed.
+
+Where these files come from
+---------------------------
+scripts/fetch-kiwix-sources.sh in the Arcana source downloads every file
+from the address Kiwix's recipes use (or the upstream project), and checks
+each one against a pinned SHA-256 (git snapshots against a pinned commit).
+Upstream locations:
+  https://download.kiwix.org/release/   https://download.openzim.org/release/
+  https://github.com/kiwix/kiwix-build  https://xapian.org/download
+  https://launchpad.net/ubuntu/+source/glibc   https://www.gnu.org/software/libc/
 
 If any source code for the programs distributed here cannot be obtained
 from these places, open an issue at https://github.com/KK4ODA/arcana/issues.
