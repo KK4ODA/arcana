@@ -83,14 +83,13 @@ func OpenMemory() (*Store, error) {
 }
 
 // OpenOrRecover opens the database; if it is damaged it is moved aside and a
-// fresh one created. The second return value reports whether a rebuild from
-// sidecars is needed.
+// fresh one created. The second return value is true only when an existing
+// database was damaged (a missing database is simply recreated: it is a
+// cache that is always re-indexed from the drive at startup).
 func OpenOrRecover(path string) (*Store, bool, error) {
-	_, statErr := os.Stat(path)
-	fresh := errors.Is(statErr, os.ErrNotExist)
 	s, err := Open(path)
 	if err == nil {
-		return s, fresh, nil
+		return s, false, nil
 	}
 	stamp := time.Now().UTC().Format("20060102T150405")
 	for _, suffix := range []string{"", "-wal", "-shm"} {
@@ -421,6 +420,44 @@ func (s *Store) GetResource(ctx context.Context, id string) (catalog.Resource, e
 	var r catalog.Resource
 	err = json.Unmarshal([]byte(data), &r)
 	return r, err
+}
+
+// FindByFileName returns catalog resources that contain a file with the
+// given name. Used to recognize archives being imported from another drive.
+func (s *Store) FindByFileName(ctx context.Context, name string) ([]catalog.Resource, error) {
+	pattern := `%"name":` + string(mustJSON(name)) + `%`
+	rows, err := s.db.QueryContext(ctx, "SELECT data FROM resources WHERE data LIKE ? ESCAPE '\\'", escapeLike(pattern))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	all, err := scanResources(rows)
+	if err != nil {
+		return nil, err
+	}
+	var out []catalog.Resource
+	for _, r := range all {
+		for _, f := range r.Files {
+			if f.Name == name {
+				out = append(out, r)
+				break
+			}
+		}
+	}
+	return out, nil
+}
+
+func mustJSON(v any) []byte {
+	b, _ := json.Marshal(v)
+	return b
+}
+
+// escapeLike escapes LIKE wildcards in the literal parts of a pattern whose
+// first and last characters are intended wildcards.
+func escapeLike(p string) string {
+	inner := p[1 : len(p)-1]
+	inner = strings.NewReplacer(`\`, `\\`, "%", `\%`, "_", `\_`).Replace(inner)
+	return "%" + inner + "%"
 }
 
 // FamilyVariants returns every variant of the given families.

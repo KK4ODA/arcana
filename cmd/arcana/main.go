@@ -36,6 +36,9 @@ Usage:
   arcana catalog refresh        Download the latest resource catalogs
   arcana catalog search TEXT    Search the catalog
   arcana get ID...              Download and install resources, then exit
+  arcana import FILE... [--id ID] [--allow-unverified]
+                                Install archives from another drive (offline);
+                                verified against the catalog checksum
   arcana volumes                List drives and their file systems
   arcana version                Print version information
 
@@ -68,6 +71,8 @@ func main() {
 		err = cmdCatalog(args)
 	case "get":
 		err = cmdGet(args)
+	case "import":
+		err = cmdImport(args)
 	case "volumes":
 		err = cmdVolumes()
 	case "version", "--version", "-v":
@@ -273,6 +278,9 @@ func cmdInit(args []string) error {
 	return nil
 }
 
+var boolFlags = map[string]bool{"full": true, "lan": true, "read-only": true, "no-browser": true,
+	"allow-unverified": true, "online": true, "verbose": true}
+
 // reorder moves flags before positional arguments so "init DIR --label X"
 // works as users expect.
 func reorder(args []string) []string {
@@ -281,7 +289,7 @@ func reorder(args []string) []string {
 		if strings.HasPrefix(args[i], "-") {
 			flags = append(flags, args[i])
 			if !strings.Contains(args[i], "=") && i+1 < len(args) && !strings.HasPrefix(args[i+1], "-") &&
-				args[i] != "--full" && args[i] != "--lan" && args[i] != "--read-only" && args[i] != "--no-browser" {
+				!boolFlags[strings.TrimLeft(args[i], "-")] {
 				flags = append(flags, args[i+1])
 				i++
 			}
@@ -492,6 +500,41 @@ func cmdGet(args []string) error {
 		case <-time.After(time.Second):
 		}
 	}
+}
+
+func cmdImport(args []string) error {
+	var id string
+	var allowUnverified, online bool
+	c, fs, err := parseFlags("import", reorder(args), func(fs *flag.FlagSet) {
+		fs.StringVar(&id, "id", "", "")
+		fs.BoolVar(&allowUnverified, "allow-unverified", false, "")
+		fs.BoolVar(&online, "online", false, "")
+	})
+	if err != nil {
+		return err
+	}
+	if fs.NArg() == 0 {
+		return errors.New("usage: arcana import FILE... [--id RESOURCE-ID] [--allow-unverified] [--online]")
+	}
+	a, done, err := openCLI(c)
+	if err != nil {
+		return err
+	}
+	defer done()
+	failed := 0
+	for _, f := range fs.Args() {
+		res, err := a.ImportFile(context.Background(), f, app.ImportOptions{ResourceID: id, AllowUnverified: allowUnverified, Resolve: online})
+		if err != nil {
+			fmt.Printf("%s: %v\n", filepath.Base(f), err)
+			failed++
+			continue
+		}
+		fmt.Printf("%s: installed as %s %s\n", filepath.Base(f), res.ID, res.Version)
+	}
+	if failed > 0 {
+		return fmt.Errorf("%d file(s) not imported", failed)
+	}
+	return nil
 }
 
 func cmdVolumes() error {

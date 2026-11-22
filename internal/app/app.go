@@ -70,10 +70,10 @@ func Open(root string, opts Options) (*App, error) {
 			a.note("Read-only: " + lib.ReadOnlyReason + ". Browsing and search work; downloads and settings changes are disabled.")
 		}
 	} else {
-		var rebuilt bool
-		a.Store, rebuilt, err = store.OpenOrRecover(lib.DB())
-		if rebuilt && err == nil {
-			a.note("The metadata index was missing or damaged and has been rebuilt from the drive.")
+		var recovered bool
+		a.Store, recovered, err = store.OpenOrRecover(lib.DB())
+		if recovered && err == nil {
+			a.note("The metadata index was damaged (for example by unplugging the drive during a write) and has been rebuilt from the drive. No content was lost; the damaged copy was kept in the state folder.")
 		}
 	}
 	if err != nil {

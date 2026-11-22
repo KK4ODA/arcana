@@ -353,6 +353,9 @@ func (m *Manager) Enqueue(ctx context.Context, res catalog.Resource) (*store.Job
 	return j, nil
 }
 
+// Reserve returns the effective free-space reserve for vol.
+func (m *Manager) Reserve(vol storage.Volume) int64 { return m.reserve(vol) }
+
 func (m *Manager) reserve(vol storage.Volume) int64 {
 	r := m.opts.Settings().ReserveBytes
 	if r <= 0 {

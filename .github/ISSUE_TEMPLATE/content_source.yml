@@ -1,0 +1,36 @@
+name: Propose a content source
+description: Suggest a resource or catalog for Arcana's curated catalog.
+labels: [catalog]
+body:
+  - type: input
+    id: title
+    attributes:
+      label: Resource title and publisher
+    validations:
+      required: true
+  - type: input
+    id: url
+    attributes:
+      label: Official source URL
+    validations:
+      required: true
+  - type: input
+    id: license
+    attributes:
+      label: License or terms of use
+      description: Link to the publisher's own statement. Resources are only listed once redistribution and offline use are confirmed.
+    validations:
+      required: true
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options: [Encyclopedias and reference, Medicine and public health, First aid and emergency care, Practical skills and repair, Agriculture and food production, Water and sanitation, Energy and electrical systems, Mechanical engineering, Amateur radio and communications, Maps and navigation, Survival and emergency preparedness, Education and training, Computing and programming, Scientific and technical reference, "History, culture and literature", Personal and community documents]
+  - type: textarea
+    id: why
+    attributes:
+      label: Why is it useful offline?
+  - type: textarea
+    id: details
+    attributes:
+      label: Format, size, languages, update frequency, checksums

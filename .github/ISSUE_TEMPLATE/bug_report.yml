@@ -1,0 +1,46 @@
+name: Bug report
+description: Something does not work as described.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Arcana version
+      description: Shown in Settings, or run `arcana version`.
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: How was Arcana running?
+      options:
+        - Portable, from an external drive
+        - Local network server (--lan)
+        - Raspberry Pi or other appliance
+        - From source
+    validations:
+      required: true
+  - type: input
+    id: platform
+    attributes:
+      label: Operating system and drive file system
+      placeholder: Windows 11, exFAT USB SSD
+  - type: textarea
+    id: logs
+    attributes:
+      label: Log excerpt
+      description: From logs/arcana.log in the library folder. Remove anything private.
+      render: text
+  - type: checkboxes
+    id: offline
+    attributes:
+      label: Connectivity
+      options:
+        - label: The problem happens with no internet connection.
