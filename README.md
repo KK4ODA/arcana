@@ -2,17 +2,23 @@
 
 **A portable, offline-first knowledge library.** Arcana lets you build a
 collection of reference material on an external drive: encyclopedias,
-medical references, repair guides, amateur radio regulations, and (soon)
-maps. You can then carry the drive between computers and read, search and
-share it with no internet connection.
+medical references, repair guides, amateur radio regulations and maps.
+You can then carry the drive between computers and read, search and share
+it with no internet connection.
 
 > The ultimate design criterion is not how many features Arcana advertises,
 > but whether you can depend on the information stored in it when
 > everything else is offline.
 
-Status: **0.2.0 — Phases 1 and 2.** It works end to end on Linux
-and is packaged for Windows and macOS, but **has not yet been run on real
-Windows or macOS hardware** (see [Status](#status)).
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/library-dark.png">
+  <img alt="The Arcana library: a dashboard with installed content, free space, offline readiness, network sharing and GPS status, above a drive usage bar, a full-text search box and the list of installed resources with their categories, editions, sizes and licenses." src="docs/screenshots/library.png">
+</picture>
+
+Status: **0.6.2** ([changelog](CHANGELOG.md)). It
+works end to end on Linux and is packaged for Windows and macOS, but **has
+not yet been run on real Windows or macOS hardware**, and the programs are
+not yet code-signed (see [Status](#status)).
 
 ## What it does today
 
@@ -25,8 +31,10 @@ Windows or macOS hardware** (see [Status](#status)).
   limit and NTFS being read-only on macOS, and keeps a reserve you choose.
 - **Real catalog.** Over 3,600 offline archives from the Kiwix library
   (Wikipedia, WikiMed, Stack Exchange, iFixit, Project Gutenberg and more),
-  plus a curated catalog. Licenses, redistribution status, publication
-  dates and medical or regulatory warnings are shown for every resource.
+  541 map regions, Project Gutenberg's practical shelves (optional), a
+  curated catalog and signed community catalogs. Licenses, redistribution
+  status, publication dates and medical or regulatory warnings are shown
+  for every resource.
 - **Storage-aware selection.** Pick resources or start from nine
   collections ("Family Emergency Preparedness", "Amateur Radio Operator",
   …). Arcana recommends editions that fit your drive and explains each
@@ -41,10 +49,20 @@ Windows or macOS hardware** (see [Status](#status)).
   - An update never removes the working version until the new one is
     verified.
 - **Offline reading and search.** Archives open through Kiwix's reader,
-  with full-text search across installed content. Provenance and warnings
-  are shown above every page.
+  and PDFs and EPUBs in Arcana's own viewer. Full-text search covers every
+  installed archive and your own documents. Provenance and warnings are
+  shown above every page.
+- **Your own material.** Bookmarks, favorites, notes and reading history.
+  Add your own PDF, EPUB, HTML, Markdown and text files; they are indexed
+  and searched with everything else.
+- **Offline maps and GPS.** Vector maps of countries, states and continents
+  from OpenStreetMap, or a custom area, with offline place search. Position
+  from a USB or serial GPS receiver, gpsd, NMEA over UDP/TCP, a simulator
+  or a fixed point; waypoints, track recording and GPX import and export.
 - **Share on the local network** (`--lan`). Phones and other computers can
-  browse and search; only the host computer can make changes.
+  browse and search; only the host computer can make changes. Other
+  devices find the library as `arcana.local` or by scanning a QR code.
+  HTTPS and password-protected remote administration are optional.
 - **Integrity tools.** Quick and full checks find missing or corrupted
   files. If the metadata index is lost, it is rebuilt from the drive.
 - **Updates in one click.** Once a day, while online, Arcana looks for a
@@ -53,13 +71,69 @@ Windows or macOS hardware** (see [Status](#status)).
   restarts into it. The previous version is kept for rollback. The check
   can be switched off in *Settings → Application updates*; it is the only
   network request Arcana makes without being asked.
-- **Offline import.** `arcana import` installs archives from another drive
-  and verifies them against the catalog with no network.
+- **Moving content without internet.** `arcana import` installs archives
+  from another drive and verifies them against the catalog with no
+  network. `arcana export` copies resources to another drive, and two
+  Arcana libraries on the same network can copy from each other.
+- **Raspberry Pi / Linux appliance.** An installer sets Arcana up as a
+  service with its own Wi-Fi network and captive portal
+  ([docs/appliance.md](docs/appliance.md); not yet run on hardware).
+- **Integration API** for other programs, such as RadioPost and Aether HF:
+  search with citations, article excerpts and position, with scoped tokens
+  the operator approves ([docs/integration-api.md](docs/integration-api.md)).
+
+## Screenshots
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <img alt="Search results for 'lightning strike': a match in the user's own Markdown checklist, then articles from the Amateur Radio Q&amp;A and WikiMed with highlighted snippets." src="docs/screenshots/search.png"><br>
+      <b>Search</b> across every installed archive and your own documents at once.
+    </td>
+    <td width="50%" valign="top">
+      <img alt="The reader showing the Amateur Radio Q&amp;A archive, with its edition, publication date, CC-BY-SA-4.0 license and a notice that operating rules differ by country above the page." src="docs/screenshots/reader.png"><br>
+      <b>Read</b> with the edition, license and any regulatory or medical notice above every page.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <img alt="The Collections and recommendations dialog for Family Emergency Preparedness, listing suggested resources with priority, size and the reason each edition was chosen, and the total against the space available." src="docs/screenshots/collections.png"><br>
+      <b>Collections</b> suggest editions that fit the space left on the drive, and say why.
+    </td>
+    <td width="50%" valign="top">
+      <img alt="The Downloads view with two archives downloading, one queued and several installed, showing progress, speed and time remaining." src="docs/screenshots/downloads.png"><br>
+      <b>Downloads</b> resume after interruptions and are verified before they are used.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <img alt="An offline map of central Luxembourg with the current position, a recorded track and three waypoints, next to a panel with coordinates, Maidenhead grid square, installed maps, waypoints and tracks." src="docs/screenshots/maps.png"><br>
+      <b>Maps</b> with your position, waypoints and recorded tracks (here from the GPS simulator).
+    </td>
+    <td width="50%" valign="top">
+      <img alt="A printable connection card with a QR code and the addresses of the library on the local network." src="docs/screenshots/connect.png"><br>
+      <b>Share</b> on the local network: other devices scan the code or open <code>arcana.local</code>.
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center">
+      <img alt="On a phone: search results for 'hypothermia' from WikiMed, viewed as a read-only network client." src="docs/screenshots/phone-search.png" width="260">
+      &nbsp;&nbsp;
+      <img alt="On a phone: a WikiMed article with the notice that it is dated reference material and not current medical advice." src="docs/screenshots/phone-reader.png" width="260"><br>
+      <b>On a phone</b> over the local network: visitors can search and read but not change anything.
+    </td>
+  </tr>
+</table>
+
+<sub>Arcana 0.6 on Linux. Content shown: Amateur Radio Stack Exchange and
+WikiMed (from Wikipedia), CC BY-SA 4.0. Map data © OpenStreetMap
+contributors (ODbL), from the Protomaps basemap.</sub>
 
 ## Quick start (portable)
 
-1. Download a release archive and unzip the `Arcana` folder onto an
-   external drive (exFAT recommended).
+1. Download the [latest release](https://github.com/KK4ODA/arcana/releases/latest)
+   and unzip the `Arcana` folder onto an external drive (exFAT
+   recommended).
 2. Start it:
    - **Windows:** double-click `Arcana.exe`.
    - **Linux / macOS:** `sh /path/to/Arcana/arcana.sh`
@@ -82,7 +156,14 @@ arcana check [--full]
 arcana catalog refresh | catalog search TEXT
 arcana get RESOURCE-ID...                       # download, verify, install
 arcana import FILE... [--id ID] [--allow-unverified]
+arcana import --from DIR [ID...] [--user-documents]
+arcana export --to DIR [ID...|--all] [--user-documents]
+arcana manifest
+arcana update stage DIR | apply | rollback | status
+arcana hotspot start --ssid NAME --password PW [--device wlan0] | stop | status
 ```
+
+`arcana --help` describes each command.
 
 ## Building from source
 
@@ -93,7 +174,7 @@ scripts/fetch-kiwix.sh          # hash-pinned kiwix-serve for your platform
 go test ./...                   # unit and integration tests
 make acceptance                 # offline acceptance test (Linux, network namespace)
 go run ./cmd/arcana --library /tmp/lib   # opens setup if /tmp/lib is not a library yet
-scripts/package.sh 0.1.0        # portable bundle for all platforms → dist/
+scripts/package.sh X.Y.Z        # portable bundle for all platforms → dist/
 ```
 
 See [docs/development.md](docs/development.md).

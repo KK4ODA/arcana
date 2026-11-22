@@ -2,11 +2,14 @@ package kiwix
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -44,6 +47,75 @@ func TestSanitizeSnippet(t *testing.T) {
 	}
 	if got := SanitizeSnippet("<b>unbalanced"); strings.Contains(got, "<b>") {
 		t.Errorf("unbalanced tags must be dropped: %q", got)
+	}
+}
+
+// kiwix-serve formats totalResults for display ("1,800" in 3.8.2), which
+// once made every search with 1,000 or more matches fail.
+func TestSearchFormattedTotal(t *testing.T) {
+	var totalXML string // the <opensearch:totalResults> element, or ""
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != URLRoot+"/search" || r.URL.Query().Get("books.name") != "ham_en_all" {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("Content-Type", "application/rss+xml; charset=utf-8")
+		fmt.Fprintf(w, `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Search: repeater</title>
+    %s
+    <opensearch:startIndex>1</opensearch:startIndex>
+    <opensearch:itemsPerPage>25</opensearch:itemsPerPage>
+    <item><title>Repeater offsets</title><link>/kiwix/content/ham_en_all/A/1</link>
+      <description>Which <b>repeater</b> offset</description></item>
+    <item><title>Linking repeaters</title><link>/kiwix/content/ham_en_all/A/2</link>
+      <description>Two <b>repeaters</b></description></item>
+  </channel>
+</rss>`, totalXML)
+	}))
+	defer ts.Close()
+	u, _ := url.Parse(ts.URL)
+	port, _ := strconv.Atoi(u.Port())
+	s := New("", t.TempDir(), nil)
+	s.books = map[string]Book{"ham.se": {ResourceID: "ham.se", Name: "ham_en_all", Title: "Ham SE", Language: "en"}}
+	s.proc = &process{port: port}
+
+	cases := []struct {
+		name, total string
+		want        int
+	}{
+		{"comma", "1,800", 1800},
+		{"period", "1.800", 1800},
+		{"space", "1 800", 1800},
+		{"no-break space", "1 800", 1800},
+		{"narrow no-break space", "1 800", 1800},
+		{"millions", "2,345,678", 2345678},
+		{"plain", "42", 42},
+		// An unreadable or missing count falls back to the items received.
+		{"unreadable", "many", 2},
+		{"missing", "", 2},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			totalXML = ""
+			if c.total != "" {
+				totalXML = "<opensearch:totalResults>" + c.total + "</opensearch:totalResults>"
+			}
+			res, total, err := s.Search(context.Background(), "repeater", nil, 25)
+			if err != nil {
+				t.Fatalf("search failed: %v", err)
+			}
+			if total != c.want {
+				t.Errorf("total = %d, want %d", total, c.want)
+			}
+			if len(res) != 2 || res[0].ResourceID != "ham.se" || res[1].Title != "Linking repeaters" {
+				t.Errorf("results: %+v", res)
+			}
+		})
+	}
+	if _, ok := parseCount("99999999999999999999999"); ok {
+		t.Error("an out-of-range count must be reported as unreadable")
 	}
 }
 

@@ -3,7 +3,12 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
-## 0.6.2 — Unreleased
+## 0.6.2 — 2026-11-22
+
+Downloads are much faster, and full-text search works again for common
+words in larger archives. Arcana 0.6.0 and 0.6.1 offer this version by
+themselves within a day of being online: choose *Update now* in the banner
+at the top of the page.
 
 ### Changed
 - **Much faster downloads.** Large files now download in 4 MiB pieces over
@@ -12,11 +17,18 @@ the library format version is tracked separately (docs/design/09-storage-and-dat
   piece from a faster mirror rather than waiting for a slow one. Pieces
   are still written and checked in order, so pausing, resuming after a
   crash and verification work as before. On a 306 MB Kiwix file this went
-  from 2.4–5.8 MB/s to 64–80 MB/s (ADR-0019).
+  from 2.4–5.8 MB/s to 64–84 MB/s (ADR-0019).
 - **Faster map regions.** Map tiles are fetched with up to eight requests
   in flight instead of one at a time; a test region went from 30 s to 4 s.
 - The Downloads view names the main mirror in use and how many others
   help.
+
+### Fixed
+- Full-text search failed when an archive reported 1,000 or more matches.
+  kiwix-serve writes the count with a thousands separator ("1,800"), which
+  Arcana could not read, so no results were shown at all. The count is now
+  read whatever the separator, and an unreadable count no longer hides the
+  results.
 
 ## 0.6.1 — 2026-11-22
 

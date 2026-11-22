@@ -512,7 +512,9 @@ type Result struct {
 
 type rss struct {
 	Channel struct {
-		Total int `xml:"totalResults"`
+		// Total is text: kiwix-serve formats it for display, with a
+		// thousands separator ("1,800"). See parseCount.
+		Total string `xml:"totalResults"`
 		Items []struct {
 			Title string `xml:"title"`
 			Link  string `xml:"link"`
@@ -580,7 +582,12 @@ func (s *Server) Search(ctx context.Context, query string, only map[string]bool,
 			lastErr = err
 			continue
 		}
-		total += doc.Channel.Total
+		if n, ok := parseCount(doc.Channel.Total); ok {
+			total += n
+		} else {
+			// A count that cannot be read must not discard real results.
+			total += len(doc.Channel.Items)
+		}
 		for _, it := range doc.Channel.Items {
 			name := strings.TrimPrefix(it.Link, URLRoot+"/content/")
 			if i := strings.IndexByte(name, '/'); i >= 0 {
@@ -600,6 +607,28 @@ func (s *Server) Search(ctx context.Context, query string, only map[string]bool,
 		return nil, 0, lastErr
 	}
 	return results, total, nil
+}
+
+// parseCount reads a result count that kiwix-serve may have formatted for
+// display. The thousands separator depends on the locale ("1,800", "1.800",
+// "1 800", or with a no-break or narrow no-break space), so every character
+// other than an ASCII digit is dropped. It reports false when no number
+// remains or the number is out of range.
+func parseCount(s string) (int, bool) {
+	digits := strings.Map(func(r rune) rune {
+		if r >= '0' && r <= '9' {
+			return r
+		}
+		return -1
+	}, s)
+	if digits == "" {
+		return 0, false
+	}
+	n, err := strconv.Atoi(digits)
+	if err != nil {
+		return 0, false
+	}
+	return n, true
 }
 
 // SanitizeSnippet converts an XML search snippet into safe HTML: text is
