@@ -1,0 +1,20 @@
+Microsoft Visual C++ runtime
+============================
+
+msvcp140.dll, vcruntime140.dll and vcruntime140_1.dll in this folder are
+the Microsoft Visual C++ runtime, version @VERSION@, copyright Microsoft
+Corporation. kiwix-serve.exe and the ICU DLLs need them. They are included
+so that Arcana works on computers where the Visual C++ Redistributable is
+not installed; Windows uses these copies for kiwix-serve even where another
+version is installed.
+
+They are unmodified files from Microsoft's installer VC_redist.x64.exe,
+SHA-256 @INSTALLER_SHA256@,
+redistributed with this application as Microsoft permits for the Visual
+C++ redistributable files ("local deployment",
+https://learn.microsoft.com/cpp/windows/deployment-in-visual-cpp). They
+remain subject to Microsoft's license terms and are not covered by
+Arcana's or Kiwix's licenses. They are not open source; no source code is
+available for them.
+
+Do not use them separately from this application.

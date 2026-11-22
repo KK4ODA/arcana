@@ -20,17 +20,19 @@ const (
 )
 
 // exitHint explains an exit status that has a known cause, or returns "".
-// kiwix-serve.exe needs the Microsoft Visual C++ runtime (VCRUNTIME140.dll,
-// MSVCP140.dll), which Kiwix does not ship and a new Windows installation
-// may lack.
+// kiwix-serve.exe needs the Microsoft Visual C++ runtime (msvcp140.dll,
+// vcruntime140.dll, vcruntime140_1.dll). Kiwix does not ship it; Arcana's
+// Windows build puts it beside kiwix-serve.exe, so this means those files
+// are missing or damaged.
 func exitHint(st *os.ProcessState) string {
 	if st == nil {
 		return ""
 	}
 	switch uint32(st.ExitCode()) {
 	case statusDLLNotFound, statusEntryPointNotFound:
-		return "kiwix-serve could not start because the Microsoft Visual C++ runtime is missing or out of date on this computer. " +
-			"Install the Microsoft Visual C++ Redistributable (x64) from Microsoft, then restart Arcana. " +
+		return "kiwix-serve could not start because the Microsoft Visual C++ runtime could not be loaded. " +
+			"Arcana ships it beside kiwix-serve (bin\\windows-amd64\\kiwix); if those files are missing or damaged, " +
+			"copy Arcana onto the drive again, or install the Microsoft Visual C++ Redistributable (x64) from Microsoft, then restart Arcana. " +
 			"Until then, ZIM content cannot be opened; maps, documents and notes still work."
 	}
 	return ""

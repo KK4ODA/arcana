@@ -111,14 +111,18 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      # kiwix-serve binaries and their sources (about 170 MB), pinned by
-      # the fetch scripts: download them once per change of the pins.
+      # kiwix-serve binaries, their sources (about 170 MB) and the Visual
+      # C++ runtime, pinned by the fetch scripts: download them once per
+      # change of the pins.
       - uses: actions/cache@v4
         with:
           path: |
             third_party/kiwix
             third_party/kiwix-src
-          key: kiwix-${{ hashFiles('scripts/fetch-kiwix.sh', 'scripts/fetch-kiwix-sources.sh') }}
+            third_party/vcruntime
+          key: kiwix-${{ hashFiles('scripts/fetch-kiwix.sh', 'scripts/fetch-kiwix-sources.sh', 'scripts/fetch-vcruntime.sh') }}
+      - name: Install cabextract (unpacks the Visual C++ runtime)
+        run: sudo apt-get install -y -q cabextract || (sudo apt-get update -q && sudo apt-get install -y -q cabextract)
       - name: Package release files (all platforms)
         run: scripts/package.sh "0.0.0-ci.${GITHUB_RUN_NUMBER}"
       - uses: actions/upload-artifact@v4
@@ -131,3 +135,18 @@ jobs:
             !dist/arcana-*-kiwix-sources.tar
             dist/SHA256SUMS
           retention-days: 14
+
+  windows-package:
+    # The packaged Windows build runs kiwix-serve with the Visual C++
+    # runtime it ships, loaded from its own folder.
+    needs: [build]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: arcana-ci-build
+          path: dist
+      - name: Run the packaged kiwix-serve
+        shell: pwsh
+        run: ./scripts/check-windows-runtime.ps1 (Get-ChildItem dist/arcana-*-windows-amd64.zip).FullName testdata/sample/arcana-sample_en_2026-11.zim

@@ -100,10 +100,16 @@ Not included
   not require their source to be distributed. They come from GCC
   11.4.0-1ubuntu1~22.04.2 (Ubuntu 22.04, x86_64) and GCC 12.5.0
   (crosstool-NG, arm64); see https://gcc.gnu.org.
-- The macOS and Windows builds use the operating system's own C and C++
-  libraries, which are not distributed with Arcana. On Windows, kiwix-serve
-  needs the Microsoft Visual C++ runtime (VCRUNTIME140.dll, MSVCP140.dll)
-  to be installed.
+- The macOS build uses the operating system's own C and C++ libraries,
+  which are not distributed with Arcana.
+- The Windows build includes Microsoft's Visual C++ runtime
+  (msvcp140.dll, vcruntime140.dll, vcruntime140_1.dll, version
+  14.52.37029.0) next to kiwix-serve.exe, so it runs on computers without
+  the Visual C++ Redistributable. These are unmodified Microsoft files
+  from the official VC_redist.x64.exe, redistributed under Microsoft's
+  terms; they are not open source (see VCRUNTIME-NOTICE.txt in that
+  folder). For kiwix-serve, which is GPL-3.0-or-later, they are System
+  Libraries of the compiler and not part of its Corresponding Source.
 
 Where these files come from
 ---------------------------

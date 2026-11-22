@@ -5,7 +5,8 @@ name: Release
 #   1. the tag must match a finished CHANGELOG.md section;
 #   2. every CI check runs (lint, tests on Linux, Windows and macOS, the
 #      offline acceptance test, appliance checks);
-#   3. the release files are built, checked and given build provenance;
+#   3. the release files are built, checked and given build provenance, and
+#      the Windows build is run on Windows;
 #   4. the GitHub release is created with notes from CHANGELOG.md.
 #
 # Update signing (docs/adr/0011): the programs trust the project's release
@@ -63,6 +64,8 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - name: Install cabextract (unpacks the Visual C++ runtime)
+        run: sudo apt-get install -y -q cabextract || (sudo apt-get update -q && sudo apt-get install -y -q cabextract)
       - name: Build release files
         env:
           ARCANA_UPDATE_PUBKEY: ${{ vars.ARCANA_UPDATE_PUBKEY }}
@@ -108,8 +111,23 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-  publish:
+  check-windows:
+    # The Windows release file runs kiwix-serve with the Visual C++ runtime
+    # it ships, loaded from its own folder.
     needs: [prepare, build]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-files
+          path: dist
+      - name: Run the packaged kiwix-serve
+        shell: pwsh
+        run: ./scripts/check-windows-runtime.ps1 dist/arcana-${{ needs.prepare.outputs.version }}-windows-amd64.zip testdata/sample/arcana-sample_en_2026-11.zim
+
+  publish:
+    needs: [prepare, build, check-windows]
     runs-on: ubuntu-latest
     permissions:
       contents: write

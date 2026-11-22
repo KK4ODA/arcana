@@ -14,7 +14,8 @@
 #
 # The folder contains Arcana.exe (Windows) at the top level, arcana.sh for
 # Linux and macOS, per-platform programs under bin/<os>-<arch>/, kiwix-serve
-# for each platform (fetched and hash-verified by fetch-kiwix.sh), the
+# for each platform (fetched and hash-verified by fetch-kiwix.sh; on Windows
+# with Microsoft's Visual C++ runtime DLLs from fetch-vcruntime.sh), the
 # appliance installer, licenses and source information, and the sample
 # library pre-installed under content/. It contains no library marker: each
 # user's library gets its own identity on first start.
@@ -50,6 +51,17 @@ for p in $PLATFORMS; do
 	mkdir -p "$OUT/bin/$p/kiwix"
 	cp "$ROOT/third_party/kiwix/$p/kiwix/"* "$OUT/bin/$p/kiwix/"
 done
+case " $PLATFORMS " in *" windows-amd64 "*)
+	# kiwix-serve.exe needs the Visual C++ runtime, which Kiwix does not
+	# ship: put Microsoft's DLLs next to it (app-local deployment).
+	"$ROOT/scripts/fetch-vcruntime.sh"
+	VC="$ROOT/third_party/vcruntime"
+	cp "$VC/msvcp140.dll" "$VC/vcruntime140.dll" "$VC/vcruntime140_1.dll" "$OUT/bin/windows-amd64/kiwix/"
+	vcsha=$(sed -n 's/^INSTALLER_SHA256=//p' "$ROOT/scripts/fetch-vcruntime.sh")
+	sed -e "s/@VERSION@/$(cat "$VC/VERSION")/" -e "s/@INSTALLER_SHA256@/$vcsha/" \
+		"$ROOT/packaging/VCRUNTIME-NOTICE.txt" > "$OUT/bin/windows-amd64/kiwix/VCRUNTIME-NOTICE.txt"
+	;;
+esac
 if [ -f "$OUT/bin/windows-amd64/arcana.exe" ]; then
 	# Windows users start Arcana.exe at the top level; it finds its
 	# kiwix-serve under bin/windows-amd64/.

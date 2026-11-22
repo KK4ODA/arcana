@@ -45,6 +45,7 @@ The full license texts are in each module's source, available from
 | Program | Version | License | Source |
 |---|---|---|---|
 | kiwix-serve (kiwix-tools) | 3.8.2 (Linux, macOS), 3.8.1 (Windows) | GPL-3.0-or-later | https://github.com/kiwix/kiwix-tools, https://download.kiwix.org/release/kiwix-tools/ |
+| Microsoft Visual C++ runtime (Windows only: msvcp140.dll, vcruntime140.dll, vcruntime140_1.dll, beside kiwix-serve.exe) | 14.52.37029.0 | Microsoft license terms for the Visual C++ redistributable files; not open source | Unmodified, from Microsoft's VC_redist.x64.exe; see `VCRUNTIME-NOTICE.txt` |
 
 kiwix-serve is statically linked by the Kiwix project against libkiwix
 (GPL-3.0-or-later), libzim (GPL-2.0-or-later), Xapian (GPL-2.0-or-later),

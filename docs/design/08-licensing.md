@@ -57,6 +57,21 @@ All direct Go dependencies are BSD-3-Clause or MIT, which are compatible.
   explains which file belongs to which build, and how each version was
   established. When kiwix-tools is updated, the pins are re-read from the
   kiwix-build commit that released it.
+- **Visual C++ runtime (Windows, maintainer decision 2026-11-22).**
+  Kiwix's Windows kiwix-serve needs msvcp140.dll, vcruntime140.dll and
+  vcruntime140_1.dll and does not ship them, so it failed on computers
+  without the Visual C++ Redistributable. The Windows build now carries
+  them beside kiwix-serve.exe (`scripts/fetch-vcruntime.sh`): unmodified
+  files from Microsoft's official `VC_redist.x64.exe`, the installer and
+  each DLL pinned by SHA-256, with `VCRUNTIME-NOTICE.txt`. Microsoft
+  documents this "local deployment" of the redistributable files; they
+  stay under Microsoft's terms. For kiwix-serve (GPL-3.0-or-later) they
+  are System Libraries of the compiler, which GPL-3.0 allows to accompany
+  the program without being part of its Corresponding Source. Windows
+  loads them from the program's folder first, so they must be at least as
+  new as the toolset kiwix-serve was built with (14.44 for 3.8.1); the
+  release workflow runs the Windows build and checks that these copies are
+  the ones loaded.
 - **Notices.** `bin/<platform>/kiwix/NOTICE.txt` and
   `THIRD_PARTY_NOTICES.md` identify the program, its license and its
   source.

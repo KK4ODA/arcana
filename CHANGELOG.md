@@ -3,6 +3,19 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
+## 0.6.1 — Unreleased
+
+### Added
+- **The Windows build includes the Microsoft Visual C++ runtime**
+  (msvcp140.dll, vcruntime140.dll, vcruntime140_1.dll, version
+  14.52.37029.0) beside kiwix-serve, so ZIM archives open on computers
+  without the Visual C++ Redistributable. The files are Microsoft's,
+  unmodified, from the official installer and pinned by SHA-256
+  (`VCRUNTIME-NOTICE.txt`). Windows drives updated with *Update now*
+  receive them too.
+- CI and the release workflow run the packaged Windows build on Windows
+  and check that kiwix-serve loads these copies.
+
 ## 0.6.0 — 2026-11-22
 
 The first public release. It includes everything from the development

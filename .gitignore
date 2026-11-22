@@ -10,8 +10,10 @@
 /Arcana/
 /tmp/
 
-# Kiwix binaries and sources fetched by scripts/fetch-kiwix*.sh
+# Kiwix binaries and sources fetched by scripts/fetch-kiwix*.sh, and the
+# Visual C++ runtime fetched by scripts/fetch-vcruntime.sh
 /third_party/kiwix/
+/third_party/vcruntime/
 
 # Editors and OS
 .DS_Store

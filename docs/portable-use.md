@@ -32,11 +32,6 @@ The release binaries are not yet code-signed.
   (Properties → Unblock) avoids the prompt.
 - **macOS** may refuse to open downloaded programs. Run once:
   `xattr -dr com.apple.quarantine /Volumes/<drive>/Arcana`
-- **Windows** also needs the Microsoft Visual C++ runtime for the ZIM
-  reader (kiwix-serve). Most computers have it; if not, Arcana says so on
-  its dashboard. Install the *Microsoft Visual C++ Redistributable (x64)*
-  from Microsoft and restart Arcana. For offline use, keep its installer
-  (`vc_redist.x64.exe`) on the drive.
 - **Linux** may mount drives without permission to run programs.
   `arcana.sh` detects this and runs a temporary copy from your computer,
   while the library stays on the drive.
