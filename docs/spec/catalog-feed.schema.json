@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/KK4ODA/arcana/docs/spec/catalog-feed.schema.json",
+  "title": "Arcana catalog feed",
+  "description": "A list of downloadable resources. Arcana validates every entry again on import; see docs/design/03-catalog.md.",
+  "type": "object",
+  "required": ["format", "formatVersion", "resources"],
+  "properties": {
+    "format": {"const": "arcana-catalog"},
+    "formatVersion": {"const": 1},
+    "title": {"type": "string", "maxLength": 200},
+    "generated": {"type": "string", "format": "date-time"},
+    "resources": {"type": "array", "items": {"$ref": "#/$defs/resource"}},
+    "presets": {"type": "array", "items": {"$ref": "#/$defs/preset"}}
+  },
+  "$defs": {
+    "resource": {
+      "type": "object",
+      "required": ["id", "provider", "title", "version", "format", "files", "license"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z0-9]+(\\.[a-z0-9][a-z0-9._-]*)?$", "maxLength": 128},
+        "provider": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,31}$"},
+        "title": {"type": "string", "maxLength": 200},
+        "description": {"type": "string", "maxLength": 4000},
+        "category": {"enum": ["reference", "medicine", "first-aid", "practical-skills", "agriculture", "water-sanitation", "energy-electrical", "mechanical", "radio-communications", "maps-navigation", "preparedness", "education", "computing", "science-technical", "history-culture", "personal-community"]},
+        "subcategory": {"type": "string"},
+        "tags": {"type": "array", "items": {"type": "string"}},
+        "family": {"type": "string"},
+        "variant": {"type": "string"},
+        "variantLabel": {"type": "string", "maxLength": 80},
+        "publisher": {"type": "string"},
+        "creator": {"type": "string"},
+        "sourceUrl": {"type": "string", "format": "uri"},
+        "version": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"},
+        "published": {"type": "string"},
+        "lastVerified": {"type": "string", "format": "date-time"},
+        "languages": {"type": "array", "items": {"type": "string", "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$"}},
+        "coverage": {
+          "type": "object",
+          "properties": {
+            "scope": {"enum": ["global", "regional", "none"]},
+            "regions": {"type": "array", "items": {"type": "string"}},
+            "bbox": {"type": "array", "items": {"type": "number"}, "minItems": 4, "maxItems": 4}
+          }
+        },
+        "format": {"enum": ["zim", "pdf", "epub", "html", "markdown", "text", "image", "audio", "video", "pmtiles", "mbtiles", "gpx", "archive"]},
+        "files": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/file"}},
+        "downloadSize": {"type": "integer", "minimum": 0},
+        "installedSize": {"type": "integer", "minimum": 0},
+        "sizeEstimated": {"type": "boolean"},
+        "license": {
+          "type": "object",
+          "required": ["id", "redistribution"],
+          "properties": {
+            "id": {"type": "string"},
+            "name": {"type": "string"},
+            "url": {"type": "string", "format": "uri"},
+            "redistribution": {"enum": ["permitted", "noncommercial", "restricted", "unknown"]},
+            "attribution": {"type": "string"},
+            "verified": {"type": "boolean"},
+            "notes": {"type": "string"}
+          }
+        },
+        "capabilities": {"type": "object", "properties": {"fullTextSearch": {"type": "boolean"}, "titleSearch": {"type": "boolean"}}},
+        "media": {"type": "object", "properties": {"pictures": {"type": "boolean"}, "videos": {"type": "boolean"}, "detail": {"enum": ["full", "reduced", "summary"]}}},
+        "dependencies": {"type": "array", "items": {"type": "string"}},
+        "updateStrategy": {"enum": ["snapshot-replace", "none", "delta"]},
+        "warnings": {"type": "array", "items": {"type": "object", "required": ["kind", "text"], "properties": {"kind": {"enum": ["medical", "regulatory", "outdated", "license", "content"]}, "text": {"type": "string"}}}},
+        "stats": {"type": "object", "additionalProperties": {"type": "integer"}},
+        "popularity": {"type": "integer"},
+        "providerRef": {"type": "object", "additionalProperties": {"type": "string"}}
+      }
+    },
+    "file": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {"type": "string", "maxLength": 180, "pattern": "^[^./\\\\:*?\"<>|][^/\\\\:*?\"<>|]*[^. /\\\\:*?\"<>|]$"},
+        "size": {"type": "integer", "minimum": 0},
+        "hashes": {
+          "type": "object",
+          "properties": {
+            "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "sha512": {"type": "string", "pattern": "^[0-9a-f]{128}$"},
+            "sha1": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+            "md5": {"type": "string", "pattern": "^[0-9a-f]{32}$"}
+          },
+          "additionalProperties": false
+        },
+        "mirrors": {"type": "array", "items": {"type": "object", "required": ["url"], "properties": {"url": {"type": "string", "pattern": "^https?://"}, "priority": {"type": "integer"}, "location": {"type": "string"}}}},
+        "metalinkUrl": {"type": "string", "pattern": "^https?://"}
+      }
+    },
+    "preset": {
+      "type": "object",
+      "required": ["id", "title", "items"],
+      "properties": {
+        "id": {"type": "string"},
+        "title": {"type": "string"},
+        "description": {"type": "string"},
+        "items": {"type": "array", "items": {"type": "object", "required": ["family", "priority"], "properties": {
+          "family": {"type": "string"},
+          "variants": {"type": "array", "items": {"type": "string"}},
+          "priority": {"type": "integer", "minimum": 1, "maximum": 3},
+          "reason": {"type": "string"}
+        }}}
+      }
+    }
+  }
+}

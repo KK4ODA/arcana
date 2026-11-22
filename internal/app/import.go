@@ -161,4 +161,3 @@ func copyAndHash(ctx context.Context, src, dst string) (string, error) {
 	}
 	return hex.EncodeToString(h.Sum(nil)), nil
 }
-

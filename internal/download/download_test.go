@@ -27,7 +27,7 @@ import (
 // fixture is a library with a manager whose network policy allows the
 // loopback test servers.
 type fixture struct {
-	t       *testing.T
+	t       testing.TB
 	lib     library.Layout
 	st      *store.Store
 	content *content.Manager
@@ -36,7 +36,7 @@ type fixture struct {
 	cancel  context.CancelFunc
 }
 
-func newFixture(t *testing.T) *fixture {
+func newFixture(t testing.TB) *fixture {
 	t.Helper()
 	root := filepath.Join(t.TempDir(), "Arcana")
 	if _, err := library.Init(root, "test"); err != nil {
@@ -504,5 +504,38 @@ func TestParseContentRange(t *testing.T) {
 	}
 	if _, _, ok := parseContentRange("bytes */1000"); ok {
 		t.Fatal("unsatisfied range should not parse as a start")
+	}
+}
+
+// BenchmarkDownloadThroughput measures transfer, hashing and checkpointing
+// overhead against a local server (no network limits).
+func BenchmarkDownloadThroughput(b *testing.B) {
+	data := payload(256<<20, 42)
+	for i := 0; i < b.N; i++ {
+		b.StopTimer()
+		f := newFixture(b)
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			http.ServeContent(w, r, "f", time.Unix(0, 0), bytes.NewReader(data))
+		}))
+		f.start()
+		f.mgr.opts.CheckpointBytes = 16 << 20
+		b.SetBytes(int64(len(data)))
+		b.StartTimer()
+		job, err := f.mgr.Enqueue(context.Background(), resource(fmt.Sprintf("bench%d", i), "1", data, srv.URL))
+		if err != nil {
+			b.Fatal(err)
+		}
+		for {
+			j, _ := f.st.GetJob(context.Background(), job.ID)
+			if j.State == store.JobCompleted {
+				break
+			}
+			if j.State == store.JobFailed {
+				b.Fatal(j.Error)
+			}
+			time.Sleep(20 * time.Millisecond)
+		}
+		b.StopTimer()
+		srv.Close()
 	}
 }

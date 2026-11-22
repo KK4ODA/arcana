@@ -102,6 +102,9 @@ func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request, a *app.App
 	if lastCheck == "" {
 		att = append(att, attention{Level: "info", View: "discover",
 			Message: "The online catalog has never been loaded. Connect to the internet and refresh it in Discover to see all available resources."})
+	} else if t, err := time.Parse(time.RFC3339, lastCheck); err == nil && time.Since(t) > 30*24*time.Hour {
+		att = append(att, attention{Level: "info", View: "discover",
+			Message: fmt.Sprintf("The catalog was last refreshed %d days ago. When you are online, refresh it to learn about newer editions.", int(time.Since(t).Hours()/24))})
 	}
 
 	var ks kiwix.Status
