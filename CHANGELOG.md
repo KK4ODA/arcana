@@ -3,6 +3,15 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
+## Unreleased
+
+### Fixed
+- Full-text search failed when an archive reported 1,000 or more matches.
+  kiwix-serve writes the count with a thousands separator ("1,800"), which
+  Arcana could not read, so no results were shown at all. The count is now
+  read whatever the separator, and an unreadable count no longer hides the
+  results.
+
 ## 0.6.1 — 2026-11-22
 
 Reading ZIM archives now works on Windows computers that do not have the
