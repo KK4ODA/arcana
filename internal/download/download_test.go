@@ -65,11 +65,13 @@ func (f *fixture) start() {
 	settings.AllowPrivateNetworkDownloads = true
 	settings.ReserveBytes = 1 << 20
 	f.mgr = New(Options{
-		Store:              f.st,
-		Layout:             f.lib,
-		Content:            f.content,
-		Settings:           func() library.Settings { return settings },
-		Volume:             func() (storage.Volume, error) { return storage.Volume{TotalBytes: 200 << 30, AvailBytes: uint64(f.avail.Load()), FSType: "exfat"}, nil },
+		Store:    f.st,
+		Layout:   f.lib,
+		Content:  f.content,
+		Settings: func() library.Settings { return settings },
+		Volume: func() (storage.Volume, error) {
+			return storage.Volume{TotalBytes: 200 << 30, AvailBytes: uint64(f.avail.Load()), FSType: "exfat"}, nil
+		},
 		CheckpointBytes:    64 << 10,
 		CheckpointInterval: time.Hour,
 		RetryBase:          10 * time.Millisecond,
