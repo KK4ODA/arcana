@@ -26,4 +26,5 @@
 - [Catalog feed JSON Schema](spec/catalog-feed.schema.json)
 - [Portable use guide](portable-use.md)
 - [Appliance guide (Raspberry Pi / Linux)](appliance.md)
+- [Integration API v1 (for RadioPost, Aether HF and other programs)](integration-api.md)
 - [Development guide](development.md)

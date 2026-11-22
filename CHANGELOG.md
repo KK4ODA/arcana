@@ -3,7 +3,34 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
-## Unreleased — 0.5.0 (Phase 5: appliance)
+## Unreleased — 0.6.0 (Phase 6: integration and peer sync)
+
+### Added
+- **Integration API v1** (`/api/integration/v1/`) for programs such as
+  RadioPost and Aether HF: search with citations, article text and bounded
+  excerpts with an attribution footer, current position, coordinates with
+  Maidenhead locator and nearby places, server-sent events, and short share
+  links. Read-only; every call needs a scoped token. Programs pair by asking
+  for access and the operator approves the request in *Settings →
+  Integrations* after comparing a code. Tokens are stored hashed and can be
+  revoked. Advertised on the network as `_arcana._tcp`.
+- **Copy from another Arcana on the network** (*Settings → Other Arcana
+  libraries*): browse its library, see what is new or newer, and copy
+  through the download queue, verified against that library's checksums
+  and the publisher's when known. Works without internet.
+- **Signed catalogs:** a catalog feed can carry a publisher key; Arcana then
+  accepts it only with a valid Ed25519 signature (`release-sign sign`
+  produces it).
+- docs/integration-api.md; docs/design/15-local-ai.md (design only).
+- Acceptance step 11b: a second library copies from the first over the
+  LAN address inside the offline namespace.
+
+### Security
+- Token, pairing and peer management stay host-only even for signed-in
+  network administrators. The integration API never accepts the UI's
+  session tokens, and the UI API never accepts integration tokens.
+
+## 0.5.0 (Phase 5: appliance)
 
 ### Added
 - **Appliance installer** for Raspberry Pi OS (Bookworm) and other systemd

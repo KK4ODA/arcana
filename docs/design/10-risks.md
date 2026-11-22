@@ -59,6 +59,10 @@ the maintainers.
 | S10 | Password guessing from the network | 2 | 3 | 6 | Argon2id, 5 failures per address and 30 overall per 15 minutes, fixed delay, events logged | Mitigated |
 | S11 | Users accept a forged self-signed certificate | 1 | 2 | 2 | Fingerprint shown in the Server view to compare on first visit | Accepted |
 | S12 | Appliance access point without a password exposes the library to anyone in range | 2 | 1 | 2 | Installer warns; read-only for visitors; remote administration off by default | Accepted |
+| S13 | Integration token leaked from a paired program | 2 | 2 | 4 | Read-only API, per-token scopes, hashed storage, revocation, last-used shown; location needs its own scope | Mitigated |
+| S14 | Pairing requests used to trick the operator | 2 | 2 | 4 | Matching code shown on both sides, requester address shown, at most 8 pending, 10-minute expiry | Mitigated |
+| S15 | A peer library serves altered files | 1 | 3 | 3 | Peers are added explicitly; files verified against the peer's SHA-256 and against the publisher's checksum in the local catalog when present; copies inherit "unverified" from the peer | Mitigated |
+| S16 | Peer tokens stored in clear text in settings | 2 | 1 | 2 | They grant only `library:read` on the other library; revocable there | Accepted |
 | X6 | Appliance never run on Raspberry Pi hardware; captive-portal behaviour varies by phone OS version | 3 | 2 | 6 | Static checks and simulations in CI; hardware test plan in docs/appliance.md; plain `http://` address and printed connection card as fallback | Open |
 | S7 | kiwix-serve vulnerability exposed on LAN | 2 | 2 | 4 | kiwix-serve binds loopback only; reached only through Arcana's read-only proxy; pinned and updated with releases | Mitigated |
 

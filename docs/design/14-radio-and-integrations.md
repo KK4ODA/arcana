@@ -28,7 +28,14 @@
 
 No transmission functionality is in scope.
 
-## Local integration API (design, Phase 6)
+## Local integration API (implemented in 0.6.0)
+
+> **Status:** implemented as designed below, with these differences:
+> pairing uses an approval code shown on both sides rather than a client
+> key pair; an extra scope `library:read` lets another Arcana copy
+> resources (peer sync); `GET /maps/static` (rendered map images) and
+> sidecar plugins are not implemented. Reference for program authors:
+> [docs/integration-api.md](../integration-api.md).
 
 **Goal.** Let independent programs such as RadioPost (offline messaging)
 and Aether HF use Arcana's knowledge and mapping services without tight

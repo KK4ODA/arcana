@@ -148,6 +148,7 @@ func TestSessionAndAccessPolicy(t *testing.T) {
 func TestInterfaceMakesNoExternalRequests(t *testing.T) {
 	allowed := map[string]bool{
 		"https://example.org/arcana-catalog.json": true, // input placeholder text
+		"http://192.168.1.20:8470":                true, // input placeholder text (peer address)
 		// Map attribution links required by the ODbL; followed only if
 		// the user clicks them.
 		"https://www.openstreetmap.org/copyright": true,

@@ -2,9 +2,13 @@ package catalog
 
 import (
 	"context"
+	"crypto/ed25519"
 	_ "embed"
+	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"strings"
 )
 
 // Feed is Arcana's own catalog document format. It is used for the bundled
@@ -42,6 +46,26 @@ type FeedProvider struct {
 	ProviderName string
 	URL          string
 	Data         []byte
+	// PublicKey, when set (base64 Ed25519), requires the feed to be signed:
+	// URL + ".sig" must hold a base64 signature of the exact feed bytes,
+	// as produced by tools/release-sign.
+	PublicKey string
+}
+
+// ErrFeedSignature means a signed feed failed verification.
+var ErrFeedSignature = errors.New("the catalog's signature is missing or does not match its publisher key")
+
+// VerifyFeed checks a detached feed signature.
+func VerifyFeed(data, sig []byte, publicKey string) error {
+	key, err := base64.StdEncoding.DecodeString(strings.TrimSpace(publicKey))
+	if err != nil || len(key) != ed25519.PublicKeySize {
+		return errors.New("the catalog's publisher key is not a valid Ed25519 key")
+	}
+	raw, err := base64.StdEncoding.DecodeString(strings.TrimSpace(string(sig)))
+	if err != nil || len(raw) != ed25519.SignatureSize || !ed25519.Verify(ed25519.PublicKey(key), data, raw) {
+		return ErrFeedSignature
+	}
+	return nil
 }
 
 // ID implements Provider.
@@ -61,6 +85,15 @@ func (p *FeedProvider) Fetch(ctx context.Context, f Fetcher) ([]Resource, error)
 		data, err = f.Get(ctx, p.URL, 32<<20)
 		if err != nil {
 			return nil, err
+		}
+		if p.PublicKey != "" {
+			sig, err := f.Get(ctx, p.URL+".sig", 4096)
+			if err != nil {
+				return nil, fmt.Errorf("%w (%v)", ErrFeedSignature, err)
+			}
+			if err := VerifyFeed(data, sig, p.PublicKey); err != nil {
+				return nil, err
+			}
 		}
 	}
 	feed, err := ParseFeed(data)

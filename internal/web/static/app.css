@@ -335,3 +335,5 @@ dialog.signin form > * + * { margin-top: 8px; }
   body, main { background: #fff !important; }
   .connect-card { border: 0; margin: 0 auto; }
 }
+.scope-list { display: grid; gap: 4px; margin: 6px 0; }
+.scope-list label { display: flex; gap: 6px; align-items: baseline; }

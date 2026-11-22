@@ -146,7 +146,10 @@ func (s *Server) applyMDNS() {
 		instance = "Arcana – " + l
 	}
 	r := mdns.New(mdns.Config{Name: label, Instance: instance, Port: s.appPort, Log: s.log,
-		TXT: []string{"path=/", "version=" + buildinfo.Version}})
+		TXT: []string{"path=/", "version=" + buildinfo.Version},
+		// Programs (RadioPost, Aether HF, other Arcanas) find the
+		// integration API by browsing for _arcana._tcp.
+		Extra: []mdns.Service{{Type: "_arcana._tcp", TXT: []string{"api=" + integrationPrefix + "/", "apiversion=1"}}}})
 	mctx, cancel := context.WithCancel(ctx)
 	s.nw.mdns, s.nw.mdnsCancel, s.nw.mdnsRunning = r, cancel, true
 	s.nw.mu.Unlock()

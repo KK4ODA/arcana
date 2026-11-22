@@ -100,7 +100,9 @@ See [docs/development.md](docs/development.md).
 | **Implemented (Phase 3)** | Offline vector maps: 541 OpenStreetMap regions (world, continents, countries, states) extracted on demand from Protomaps planet builds, custom areas, seamless merging of overlapping maps, offline place search; GPS from USB/serial receivers, gpsd, NMEA over UDP/TCP, a GPX simulator or a fixed position; waypoints, track recording, GPX import/export |
 | **Implemented (Phase 4)** | `arcana.local` on the network (built-in mDNS), QR codes and a printable connection card, optional HTTPS on the same port, password-protected remote administration (off by default), Wi-Fi hotspot control on Linux |
 | **Implemented (Phase 5), not yet run on hardware** | Raspberry Pi / Linux appliance: installer, confined systemd service with watchdog, Wi-Fi access point with captive portal ([docs/appliance.md](docs/appliance.md)) |
-| **Planned** | Ready-made Raspberry Pi SD image; hardware and power-loss tests. Map routing, terrain and measuring tools |
+| **Implemented (Phase 6)** | Integration API for other programs (RadioPost, Aether HF) with scoped, approved tokens and citations ([docs/integration-api.md](docs/integration-api.md)); copying between Arcana libraries on a LAN; signed community catalogs |
+| **Design only** | Optional local question answering over installed sources ([docs/design/15-local-ai.md](docs/design/15-local-ai.md)) |
+| **Planned** | Ready-made Raspberry Pi SD image; hardware and power-loss tests. Map routing, terrain and measuring tools; scheduled peer sync |
 | **Needs a decision** | License confirmation (GPL-3.0-or-later proposed); code-signing certificates; GPL source bundle for kiwix-serve in releases |
 
 The full design package is in [docs/](docs/README.md).

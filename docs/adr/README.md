@@ -19,3 +19,4 @@
 | [0015](0015-tile-overzoom-micro-codec.md) | Derive missing tiles from ancestors with a small MVT codec | Accepted |
 | [0016](0016-gps-single-nmea-path.md) | One NMEA parsing path for every position source | Accepted |
 | [0017](0017-network-serving-features.md) | Remote administration, HTTPS on the same port, built-in mDNS | Accepted |
+| [0018](0018-integration-api-and-peer-sync.md) | Versioned integration API with scoped tokens; peer sync over it | Accepted |

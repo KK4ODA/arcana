@@ -333,3 +333,10 @@ func clip(s string, n int) string {
 	}
 	return s[:n]
 }
+
+// HTMLText extracts the title and readable text of an HTML page (scripts,
+// styles and markup removed; block elements become line breaks).
+func HTMLText(r io.Reader) (title, text string, err error) {
+	ex, err := htmlText(r)
+	return strings.TrimSpace(ex.Title), ex.Text, err
+}

@@ -193,6 +193,13 @@ func freePort(t *testing.T) int {
 
 func launch(t *testing.T, bin, drive, logPath string) *instance {
 	t.Helper()
+	return launchWith(t, bin, drive, logPath, true)
+}
+
+// launchWith starts Arcana; with needReady it also waits for installed
+// content to become browsable.
+func launchWith(t *testing.T, bin, drive, logPath string, needReady bool) *instance {
+	t.Helper()
 	port := freePort(t)
 	logf, err := os.OpenFile(logPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
 	if err != nil {
@@ -215,7 +222,7 @@ func launch(t *testing.T, bin, drive, logPath string) *instance {
 					Ready bool `json:"ready"`
 				} `json:"offline"`
 			}
-			if in.getJSON("/api/status", &st) == nil && st.Offline.Ready {
+			if in.getJSON("/api/status", &st) == nil && (st.Offline.Ready || !needReady) {
 				return in
 			}
 		}
@@ -730,6 +737,103 @@ func TestOfflineAcceptance(t *testing.T) {
 		}
 		in = launch(t, bin, moved, logPath)
 		browseAndSearch(t, in)
+	})
+
+	t.Run("11b-copy-from-another-arcana-on-the-lan", func(t *testing.T) {
+		// Library A (running) issues a read-only token for copying.
+		code, body := in.send("POST", "/api/integrations", `{"name":"Second library","scopes":["library:read"]}`)
+		if code != 200 {
+			t.Fatalf("token: %d %s", code, body)
+		}
+		var tr struct {
+			Token string `json:"token"`
+		}
+		json.Unmarshal([]byte(body), &tr)
+		// Library B: a new, empty library on another drive.
+		driveE := filepath.Join(work, "driveE", "Arcana")
+		if out, err := exec.Command(bin, "init", driveE).CombinedOutput(); err != nil {
+			t.Fatalf("init: %v\n%s", err, out)
+		}
+		plat := runtime.GOOS + "-" + runtime.GOARCH
+		kdir := filepath.Join(driveE, "bin", plat, "kiwix")
+		os.MkdirAll(kdir, 0o755)
+		kiwixBin, _ := os.ReadFile(filepath.Join(repoRoot, "third_party", "kiwix", plat, "kiwix", "kiwix-serve"))
+		if err := os.WriteFile(filepath.Join(kdir, "kiwix-serve"), kiwixBin, 0o755); err != nil {
+			t.Fatal(err)
+		}
+		b := launchWith(t, bin, driveE, filepath.Join(work, "arcana-b.log"), false)
+		defer b.stop()
+		peerURL := fmt.Sprintf("http://%s:%d", lanClientIP, in.port)
+		code, body = b.send("POST", "/api/peers", fmt.Sprintf(`{"name":"Library A","url":%q,"token":%q}`, peerURL, tr.Token))
+		if code != 200 || strings.Contains(body, "warning") {
+			t.Fatalf("add peer: %d %s", code, body)
+		}
+		var lib struct {
+			Resources []struct {
+				Resource struct {
+					ID string `json:"id"`
+				} `json:"resource"`
+				Status string `json:"status"`
+			} `json:"resources"`
+		}
+		if err := b.getJSON("/api/peers/library-a/library", &lib); err != nil {
+			t.Fatal(err)
+		}
+		var ids []string
+		for _, r := range lib.Resources {
+			if r.Status != "new" {
+				t.Fatalf("%s: status %s", r.Resource.ID, r.Status)
+			}
+			ids = append(ids, r.Resource.ID)
+		}
+		if len(ids) != 2 {
+			t.Fatalf("peer offers %v", ids)
+		}
+		idsJSON, _ := json.Marshal(ids)
+		if code, body := b.send("POST", "/api/peers/library-a/pull", `{"ids":`+string(idsJSON)+`}`); code != 200 || strings.Count(body, "queued") != 2 {
+			t.Fatalf("pull: %d %s", code, body)
+		}
+		deadline := time.Now().Add(60 * time.Second)
+		for {
+			var got struct {
+				Resources []struct {
+					ResourceID   string `json:"resourceId"`
+					Verification string `json:"verification"`
+				} `json:"resources"`
+			}
+			b.getJSON("/api/library", &got)
+			if len(got.Resources) == 2 {
+				for _, r := range got.Resources {
+					if !strings.Contains(r.Verification, "copied from (Library A)") {
+						t.Fatalf("%s verification: %s", r.ResourceID, r.Verification)
+					}
+				}
+				break
+			}
+			if time.Now().After(deadline) {
+				var jobs map[string]any
+				b.getJSON("/api/downloads", &jobs)
+				t.Fatalf("copies did not finish: %v", jobs)
+			}
+			time.Sleep(300 * time.Millisecond)
+		}
+		// The copied archive is readable and searchable on B once its
+		// reader has picked it up.
+		for i := 0; ; i++ {
+			var st struct {
+				Offline struct {
+					Ready bool `json:"ready"`
+				} `json:"offline"`
+			}
+			if b.getJSON("/api/status", &st) == nil && st.Offline.Ready {
+				break
+			}
+			if i > 100 {
+				t.Fatal("copied archive never became readable")
+			}
+			time.Sleep(200 * time.Millisecond)
+		}
+		browseAndSearch(t, b)
 	})
 
 	t.Run("12-transfer-to-second-drive-offline", func(t *testing.T) {

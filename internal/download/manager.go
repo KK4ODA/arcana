@@ -47,6 +47,9 @@ type Options struct {
 	// ResolverFor, when set, is consulted instead of Resolvers so that
 	// providers enabled after startup are honored.
 	ResolverFor func(provider string) catalog.Resolver
+	// RequestHook, when set, may add headers to each download request
+	// (for example the token for another Arcana on the LAN).
+	RequestHook func(*http.Request)
 	// Extractors install resources whose provider reference names a method
 	// (for example "pmtiles-extract") instead of downloading their files.
 	Extractors map[string]Extractor

@@ -31,6 +31,13 @@ const (
 	enumName   = "_services._dns-sd._udp.local."
 )
 
+// Service is an additional DNS-SD service type to advertise on the same
+// port (for example "_arcana._tcp" for the integration API).
+type Service struct {
+	Type string // "_name._tcp"
+	TXT  []string
+}
+
 // Config describes what to advertise.
 type Config struct {
 	// Name is the host label (default "arcana"); the responder answers
@@ -39,8 +46,16 @@ type Config struct {
 	// Instance is the human-readable service name, e.g. "Arcana library".
 	Instance string
 	Port     int
-	TXT      []string
-	Log      *slog.Logger
+	// TXT is the TXT record of the _http._tcp service.
+	TXT   []string
+	Extra []Service
+	Log   *slog.Logger
+}
+
+type service struct {
+	typ      string // "_http._tcp.local."
+	instance string // "Arcana library._http._tcp.local."
+	txt      []string
 }
 
 // Responder answers mDNS queries.
@@ -49,7 +64,7 @@ type Responder struct {
 
 	mu       sync.Mutex
 	host     string // e.g. "arcana.local."
-	instance string // e.g. "Arcana library._http._tcp.local."
+	services []service
 	own      map[string]bool
 }
 
@@ -94,9 +109,19 @@ func (r *Responder) setName(label string) {
 	if len(inst) > 63 {
 		inst = inst[:63]
 	}
+	svcs := []service{{typ: serviceSRV, instance: inst + "." + serviceSRV, txt: r.cfg.TXT}}
+	for _, e := range r.cfg.Extra {
+		t := strings.TrimSuffix(e.Type, ".") + ".local."
+		svcs = append(svcs, service{typ: t, instance: inst + "." + t, txt: e.TXT})
+	}
+	for i := range svcs {
+		if len(svcs[i].txt) == 0 {
+			svcs[i].txt = []string{""}
+		}
+	}
 	r.mu.Lock()
 	r.host = label + ".local."
-	r.instance = inst + "." + serviceSRV
+	r.services = svcs
 	r.mu.Unlock()
 }
 
@@ -107,10 +132,10 @@ func (r *Responder) Host() string {
 	return strings.TrimSuffix(r.host, ".")
 }
 
-func (r *Responder) names() (host, instance string) {
+func (r *Responder) names() (string, []service) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	return r.host, r.instance
+	return r.host, append([]service(nil), r.services...)
 }
 
 func mustName(s string) dnsmessage.Name {
@@ -136,8 +161,11 @@ func (r *Responder) respond(packet []byte, addrs []net.IP, legacy bool) ([]byte,
 	if err != nil {
 		return nil, false, err
 	}
-	host, instance := r.names()
-	var wantA, wantPTR, wantSRV, wantTXT, wantEnum, unicast bool
+	host, svcs := r.names()
+	var wantA, wantEnum, unicast bool
+	wantPTR := map[int]bool{}
+	wantSRV := map[int]bool{}
+	wantTXT := map[int]bool{}
 	var answered []dnsmessage.Question
 	for _, q := range qs {
 		if uint16(q.Class)&unicastBit != 0 {
@@ -146,32 +174,30 @@ func (r *Responder) respond(packet []byte, addrs []net.IP, legacy bool) ([]byte,
 		name := strings.ToLower(q.Name.String())
 		any := q.Type == dnsmessage.TypeALL
 		hit := false
-		switch name {
-		case strings.ToLower(host):
-			if q.Type == dnsmessage.TypeA || any {
-				wantA, hit = true, true
+		if name == strings.ToLower(host) && (q.Type == dnsmessage.TypeA || any) {
+			wantA, hit = true, true
+		}
+		if name == enumName && (q.Type == dnsmessage.TypePTR || any) {
+			wantEnum, hit = true, true
+		}
+		for i, sv := range svcs {
+			if name == strings.ToLower(sv.typ) && (q.Type == dnsmessage.TypePTR || any) {
+				wantPTR[i], hit = true, true
 			}
-		case serviceSRV:
-			if q.Type == dnsmessage.TypePTR || any {
-				wantPTR, hit = true, true
-			}
-		case strings.ToLower(instance):
-			if q.Type == dnsmessage.TypeSRV || any {
-				wantSRV, hit = true, true
-			}
-			if q.Type == dnsmessage.TypeTXT || any {
-				wantTXT, hit = true, true
-			}
-		case enumName:
-			if q.Type == dnsmessage.TypePTR || any {
-				wantEnum, hit = true, true
+			if name == strings.ToLower(sv.instance) {
+				if q.Type == dnsmessage.TypeSRV || any {
+					wantSRV[i], hit = true, true
+				}
+				if q.Type == dnsmessage.TypeTXT || any {
+					wantTXT[i], hit = true, true
+				}
 			}
 		}
 		if hit {
 			answered = append(answered, q)
 		}
 	}
-	if len(answered) == 0 || (wantA && len(addrs) == 0 && !wantPTR && !wantSRV && !wantTXT && !wantEnum) {
+	if len(answered) == 0 || (wantA && len(addrs) == 0 && len(wantPTR)+len(wantSRV)+len(wantTXT) == 0 && !wantEnum) {
 		return nil, false, nil
 	}
 	h := dnsmessage.Header{Response: true, Authoritative: true}
@@ -205,69 +231,73 @@ func (r *Responder) respond(packet []byte, addrs []net.IP, legacy bool) ([]byte,
 		}
 		return t
 	}
-	hostName, instName, svcName := mustName(host), mustName(instance), mustName(serviceSRV)
-	addA := func(add func(dnsmessage.ResourceHeader, dnsmessage.AResource) error) error {
+	hostName := mustName(host)
+	addA := func() error {
 		for _, ip := range addrs {
 			var a [4]byte
 			copy(a[:], ip.To4())
-			if err := add(dnsmessage.ResourceHeader{Name: hostName, Class: flush, TTL: ttl(hostTTL)}, dnsmessage.AResource{A: a}); err != nil {
+			if err := b.AResource(dnsmessage.ResourceHeader{Name: hostName, Class: flush, TTL: ttl(hostTTL)}, dnsmessage.AResource{A: a}); err != nil {
 				return err
 			}
 		}
 		return nil
 	}
-	srv := func(add func(dnsmessage.ResourceHeader, dnsmessage.SRVResource) error) error {
-		return add(dnsmessage.ResourceHeader{Name: instName, Class: flush, TTL: ttl(hostTTL)},
+	srv := func(sv service) error {
+		return b.SRVResource(dnsmessage.ResourceHeader{Name: mustName(sv.instance), Class: flush, TTL: ttl(hostTTL)},
 			dnsmessage.SRVResource{Target: hostName, Port: uint16(r.cfg.Port)})
 	}
-	txt := func(add func(dnsmessage.ResourceHeader, dnsmessage.TXTResource) error) error {
-		t := r.cfg.TXT
-		if len(t) == 0 {
-			t = []string{""}
-		}
-		return add(dnsmessage.ResourceHeader{Name: instName, Class: flush, TTL: ttl(serviceTTL)}, dnsmessage.TXTResource{TXT: t})
+	txt := func(sv service) error {
+		return b.TXTResource(dnsmessage.ResourceHeader{Name: mustName(sv.instance), Class: flush, TTL: ttl(serviceTTL)}, dnsmessage.TXTResource{TXT: sv.txt})
 	}
 	if wantA {
-		if err := addA(b.AResource); err != nil {
+		if err := addA(); err != nil {
 			return nil, false, err
 		}
 	}
-	if wantPTR {
-		if err := b.PTRResource(dnsmessage.ResourceHeader{Name: svcName, Class: dnsmessage.ClassINET, TTL: ttl(serviceTTL)},
-			dnsmessage.PTRResource{PTR: instName}); err != nil {
-			return nil, false, err
+	for i, sv := range svcs {
+		if wantPTR[i] {
+			if err := b.PTRResource(dnsmessage.ResourceHeader{Name: mustName(sv.typ), Class: dnsmessage.ClassINET, TTL: ttl(serviceTTL)},
+				dnsmessage.PTRResource{PTR: mustName(sv.instance)}); err != nil {
+				return nil, false, err
+			}
 		}
 	}
 	if wantEnum {
-		if err := b.PTRResource(dnsmessage.ResourceHeader{Name: mustName(enumName), Class: dnsmessage.ClassINET, TTL: ttl(serviceTTL)},
-			dnsmessage.PTRResource{PTR: svcName}); err != nil {
-			return nil, false, err
+		for _, sv := range svcs {
+			if err := b.PTRResource(dnsmessage.ResourceHeader{Name: mustName(enumName), Class: dnsmessage.ClassINET, TTL: ttl(serviceTTL)},
+				dnsmessage.PTRResource{PTR: mustName(sv.typ)}); err != nil {
+				return nil, false, err
+			}
 		}
 	}
-	if wantSRV {
-		if err := srv(b.SRVResource); err != nil {
-			return nil, false, err
+	for i, sv := range svcs {
+		if wantSRV[i] {
+			if err := srv(sv); err != nil {
+				return nil, false, err
+			}
 		}
-	}
-	if wantTXT {
-		if err := txt(b.TXTResource); err != nil {
-			return nil, false, err
+		if wantTXT[i] {
+			if err := txt(sv); err != nil {
+				return nil, false, err
+			}
 		}
 	}
 	// Additional records save the browser a round trip (RFC 6763 §12).
 	if err := b.StartAdditionals(); err != nil {
 		return nil, false, err
 	}
-	if wantPTR && !wantSRV {
-		if err := srv(b.SRVResource); err != nil {
-			return nil, false, err
-		}
-		if err := txt(b.TXTResource); err != nil {
-			return nil, false, err
+	for i, sv := range svcs {
+		if wantPTR[i] && !wantSRV[i] {
+			if err := srv(sv); err != nil {
+				return nil, false, err
+			}
+			if err := txt(sv); err != nil {
+				return nil, false, err
+			}
 		}
 	}
-	if (wantPTR || wantSRV) && !wantA {
-		if err := addA(b.AResource); err != nil {
+	if (len(wantPTR) > 0 || len(wantSRV) > 0) && !wantA {
+		if err := addA(); err != nil {
 			return nil, false, err
 		}
 	}
@@ -278,7 +308,7 @@ func (r *Responder) respond(packet []byte, addrs []net.IP, legacy bool) ([]byte,
 // announcement is an unsolicited response with every record (ttl 0 for
 // goodbye).
 func (r *Responder) announcement(addrs []net.IP, goodbye bool) ([]byte, error) {
-	host, instance := r.names()
+	host, svcs := r.names()
 	b := dnsmessage.NewBuilder(nil, dnsmessage.Header{Response: true, Authoritative: true})
 	b.EnableCompression()
 	if err := b.StartAnswers(); err != nil {
@@ -291,7 +321,7 @@ func (r *Responder) announcement(addrs []net.IP, goodbye bool) ([]byte, error) {
 		return v
 	}
 	flush := dnsmessage.Class(dnsmessage.ClassINET | unicastBit)
-	hostName, instName := mustName(host), mustName(instance)
+	hostName := mustName(host)
 	for _, ip := range addrs {
 		var a [4]byte
 		copy(a[:], ip.To4())
@@ -299,20 +329,19 @@ func (r *Responder) announcement(addrs []net.IP, goodbye bool) ([]byte, error) {
 			return nil, err
 		}
 	}
-	if err := b.PTRResource(dnsmessage.ResourceHeader{Name: mustName(serviceSRV), Class: dnsmessage.ClassINET, TTL: t(serviceTTL)},
-		dnsmessage.PTRResource{PTR: instName}); err != nil {
-		return nil, err
-	}
-	if err := b.SRVResource(dnsmessage.ResourceHeader{Name: instName, Class: flush, TTL: t(hostTTL)},
-		dnsmessage.SRVResource{Target: hostName, Port: uint16(r.cfg.Port)}); err != nil {
-		return nil, err
-	}
-	txt := r.cfg.TXT
-	if len(txt) == 0 {
-		txt = []string{""}
-	}
-	if err := b.TXTResource(dnsmessage.ResourceHeader{Name: instName, Class: flush, TTL: t(serviceTTL)}, dnsmessage.TXTResource{TXT: txt}); err != nil {
-		return nil, err
+	for _, sv := range svcs {
+		instName := mustName(sv.instance)
+		if err := b.PTRResource(dnsmessage.ResourceHeader{Name: mustName(sv.typ), Class: dnsmessage.ClassINET, TTL: t(serviceTTL)},
+			dnsmessage.PTRResource{PTR: instName}); err != nil {
+			return nil, err
+		}
+		if err := b.SRVResource(dnsmessage.ResourceHeader{Name: instName, Class: flush, TTL: t(hostTTL)},
+			dnsmessage.SRVResource{Target: hostName, Port: uint16(r.cfg.Port)}); err != nil {
+			return nil, err
+		}
+		if err := b.TXTResource(dnsmessage.ResourceHeader{Name: instName, Class: flush, TTL: t(serviceTTL)}, dnsmessage.TXTResource{TXT: sv.txt}); err != nil {
+			return nil, err
+		}
 	}
 	return b.Finish()
 }

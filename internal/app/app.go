@@ -22,6 +22,7 @@ import (
 	"github.com/KK4ODA/arcana/internal/download"
 	"github.com/KK4ODA/arcana/internal/fsutil"
 	"github.com/KK4ODA/arcana/internal/gps"
+	"github.com/KK4ODA/arcana/internal/integration"
 	"github.com/KK4ODA/arcana/internal/kiwix"
 	"github.com/KK4ODA/arcana/internal/library"
 	"github.com/KK4ODA/arcana/internal/maps"
@@ -59,8 +60,11 @@ type App struct {
 	maps      *mapState
 	GPS       *gps.Manager
 	// Admin holds the optional remote-administration password.
-	Admin  *auth.Store
-	runCtx context.Context
+	Admin *auth.Store
+	// Integrations holds tokens of programs using the integration API.
+	Integrations *integration.Store
+	events       eventHub
+	runCtx       context.Context
 
 	opts         Options
 	refreshMu    sync.Mutex
@@ -98,7 +102,12 @@ func Open(root string, opts Options) (*App, error) {
 		return nil, err
 	}
 	a.Content = &content.Manager{Layout: lib.Layout, Store: a.Store, Log: log}
-	a.Content.OnChange = func() { a.reloadKiwix(); a.reloadMaps(); a.RequestReindex() }
+	a.Content.OnChange = func() {
+		a.reloadKiwix()
+		a.reloadMaps()
+		a.RequestReindex()
+		a.publish(Event{Type: "library"})
+	}
 	a.reindex = make(chan struct{}, 1)
 	a.Tasks = tasks.New(context.Background())
 	a.Updater = &appupdate.Updater{Lib: lib, Keys: appupdate.TrustedKeys()}
@@ -116,6 +125,10 @@ func Open(root string, opts Options) (*App, error) {
 	}
 	a.openGPS()
 	a.Admin = auth.NewStore(lib.User())
+	if a.Integrations, err = integration.Open(lib.User(), lib.ReadOnly); err != nil {
+		a.Close()
+		return nil, err
+	}
 
 	ctx := context.Background()
 	// Sidecars are the source of truth for installed content; re-index on
@@ -132,7 +145,7 @@ func Open(root string, opts Options) (*App, error) {
 		log.Warn("catalog cache", "err", err)
 	}
 
-	client := download.NewClient(func() bool { return lib.Settings.Get().AllowPrivateNetworkDownloads })
+	client := download.NewClientFor(func() bool { return lib.Settings.Get().AllowPrivateNetworkDownloads }, a.peerAddrAllowed)
 	a.Fetcher = catalog.NewHTTPFetcher(client)
 	a.Downloads = download.New(download.Options{
 		Store:       a.Store,
@@ -143,6 +156,7 @@ func Open(root string, opts Options) (*App, error) {
 		Fetcher:     a.Fetcher,
 		Client:      client,
 		Extractors:  map[string]download.Extractor{maps.MethodExtract: a.mapExtractor},
+		RequestHook: a.peerRequestHook,
 		Log:         log,
 		ReadOnly:    lib.ReadOnly,
 	})
@@ -263,7 +277,7 @@ func (a *App) Providers() []catalog.Provider {
 	}
 	for _, f := range s.Catalog.Feeds {
 		if f.Enabled {
-			ps = append(ps, &catalog.FeedProvider{ProviderID: f.ID, ProviderName: f.Name, URL: f.URL})
+			ps = append(ps, &catalog.FeedProvider{ProviderID: f.ID, ProviderName: f.Name, URL: f.URL, PublicKey: f.PublicKey})
 		}
 	}
 	return ps

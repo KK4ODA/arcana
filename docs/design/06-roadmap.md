@@ -127,21 +127,22 @@ Phase 1 content origin. Details: [05-maps-gps.md](05-maps-gps.md#implementation-
 - The library is prepared on a desktop and moved to the appliance with no
   conversion. Already true of the format; to be verified on hardware.
 
-## Phase 6 — Advanced · Planned (not on the critical path)
+## Phase 6 — Advanced · Partly done (0.6.0)
 
-- Unified cross-library search ranking across languages and formats.
-- Advanced offline routing.
-- Optional local AI question answering:
-  - a separate optional sidecar (llama.cpp-class) installed as a catalog
-    resource;
-  - retrieval only from installed sources, with citations and visible
-    uncertainty;
-  - never required and never on by default.
-- Peer-to-peer library sync on the LAN, built on the Phase 2 manifest and
-  verified transfers.
-- RadioPost / Aether HF interoperability through the local integration API
-  (14-integrations.md).
-- Community catalog plugins (signed feeds), multi-drive collections.
+- **Done:** local integration API v1 (scoped bearer tokens, pairing with
+  operator approval, search with citations, article text and excerpts,
+  location, coordinates, events, share links), advertised as
+  `_arcana._tcp`; reference in [integration-api.md](../integration-api.md).
+  This is the interface for RadioPost and Aether HF.
+- **Done:** peer-to-peer copying on the LAN: one Arcana browses another's
+  library and pulls resources through its verified download queue
+  (acceptance step 11b, inside the offline network namespace).
+- **Done:** signed community catalogs (Ed25519 publisher key per feed).
+- **Design only:** optional local question answering
+  ([15-local-ai.md](15-local-ai.md)).
+- **Planned:** unified cross-library search ranking across languages;
+  advanced offline routing; automatic (scheduled) peer sync; multi-drive
+  collections; rendered map snippets for the integration API.
 
 ## Priorities and sequencing rationale
 

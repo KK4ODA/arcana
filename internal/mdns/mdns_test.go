@@ -165,3 +165,35 @@ func TestLiveResponder(t *testing.T) {
 	}
 	t.Skip("no reply over loopback (port 5353 may be held exclusively by another responder)")
 }
+
+func TestExtraService(t *testing.T) {
+	r := New(Config{Name: "arcana", Instance: "Arcana", Port: 8470,
+		Extra: []Service{{Type: "_arcana._tcp", TXT: []string{"api=/api/integration/v1/"}}}})
+	addrs := []net.IP{net.IPv4(10, 0, 0, 2)}
+	out, _, err := r.respond(query(t, 0, q("_arcana._tcp.local.", dnsmessage.TypePTR, 1)), addrs, false)
+	if err != nil || out == nil {
+		t.Fatal(err)
+	}
+	m := parse(t, out)
+	if ptr := m.answers[0].Body.(*dnsmessage.PTRResource); ptr.PTR.String() != "Arcana._arcana._tcp.local." {
+		t.Fatalf("PTR %v", ptr.PTR)
+	}
+	var txt *dnsmessage.TXTResource
+	for _, a := range m.additionals {
+		if t, ok := a.Body.(*dnsmessage.TXTResource); ok {
+			txt = t
+		}
+	}
+	if txt == nil || txt.TXT[0] != "api=/api/integration/v1/" {
+		t.Fatalf("TXT %+v", txt)
+	}
+	// Service enumeration lists both types.
+	out, _, _ = r.respond(query(t, 0, q("_services._dns-sd._udp.local.", dnsmessage.TypePTR, 1)), addrs, false)
+	if m := parse(t, out); len(m.answers) != 2 {
+		t.Fatalf("enumeration %d", len(m.answers))
+	}
+	ann, _ := r.announcement(addrs, false)
+	if m := parse(t, ann); len(m.answers) != 1+3*2 {
+		t.Fatalf("announcement has %d records", len(m.answers))
+	}
+}

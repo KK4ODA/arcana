@@ -23,10 +23,19 @@ var errBlockedAddress = errors.New("address is on a local or private network; en
 // bypass it). A configured HTTP(S) proxy is exempt because it is chosen by
 // the user, not by a catalog.
 func NewClient(allowPrivate func() bool) *http.Client {
+	return NewClientFor(allowPrivate, nil)
+}
+
+// NewClientFor is NewClient with an additional per-address exemption, used
+// for peers on the local network that the user configured explicitly.
+func NewClientFor(allowPrivate func() bool, allowAddr func(address string) bool) *http.Client {
 	proxies := proxyHosts()
 	dialer := &net.Dialer{Timeout: 30 * time.Second, KeepAlive: 30 * time.Second}
 	dialer.Control = func(network, address string, _ syscall.RawConn) error {
 		if allowPrivate != nil && allowPrivate() {
+			return nil
+		}
+		if allowAddr != nil && allowAddr(address) {
 			return nil
 		}
 		if proxies[address] {
@@ -43,7 +52,22 @@ func NewClient(allowPrivate func() bool) *http.Client {
 		return nil
 	}
 	tr := &http.Transport{
-		Proxy: http.ProxyFromEnvironment,
+		Proxy: func(r *http.Request) (*url.URL, error) {
+			// Configured peers are on the local network: go direct.
+			if allowAddr != nil {
+				port := r.URL.Port()
+				if port == "" {
+					port = map[string]string{"https": "443"}[r.URL.Scheme]
+					if port == "" {
+						port = "80"
+					}
+				}
+				if allowAddr(net.JoinHostPort(r.URL.Hostname(), port)) {
+					return nil, nil
+				}
+			}
+			return http.ProxyFromEnvironment(r)
+		},
 		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
 			return dialer.DialContext(ctx, network, addr)
 		},

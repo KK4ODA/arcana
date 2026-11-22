@@ -120,6 +120,12 @@ func (p *accessPolicy) guardMutations(next http.Handler) http.Handler {
 				writeError(w, http.StatusForbidden, "Cross-site request refused.")
 				return
 			}
+			if strings.HasPrefix(r.URL.Path, integrationPrefix+"/") {
+				// The integration API authenticates every call with a
+				// bearer token (or is pairing, which only records a
+				// request for the operator to approve).
+				break
+			}
 			if isLocal(r) {
 				if !p.tokenOK(r) {
 					writeError(w, http.StatusForbidden, "Missing or invalid session token. Reload the page.")

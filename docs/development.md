@@ -51,6 +51,7 @@ internal/web/static/   embedded UI (ES modules, CSS)
 packaging/             launcher and first-run readme for release bundles
 packaging/appliance/   appliance installer, systemd units, captive-portal rules (docs/appliance.md)
 internal/sdnotify/     systemd readiness and watchdog notifications
+internal/integration/  integration API tokens, scopes and pairing
 scripts/               fetch-kiwix.sh, package.sh
 test/acceptance/       offline acceptance test and UI tripwire
 testdata/sample/       CC0 sample ZIM
@@ -108,6 +109,9 @@ docs/design/14-radio-and-integrations.md.
 | `GET /api/server/qr.svg?url=`, `GET /api/server/wifi-qr.svg` | QR codes for this server's own addresses; for joining the hotspot (administrators) |
 | `PUT /api/server/tls` | HTTPS mode: `""`, `self-signed` or `custom` (host only) |
 | `GET/POST /api/server/hotspot` | Hotspot status; `{action: start/stop, ssid, password, device}` (host only) |
+| `GET/POST /api/integrations`, `DELETE /api/integrations/{id}`, `POST /api/integrations/pair/{id}/{approve,deny}` | Integration tokens and pairing requests (host only) |
+| `GET/POST /api/peers`, `DELETE /api/peers/{id}`, `GET /api/peers/{id}/library`, `POST /api/peers/{id}/pull` | Other Arcana libraries to copy from (host only) |
+| `/api/integration/v1/*` | Versioned API for other programs: see [integration-api.md](integration-api.md) |
 | `GET /api/gps`, `GET /api/gps/stream` | Position status; server-sent events (host only unless sharing is on) |
 | `GET /api/gps/ports` | Serial ports (host only) |
 | `GET/POST /api/gps/waypoints`, `DELETE /api/gps/waypoints/{id}` | Waypoints |

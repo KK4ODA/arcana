@@ -30,6 +30,18 @@ type Settings struct {
 	Updates                      UpdateSettings  `json:"updates"`
 	Maps                         MapSettings     `json:"maps"`
 	GPS                          GPSSettings     `json:"gps"`
+	// Peers are other Arcana libraries on the network to copy from.
+	Peers []PeerSource `json:"peers,omitempty"`
+}
+
+// PeerSource is another Arcana whose integration API this library may
+// read. Token is that library's access token (scope library:read); it only
+// grants reading, and is stored in clear text because Arcana must send it.
+type PeerSource struct {
+	ID    string `json:"id"`
+	Name  string `json:"name"`
+	URL   string `json:"url"`
+	Token string `json:"token"`
 }
 
 // MapSettings control the map region provider.
@@ -114,6 +126,9 @@ type FeedSource struct {
 	Name    string `json:"name"`
 	URL     string `json:"url"`
 	Enabled bool   `json:"enabled"`
+	// PublicKey (base64 Ed25519) makes Arcana accept the feed only with a
+	// valid signature from this key.
+	PublicKey string `json:"publicKey,omitempty"`
 }
 
 // DefaultSettings returns settings for a new library.
@@ -193,6 +208,7 @@ func (s *SettingsStore) Get() Settings {
 	defer s.mu.Unlock()
 	c := s.current
 	c.Catalog.Feeds = append([]FeedSource(nil), s.current.Catalog.Feeds...)
+	c.Peers = append([]PeerSource(nil), s.current.Peers...)
 	return c
 }
 

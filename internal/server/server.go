@@ -9,6 +9,7 @@ package server
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -67,6 +68,7 @@ type Server struct {
 	sessions *auth.Sessions
 	limiter  *auth.Limiter
 	nw       netState
+	shares   shareStore
 
 	appSrv     *http.Server
 	contentSrv *http.Server
@@ -229,6 +231,7 @@ func (s *Server) appHandler() http.Handler {
 	s.registerGPS(mux)
 	s.registerAuth(mux)
 	s.registerNetwork(mux)
+	s.registerIntegration(mux)
 	mux.HandleFunc("GET /api/", func(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusNotFound, "unknown API endpoint")
 	})
@@ -833,6 +836,11 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *ap
 					Files: []catalog.File{{Name: "x.pdf", Mirrors: []catalog.Mirror{{URL: f.URL}}}}}
 				if err := probe.Validate(); err != nil || seen[f.ID] {
 					return fmt.Errorf("feed %q: use a unique lower-case ID and an http(s) URL", f.ID)
+				}
+				if f.PublicKey != "" {
+					if k, err := base64.StdEncoding.DecodeString(strings.TrimSpace(f.PublicKey)); err != nil || len(k) != 32 {
+						return fmt.Errorf("feed %q: the publisher key must be a base64 Ed25519 public key", f.ID)
+					}
 				}
 				seen[f.ID] = true
 			}

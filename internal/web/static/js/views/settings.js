@@ -1,6 +1,7 @@
 import { api, getSession } from '../api.js';
 import { h, clear, fill, fmtBytes, fmtDate, toast } from '../util.js';
 import { tasksPanel } from './tasks.js';
+import { integrationsPanel, peersPanel } from './integrations.js';
 
 const GB = 1e9;
 
@@ -35,6 +36,7 @@ export async function settingsView(main) {
     for (const f of feeds) {
       feedList.appendChild(h('div', { class: 'row', style: 'margin-bottom:4px' },
         h('span', { class: 'mono small' }, f.id), h('span', null, f.name), h('span', { class: 'mono small muted' }, f.url),
+        f.publicKey ? h('span', { class: 'badge', title: `Signed by ${f.publicKey}` }, 'Signed') : null,
         h('button', { disabled: ro, onclick: () => { feeds.splice(feeds.indexOf(f), 1); renderFeeds(); } }, 'Remove')));
     }
   }
@@ -42,6 +44,7 @@ export async function settingsView(main) {
   const fid = h('input', { type: 'text', placeholder: 'id (e.g. community)', style: 'width:150px', disabled: ro });
   const fname = h('input', { type: 'text', placeholder: 'Name', style: 'width:160px', disabled: ro });
   const furl = h('input', { type: 'url', placeholder: 'https://example.org/arcana-catalog.json', style: 'width:320px', disabled: ro });
+  const fkey = h('input', { type: 'text', placeholder: 'publisher key (optional, base64 Ed25519)', class: 'mono', style: 'width:300px', disabled: ro });
 
   const field = (label, control, help) => h('div', { class: 'field' }, h('label', null, label), h('div', null, control, help ? h('div', { class: 'help' }, help) : null));
 
@@ -66,13 +69,13 @@ export async function settingsView(main) {
     field('Project Gutenberg', h('label', { class: 'inline' }, gutenberg, 'Include practical public-domain books (about 6,500)'),
       'Health, farming, cooking, engineering, crafts and science books from Project Gutenberg\u2019s mirror. Gutenberg publishes no checksums, so these downloads are marked unverified. Historical medical books are marked as outdated.'),
     field('Additional catalogs', h('div', null, feedList,
-      h('div', { class: 'row' }, fid, fname, furl, h('button', { disabled: ro, onclick: () => {
+      h('div', { class: 'row' }, fid, fname, furl, fkey, h('button', { disabled: ro, onclick: () => {
         if (!fid.value || !furl.value) { toast('Enter an id and a URL.'); return; }
-        feeds.push({ id: fid.value.trim().toLowerCase(), name: fname.value.trim() || fid.value.trim(), url: furl.value.trim(), enabled: true });
-        fid.value = fname.value = furl.value = '';
+        feeds.push({ id: fid.value.trim().toLowerCase(), name: fname.value.trim() || fid.value.trim(), url: furl.value.trim(), enabled: true, publicKey: fkey.value.trim() || undefined });
+        fid.value = fname.value = furl.value = fkey.value = '';
         renderFeeds();
       } }, 'Add'))),
-      'Catalogs in Arcana\u2019s JSON feed format (see docs/spec). Entries are validated and can only use their own identifier namespace.'),
+      'Catalogs in Arcana\u2019s JSON feed format (see docs/spec). Entries are validated and can only use their own identifier namespace. With a publisher key, the catalog is accepted only if its .sig file matches.'),
     field('Automatic refresh', autoRefresh, 'Arcana makes no network requests unless you ask, or you turn this on. Failed attempts (no internet) are retried at the next interval.')));
 
   // Maps and position.
@@ -169,6 +172,12 @@ export async function settingsView(main) {
   if (s.local) main.appendChild(transferPanel(lib.resources, ro, tp));
   main.appendChild(integrityPanel(tp));
   if (s.local) main.appendChild(await updatesPanel(s, ro, updateURL, tp));
+  let ip = null;
+  if (s.local && !ro) {
+    ip = integrationsPanel();
+    main.appendChild(ip.el);
+    main.appendChild(peersPanel().el);
+  }
 
   main.appendChild(h('section', { class: 'panel' },
     h('header', null, h('h2', null, 'About this library')),
@@ -176,7 +185,7 @@ export async function settingsView(main) {
       h('dt', null, 'Location'), h('dd', { class: 'mono small' }, r.libraryRoot),
       h('dt', null, 'Library ID'), h('dd', { class: 'mono small' }, r.libraryId),
       h('dt', null, 'Arcana version'), h('dd', { class: 'mono small' }, `${s.version} (${s.platform})`)))));
-  return () => tp.stop();
+  return () => { tp.stop(); if (ip) ip.stop(); };
 }
 
 function transferPanel(resources, ro, tp) {

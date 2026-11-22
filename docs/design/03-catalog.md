@@ -130,6 +130,16 @@ type Fetcher interface {
 }
 ```
 
+**Signed feeds (0.6.0).** A publisher can sign a feed so that a mirror or
+network attacker cannot alter it. The publisher keeps an Ed25519 key
+(`go run ./tools/release-sign keygen -out feed.key` prints the public key)
+and publishes `catalog.json.sig` next to `catalog.json`
+(`go run ./tools/release-sign sign -in catalog.json`). Users add the feed
+with the public key; Arcana then rejects the feed if the signature is
+missing or does not match the exact bytes. Unsigned feeds still work
+without a key. Signing proves who published the catalog; it does not
+replace the per-file SHA-256 checksums the catalog lists.
+
 A Kiwix entry after normalization (abbreviated):
 
 ```json

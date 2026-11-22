@@ -19,6 +19,7 @@ const sessionCookie = "arcana_session"
 var hostOnlyPrefixes = []string{
 	"/api/setup/", "/api/transfer/", "/api/app/update", "/api/auth/password", "/api/manifest",
 	"/api/user/notes", "/api/user/recent", "/api/user/documents", "/api/server/tls", "/api/server/hotspot",
+	"/api/integrations", "/api/peers",
 }
 
 func hostOnlyPath(p string) bool {

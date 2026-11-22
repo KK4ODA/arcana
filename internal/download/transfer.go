@@ -170,6 +170,11 @@ func (m *Manager) execute(ctx context.Context, j *store.Job, rs *runState, persi
 			r = m.opts.ResolverFor(res.Provider)
 			ok = r != nil
 		}
+		if res.ProviderRef["via"] == "peer" {
+			// Copied from another Arcana: its locations and checksums are
+			// already final; resolving would point back at the internet.
+			ok = false
+		}
 		if ok {
 			resolved, err := r.Resolve(ctx, m.opts.Fetcher, res)
 			if err != nil {
@@ -240,6 +245,14 @@ func (m *Manager) install(ctx context.Context, j *store.Job, persist func()) err
 			SHA256: j.Done[i].SHA256,
 		})
 		algo, _ := verifyAlgo(f)
+		if ref := j.Resource.ProviderRef; ref["via"] == "peer" {
+			verification = "sha256 matched the value recorded by the library it was copied from (" + ref["peerName"] + ")"
+			if ref["peerUnverified"] == "true" {
+				unverified = true
+				verification += "; that library had no publisher checksum either"
+			}
+			continue
+		}
 		if j.Resource.ProviderRef["method"] != "" {
 			unverified = true
 			verification = "built by Arcana from a single version of the source (" + hostOf(f.Mirrors[0].URL) +
@@ -552,6 +565,9 @@ func (m *Manager) fetch(ctx context.Context, j *store.Job, rs *runState, f catal
 		return fail(kindFatal, "bad URL: %v", err)
 	}
 	req.Header.Set("User-Agent", catalog.UserAgent())
+	if m.opts.RequestHook != nil {
+		m.opts.RequestHook(req)
+	}
 	// Identity encoding: transparent compression would make byte offsets
 	// meaningless for range requests.
 	req.Header.Set("Accept-Encoding", "identity")

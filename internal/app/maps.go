@@ -194,6 +194,11 @@ func (a *App) MapStatus() MapStatus {
 	return st
 }
 
+// NearbyPlaces lists indexed places near a point.
+func (a *App) NearbyPlaces(ctx context.Context, lat, lon, radius float64, limit int) ([]maps.NearbyPlace, error) {
+	return a.maps.places.Nearest(ctx, lat, lon, radius, limit)
+}
+
 // SearchPlaces searches the offline place index.
 func (a *App) SearchPlaces(ctx context.Context, q string, limit int) ([]maps.Place, error) {
 	return a.maps.places.Search(ctx, q, limit)
