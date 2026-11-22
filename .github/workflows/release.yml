@@ -71,9 +71,14 @@ jobs:
           sha256sum -c SHA256SUMS
           tmp=$(mktemp -d)
           tar -xzf "arcana-$VERSION-linux-amd64.tar.gz" -C "$tmp"
-          "$tmp/Arcana/bin/linux-amd64/arcana" version | tee /dev/stderr | grep -q "^arcana $VERSION "
+          # No "| grep -q" pipelines: with pipefail an early grep exit can
+          # fail the step through SIGPIPE.
+          "$tmp/Arcana/bin/linux-amd64/arcana" version > "$tmp/version.txt"
+          cat "$tmp/version.txt"
+          grep -q "^arcana $VERSION " "$tmp/version.txt"
           test -f "$tmp/Arcana/licenses/SOURCES.txt"
-          tar -tf "arcana-$VERSION-kiwix-sources.tar" | grep -q kiwix-tools-3.8.2.tar.xz
+          tar -tf "arcana-$VERSION-kiwix-sources.tar" > "$tmp/sources.txt"
+          grep -q kiwix-tools-3.8.2.tar.xz "$tmp/sources.txt"
       - name: Build provenance
         if: ${{ !github.event.repository.private }}
         uses: actions/attest-build-provenance@v2
