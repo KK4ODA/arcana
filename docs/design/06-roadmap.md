@@ -85,18 +85,18 @@ Phase 1 content origin. Details: [05-maps-gps.md](05-maps-gps.md#implementation-
 | 3c: routing evaluation (Valhalla sidecar; BRouter alternative) | Planned: decision ADR with measured sizes and Pi 5 memory |
 | Geography step in the selection wizard | Planned |
 
-## Phase 4 — Network serving · Partial
+## Phase 4 — Network serving · Done (0.4.0)
 
 **Dependencies:** Phase 1 server.
 
 | Milestone | Status |
 |---|---|
 | Local HTTP server, responsive UI, multiple clients, read-only clients | Done |
-| Authentication for remote administration (password, Argon2id hash in `user/`, session cookie, rate-limited) | Planned |
-| mDNS (`arcana.local`, DNS-SD `_http._tcp`), registered via OS responder where present, else brutella/dnssd | Planned |
-| QR code connection page | Planned |
-| Hotspot helpers: NetworkManager (Linux), documented Windows Mobile Hotspot use | Planned; **Unresolved**: no supported no-upstream hotspot API on Windows, none on macOS |
-| Optional local TLS (user cert or self-signed) for Geolocation/service workers on LAN | Planned |
+| Authentication for remote administration (password, Argon2id hash in `user/`, session cookie, rate-limited) | **Done.** Off by default; host-only actions remain; unit-tested and acceptance step 7b |
+| mDNS (`arcana.local`, DNS-SD `_http._tcp`) | **Done, differs:** a built-in responder (`internal/mdns`, on x/net) instead of registering with the OS responder or brutella/dnssd; it shares port 5353 with Avahi/Bonjour (ADR-0017). Answers verified in a live test; conflict probing tested |
+| QR code connection page | **Done.** QR codes for every address in the Server view, a printable connection card, Wi-Fi QR for the hotspot |
+| Hotspot helpers: NetworkManager (Linux), documented Windows Mobile Hotspot use | **Done** for Linux (`nmcli`, tested against a simulated nmcli; not yet on hardware). Windows and macOS show guidance. **Unresolved**: no supported no-upstream hotspot API on Windows, none on macOS |
+| Optional local TLS (user cert or self-signed) for Geolocation/service workers on LAN | **Done.** HTTP and HTTPS on the same ports; a LAN browser over HTTPS gets a secure context (verified in a browser test) |
 
 ## Phase 5 — Cross-platform and appliance · Planned
 

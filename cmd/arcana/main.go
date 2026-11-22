@@ -21,6 +21,7 @@ import (
 
 	"github.com/KK4ODA/arcana/internal/app"
 	"github.com/KK4ODA/arcana/internal/buildinfo"
+	"github.com/KK4ODA/arcana/internal/hotspot"
 	"github.com/KK4ODA/arcana/internal/library"
 	"github.com/KK4ODA/arcana/internal/server"
 	"github.com/KK4ODA/arcana/internal/storage"
@@ -47,6 +48,8 @@ Usage:
   arcana manifest               Write manifest/library.json describing this library
   arcana update stage DIR | apply | rollback | status
                                 Install a signed application update (offline)
+  arcana hotspot start --ssid NAME --password PW [--device wlan0] | stop | status
+                                Wi-Fi hotspot for phones (Linux with NetworkManager)
   arcana volumes                List drives and their file systems
   arcana version                Print version information
 
@@ -89,6 +92,8 @@ func main() {
 		err = cmdUpdate(args)
 	case "volumes":
 		err = cmdVolumes()
+	case "hotspot":
+		err = cmdHotspot(args)
 	case "version", "--version", "-v":
 		fmt.Printf("arcana %s (%s, %s, built %s)\n", buildinfo.Version, buildinfo.Platform(), buildinfo.Commit, buildinfo.Date)
 	case "help", "-h", "--help":
@@ -235,6 +240,15 @@ func cmdServe(args []string) error {
 	fmt.Printf("  Open:     %s\n", url)
 	if lan {
 		fmt.Println("  Sharing on the local network (read-only for other devices).")
+		if a != nil {
+			if set := a.Lib.Settings.Get().Server; set.MDNS {
+				name := set.Name
+				if name == "" {
+					name = "arcana"
+				}
+				fmt.Printf("  Network:  http://%s.local:%d/ (if the name is taken, the Server view shows the one in use)\n", name, srv.AppPort())
+			}
+		}
 	}
 	fmt.Println("  Press Ctrl+C or close this window to stop Arcana.")
 	fmt.Println()
@@ -756,4 +770,42 @@ func remove(list []string, s string) []string {
 		}
 	}
 	return out
+}
+
+func cmdHotspot(args []string) error {
+	if len(args) == 0 {
+		return errors.New("usage: arcana hotspot start --ssid NAME --password PW [--device DEV] | stop | status")
+	}
+	m := hotspot.New()
+	ctx := context.Background()
+	switch args[0] {
+	case "status":
+		st := m.Status(ctx)
+		if !st.Supported {
+			fmt.Println("Hotspot not available:", st.Reason)
+			return nil
+		}
+		state := "off"
+		if st.Active {
+			state = "on (" + st.Device + ")"
+		}
+		fmt.Printf("Hotspot: %s\nNetwork name: %s\nWi-Fi devices: %s\n", state, st.SSID, strings.Join(st.Devices, ", "))
+		return nil
+	case "stop":
+		return m.Stop(ctx)
+	case "start":
+		fs := flag.NewFlagSet("hotspot", flag.ContinueOnError)
+		ssid := fs.String("ssid", "Arcana", "")
+		pw := fs.String("password", "", "")
+		dev := fs.String("device", "", "")
+		if err := fs.Parse(args[1:]); err != nil {
+			return err
+		}
+		if err := m.Start(ctx, *dev, *ssid, *pw); err != nil {
+			return err
+		}
+		fmt.Printf("Hotspot %q is on. Start Arcana with --lan so phones that join it can open the library.\n", *ssid)
+		return nil
+	}
+	return fmt.Errorf("unknown hotspot action %q", args[0])
 }

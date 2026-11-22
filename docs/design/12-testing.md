@@ -59,8 +59,12 @@ the kiwix-serve fetched by `scripts/fetch-kiwix.sh`):
    - read an article;
    - confirm the session has no token;
    - confirm a write is refused even with a stolen token;
-   - run the Playwright tripwire over eight views: any non-local request
-     or script error fails the test.
+   - (7b) remote administration: sign-in is refused before a password
+     exists, a wrong password is refused, the right one allows a settings
+     change, a host-only action is still refused, and sign-out ends the
+     session;
+   - (7c) run the Playwright tripwire over nine views, including Maps: any
+     non-local request or script error fails the test.
 8. **Restart the host.** Change a setting, then `kill -9` (no shutdown
    handlers). Assert that kiwix-serve exits by itself.
 9. **Reconnect the drive.** Move the library to a different path (a new

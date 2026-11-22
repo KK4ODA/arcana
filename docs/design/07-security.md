@@ -54,15 +54,52 @@
   to the host unless sharing is enabled. GPS sources only read; Arcana
   never sends position data.
 
-## Planned (Phase 4) remote administration
+## Remote administration (implemented in 0.4.0)
 
-- A password stored as an Argon2id hash in `user/settings.json`.
-- Login sets an `HttpOnly; SameSite=Strict` cookie scoped to the app
-  origin.
-- Admin endpoints accept loopback **or** an admin session plus the token.
-- Rate-limited login.
-- Optional local TLS.
-- Remote administration stays disabled until a password is set.
+- **Off until the host sets a password.** Only the host can set, change or
+  remove it. It is stored as an Argon2id hash (time 3, 64 MiB, 2 lanes,
+  16-byte salt; parameters stored with the hash) in
+  `user/admin-password.json`, so it travels with the drive.
+- **Sessions.** Signing in creates a random 256-bit session ID in an
+  `HttpOnly; SameSite=Strict` cookie (`Secure` over HTTPS) and a separate
+  per-session token that the page sends in `X-Arcana-Token`. Sessions live
+  in memory (2 h idle, 12 h absolute, 64 at most); a restart, a password
+  change or turning the feature off signs everyone out.
+- **Guessing.** Failed attempts are limited to 5 per address and 30 in
+  total per 15 minutes, on top of Argon2id's cost and a fixed delay.
+- **CSRF and the content origin.** Browsers send cookies to every port of
+  a host, so the content origin (port + 1) receives the session cookie: it
+  strips cookies before serving anything, mutations require the session
+  token (unreadable from another origin), and `Sec-Fetch-Site` must be
+  `same-origin`. The login endpoint requires a JSON body, which forces a
+  CORS preflight for any cross-origin attempt.
+- **Host-only actions.** A signed-in network administrator manages
+  downloads, catalog, removals and settings, but cannot list drives, run
+  transfers, apply program updates, change the password, or read the host
+  user's notes, history and documents.
+- **Transport.** Over plain HTTP the password crosses the network in clear
+  text; the sign-in dialog says so. Optional HTTPS (below) avoids this.
+
+## HTTPS, names and hotspot (implemented in 0.4.0)
+
+- **HTTPS on the same ports.** When enabled, each connection's first byte
+  decides: a TLS handshake is served with TLS, anything else as HTTP. The
+  host keeps using `http://127.0.0.1`, which browsers already treat as a
+  secure context, while phones can use `https://` (needed for browser
+  geolocation and service workers). Certificates are either self-signed
+  (ECDSA P-256, kept in `state/tls/`, renewed when an address is missing or
+  30 days before expiry; the Server view shows the SHA-256 fingerprint to
+  compare) or supplied by the user in `user/tls/`. TLS 1.2 minimum.
+- **mDNS.** A built-in responder answers only for its own name
+  (`arcana.local` by default) and its `_http._tcp` service, only while
+  sharing on the network, and probes for a conflicting name first
+  (renaming to `arcana-2.local` and so on).
+- **Hotspot.** On Linux with NetworkManager, the host can start and stop a
+  Wi-Fi access point. Arcana runs `nmcli` with a fixed argument list (no
+  shell), validates the network name and password, and needs no
+  administrator rights of its own; NetworkManager's policy decides. The
+  hotspot password is stored in `user/settings.json` in clear text because
+  it is shown to people joining (as a QR code to the host only).
 
 ## Residual risks of third-party content
 

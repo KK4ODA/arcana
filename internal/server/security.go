@@ -9,6 +9,8 @@ import (
 	"os"
 	"strings"
 	"sync"
+
+	"github.com/KK4ODA/arcana/internal/auth"
 )
 
 // accessPolicy decides who may do what.
@@ -20,11 +22,15 @@ import (
 //   - Every state-changing request must carry the per-process session token
 //     in a header. Only same-origin pages can read the token, so other web
 //     sites cannot forge requests (CSRF).
-//   - Administrative actions are accepted only from the local computer.
-//     Clients on the network get read-only access. (Password-authenticated
-//     remote administration is planned for Phase 4.)
+//   - Administrative actions are accepted from the local computer, and from
+//     network clients that signed in with the administration password (off
+//     by default). Other network clients get read-only access. Signed-in
+//     clients use a per-session token instead of the host token, and a few
+//     host-only actions stay unavailable to them.
 type accessPolicy struct {
 	token string
+	// remote returns the signed-in session of a network client, if any.
+	remote func(r *http.Request) *auth.Session
 
 	mu    sync.RWMutex
 	hosts map[string]bool
@@ -108,16 +114,43 @@ func (p *accessPolicy) guardMutations(next http.Handler) http.Handler {
 		switch r.Method {
 		case http.MethodGet, http.MethodHead, http.MethodOptions:
 		default:
-			if !isLocal(r) {
-				writeError(w, http.StatusForbidden, "This Arcana server is read-only for devices on the network. Make changes on the computer running Arcana.")
-				return
-			}
-			if !p.tokenOK(r) {
-				writeError(w, http.StatusForbidden, "Missing or invalid session token. Reload the page.")
-				return
-			}
+			// Other origins, including Arcana's own content origin on the
+			// neighbouring port (same site, different origin), are refused.
 			if site := r.Header.Get("Sec-Fetch-Site"); site != "" && site != "same-origin" && site != "none" {
 				writeError(w, http.StatusForbidden, "Cross-site request refused.")
+				return
+			}
+			if isLocal(r) {
+				if !p.tokenOK(r) {
+					writeError(w, http.StatusForbidden, "Missing or invalid session token. Reload the page.")
+					return
+				}
+				break
+			}
+			if r.URL.Path == "/api/auth/login" {
+				// Signing in needs no session. Requiring JSON forces a
+				// CORS preflight for any cross-origin attempt.
+				if !strings.HasPrefix(r.Header.Get("Content-Type"), "application/json") {
+					writeError(w, http.StatusUnsupportedMediaType, "JSON required.")
+					return
+				}
+				break
+			}
+			var sess *auth.Session
+			if p.remote != nil {
+				sess = p.remote(r)
+			}
+			if sess == nil {
+				writeError(w, http.StatusForbidden, "This Arcana server is read-only for devices on the network. Make changes on the computer running Arcana, or sign in as an administrator.")
+				return
+			}
+			if hostOnlyPath(r.URL.Path) {
+				writeError(w, http.StatusForbidden, "Available only on the computer running Arcana.")
+				return
+			}
+			got := r.Header.Get("X-Arcana-Token")
+			if len(got) != len(sess.CSRF) || subtle.ConstantTimeCompare([]byte(got), []byte(sess.CSRF)) != 1 {
+				writeError(w, http.StatusForbidden, "Missing or invalid session token. Reload the page.")
 				return
 			}
 		}
@@ -137,6 +170,15 @@ func localOnly(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+func isLoopbackHost(host string) bool {
+	host = strings.Trim(host, "[]")
+	if host == "localhost" {
+		return true
+	}
+	ip := net.ParseIP(host)
+	return ip != nil && ip.IsLoopback()
+}
+
 // appHeaders are sent with every response from the application origin.
 func appHeaders(contentPort int) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
@@ -149,13 +191,21 @@ func appHeaders(contentPort int) func(http.Handler) http.Handler {
 			if strings.Contains(host, ":") {
 				host = "[" + host + "]"
 			}
-			contentOrigin := "http://" + host + ":" + itoa(contentPort)
+			scheme := "http://"
+			if r.TLS != nil {
+				scheme = "https://"
+			}
+			contentOrigin := scheme + host + ":" + itoa(contentPort)
 			h.Set("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; worker-src 'self'; "+
 				"connect-src 'self'; frame-src "+contentOrigin+"; frame-ancestors 'none'; base-uri 'none'; form-action 'self'; object-src 'none'")
 			h.Set("X-Content-Type-Options", "nosniff")
 			h.Set("Referrer-Policy", "no-referrer")
 			h.Set("X-Frame-Options", "DENY")
-			h.Set("Cross-Origin-Opener-Policy", "same-origin")
+			// Browsers ignore (and warn about) COOP on plain-HTTP network
+			// addresses; send it where it takes effect.
+			if r.TLS != nil || isLoopbackHost(host) {
+				h.Set("Cross-Origin-Opener-Policy", "same-origin")
+			}
 			h.Set("Cross-Origin-Resource-Policy", "same-origin")
 			next.ServeHTTP(w, r)
 		})

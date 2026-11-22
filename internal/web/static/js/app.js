@@ -5,7 +5,7 @@ import { discoverView } from './views/discover.js';
 import { mapsView } from './views/maps.js';
 import { downloadsView } from './views/downloads.js';
 import { updatesView } from './views/updates.js';
-import { serverView } from './views/server.js';
+import { serverView, connectView } from './views/server.js';
 import { settingsView } from './views/settings.js';
 import { setupView } from './views/setup.js';
 import { readerView, documentView } from './views/reader.js';
@@ -60,7 +60,46 @@ function renderPills() {
     : pill('warn', 'Not ready offline', 'No browsable content installed yet, or the archive reader is not running.'));
   if (status.sharing.active) el.appendChild(pill('info', 'Sharing on network', status.sharing.urls.join(' ')));
   if (s.readOnly) el.appendChild(pill('warn', 'Read-only', s.readOnlyReason));
-  if (!s.local) el.appendChild(pill('info', 'Network client (read-only)', 'Changes can only be made on the computer running Arcana.'));
+  if (s.remoteAdmin) {
+    el.appendChild(pill('ok', 'Signed in as administrator', 'You can manage this library from this device.'));
+    el.appendChild(h('button', { class: 'link small', onclick: signOut }, 'Sign out'));
+  } else if (!s.local) {
+    el.appendChild(pill('info', 'Network client (read-only)', 'Changes can only be made on the computer running Arcana.'));
+    if (s.authEnabled) el.appendChild(h('button', { class: 'link small', onclick: signIn }, 'Sign in'));
+  }
+}
+
+async function signOut() {
+  try { await api.post('/api/auth/logout'); } catch (_) { /* ignore */ }
+  location.reload();
+}
+
+function signIn() {
+  const pw = h('input', { type: 'password', autocomplete: 'current-password', required: true, 'aria-label': 'Administrator password', style: 'width:100%' });
+  const msg = h('p', { class: 'small', role: 'alert' });
+  const dlg = h('dialog', { class: 'signin', 'aria-label': 'Sign in' });
+  const submit = async (ev) => {
+    ev.preventDefault();
+    try {
+      const r = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: pw.value }), cache: 'no-store' });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(d.error || r.statusText);
+      dlg.close();
+      location.reload();
+    } catch (e) { msg.textContent = e.message; pw.select(); }
+  };
+  dlg.append(
+    h('header', null, h('h2', null, 'Sign in to manage this library')),
+    h('form', { class: 'body', onsubmit: submit },
+      h('p', { class: 'small muted' }, location.protocol === 'https:' ? 'The connection is encrypted.'
+        : 'This connection is not encrypted; others on the network could see the password. Use the https:// address if the host offers one.'),
+      pw, msg,
+      h('div', { class: 'row', style: 'justify-content:flex-end' },
+        h('button', { type: 'button', onclick: () => dlg.close() }, 'Cancel'), h('button', { class: 'primary', type: 'submit' }, 'Sign in'))));
+  dlg.addEventListener('close', () => dlg.remove());
+  document.body.appendChild(dlg);
+  dlg.showModal();
+  pw.focus();
 }
 
 async function refreshStatus() {
@@ -90,6 +129,11 @@ async function route() {
   }
   if (r.name === 'read') {
     cleanup = await readerView(main, r.args[0], r.params);
+    return;
+  }
+  if (r.name === 'connect') {
+    renderTabs('server');
+    cleanup = await connectView(main);
     return;
   }
   if (r.name === 'doc') {

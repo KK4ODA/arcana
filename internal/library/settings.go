@@ -74,6 +74,18 @@ type ServerSettings struct {
 	// Port for the application UI and API (default 8470). Reference content
 	// is served on Port+1 to keep it in a separate browser origin.
 	Port int `json:"port"`
+	// MDNS advertises the library as <Name>.local while sharing.
+	MDNS bool `json:"mdns"`
+	// Name is the mDNS host label (default "arcana").
+	Name string `json:"name,omitempty"`
+	// TLS is "" (HTTP only), "self-signed" or "custom" (user/tls/cert.pem
+	// and key.pem). HTTPS is offered on the same ports as HTTP.
+	TLS string `json:"tls,omitempty"`
+	// HotspotSSID and HotspotPassword are used when Arcana starts a Wi-Fi
+	// hotspot (Linux with NetworkManager). The password is stored in clear
+	// text because it is shown to people joining.
+	HotspotSSID     string `json:"hotspotSsid,omitempty"`
+	HotspotPassword string `json:"hotspotPassword,omitempty"`
 }
 
 // CatalogSettings select which catalog providers are active.
@@ -108,7 +120,7 @@ type FeedSource struct {
 func DefaultSettings() Settings {
 	return Settings{
 		MaxConcurrentDownloads: 2,
-		Server:                 ServerSettings{Port: 8470},
+		Server:                 ServerSettings{Port: 8470, MDNS: true, Name: "arcana"},
 		Catalog: CatalogSettings{
 			KiwixEnabled:    true,
 			KiwixURL:        "https://library.kiwix.org",

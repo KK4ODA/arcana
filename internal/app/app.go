@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/KK4ODA/arcana/internal/appupdate"
+	"github.com/KK4ODA/arcana/internal/auth"
 	"github.com/KK4ODA/arcana/internal/catalog"
 	"github.com/KK4ODA/arcana/internal/content"
 	"github.com/KK4ODA/arcana/internal/docs"
@@ -57,7 +58,9 @@ type App struct {
 	reindex   chan struct{}
 	maps      *mapState
 	GPS       *gps.Manager
-	runCtx    context.Context
+	// Admin holds the optional remote-administration password.
+	Admin  *auth.Store
+	runCtx context.Context
 
 	opts         Options
 	refreshMu    sync.Mutex
@@ -112,6 +115,7 @@ func Open(root string, opts Options) (*App, error) {
 		return nil, err
 	}
 	a.openGPS()
+	a.Admin = auth.NewStore(lib.User())
 
 	ctx := context.Background()
 	// Sidecars are the source of truth for installed content; re-index on

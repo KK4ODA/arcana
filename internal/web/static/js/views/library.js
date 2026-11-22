@@ -127,7 +127,7 @@ export async function libraryView(main, params, ctx) {
         h('tbody', null, rows.map((r) => h('tr', null,
           h('td', { class: 'check' }, star(r)),
           h('td', { class: 'title-cell' },
-            r.openPath ? h('a', { href: `#/read/${encodeURIComponent(r.resourceId)}` }, h('b', null, r.title)) : h('b', null, r.title), ' ',
+            r.openPath ? h('a', { href: openHref(r) }, h('b', null, r.title)) : h('b', null, r.title), ' ',
             warningBadges(r.warnings), r.unverified ? h('span', { class: 'badge warn', title: 'The source published no checksum.' }, 'Unverified') : null,
             h('span', { class: 'sub' }, r.description)),
           h('td', { class: 'hide-sm small' }, CATEGORY_TITLES[r.category] || r.category),
@@ -136,7 +136,7 @@ export async function libraryView(main, params, ctx) {
           h('td', { class: 'right num' }, fmtBytes(r.size)),
           h('td', { class: 'hide-sm' }, licenseBadge(r.license)),
           h('td', { class: 'right' }, h('div', { class: 'row actions' },
-            r.openPath ? h('a', { class: 'button', href: `#/read/${encodeURIComponent(r.resourceId)}` }, 'Open') :
+            r.openPath ? h('a', { class: 'button', href: openHref(r) }, 'Open') :
               h('span', { class: 'small muted', title: 'The archive reader is not available.' }, 'Cannot open'),
             canChange ? h('button', { class: 'danger', onclick: () => remove(r) }, 'Remove') : null)),
         ))))));
@@ -255,6 +255,12 @@ export function noteEditor(note, onSaved, ref) {
     } catch (e) { toast(e.message); }
   } }, 'Save note');
   return h('div', { class: 'note-editor' }, title, text, h('div', { class: 'row' }, save));
+}
+
+// Maps open in the map view; everything else in the reader.
+function openHref(r) {
+  if (r.format === 'pmtiles') return `#/maps?set=${encodeURIComponent(r.resourceId)}`;
+  return `#/read/${encodeURIComponent(r.resourceId)}`;
 }
 
 function dashboard(st) {

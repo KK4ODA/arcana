@@ -18,3 +18,4 @@
 | [0014](0014-web-ui-without-framework-or-build-step.md) | Web UI without framework or build step | Accepted |
 | [0015](0015-tile-overzoom-micro-codec.md) | Derive missing tiles from ancestors with a small MVT codec | Accepted |
 | [0016](0016-gps-single-nmea-path.md) | One NMEA parsing path for every position source | Accepted |
+| [0017](0017-network-serving-features.md) | Remote administration, HTTPS on the same port, built-in mDNS | Accepted |

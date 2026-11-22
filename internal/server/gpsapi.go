@@ -15,24 +15,24 @@ import (
 )
 
 func (s *Server) registerGPS(mux *http.ServeMux) {
-	mux.HandleFunc("GET /api/gps", s.withApp(gpsVisible(s.handleGPSStatus)))
-	mux.HandleFunc("GET /api/gps/stream", s.withApp(gpsVisible(s.handleGPSStream)))
-	mux.HandleFunc("GET /api/gps/ports", localOnly(s.handleGPSPorts))
-	mux.HandleFunc("GET /api/gps/waypoints", s.withApp(gpsVisible(s.handleWaypoints)))
+	mux.HandleFunc("GET /api/gps", s.withApp(s.gpsVisible(s.handleGPSStatus)))
+	mux.HandleFunc("GET /api/gps/stream", s.withApp(s.gpsVisible(s.handleGPSStream)))
+	mux.HandleFunc("GET /api/gps/ports", s.adminOnly(s.handleGPSPorts))
+	mux.HandleFunc("GET /api/gps/waypoints", s.withApp(s.gpsVisible(s.handleWaypoints)))
 	mux.HandleFunc("POST /api/gps/waypoints", s.withApp(s.handleAddWaypoint))
 	mux.HandleFunc("DELETE /api/gps/waypoints/{id}", s.withApp(s.handleDeleteWaypoint))
-	mux.HandleFunc("GET /api/gps/tracks", s.withApp(gpsVisible(s.handleTracks)))
-	mux.HandleFunc("GET /api/gps/tracks/{name}", s.withApp(gpsVisible(s.handleTrack)))
+	mux.HandleFunc("GET /api/gps/tracks", s.withApp(s.gpsVisible(s.handleTracks)))
+	mux.HandleFunc("GET /api/gps/tracks/{name}", s.withApp(s.gpsVisible(s.handleTrack)))
 	mux.HandleFunc("DELETE /api/gps/tracks/{name}", s.withApp(s.handleDeleteTrack))
-	mux.HandleFunc("GET /api/gps/export", s.withApp(gpsVisible(s.handleGPXExport)))
+	mux.HandleFunc("GET /api/gps/export", s.withApp(s.gpsVisible(s.handleGPXExport)))
 	mux.HandleFunc("POST /api/gps/import", s.withApp(s.handleGPXImport))
 }
 
 // gpsVisible limits position data to the host computer unless the host
 // chose to share it with network clients.
-func gpsVisible(h func(http.ResponseWriter, *http.Request, *app.App)) func(http.ResponseWriter, *http.Request, *app.App) {
+func (s *Server) gpsVisible(h func(http.ResponseWriter, *http.Request, *app.App)) func(http.ResponseWriter, *http.Request, *app.App) {
 	return func(w http.ResponseWriter, r *http.Request, a *app.App) {
-		if !isLocal(r) && !a.Lib.Settings.Get().GPS.ShareWithClients {
+		if !s.isAdmin(r) && !a.Lib.Settings.Get().GPS.ShareWithClients {
 			writeError(w, http.StatusForbidden, "The host has not shared its position with network clients.")
 			return
 		}

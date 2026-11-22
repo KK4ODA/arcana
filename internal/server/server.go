@@ -24,14 +24,18 @@ import (
 	"time"
 
 	"github.com/KK4ODA/arcana/internal/app"
+	"github.com/KK4ODA/arcana/internal/auth"
 	"github.com/KK4ODA/arcana/internal/buildinfo"
 	"github.com/KK4ODA/arcana/internal/catalog"
 	"github.com/KK4ODA/arcana/internal/content"
 	"github.com/KK4ODA/arcana/internal/docs"
+	"github.com/KK4ODA/arcana/internal/hotspot"
 	"github.com/KK4ODA/arcana/internal/kiwix"
 	"github.com/KK4ODA/arcana/internal/library"
+	"github.com/KK4ODA/arcana/internal/mdns"
 	"github.com/KK4ODA/arcana/internal/storage"
 	"github.com/KK4ODA/arcana/internal/store"
+	"github.com/KK4ODA/arcana/internal/tlsutil"
 	"github.com/KK4ODA/arcana/internal/web"
 )
 
@@ -57,6 +61,10 @@ type Server struct {
 	mu  sync.RWMutex
 	app *app.App
 
+	sessions *auth.Sessions
+	limiter  *auth.Limiter
+	nw       netState
+
 	appSrv     *http.Server
 	contentSrv *http.Server
 	appPort    int
@@ -72,7 +80,11 @@ func New(a *app.App, cfg Config) *Server {
 	if cfg.Port <= 0 {
 		cfg.Port = 8470
 	}
-	return &Server{cfg: cfg, policy: newAccessPolicy(), log: cfg.Log, app: a}
+	s := &Server{cfg: cfg, policy: newAccessPolicy(), log: cfg.Log, app: a,
+		sessions: auth.NewSessions(), limiter: auth.NewLimiter(15*time.Minute, 5, 30)}
+	s.policy.remote = s.remoteSession
+	s.nw.hotspot = hotspot.New()
+	return s
 }
 
 func (s *Server) current() *app.App {
@@ -119,6 +131,13 @@ func (s *Server) Serve(ctx context.Context, la, lc net.Listener) error {
 	s.appSrv = &http.Server{Handler: s.appHandler(), ReadHeaderTimeout: 15 * time.Second, IdleTimeout: 120 * time.Second,
 		BaseContext: func(net.Listener) context.Context { return ctx }}
 	s.contentSrv = &http.Server{Handler: s.contentHandler(), ReadHeaderTimeout: 15 * time.Second, IdleTimeout: 120 * time.Second}
+	// HTTPS (when enabled) is offered on the same ports as HTTP.
+	s.nw.ctx = ctx
+	_ = s.applyTLS()
+	la = tlsutil.NewSniffer(la, s.tlsConfig)
+	lc = tlsutil.NewSniffer(lc, s.tlsConfig)
+	s.applyMDNS()
+	s.policy.refreshHosts(s.extraHosts())
 	errc := make(chan error, 2)
 	go func() { errc <- s.appSrv.Serve(la) }()
 	go func() { errc <- s.contentSrv.Serve(lc) }()
@@ -132,7 +151,7 @@ func (s *Server) Serve(ctx context.Context, la, lc net.Listener) error {
 			case <-ctx.Done():
 				return
 			case <-t.C:
-				s.policy.refreshHosts(nil)
+				s.policy.refreshHosts(s.extraHosts())
 			}
 		}
 	}()
@@ -185,8 +204,8 @@ func (s *Server) appHandler() http.Handler {
 	mux.HandleFunc("POST /api/downloads/{id}/{action}", s.withApp(s.handleJobAction))
 	mux.HandleFunc("DELETE /api/downloads/{id}", s.withApp(s.handleJobRemove))
 	mux.HandleFunc("GET /api/updates", s.withApp(s.handleUpdates))
-	mux.HandleFunc("GET /api/check", localOnly(s.withApp(s.handleCheck)))
-	mux.HandleFunc("GET /api/settings", localOnly(s.withApp(s.handleGetSettings)))
+	mux.HandleFunc("GET /api/check", s.adminOnly(s.withApp(s.handleCheck)))
+	mux.HandleFunc("GET /api/settings", s.adminOnly(s.withApp(s.handleGetSettings)))
 	mux.HandleFunc("PUT /api/settings", s.withApp(s.handlePutSettings))
 	mux.HandleFunc("GET /api/server", s.handleServerInfo)
 	mux.HandleFunc("GET /api/setup/volumes", localOnly(s.handleVolumes))
@@ -194,6 +213,8 @@ func (s *Server) appHandler() http.Handler {
 	s.registerPhase2(mux)
 	s.registerMaps(mux)
 	s.registerGPS(mux)
+	s.registerAuth(mux)
+	s.registerNetwork(mux)
 	mux.HandleFunc("GET /api/", func(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusNotFound, "unknown API endpoint")
 	})
@@ -235,6 +256,9 @@ func (s *Server) contentHandler() http.Handler {
 		}
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("Referrer-Policy", "no-referrer")
+		// Browsers send the app origin's cookies here too (cookies ignore
+		// ports); content never needs them.
+		r.Header.Del("Cookie")
 		mux.ServeHTTP(w, r)
 	})
 	return s.policy.guardHost(h)
@@ -327,6 +351,7 @@ func (s *Server) handleSession(w http.ResponseWriter, r *http.Request) {
 		"platform":    buildinfo.Platform(),
 		"local":       isLocal(r),
 		"admin":       isLocal(r),
+		"secure":      r.TLS != nil,
 		"setup":       a == nil,
 		"contentPort": s.content,
 	}
@@ -334,6 +359,13 @@ func (s *Server) handleSession(w http.ResponseWriter, r *http.Request) {
 	// read-only), and only same-origin scripts can read this response.
 	if isLocal(r) {
 		resp["token"] = s.policy.token
+	} else if sess := s.remoteSession(r); sess != nil {
+		resp["admin"] = true
+		resp["remoteAdmin"] = true
+		resp["token"] = sess.CSRF
+	}
+	if a != nil {
+		resp["authEnabled"] = a.Admin.Enabled()
 	}
 	if a != nil {
 		resp["readOnly"] = a.Lib.ReadOnly
@@ -728,6 +760,8 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *ap
 		UpdateURL                    *string               `json:"updateUrl"`
 		Feeds                        *[]library.FeedSource `json:"feeds"`
 		MapsEnabled                  *bool                 `json:"mapsEnabled"`
+		MDNS                         *bool                 `json:"mdns"`
+		MDNSName                     *string               `json:"mdnsName"`
 		GPS                          *library.GPSSettings  `json:"gps"`
 	}
 	if err := readJSON(r, &req); err != nil {
@@ -793,6 +827,16 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *ap
 		if req.MapsEnabled != nil {
 			st.Maps.Enabled = *req.MapsEnabled
 		}
+		if req.MDNS != nil {
+			st.Server.MDNS = *req.MDNS
+		}
+		if req.MDNSName != nil {
+			label := mdns.SanitizeLabel(*req.MDNSName)
+			if label == "" || label != strings.ToLower(strings.TrimSpace(*req.MDNSName)) {
+				return errors.New("the network name may use letters, digits and hyphens only")
+			}
+			st.Server.Name = label
+		}
 		if req.GPS != nil {
 			g := *req.GPS
 			switch g.Source {
@@ -821,6 +865,10 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *ap
 	a.Downloads.ApplySettings()
 	if req.GPS != nil {
 		a.ApplyGPSSettings()
+	}
+	if req.MDNS != nil || req.MDNSName != nil {
+		s.applyMDNS()
+		s.policy.refreshHosts(s.extraHosts())
 	}
 	writeJSON(w, 200, map[string]any{"settings": next, "restartRequired": req.ShareOnLAN != nil})
 }
@@ -885,6 +933,8 @@ func (s *Server) handleInit(w http.ResponseWriter, r *http.Request) {
 	s.mu.Lock()
 	s.app = a
 	s.mu.Unlock()
+	_ = s.applyTLS()
+	s.applyMDNS()
 	writeJSON(w, 200, map[string]string{"root": root})
 }
 

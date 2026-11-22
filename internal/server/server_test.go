@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -338,5 +339,199 @@ func TestArchivePagesReportLocationToReader(t *testing.T) {
 	rec = e.do(e.content, "GET", "/_arcana/frame.js", local, "127.0.0.1:18471", nil, nil)
 	if !strings.Contains(rec.Body.String(), "arcana:location") {
 		t.Fatal("frame script missing")
+	}
+}
+
+func TestRemoteAdministration(t *testing.T) {
+	e := newEnv(t)
+	host := "127.0.0.1:18470"
+	var sess map[string]any
+	json.Unmarshal(e.do(e.appH, "GET", "/api/session", local, host, nil, nil).Body.Bytes(), &sess)
+	hostToken := sess["token"].(string)
+	jsonHdr := func(tok string) map[string]string {
+		return map[string]string{"X-Arcana-Token": tok, "Content-Type": "application/json"}
+	}
+	login := func(remote, pw string) *httptest.ResponseRecorder {
+		return e.do(e.appH, "POST", "/api/auth/login", remote, host, map[string]string{"Content-Type": "application/json"},
+			strings.NewReader(`{"password":"`+pw+`"}`))
+	}
+
+	// Off by default.
+	if rec := login(lanClient, "anything at all"); rec.Code != 403 {
+		t.Fatalf("login while disabled: %d", rec.Code)
+	}
+	// Only the host can set the password, and a signed-in client cannot change it.
+	if rec := e.do(e.appH, "PUT", "/api/auth/password", lanClient, host, jsonHdr(hostToken), strings.NewReader(`{"password":"0123456789ab"}`)); rec.Code != 403 {
+		t.Fatalf("LAN set password: %d", rec.Code)
+	}
+	if rec := e.do(e.appH, "PUT", "/api/auth/password", local, host, jsonHdr(hostToken), strings.NewReader(`{"password":"short"}`)); rec.Code != 400 {
+		t.Fatalf("short password: %d", rec.Code)
+	}
+	if rec := e.do(e.appH, "PUT", "/api/auth/password", local, host, jsonHdr(hostToken), strings.NewReader(`{"password":"river stone lantern"}`)); rec.Code != 200 {
+		t.Fatalf("set password: %d %s", rec.Code, rec.Body.String())
+	}
+	// Wrong password, then a form post (no JSON), then the right one.
+	if rec := login(lanClient, "wrong password!"); rec.Code != 401 {
+		t.Fatalf("wrong password: %d", rec.Code)
+	}
+	if rec := e.do(e.appH, "POST", "/api/auth/login", lanClient, host, map[string]string{"Content-Type": "application/x-www-form-urlencoded"},
+		strings.NewReader("password=river+stone+lantern")); rec.Code != 415 {
+		t.Fatalf("form login: %d", rec.Code)
+	}
+	rec := login(lanClient, "river stone lantern")
+	if rec.Code != 200 {
+		t.Fatalf("login: %d %s", rec.Code, rec.Body.String())
+	}
+	var cookie *http.Cookie
+	for _, c := range rec.Result().Cookies() {
+		if c.Name == sessionCookie {
+			cookie = c
+		}
+	}
+	if cookie == nil || !cookie.HttpOnly || cookie.SameSite != http.SameSiteStrictMode {
+		t.Fatalf("cookie %+v", cookie)
+	}
+	var lr struct {
+		Token string `json:"token"`
+	}
+	json.Unmarshal(rec.Body.Bytes(), &lr)
+	withCookie := func(h map[string]string) map[string]string {
+		if h == nil {
+			h = map[string]string{}
+		}
+		h["Cookie"] = sessionCookie + "=" + cookie.Value
+		return h
+	}
+	json.Unmarshal(e.do(e.appH, "GET", "/api/session", lanClient, host, withCookie(nil), nil).Body.Bytes(), &sess)
+	if sess["admin"] != true || sess["local"] != false || sess["token"] != lr.Token {
+		t.Fatalf("signed-in session %v", sess)
+	}
+	cases := []struct {
+		name, method, url string
+		hdr               map[string]string
+		want              int
+	}{
+		{"admin reads settings", "GET", "/api/settings", withCookie(nil), 200},
+		{"admin changes settings", "PUT", "/api/settings", withCookie(jsonHdr(lr.Token)), 200},
+		{"session token required", "PUT", "/api/settings", withCookie(jsonHdr("")), 403},
+		{"host token is not a session token", "PUT", "/api/settings", withCookie(jsonHdr(hostToken)), 403},
+		{"cross-site refused", "PUT", "/api/settings", withCookie(map[string]string{"X-Arcana-Token": lr.Token, "Sec-Fetch-Site": "same-site"}), 403},
+		{"host-only: transfer", "POST", "/api/transfer/export", withCookie(jsonHdr(lr.Token)), 403},
+		{"host-only: password", "DELETE", "/api/auth/password", withCookie(jsonHdr(lr.Token)), 403},
+		{"host-only: drives", "GET", "/api/setup/volumes", withCookie(nil), 403},
+		{"host-only: notes", "GET", "/api/user/notes", withCookie(nil), 403},
+		{"forged cookie", "PUT", "/api/settings", map[string]string{"Cookie": sessionCookie + "=" + strings.Repeat("a", 64), "X-Arcana-Token": lr.Token}, 403},
+	}
+	for _, c := range cases {
+		body := strings.NewReader(`{"maxConcurrentDownloads":2}`)
+		if got := e.do(e.appH, c.method, c.url, lanClient, host, c.hdr, body).Code; got != c.want {
+			t.Errorf("%s: got %d want %d", c.name, got, c.want)
+		}
+	}
+	// Signing out ends the session.
+	e.do(e.appH, "POST", "/api/auth/logout", lanClient, host, withCookie(jsonHdr(lr.Token)), nil)
+	if got := e.do(e.appH, "GET", "/api/settings", lanClient, host, withCookie(nil), nil).Code; got != 403 {
+		t.Fatalf("after logout: %d", got)
+	}
+	// Repeated failures are throttled.
+	other := "192.168.1.77:4000"
+	codes := []int{}
+	for i := 0; i < 6; i++ {
+		codes = append(codes, login(other, "guess number x").Code)
+	}
+	if codes[4] != 401 || codes[5] != 429 {
+		t.Fatalf("throttling: %v", codes)
+	}
+	// Changing the password signs everyone out.
+	rec = login(lanClient, "river stone lantern")
+	for _, c := range rec.Result().Cookies() {
+		if c.Name == sessionCookie {
+			cookie = c
+		}
+	}
+	e.do(e.appH, "PUT", "/api/auth/password", local, host, jsonHdr(hostToken), strings.NewReader(`{"password":"a different phrase"}`))
+	if got := e.do(e.appH, "GET", "/api/settings", lanClient, host, withCookie(nil), nil).Code; got != 403 {
+		t.Fatalf("session survived a password change: %d", got)
+	}
+}
+
+func TestNetworkFeatures(t *testing.T) {
+	e := newEnv(t)
+	host := "127.0.0.1:18470"
+	var sess map[string]any
+	json.Unmarshal(e.do(e.appH, "GET", "/api/session", local, host, nil, nil).Body.Bytes(), &sess)
+	tok := sess["token"].(string)
+	hdr := map[string]string{"X-Arcana-Token": tok, "Content-Type": "application/json"}
+
+	// QR codes only for this server's own addresses.
+	rec := e.do(e.appH, "GET", "/api/server/qr.svg?url="+url.QueryEscape("http://127.0.0.1:18470/"), lanClient, host, nil, nil)
+	if rec.Code != 200 || !strings.HasPrefix(rec.Body.String(), "<svg") || rec.Header().Get("Content-Type") != "image/svg+xml" {
+		t.Fatalf("qr: %d %s", rec.Code, rec.Body.String()[:40])
+	}
+	for _, bad := range []string{"https://evil.example/", "http://127.0.0.1:9999/", "javascript:alert(1)", "http://user@127.0.0.1:18470/"} {
+		if rec := e.do(e.appH, "GET", "/api/server/qr.svg?url="+url.QueryEscape(bad), local, host, nil, nil); rec.Code != 400 {
+			t.Errorf("qr for %s: %d", bad, rec.Code)
+		}
+	}
+	// Wi-Fi credentials are not shown to anonymous network clients.
+	if rec := e.do(e.appH, "GET", "/api/server/wifi-qr.svg", lanClient, host, nil, nil); rec.Code != 403 {
+		t.Fatalf("wifi qr for LAN: %d", rec.Code)
+	}
+	if got := wifiQRText(`My;Net`, `p:ss"w`); got != `WIFI:T:WPA;S:My\;Net;P:p\:ss\"w;;` {
+		t.Fatalf("wifi text %q", got)
+	}
+
+	// HTTPS: self-signed certificate created on demand.
+	rec = e.do(e.appH, "PUT", "/api/server/tls", local, host, hdr, strings.NewReader(`{"mode":"self-signed"}`))
+	if rec.Code != 200 {
+		t.Fatalf("tls: %d %s", rec.Code, rec.Body.String())
+	}
+	var info struct {
+		TLS struct {
+			Enabled     bool `json:"enabled"`
+			Certificate struct {
+				Fingerprint string   `json:"fingerprint"`
+				Names       []string `json:"names"`
+			} `json:"certificate"`
+		} `json:"tls"`
+	}
+	json.Unmarshal(rec.Body.Bytes(), &info)
+	if !info.TLS.Enabled || len(info.TLS.Certificate.Fingerprint) != 95 || e.srv.tlsConfig() == nil {
+		t.Fatalf("tls info %s", rec.Body.String())
+	}
+	// A custom certificate that does not exist is refused and the working
+	// mode is kept.
+	rec = e.do(e.appH, "PUT", "/api/server/tls", local, host, hdr, strings.NewReader(`{"mode":"custom"}`))
+	if rec.Code != 400 || e.app.Lib.Settings.Get().Server.TLS != "self-signed" || e.srv.tlsConfig() == nil {
+		t.Fatalf("custom without files: %d %s", rec.Code, rec.Body.String())
+	}
+	if rec := e.do(e.appH, "PUT", "/api/server/tls", lanClient, host, hdr, strings.NewReader(`{"mode":""}`)); rec.Code != 403 {
+		t.Fatalf("LAN changed TLS: %d", rec.Code)
+	}
+	e.do(e.appH, "PUT", "/api/server/tls", local, host, hdr, strings.NewReader(`{"mode":""}`))
+	if e.srv.tlsConfig() != nil {
+		t.Fatal("TLS still on")
+	}
+
+	// Hotspot control is host-only.
+	if rec := e.do(e.appH, "GET", "/api/server/hotspot", lanClient, host, nil, nil); rec.Code != 403 {
+		t.Fatalf("LAN hotspot status: %d", rec.Code)
+	}
+	if rec := e.do(e.appH, "GET", "/api/server/hotspot", local, host, nil, nil); rec.Code != 200 {
+		t.Fatalf("hotspot status: %d", rec.Code)
+	}
+	if rec := e.do(e.appH, "POST", "/api/server/hotspot", local, host, hdr, strings.NewReader(`{"action":"start","ssid":"X","password":"short"}`)); rec.Code != 400 {
+		t.Fatalf("invalid hotspot accepted: %d", rec.Code)
+	}
+
+	// mDNS name validation.
+	if rec := e.do(e.appH, "PUT", "/api/settings", local, host, hdr, strings.NewReader(`{"mdnsName":"bad name!"}`)); rec.Code != 400 {
+		t.Fatalf("bad mdns name: %d", rec.Code)
+	}
+	if rec := e.do(e.appH, "PUT", "/api/settings", local, host, hdr, strings.NewReader(`{"mdnsName":"field-kit"}`)); rec.Code != 200 {
+		t.Fatalf("mdns name: %d %s", rec.Code, rec.Body.String())
+	}
+	if e.srv.mdnsHost() != "field-kit.local" || !e.srv.policy.hostAllowed("field-kit.local:18470") {
+		t.Fatalf("mdns host %q not allowed", e.srv.mdnsHost())
 	}
 }

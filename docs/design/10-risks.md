@@ -55,6 +55,9 @@ the maintainers.
 | S6 | Compromised update channel (Phase 2) | 2 | 3 | 6 | Ed25519-signed manifests, offline keys, staged swap with rollback | Planned |
 | S7 | Someone on the LAN injects false positions through the UDP listener | 2 | 2 | 4 | UDP is off unless chosen; checksums required; the help text says it listens on every interface; sender allow-list not yet implemented | Open |
 | S8 | Position disclosed to other people on the network | 2 | 2 | 4 | Position, waypoints and tracks are host-only unless "Share position" is on (acceptance-tested); never transmitted | Mitigated |
+| S9 | Administrator password sniffed on an open network | 2 | 3 | 6 | Remote administration is off by default; sign-in dialog warns on HTTP; optional HTTPS on the same port; sessions end on restart or password change | Mitigated (user choice) |
+| S10 | Password guessing from the network | 2 | 3 | 6 | Argon2id, 5 failures per address and 30 overall per 15 minutes, fixed delay, events logged | Mitigated |
+| S11 | Users accept a forged self-signed certificate | 1 | 2 | 2 | Fingerprint shown in the Server view to compare on first visit | Accepted |
 | S7 | kiwix-serve vulnerability exposed on LAN | 2 | 2 | 4 | kiwix-serve binds loopback only; reached only through Arcana's read-only proxy; pinned and updated with releases | Mitigated |
 
 ## Performance

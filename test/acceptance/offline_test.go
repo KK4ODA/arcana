@@ -21,6 +21,7 @@ import (
 	"math"
 	"net"
 	"net/http"
+	"net/http/cookiejar"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -177,6 +178,8 @@ type instance struct {
 	port int
 	log  string
 	tok  string
+	// lanTok is the session token of a signed-in network client.
+	lanTok string
 }
 
 func freePort(t *testing.T) int {
@@ -595,7 +598,59 @@ func TestOfflineAcceptance(t *testing.T) {
 		resp.Body.Close()
 	})
 
-	t.Run("07b-interface-makes-no-external-requests", func(t *testing.T) {
+	t.Run("07b-remote-administration", func(t *testing.T) {
+		jar, _ := cookiejar.New(nil)
+		dialer := &net.Dialer{LocalAddr: &net.TCPAddr{IP: net.ParseIP(lanClientIP)}}
+		client := &http.Client{Jar: jar, Transport: &http.Transport{DialContext: dialer.DialContext}}
+		base := fmt.Sprintf("http://%s:%d", lanClientIP, in.port)
+		post := func(method, p, body, tok string) int {
+			req, _ := http.NewRequest(method, base+p, strings.NewReader(body))
+			req.Header.Set("Content-Type", "application/json")
+			if tok != "" {
+				req.Header.Set("X-Arcana-Token", tok)
+			}
+			resp, err := client.Do(req)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer resp.Body.Close()
+			if p == "/api/auth/login" && resp.StatusCode == 200 {
+				var lr struct {
+					Token string `json:"token"`
+				}
+				json.NewDecoder(resp.Body).Decode(&lr)
+				in.lanTok = lr.Token
+			}
+			return resp.StatusCode
+		}
+		if code := post("POST", "/api/auth/login", `{"password":"correct horse battery"}`, ""); code != 403 {
+			t.Fatalf("login before a password exists: %d", code)
+		}
+		if code, body := in.send("PUT", "/api/auth/password", `{"password":"correct horse battery"}`); code != 200 {
+			t.Fatalf("set password: %d %s", code, body)
+		}
+		if code := post("POST", "/api/auth/login", `{"password":"wrong guess here"}`, ""); code != 401 {
+			t.Fatalf("wrong password: %d", code)
+		}
+		if code := post("POST", "/api/auth/login", `{"password":"correct horse battery"}`, ""); code != 200 {
+			t.Fatalf("login: %d", code)
+		}
+		if code := post("PUT", "/api/settings", `{"maxConcurrentDownloads":3}`, in.lanTok); code != 200 {
+			t.Fatalf("signed-in change: %d", code)
+		}
+		if code := post("POST", "/api/transfer/export", `{}`, in.lanTok); code != 403 {
+			t.Fatalf("host-only action from the network: %d", code)
+		}
+		post("POST", "/api/auth/logout", `{}`, in.lanTok)
+		if code := post("PUT", "/api/settings", `{"maxConcurrentDownloads":2}`, in.lanTok); code != 403 {
+			t.Fatalf("change after sign-out: %d", code)
+		}
+		if code, _ := in.send("DELETE", "/api/auth/password", ``); code != 200 {
+			t.Fatal("could not turn remote administration off")
+		}
+	})
+
+	t.Run("07c-interface-makes-no-external-requests", func(t *testing.T) {
 		node, err := exec.LookPath("node")
 		if err != nil {
 			t.Skip("node not installed")

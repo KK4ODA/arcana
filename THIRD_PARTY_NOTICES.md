@@ -22,6 +22,8 @@ review"); the list here matches `go.mod` at the time of writing.
 | github.com/ledongthuc/pdf (PDF text extraction; derived from rsc.io/pdf) | v0.0.0-20261020125853 | BSD-3-Clause |
 | github.com/adrianmo/go-nmea (NMEA 0183 parser) | v1.11.0 | MIT |
 | go.bug.st/serial (serial ports) | v1.8.0 | BSD-3-Clause |
+| golang.org/x/crypto (Argon2id) | v0.59.0 | BSD-3-Clause |
+| rsc.io/qr (QR codes) | v0.2.0 | BSD-3-Clause |
 | Go standard library | 1.26 | BSD-3-Clause |
 
 The full license texts are in each module's source, available from

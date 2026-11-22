@@ -5,6 +5,7 @@ import (
 	"net"
 	"net/http"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/KK4ODA/arcana/internal/app"
@@ -138,7 +139,7 @@ func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request, a *app.App
 		"downloads":    map[string]any{"active": active, "failed": failed, "waiting": waiting},
 		"updates":      map[string]any{"available": len(updates), "highPriority": high, "lastCatalogRefresh": lastCheck},
 		"sharing":      s.sharingInfo(r),
-		"gps":          gpsSummary(r, a),
+		"gps":          s.gpsSummary(r, a),
 		"maps":         mapSummary(a),
 		"attention":    att,
 		"serverUptime": int64(time.Since(s.startedAt).Seconds()),
@@ -154,15 +155,25 @@ func rootFor(r *http.Request, a *app.App) string {
 }
 
 func (s *Server) sharingInfo(r *http.Request) map[string]any {
-	urls := []string{}
+	urls, secure := []string{}, []string{}
+	tlsOn := s.tlsConfig() != nil
 	if s.cfg.ShareOnLAN {
+		if s.mdnsActive() {
+			urls = append(urls, fmt.Sprintf("http://%s:%d/", s.mdnsHost(), s.appPort))
+		}
 		for _, ip := range lanAddresses() {
 			urls = append(urls, fmt.Sprintf("http://%s:%d/", ip, s.appPort))
+		}
+		if tlsOn {
+			for _, u := range urls {
+				secure = append(secure, "https://"+strings.TrimPrefix(u, "http://"))
+			}
 		}
 	}
 	return map[string]any{
 		"active":      s.cfg.ShareOnLAN,
 		"urls":        urls,
+		"secureUrls":  secure,
 		"appPort":     s.appPort,
 		"contentPort": s.content,
 		"localUrl":    fmt.Sprintf("http://127.0.0.1:%d/", s.appPort),
@@ -171,9 +182,16 @@ func (s *Server) sharingInfo(r *http.Request) map[string]any {
 
 func (s *Server) handleServerInfo(w http.ResponseWriter, r *http.Request) {
 	info := s.sharingInfo(r)
-	info["note"] = "Devices on the network get read-only access. Discovery by name (arcana.local), QR codes and Wi-Fi hotspot control are planned for Phase 4."
+	for k, v := range s.networkInfo(r) {
+		info[k] = v
+	}
 	if a := s.current(); a != nil {
-		info["configuredShareOnLan"] = a.Lib.Settings.Get().Server.ShareOnLAN
+		set := a.Lib.Settings.Get().Server
+		info["configuredShareOnLan"] = set.ShareOnLAN
+		info["mdnsEnabled"] = set.MDNS
+		info["mdnsName"] = set.Name
+		info["tlsMode"] = set.TLS
+		info["remoteAdmin"] = a.Admin.Enabled()
 	}
 	writeJSON(w, 200, info)
 }
@@ -207,8 +225,8 @@ func lanAddresses() []string {
 }
 
 // gpsSummary is the dashboard's position readout.
-func gpsSummary(r *http.Request, a *app.App) map[string]any {
-	if !isLocal(r) && !a.Lib.Settings.Get().GPS.ShareWithClients {
+func (s *Server) gpsSummary(r *http.Request, a *app.App) map[string]any {
+	if !s.isAdmin(r) && !a.Lib.Settings.Get().GPS.ShareWithClients {
 		return map[string]any{"state": "private", "label": "Not shared", "sub": "the host keeps its position private"}
 	}
 	st := a.GPS.Status()

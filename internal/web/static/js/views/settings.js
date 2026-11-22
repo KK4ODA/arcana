@@ -165,9 +165,10 @@ export async function settingsView(main) {
   const tp = tasksPanel();
   main.appendChild(tp.el);
 
-  main.appendChild(transferPanel(lib.resources, ro, tp));
+  // Transfers and program updates touch the host's files: host only.
+  if (s.local) main.appendChild(transferPanel(lib.resources, ro, tp));
   main.appendChild(integrityPanel(tp));
-  main.appendChild(await updatesPanel(s, ro, updateURL, tp));
+  if (s.local) main.appendChild(await updatesPanel(s, ro, updateURL, tp));
 
   main.appendChild(h('section', { class: 'panel' },
     h('header', null, h('h2', null, 'About this library')),

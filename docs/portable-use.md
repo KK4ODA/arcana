@@ -53,7 +53,20 @@ The release binaries are not yet code-signed.
 - The Server tab lists the addresses that other devices on the same Wi-Fi
   or Ethernet network can open, e.g. `http://192.168.1.20:8470/`. The
   operating system may ask you to allow incoming connections.
-- Network devices can browse and search but **cannot change anything**.
+- Network devices can browse and search but **cannot change anything**,
+  unless you turn on *remote administration* in the Server view and give
+  them the password. They then sign in from the top bar.
+- The Server view shows a **QR code** for each address and a printable
+  **connection card**. Phones and computers can also type
+  `http://arcana.local:8470/` (some Android versions cannot; use the code).
+- **HTTPS** (Server view) is offered on the same port. Phones then show a
+  certificate warning the first time; compare the fingerprint in the
+  Server view before accepting. With HTTPS, a phone can share its own
+  location with the map.
+- **No router?** On Linux with NetworkManager, the Server view (or
+  `arcana hotspot start --ssid Arcana --password ...`) turns this computer's
+  Wi-Fi into a hotspot, with a QR code to join it. On Windows, use
+  *Settings → Network & internet → Mobile hotspot*.
 - Android may send traffic over mobile data when the Wi-Fi network has no
   internet. If the page does not load, choose "stay connected" when the
   phone asks, or turn off mobile data. VPNs can also block local

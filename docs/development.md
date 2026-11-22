@@ -43,6 +43,10 @@ internal/store/        SQLite index
 internal/fsutil/       atomic writes, safe paths, OS locks
 internal/maps/         PMTiles reader/writer, region extraction, overzoom, gazetteer, maps provider
 internal/gps/          NMEA tracker, position sources, simulator, tracks, waypoints, GPX
+internal/auth/         remote-administration password (Argon2id), sessions, sign-in throttling
+internal/mdns/         mDNS responder and DNS-SD advertisement
+internal/tlsutil/      self-signed and custom certificates, HTTP/HTTPS on one port
+internal/hotspot/      Wi-Fi hotspot through NetworkManager (Linux)
 internal/web/static/   embedded UI (ES modules, CSS)
 packaging/             launcher and first-run readme for release bundles
 scripts/               fetch-kiwix.sh, package.sh
@@ -57,9 +61,11 @@ docs/                  design package, ADRs, specs, guides
 ## HTTP API (internal; may change)
 
 The UI's API lives under `/api/` on the application origin. GET requests
-are open to local and LAN clients (except settings, drive list and
-integrity checks, which are local-only). Other methods require the
-`X-Arcana-Token` header from `GET /api/session` and a loopback client. The
+are open to local and LAN clients (except settings and integrity checks,
+which need an administrator, and drives, file paths and private notes,
+which are host-only). Other methods require the `X-Arcana-Token` header
+from `GET /api/session`, and either a loopback client or a network client
+signed in as administrator (for whom host-only routes stay closed). The
 versioned integration API for other programs is designed in
 docs/design/14-radio-and-integrations.md.
 
@@ -95,6 +101,11 @@ docs/design/14-radio-and-integrations.md.
 | `GET /maps/fonts/{fontstack}/{range}.pbf` | Map label glyphs (empty set for ranges not bundled) |
 | `GET /api/maps`, `GET /api/maps/search?q=` | Installed map sets and indexing progress; offline place search |
 | `POST /api/maps/plan`, `POST /api/maps/areas` | Measure / queue a custom area (`{name, bbox:[w,s,e,n], maxZoom}`; contacts the map source) |
+| `GET /api/auth`, `POST /api/auth/login`, `POST /api/auth/logout` | Remote administration status; sign in (JSON `{password}`, sets the session cookie, returns the session token); sign out |
+| `PUT/DELETE /api/auth/password` | Set or remove the administration password (host only) |
+| `GET /api/server/qr.svg?url=`, `GET /api/server/wifi-qr.svg` | QR codes for this server's own addresses; for joining the hotspot (administrators) |
+| `PUT /api/server/tls` | HTTPS mode: `""`, `self-signed` or `custom` (host only) |
+| `GET/POST /api/server/hotspot` | Hotspot status; `{action: start/stop, ssid, password, device}` (host only) |
 | `GET /api/gps`, `GET /api/gps/stream` | Position status; server-sent events (host only unless sharing is on) |
 | `GET /api/gps/ports` | Serial ports (host only) |
 | `GET/POST /api/gps/waypoints`, `DELETE /api/gps/waypoints/{id}` | Waypoints |

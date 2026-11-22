@@ -3,7 +3,31 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
-## Unreleased — 0.3.0 (Phase 3: offline maps and GPS)
+## Unreleased — 0.4.0 (Phase 4: network serving)
+
+### Added
+- **Remote administration** (off by default): the host sets a password in
+  the Server view; people on the network sign in to manage downloads,
+  catalog and settings. Drives, transfers, program updates, the password
+  and the host's private notes stay host-only. Argon2id password hash,
+  HttpOnly cookies with a per-session token, throttled sign-in.
+- **Name on the network:** a built-in mDNS responder advertises
+  `http://arcana.local:8470/` (configurable; renamed automatically if taken)
+  and a `_http._tcp` service while sharing.
+- **QR codes** for every network address in the Server view and a printable
+  **connection card** (`#/connect`).
+- **Optional HTTPS** on the same ports as HTTP, with a self-signed
+  certificate (fingerprint shown) or your own in `user/tls/`. Phones get a
+  secure context, so they can share their own location with the map.
+- **Wi-Fi hotspot** control on Linux with NetworkManager (Server view and
+  `arcana hotspot start|stop|status`), with a QR code to join it.
+- Acceptance step 7b covers remote administration from a LAN address.
+
+### Changed
+- Opening a map from the Library goes to the Maps view, centred on it.
+- Leaving the Maps view while updates are arriving no longer raises errors.
+
+## 0.3.0 (Phase 3: offline maps and GPS)
 
 ### Added
 - **Maps** view with offline vector maps rendered in the browser by

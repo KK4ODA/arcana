@@ -100,7 +100,8 @@ const ZOOM_FOR_KIND = { country: 5, region: 7, macroregion: 7, county: 9, locali
 
 // ---------------------------------------------------------------- view
 
-export async function mapsView(main) {
+export async function mapsView(main, params) {
+  const focusSet = params && params.get('set');
   const s = getSession();
   const canChange = s.admin && !s.readOnly;
   let map = null;
@@ -170,10 +171,12 @@ export async function mapsView(main) {
     try { ml = await loadMapLibre(); } catch (e) { fill(mapEl, h('div', { class: 'banner err' }, e.message)); }
     if (ml) {
       const fl = flavor();
-      const start = usable.reduce((a, b) => ((b.bounds[2] - b.bounds[0]) * (b.bounds[3] - b.bounds[1]) <
+      let start = usable.reduce((a, b) => ((b.bounds[2] - b.bounds[0]) * (b.bounds[3] - b.bounds[1]) <
         (a.bounds[2] - a.bounds[0]) * (a.bounds[3] - a.bounds[1]) ? b : a));
       let saved = null;
       try { saved = JSON.parse(sessionStorage.getItem('arcana-map-view') || 'null'); } catch (_) { /* unavailable */ }
+      const focus = focusSet && usable.find((x) => x.resourceId === focusSet);
+      if (focus) { start = focus; saved = null; }
       map = new ml.Map({
         container: mapEl,
         style: await buildStyle(fl, ms.maxZoom),
@@ -187,20 +190,21 @@ export async function mapsView(main) {
       map.addControl(new ml.NavigationControl({ visualizePitch: false }), 'top-right');
       map.addControl(new ml.ScaleControl({ unit: 'metric' }), 'bottom-left');
       map.on('style.load', addOverlays);
-      map.on('moveend', () => {
-        try { sessionStorage.setItem('arcana-map-view', JSON.stringify({ center: map.getCenter().toArray(), zoom: map.getZoom() })); } catch (_) { /* unavailable */ }
+      map.on('moveend', (ev) => {
+        const m = ev.target;
+        try { sessionStorage.setItem('arcana-map-view', JSON.stringify({ center: m.getCenter().toArray(), zoom: m.getZoom() })); } catch (_) { /* unavailable */ }
       });
       map.on('dragstart', () => { if (follow) { follow = false; renderPosition(); } });
       map.on('click', (ev) => showPointPopup(ml, ev.lngLat));
       const onTheme = async () => {
-        const next = flavor();
-        map.setStyle(await buildStyle(next, ms.maxZoom));
+        const style = await buildStyle(flavor(), ms.maxZoom);
+        if (map) map.setStyle(style);
       };
       const mq = matchMedia('(prefers-color-scheme: dark)');
       mq.addEventListener('change', onTheme);
       window.addEventListener('arcana-theme', onTheme);
       disposers.push(() => { mq.removeEventListener('change', onTheme); window.removeEventListener('arcana-theme', onTheme); });
-      disposers.push(() => map.remove());
+      disposers.push(() => { const m = map; map = null; m.remove(); });
     }
   } else {
     fill(mapEl, h('div', { class: 'map-empty' },
@@ -212,7 +216,7 @@ export async function mapsView(main) {
   renderSets();
 
   function addOverlays() {
-    if (!map) return;
+    if (!map || !map.style) return;
     const surface = cssVar('--surface') || '#fff';
     const text = cssVar('--text') || '#111';
     const empty = { type: 'FeatureCollection', features: [] };
@@ -240,7 +244,7 @@ export async function mapsView(main) {
   }
 
   function setData(id, data) {
-    const src = map && map.getSource(id);
+    const src = map && map.style && map.getSource(id);
     if (src) src.setData(data);
   }
 
@@ -332,13 +336,26 @@ export async function mapsView(main) {
     if (follow && g.fix && map) map.easeTo({ center: [g.fix.lon, g.fix.lat], duration: 400 });
   }
 
+  // The position, waypoints and tracks are private to the host unless it
+  // shares them; the dashboard status says which, so nothing is requested
+  // that would be refused.
+  let gpsPrivate = false;
   try {
-    onGPS(await api.get('/api/gps'));
-    es = new EventSource('/api/gps/stream');
-    es.onmessage = (ev) => { try { onGPS(JSON.parse(ev.data)); } catch (_) { /* ignore */ } };
-    disposers.push(() => es.close());
-  } catch (e) {
+    const st = await api.get('/api/status');
+    gpsPrivate = st.gps && st.gps.state === 'private';
+  } catch (_) { /* assume visible */ }
+  if (gpsPrivate) {
     onGPS({ private: true });
+  } else {
+    try {
+      onGPS(await api.get('/api/gps'));
+      es = new EventSource('/api/gps/stream');
+      es.onmessage = (ev) => { try { onGPS(JSON.parse(ev.data)); } catch (_) { /* ignore */ } };
+      disposers.push(() => es.close());
+    } catch (e) {
+      gpsPrivate = true;
+      onGPS({ private: true });
+    }
   }
 
   // ------------------------------------------------------------ waypoints
@@ -492,8 +509,13 @@ export async function mapsView(main) {
 
   renderPosition();
   renderArea();
-  loadWaypoints();
-  loadTracks();
+  if (gpsPrivate) {
+    fill(wptBox, h('p', { class: 'small muted' }, 'Not shared by the host.'));
+    fill(trkBox, h('p', { class: 'small muted' }, 'Not shared by the host.'));
+  } else {
+    loadWaypoints();
+    loadTracks();
+  }
 
   // Keep the installed-map list current while place names are indexed.
   const poll = setInterval(async () => {
@@ -503,7 +525,10 @@ export async function mapsView(main) {
         const reload = next.sets.length !== ms.sets.length;
         ms = next;
         renderSets();
-        if (reload && map) map.setStyle(await buildStyle(flavor(), ms.maxZoom));
+        if (reload && map) {
+          const style = await buildStyle(flavor(), ms.maxZoom);
+          if (map) map.setStyle(style);
+        }
       }
     } catch (_) { /* ignore */ }
   }, 5000);
