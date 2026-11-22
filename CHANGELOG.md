@@ -28,8 +28,36 @@ separately.
   and captive portal.
 - **Integration API** for programs such as RadioPost and Aether HF, and
   copying between Arcana libraries on a network.
+- **One-click updates:** Arcana looks for a new version once a day while
+  online and installs it, verified against the project's signature, with
+  one click.
 
-### Added in this milestone (Phase 6: integration and peer sync)
+### Added for this release
+- **Application updates in one click.** Once a day, starting two minutes
+  after Arcana starts, Arcana checks the project's signed `release.json`
+  (on by default; *Settings → Application updates* has the switch and
+  *Check now*). A banner shows the new version and what is new; *Update
+  now* downloads it, verifies the signature and hashes, installs it and
+  restarts Arcana on the same port, and the page reloads into the new
+  version. The previous version is kept for *Roll back*. The last check is
+  kept on the drive, so the notice also appears offline. Copies that cannot
+  replace themselves (the appliance service, copies outside the library)
+  say how to update instead. This check is the only network request Arcana
+  makes without being asked.
+- **Signed releases.** The programs trust the project's release key; the
+  release workflow signs each release's update manifest and checks the
+  signature (`release-sign verify`). An unsigned release stays a draft.
+- **Complete kiwix-serve sources.** Every release publishes the source of
+  kiwix-serve and of every library built into it, in the exact versions
+  shipped, with Kiwix's build recipes and patches and the GNU C library of
+  the static Linux builds (`arcana-<version>-kiwix-sources.tar`, about
+  170 MB, with a checksum list; see `licenses/SOURCES.txt`).
+- **Release files** for each platform, an all-platform portable zip, and
+  checksums; build provenance attestations for public releases.
+- On Windows, when kiwix-serve cannot start because the Microsoft Visual
+  C++ runtime is missing, the dashboard says so and what to install.
+
+### Added in Phase 6 (integration and peer sync)
 - **Integration API v1** (`/api/integration/v1/`) for programs such as
   RadioPost and Aether HF: search with citations, article text and bounded
   excerpts with an attribution footer, current position, coordinates with
@@ -63,8 +91,12 @@ separately.
   a physical GPS receiver yet.
 - The programs are not code-signed: Windows SmartScreen and macOS
   Gatekeeper warn on first start (README-FIRST.txt explains how to proceed).
-- In-app updates are not active in this release: no release signing key is
-  configured yet, so new versions are installed by downloading them.
+- On Windows, the ZIM reader (kiwix-serve, built by Kiwix) needs the
+  Microsoft Visual C++ runtime, which Arcana does not include. Most
+  computers have it; Arcana explains when it is missing.
+- One-click updates start with this release: this version will offer the
+  next one. The automatic restart has been tested on Linux; on Windows and
+  macOS it is covered by the test suite only.
 - Map regions are extracted from Protomaps planet builds on demand; they
   have no publisher checksum and are labelled unverified.
 - On Windows and macOS, Arcana cannot create a Wi-Fi hotspot itself.

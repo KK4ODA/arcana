@@ -251,10 +251,19 @@ func (s *Server) launch(ctx context.Context, archives []Archive) (*process, map[
 			return p, books, nil
 		}
 		stopProcess(p)
+		var known errStartup
+		if errors.As(err, &known) {
+			return nil, nil, known // retrying cannot help
+		}
 		lastErr = fmt.Errorf("%v: %s", err, strings.TrimSpace(stderr.String()))
 	}
 	return nil, nil, lastErr
 }
+
+// errStartup is a start failure with a known cause and a message for people.
+type errStartup struct{ msg string }
+
+func (e errStartup) Error() string { return e.msg }
 
 // relPath keeps arguments short and portable by passing paths relative to
 // the library root (Windows limits command lines to 32 767 characters).
@@ -271,6 +280,9 @@ func (s *Server) waitReady(ctx context.Context, p *process, archives []Archive) 
 	for time.Now().Before(deadline) {
 		select {
 		case <-p.done:
+			if hint := exitHint(p.cmd.ProcessState); hint != "" {
+				return nil, errStartup{hint}
+			}
 			return nil, errors.New("kiwix-serve exited during startup")
 		case <-ctx.Done():
 			return nil, ctx.Err()

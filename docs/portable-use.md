@@ -32,6 +32,11 @@ The release binaries are not yet code-signed.
   (Properties → Unblock) avoids the prompt.
 - **macOS** may refuse to open downloaded programs. Run once:
   `xattr -dr com.apple.quarantine /Volumes/<drive>/Arcana`
+- **Windows** also needs the Microsoft Visual C++ runtime for the ZIM
+  reader (kiwix-serve). Most computers have it; if not, Arcana says so on
+  its dashboard. Install the *Microsoft Visual C++ Redistributable (x64)*
+  from Microsoft and restart Arcana. For offline use, keep its installer
+  (`vc_redist.x64.exe`) on the drive.
 - **Linux** may mount drives without permission to run programs.
   `arcana.sh` detects this and runs a temporary copy from your computer,
   while the library stays on the drive.
@@ -72,10 +77,29 @@ The release binaries are not yet code-signed.
   phone asks, or turn off mobile data. VPNs can also block local
   addresses.
 
+## Updating Arcana
+
+- Once a day, while it is running and online, Arcana checks whether a new
+  version has been released. When one has, a banner at the top of the page
+  says so and shows what is new.
+- *Update now* downloads the new version, checks its signature, installs it
+  on the drive and restarts Arcana; the page reloads by itself. Every
+  computer that starts Arcana from this drive then uses the new version.
+- The previous version is kept. *Settings → Application updates → Roll
+  back* returns to it.
+- To stop the daily check, clear *Look for new versions automatically* in
+  *Settings → Application updates*. *Check now* still works.
+- Without internet, copy an unzipped release folder to the computer and use
+  *Settings → Application updates → Advanced* (*Verify folder*, then
+  *Install verified version*) to install it from there.
+- The appliance (Raspberry Pi service) updates by running
+  `appliance/install.sh` from the new release.
+
 ## Working offline
 
 - Nothing Arcana does while reading, searching or browsing the catalog
-  needs the internet.
+  needs the internet. The daily update check simply fails offline and is
+  tried again the next day.
 - The Updates view uses the catalog as last refreshed and shows when that
   was.
 - To move archives from another drive without internet:

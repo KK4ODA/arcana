@@ -39,7 +39,7 @@ cat <<EOF
 | \`arcana-$V-linux-amd64.tar.gz\` | Linux (x86-64), with the appliance installer |
 | \`arcana-$V-linux-arm64.tar.gz\` | Linux on 64-bit ARM, including Raspberry Pi 4 and 5 (64-bit OS) |
 | \`arcana-$V-portable.zip\` | All platforms in one folder: a drive that works on any of these computers |
-| \`arcana-$V-kiwix-sources.tar\` | Source code of the GPL components of the bundled kiwix-serve |
+| \`arcana-$V-kiwix-sources.tar\` | Complete source code of the bundled kiwix-serve and every library built into it, with Kiwix's build recipes (\`SOURCES.txt\` inside lists each file) |
 | \`SHA256SUMS\` | Checksums of all files |
 
 Extract the archive onto a drive (exFAT recommended) or into any folder,
@@ -69,11 +69,13 @@ echo
 if [ "$SIGNED" = signed ]; then
 	cat <<'EOF'
 The update manifest `release.json` is signed (`release.json.sig`); Arcana
-verifies it before installing an update.
+verifies it before installing an update. Arcana 0.6.0 and later offer new
+versions by themselves and install them with one click.
 EOF
 else
 	cat <<'EOF'
-The update manifest `release.json` is not signed in this release, so in-app
-updates stay off; new versions are installed by downloading them.
+The update manifest `release.json` is not signed yet. Arcana rejects
+unsigned releases, so release.json.sig must be added before this release
+is published.
 EOF
 fi

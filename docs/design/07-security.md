@@ -38,10 +38,15 @@
   setting is used. There is no UPnP, no port mapping, and no public
   exposure.
 - **No telemetry.** Arcana makes no network request except catalog refresh,
-  downloads the user starts, and measuring a custom map area when the host
-  asks for it. The acceptance test confirms that nothing
-  is attempted at startup or while browsing. The User-Agent names only
-  "Arcana/<version>" and the project URL.
+  downloads the user starts, measuring a custom map area when the host asks
+  for it, and the daily check for a new version of Arcana. That check is
+  on by default and can be switched off in *Settings → Application
+  updates*; it fetches only the signed `release.json` from the update
+  address (GitHub releases by default), starting two minutes after Arcana
+  starts and at most once a day, and a failed check waits for the next
+  day. The acceptance test confirms that nothing else is attempted at
+  startup or while browsing. The User-Agent names only "Arcana/<version>"
+  and the project URL.
 - **Least privilege.** Arcana never needs administrator rights. Appliance
   networking (AP, DNS, DHCP, captive portal) lives in a separate systemd
   unit with its own privileges (Phase 5).

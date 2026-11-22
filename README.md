@@ -45,6 +45,12 @@ Windows or macOS hardware** (see [Status](#status)).
   browse and search; only the host computer can make changes.
 - **Integrity tools.** Quick and full checks find missing or corrupted
   files. If the metadata index is lost, it is rebuilt from the drive.
+- **Updates in one click.** Once a day, while online, Arcana looks for a
+  new version. A banner offers *Update now*: the new version is
+  verified against the project's signature, installed, and Arcana
+  restarts into it. The previous version is kept for rollback. The check
+  can be switched off in *Settings → Application updates*; it is the only
+  network request Arcana makes without being asked.
 - **Offline import.** `arcana import` installs archives from another drive
   and verifies them against the catalog with no network.
 

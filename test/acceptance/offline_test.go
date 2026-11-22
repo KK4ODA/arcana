@@ -857,10 +857,19 @@ func TestOfflineAcceptance(t *testing.T) {
 	})
 
 	t.Run("13-no-internet-access-attempted", func(t *testing.T) {
+		// The one request Arcana makes by itself is the daily check for a new
+		// version (on by default, documented, can be switched off); it
+		// starts two minutes after start and fails quietly offline. Nothing
+		// else may try the network.
 		data, _ := os.ReadFile(logPath)
-		for _, bad := range []string{"no such host", "dial tcp", "network is unreachable"} {
-			if strings.Contains(string(data), bad) {
-				t.Fatalf("Arcana attempted network access while offline (%q):\n%s", bad, data)
+		for _, line := range strings.Split(string(data), "\n") {
+			if strings.Contains(line, "automatic update check failed") {
+				continue
+			}
+			for _, bad := range []string{"no such host", "dial tcp", "network is unreachable"} {
+				if strings.Contains(line, bad) {
+					t.Fatalf("Arcana attempted network access while offline (%q):\n%s", bad, data)
+				}
 			}
 		}
 	})
