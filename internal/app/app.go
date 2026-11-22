@@ -14,14 +14,18 @@ import (
 	"sync"
 	"time"
 
+	"github.com/KK4ODA/arcana/internal/appupdate"
 	"github.com/KK4ODA/arcana/internal/catalog"
 	"github.com/KK4ODA/arcana/internal/content"
+	"github.com/KK4ODA/arcana/internal/docs"
 	"github.com/KK4ODA/arcana/internal/download"
 	"github.com/KK4ODA/arcana/internal/fsutil"
 	"github.com/KK4ODA/arcana/internal/kiwix"
 	"github.com/KK4ODA/arcana/internal/library"
 	"github.com/KK4ODA/arcana/internal/storage"
 	"github.com/KK4ODA/arcana/internal/store"
+	"github.com/KK4ODA/arcana/internal/tasks"
+	"github.com/KK4ODA/arcana/internal/userdata"
 )
 
 // Options configure an App.
@@ -44,6 +48,11 @@ type App struct {
 	Kiwix     *kiwix.Server
 	Log       *slog.Logger
 	Fetcher   catalog.Fetcher
+	User      *userdata.Store
+	Docs      *docs.Index
+	Tasks     *tasks.Manager
+	Updater   *appupdate.Updater
+	reindex   chan struct{}
 
 	opts         Options
 	refreshMu    sync.Mutex
@@ -81,7 +90,18 @@ func Open(root string, opts Options) (*App, error) {
 		return nil, err
 	}
 	a.Content = &content.Manager{Layout: lib.Layout, Store: a.Store, Log: log}
-	a.Content.OnChange = func() { a.reloadKiwix() }
+	a.Content.OnChange = func() { a.reloadKiwix(); a.RequestReindex() }
+	a.reindex = make(chan struct{}, 1)
+	a.Tasks = tasks.New(context.Background())
+	a.Updater = &appupdate.Updater{Lib: lib, Keys: appupdate.TrustedKeys()}
+	if a.User, err = userdata.Open(lib.User(), lib.ReadOnly); err != nil {
+		a.Close()
+		return nil, err
+	}
+	if err := a.openDocsIndex(); err != nil {
+		a.Close()
+		return nil, err
+	}
 
 	ctx := context.Background()
 	// Sidecars are the source of truth for installed content; re-index on
@@ -101,15 +121,15 @@ func Open(root string, opts Options) (*App, error) {
 	client := download.NewClient(func() bool { return lib.Settings.Get().AllowPrivateNetworkDownloads })
 	a.Fetcher = catalog.NewHTTPFetcher(client)
 	a.Downloads = download.New(download.Options{
-		Store:     a.Store,
-		Layout:    lib.Layout,
-		Content:   a.Content,
-		Settings:  lib.Settings.Get,
-		Resolvers: a.resolvers(),
-		Fetcher:   a.Fetcher,
-		Client:    client,
-		Log:       log,
-		ReadOnly:  lib.ReadOnly,
+		Store:       a.Store,
+		Layout:      lib.Layout,
+		Content:     a.Content,
+		Settings:    lib.Settings.Get,
+		ResolverFor: func(p string) catalog.Resolver { return a.resolvers()[p] },
+		Fetcher:     a.Fetcher,
+		Client:      client,
+		Log:         log,
+		ReadOnly:    lib.ReadOnly,
 	})
 
 	if !opts.DisableKiwix {
@@ -131,7 +151,11 @@ func (a *App) Start(ctx context.Context) error {
 	if err := a.Downloads.Start(ctx); err != nil {
 		return err
 	}
+	a.Tasks = tasks.New(ctx)
 	a.reloadKiwix()
+	go a.reindexLoop(ctx)
+	go a.autoRefreshLoop(ctx)
+	a.RequestReindex()
 	return nil
 }
 
@@ -146,6 +170,9 @@ func (a *App) Close() {
 	}
 	if a.Kiwix != nil {
 		a.Kiwix.Stop()
+	}
+	if a.Docs != nil {
+		a.Docs.Close()
 	}
 	if a.Store != nil {
 		a.Store.Close()
@@ -204,6 +231,9 @@ func (a *App) Providers() []catalog.Provider {
 	ps := []catalog.Provider{catalog.Bundled()}
 	if s.Catalog.KiwixEnabled {
 		ps = append(ps, &catalog.KiwixProvider{BaseURL: s.Catalog.KiwixURL})
+	}
+	if s.Catalog.GutenbergEnabled {
+		ps = append(ps, &catalog.GutenbergProvider{Mirror: s.Catalog.GutenbergMirror})
 	}
 	for _, f := range s.Catalog.Feeds {
 		if f.Enabled {
@@ -464,7 +494,7 @@ func (a *App) EnqueueByID(ctx context.Context, ids []string) map[string]string {
 
 // Recommend runs the preset recommender against current storage.
 func (a *App) Recommend(ctx context.Context, presetID, lang string) (catalog.Recommendation, error) {
-	presets, err := catalog.BundledPresets()
+	presets, err := a.Presets()
 	if err != nil {
 		return catalog.Recommendation{}, err
 	}

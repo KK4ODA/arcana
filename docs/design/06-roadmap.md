@@ -51,21 +51,21 @@ Deliverables are in `docs/design/` and `docs/adr/`:
 11. Lose the database and rebuild it.
 12. Confirm no network access was attempted.
 
-## Phase 2 — Content management and updates · Planned
+## Phase 2 — Content management and updates · Done
 
 **Dependencies:** Phase 1.
 
-| Milestone | Acceptance |
+| Milestone | Status and evidence |
 |---|---|
-| Gutenberg provider (catalog CSV/RDF from mirror, EPUB) | Catalog refresh imports with licenses; EPUB opens in browser or reader |
-| Government documents provider (curated PD PDFs with hashes) | Each entry has jurisdiction, date, verified license |
-| PDF/EPUB/HTML/Markdown/text adapters + SQLite FTS5 index for non-ZIM content | Unified search returns ZIM and document hits with source identification |
-| User documents, bookmarks, notes, recent items (`user/`, separate SQLite + JSON export) | Survive every update, reinstall and DB loss in tests |
-| Collection export/import between drives with portable manifest | Export subset → import on second drive offline → identical hashes, no duplicates, user data untouched |
-| Library manifest (`manifest/library.json`, signed optional) | Another installation recognizes and validates a prepared drive |
-| Application updates: signed release manifest (minisign/Ed25519), staged swap of `bin/<platform>/`, rollback, offline update package | Tampered manifest or binary rejected; power loss mid-update leaves a runnable version |
-| Saved custom presets; geography step in wizard | Presets stored in `user/presets/` |
-| Scheduled update checks while running (opt-in) | No network activity unless enabled |
+| Gutenberg provider (catalog CSV from the official mirror, EPUB) | **Done.** Opt-in; 6,572 practical titles from the live catalog validated (`TestGutenbergRealCatalog`); downloads marked unverified (no published checksums); EPUB indexed and previewed in-app |
+| Government documents | **Partial.** Curated, hash-pinned 47 CFR Parts 95 and 97. FEMA and Ready.gov block automated downloads; more entries need curation by hand |
+| PDF/EPUB/HTML/Markdown/text adapters + SQLite FTS5 index for non-ZIM content | **Done.** `internal/docs`; malformed and hostile documents tested; unified search returns archive and document hits |
+| User documents, bookmarks, notes, history, favorites | **Done.** Plain files in `user/` (JSON and Markdown), recoverable deletes, `.bak` copies; private data (history, notes, documents) host-only |
+| Collection export/import between drives with manifest | **Done.** `internal/transfer`; acceptance step 12 |
+| Library manifest | **Done** (`manifest/library.json`); signing deferred to Phase 6 signed feeds |
+| Application updates: Ed25519-signed manifest, staged swap, rollback, offline package | **Done.** `internal/appupdate`, `tools/release-sign`; tampering, foreign keys, missing signatures and path escapes rejected in tests. Needs a maintainer signing key before it is active in releases |
+| Saved custom presets | **Done** (`user/presets/`); geography step moves to Phase 3 with map regions |
+| Scheduled catalog refresh (opt-in) | **Done**; off by default |
 
 ## Phase 3 — Offline maps and GPS · Planned
 

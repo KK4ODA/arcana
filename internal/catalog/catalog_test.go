@@ -290,3 +290,40 @@ func TestRecommendScalesWithCapacity(t *testing.T) {
 		}
 	}
 }
+
+func TestGutenbergCSV(t *testing.T) {
+	csvData := "Text#,Type,Issued,Title,Language,Authors,Subjects,LoCC,Bookshelves\n" +
+		"10001,Text,2003-11-01,\"The Bee-Keeper's\nManual\",en,\"Smith, J.\",Bee culture,SF,Category: Science - Earth/Agricultural/Farming\n" +
+		"10002,Text,2004-01-01,Household Medicine,en,,Medicine -- Popular works,R,Category: Health & Medicine\n" +
+		"10003,Text,2004-01-01,A Novel,en,,Fiction,PR,Category: Novels\n" +
+		"10004,Sound,2004-01-01,Audio,en,,,,Category: Health & Medicine\n" +
+		"../x,Text,2004-01-01,Bad,en,,,,Category: Health & Medicine\n"
+	g := &GutenbergProvider{Now: fixedNow}
+	res, err := g.ParseCSV(strings.NewReader(csvData))
+	if err != nil {
+		t.Fatal(err)
+	}
+	valid, errs := ValidateAll("gutenberg", res)
+	if len(errs) > 0 || len(valid) != 2 {
+		t.Fatalf("valid %d errs %v", len(valid), errs)
+	}
+	m := byID(valid)
+	bee := m["gutenberg.pg10001"]
+	if bee.Category != CategoryAgriculture || bee.Title != "The Bee-Keeper's Manual" || !bee.SizeEstimated || !bee.Unverifiable() {
+		t.Errorf("bee: %+v", bee)
+	}
+	med := m["gutenberg.pg10002"]
+	found := false
+	for _, w := range med.Warnings {
+		if w.Kind == "medical" && strings.Contains(w.Text, "obsolete") {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("historical medical books need a strong warning: %+v", med.Warnings)
+	}
+	all, _ := (&GutenbergProvider{All: true}).ParseCSV(strings.NewReader(csvData))
+	if len(all) != 3 {
+		t.Errorf("All should include non-practical texts: %d", len(all))
+	}
+}

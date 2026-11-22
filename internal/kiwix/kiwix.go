@@ -416,6 +416,45 @@ func (s *Server) target() (*url.URL, bool) {
 	return &url.URL{Scheme: "http", Host: "127.0.0.1:" + strconv.Itoa(s.proc.port)}, true
 }
 
+// InjectScript, when set, is the path of a script added to every HTML page
+// served from archives (Arcana's reader integration).
+var InjectScript = ""
+
+// maxInject bounds the HTML pages that are rewritten; larger pages pass
+// through unchanged.
+const maxInject = 16 << 20
+
+// injectScript adds a script tag before </head> (or at the start).
+func injectScript(resp *http.Response) error {
+	if InjectScript == "" || resp.StatusCode != http.StatusOK ||
+		!strings.HasPrefix(resp.Header.Get("Content-Type"), "text/html") || resp.Header.Get("Content-Encoding") != "" {
+		return nil
+	}
+	body, err := io.ReadAll(io.LimitReader(resp.Body, maxInject+1))
+	if err != nil {
+		return err
+	}
+	if len(body) > maxInject {
+		resp.Body = struct {
+			io.Reader
+			io.Closer
+		}{io.MultiReader(bytes.NewReader(body), resp.Body), resp.Body}
+		return nil
+	}
+	resp.Body.Close()
+	tag := []byte(`<script src="` + InjectScript + `"></script>`)
+	lower := bytes.ToLower(body)
+	if i := bytes.Index(lower, []byte("</head>")); i >= 0 {
+		body = append(body[:i:i], append(tag, body[i:]...)...)
+	} else {
+		body = append(tag, body...)
+	}
+	resp.Body = io.NopCloser(bytes.NewReader(body))
+	resp.ContentLength = int64(len(body))
+	resp.Header.Set("Content-Length", strconv.Itoa(len(body)))
+	return nil
+}
+
 // Handler reverse-proxies requests under URLRoot to kiwix-serve.
 func (s *Server) Handler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -430,12 +469,14 @@ func (s *Server) Handler() http.Handler {
 				pr.Out.Host = target.Host
 				pr.Out.Header.Del("Cookie")
 				pr.Out.Header.Del("Authorization")
+				// Uncompressed responses let the reader script be added.
+				pr.Out.Header.Del("Accept-Encoding")
 			},
 			ModifyResponse: func(resp *http.Response) error {
 				// kiwix-serve allows any origin to read content; Arcana
 				// does not let other web pages read the library.
 				resp.Header.Del("Access-Control-Allow-Origin")
-				return nil
+				return injectScript(resp)
 			},
 			ErrorHandler: func(w http.ResponseWriter, r *http.Request, err error) {
 				http.Error(w, "The archive reader is restarting; try again in a moment.", http.StatusBadGateway)

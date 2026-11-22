@@ -24,6 +24,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"syscall"
 	"testing"
@@ -248,6 +249,49 @@ func (in *instance) stop() {
 	}
 }
 
+// childPIDs lists processes named name whose parent is ppid (Linux /proc).
+func childPIDs(ppid int, name string) []int {
+	var out []int
+	entries, _ := os.ReadDir("/proc")
+	for _, e := range entries {
+		pid, err := strconv.Atoi(e.Name())
+		if err != nil {
+			continue
+		}
+		data, err := os.ReadFile(filepath.Join("/proc", e.Name(), "stat"))
+		if err != nil {
+			continue
+		}
+		// pid (comm) state ppid ...
+		st := string(data)
+		open, close := strings.IndexByte(st, '('), strings.LastIndexByte(st, ')')
+		if open < 0 || close < open {
+			continue
+		}
+		fields := strings.Fields(st[close+1:])
+		if len(fields) < 2 || st[open+1:close] != name {
+			continue
+		}
+		if pp, _ := strconv.Atoi(fields[1]); pp == ppid {
+			out = append(out, pid)
+		}
+	}
+	return out
+}
+
+// alive reports whether pid exists and is not a zombie.
+func alive(pid int) bool {
+	data, err := os.ReadFile(filepath.Join("/proc", strconv.Itoa(pid), "stat"))
+	if err != nil {
+		return false
+	}
+	st := string(data)
+	if i := strings.LastIndexByte(st, ')'); i >= 0 && i+2 < len(st) {
+		return st[i+2] != 'Z'
+	}
+	return true
+}
+
 type libraryResp struct {
 	Resources []struct {
 		ResourceID string `json:"resourceId"`
@@ -398,18 +442,20 @@ func TestOfflineAcceptance(t *testing.T) {
 		if code != 200 {
 			t.Fatalf("settings: %d %s", code, body)
 		}
+		children := childPIDs(in.cmd.Process.Pid, "kiwix-serve")
+		if len(children) == 0 {
+			t.Fatal("no kiwix-serve child process found")
+		}
 		in.kill() // power loss: no shutdown handlers run
 		// kiwix-serve must not outlive Arcana.
 		deadline := time.Now().Add(10 * time.Second)
-		for {
-			out, _ := exec.Command("pgrep", "-f", "kiwix-serve --address=127.0.0.1").Output()
-			if len(strings.TrimSpace(string(out))) == 0 {
-				break
+		for _, pid := range children {
+			for alive(pid) {
+				if time.Now().After(deadline) {
+					t.Fatalf("kiwix-serve (pid %d) kept running after Arcana was killed", pid)
+				}
+				time.Sleep(200 * time.Millisecond)
 			}
-			if time.Now().After(deadline) {
-				t.Fatal("kiwix-serve kept running after Arcana was killed")
-			}
-			time.Sleep(200 * time.Millisecond)
 		}
 	})
 
@@ -454,11 +500,30 @@ func TestOfflineAcceptance(t *testing.T) {
 			os.Remove(filepath.Join(moved, "state", f))
 		}
 		in = launch(t, bin, moved, logPath)
-		defer in.stop()
 		browseAndSearch(t, in)
 	})
 
-	t.Run("12-no-internet-access-attempted", func(t *testing.T) {
+	t.Run("12-transfer-to-second-drive-offline", func(t *testing.T) {
+		in.stop()
+		exportDir := filepath.Join(work, "driveC", "ArcanaExport")
+		if out, err := exec.Command(bin, "export", "--library", moved, "--to", exportDir, "--all").CombinedOutput(); err != nil {
+			t.Fatalf("export: %v\n%s", err, out)
+		}
+		second := filepath.Join(work, "driveD", "Arcana")
+		if out, err := exec.Command(bin, "init", second).CombinedOutput(); err != nil {
+			t.Fatalf("init: %v\n%s", err, out)
+		}
+		if out, err := exec.Command(bin, "import", "--library", second, "--from", exportDir).CombinedOutput(); err != nil {
+			t.Fatalf("import: %v\n%s", err, out)
+		}
+		out, err := exec.Command(bin, "check", "--full", "--library", second).CombinedOutput()
+		if err != nil || !strings.Contains(string(out), "No problems") {
+			t.Fatalf("second drive check: %v\n%s", err, out)
+		}
+		t.Logf("%s", out)
+	})
+
+	t.Run("13-no-internet-access-attempted", func(t *testing.T) {
 		data, _ := os.ReadFile(logPath)
 		for _, bad := range []string{"no such host", "dial tcp", "network is unreachable"} {
 			if strings.Contains(string(data), bad) {

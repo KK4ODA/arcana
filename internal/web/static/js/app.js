@@ -7,7 +7,7 @@ import { updatesView } from './views/updates.js';
 import { serverView } from './views/server.js';
 import { settingsView } from './views/settings.js';
 import { setupView } from './views/setup.js';
-import { readerView } from './views/reader.js';
+import { readerView, documentView } from './views/reader.js';
 
 const views = {
   library: { title: 'Library', render: libraryView },
@@ -88,6 +88,11 @@ async function route() {
   }
   if (r.name === 'read') {
     cleanup = await readerView(main, r.args[0], r.params);
+    return;
+  }
+  if (r.name === 'doc') {
+    renderTabs('library');
+    cleanup = await documentView(main, r.params);
     return;
   }
   const v = views[r.name] || views.library;

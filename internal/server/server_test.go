@@ -228,3 +228,95 @@ func TestEndToEndInstallAndRead(t *testing.T) {
 		t.Fatalf("search: %s", rec.Body.String())
 	}
 }
+
+func (e *env) token() string {
+	var sess map[string]any
+	rec := e.do(e.appH, "GET", "/api/session", local, "127.0.0.1:18470", nil, nil)
+	json.Unmarshal(rec.Body.Bytes(), &sess)
+	tok, _ := sess["token"].(string)
+	return tok
+}
+
+func TestUserDataAndDocumentsAPI(t *testing.T) {
+	e := newEnv(t)
+	tok := e.token()
+	h := map[string]string{"X-Arcana-Token": tok, "Content-Type": "application/json"}
+	// Bookmark from the host; network clients may read but not write, and
+	// cannot read history or notes.
+	rec := e.do(e.appH, "POST", "/api/user/bookmarks", local, "127.0.0.1:18470", h,
+		strings.NewReader(`{"resourceId":"arcana.sample","path":"morse_code","title":"Morse"}`))
+	if rec.Code != 200 {
+		t.Fatalf("bookmark: %d %s", rec.Code, rec.Body.String())
+	}
+	if rec := e.do(e.appH, "GET", "/api/user/bookmarks", lanClient, "127.0.0.1:18470", nil, nil); rec.Code != 200 || !strings.Contains(rec.Body.String(), "morse_code") {
+		t.Fatalf("LAN bookmark read: %d", rec.Code)
+	}
+	for _, p := range []string{"/api/user/recent", "/api/user/notes"} {
+		if rec := e.do(e.appH, "GET", p, lanClient, "127.0.0.1:18470", nil, nil); rec.Code != 403 {
+			t.Errorf("%s must be private to the host: %d", p, rec.Code)
+		}
+	}
+	rec = e.do(e.appH, "POST", "/api/user/notes", local, "127.0.0.1:18470", h,
+		strings.NewReader(`{"resourceId":"arcana.sample","path":"q_codes","title":"QSL cards","text":"Exchange after each contact."}`))
+	if rec.Code != 200 {
+		t.Fatalf("note: %d %s", rec.Code, rec.Body.String())
+	}
+
+	// Upload a user document; it becomes searchable.
+	uh := map[string]string{"X-Arcana-Token": tok, "X-Filename": "evacuation%20plan.txt"}
+	rec = e.do(e.appH, "POST", "/api/user/documents", local, "127.0.0.1:18470", uh,
+		strings.NewReader("Assemble at the fire station on Elm Street."))
+	if rec.Code != 200 {
+		t.Fatalf("upload: %d %s", rec.Code, rec.Body.String())
+	}
+	if rec := e.do(e.appH, "POST", "/api/user/documents", local, "127.0.0.1:18470",
+		map[string]string{"X-Arcana-Token": tok, "X-Filename": "..%2F..%2Fescape.txt"}, strings.NewReader("x")); rec.Code == 200 {
+		t.Fatal("traversal file name accepted")
+	}
+	var found bool
+	for i := 0; i < 100 && !found; i++ {
+		time.Sleep(50 * time.Millisecond)
+		rec = e.do(e.appH, "GET", "/api/search?q=fire+station", local, "127.0.0.1:18470", nil, nil)
+		found = strings.Contains(rec.Body.String(), "evacuation plan.txt")
+	}
+	if !found {
+		t.Fatalf("uploaded document not searchable: %s", rec.Body.String())
+	}
+	// Served from the content origin with a sandbox CSP.
+	rec = e.do(e.content, "GET", "/userdocs/evacuation%20plan.txt", local, "127.0.0.1:18471", nil, nil)
+	if rec.Code != 200 || !strings.Contains(rec.Header().Get("Content-Security-Policy"), "sandbox") {
+		t.Fatalf("serve user doc: %d %v", rec.Code, rec.Header())
+	}
+	// HTML user documents are downloaded, never rendered.
+	e.do(e.appH, "POST", "/api/user/documents", local, "127.0.0.1:18470",
+		map[string]string{"X-Arcana-Token": tok, "X-Filename": "page.html"}, strings.NewReader("<script>alert(1)</script>"))
+	rec = e.do(e.content, "GET", "/userdocs/page.html", local, "127.0.0.1:18471", nil, nil)
+	if rec.Header().Get("Content-Disposition") != "attachment" {
+		t.Fatal("HTML document must not render inline")
+	}
+}
+
+func TestArchivePagesReportLocationToReader(t *testing.T) {
+	if kiwixBinary() == "" {
+		t.Skip("kiwix-serve not available")
+	}
+	e := newEnv(t)
+	if _, err := e.app.ImportFile(context.Background(), filepath.Join("..", "..", "testdata", "sample", "arcana-sample_en_2026-11.zim"), app.ImportOptions{}); err != nil {
+		t.Fatal(err)
+	}
+	var path string
+	for i := 0; i < 100 && path == ""; i++ {
+		time.Sleep(50 * time.Millisecond)
+		if b, ok := e.app.Kiwix.Books()["arcana.sample"]; ok {
+			path = b.ContentPath
+		}
+	}
+	rec := e.do(e.content, "GET", path+"morse_code", local, "127.0.0.1:18471", nil, nil)
+	if !strings.Contains(rec.Body.String(), `<script src="/_arcana/frame.js"></script></head>`) {
+		t.Fatalf("reader script not injected: %s", rec.Body.String()[:300])
+	}
+	rec = e.do(e.content, "GET", "/_arcana/frame.js", local, "127.0.0.1:18471", nil, nil)
+	if !strings.Contains(rec.Body.String(), "arcana:location") {
+		t.Fatal("frame script missing")
+	}
+}

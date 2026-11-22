@@ -18,6 +18,8 @@ review"); the list here matches `go.mod` at the time of writing.
 | github.com/google/uuid | v1.6.0 | BSD-3-Clause |
 | github.com/remyoudompheng/bigfft | v0.0.0-20230129092748 | BSD-3-Clause |
 | github.com/dustin/go-humanize | v1.1.0 | MIT |
+| golang.org/x/net (html tokenizer) | v0.63.0 | BSD-3-Clause |
+| github.com/ledongthuc/pdf (PDF text extraction; derived from rsc.io/pdf) | v0.0.0-20261020125853 | BSD-3-Clause |
 | Go standard library | 1.26 | BSD-3-Clause |
 
 The full license texts are in each module's source, available from
@@ -42,7 +44,7 @@ see `docs/design/08-licensing.md` for the release checklist.
 | Item | License |
 |---|---|
 | Arcana sample library (`testdata/sample/`) | CC0-1.0 — written for this project |
-| 47 CFR Part 97 (bundled catalog entry; downloaded, not shipped) | US federal government work, public domain in the US |
+| 47 CFR Parts 95 and 97 (bundled catalog entries; downloaded, not shipped) | US federal government work, public domain in the US |
 
 Reference content downloaded through the catalog is licensed by its
 publishers. Each resource's license, as recorded in the catalog, is shown in

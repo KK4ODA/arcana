@@ -41,12 +41,12 @@ Status: ✅ implemented and tested · 🟡 partial · ⏳ planned (phase).
 ## Catalog
 | ID | Requirement | Status |
 |---|---|---|
-| FR-K1 | Provider architecture; no hard-coded URL list | ✅ bundled, Kiwix OPDS, feeds; ⏳ Gutenberg, gov docs (2), maps (3) |
+| FR-K1 | Provider architecture; no hard-coded URL list | ✅ bundled, Kiwix OPDS, Project Gutenberg, feeds; ⏳ maps (3) |
 | FR-K2 | Standard metadata incl. license, redistribution, hash, provenance, warnings | ✅ |
 | FR-K3 | 16 extensible categories | ✅ |
 | FR-K4 | Medical provenance, dates and warnings | ✅ |
 | FR-K5 | Treat catalogs as untrusted | ✅ |
-| FR-K6 | Format adapters: ZIM | ✅ ZIM; 🟡 PDF/EPUB served raw; ⏳ indexing adapters (2) |
+| FR-K6 | Format adapters | ✅ ZIM (kiwix-serve); PDF, EPUB, HTML, Markdown, text (extraction, index, preview) |
 
 ## Selection UX
 | ID | Requirement | Status |
@@ -54,8 +54,8 @@ Status: ✅ implemented and tested · 🟡 partial · ⏳ planned (phase).
 | FR-U1 | Browse by category, search, filter by language, sort by size/date/relevance | ✅ (popularity: provider data not available from Kiwix) |
 | FR-U2 | Region filter | ⏳ (3, with map regions) |
 | FR-U3 | Compare alternative editions; see total selection vs. space | ✅ |
-| FR-U4 | Curated presets; wizard with goals, language, capacity | ✅ 9 presets; ⏳ geography step, saved custom presets (2) |
-| FR-U5 | Select entire categories | ⏳ (2) |
+| FR-U4 | Curated presets; wizard with goals, language, capacity | ✅ 9 presets, saved custom collections; ⏳ geography step (3) |
+| FR-U5 | Select entire categories | ✅ "Select all shown" (filter by category first) |
 
 ## Downloads
 | ID | Requirement | Status |
@@ -64,7 +64,7 @@ Status: ✅ implemented and tested · 🟡 partial · ⏳ planned (phase).
 | FR-D2 | Integrity verification, atomic publication, never replace valid content with corrupt | ✅ |
 | FR-D3 | Persistent queue; recovery after crash, shutdown and network loss | ✅ |
 | FR-D4 | Disk-space reservation | ✅ |
-| FR-D5 | Import from another drive offline | ✅ single files; ⏳ collections + manifests (2) |
+| FR-D5 | Import from another drive offline | ✅ single files, collections, whole libraries |
 
 ## Updates
 | ID | Requirement | Status |
@@ -72,15 +72,15 @@ Status: ✅ implemented and tested · 🟡 partial · ⏳ planned (phase).
 | FR-P1 | Knowledge updates dashboard with versions, dates, sizes, priority, last check | ✅ |
 | FR-P2 | Update all/selected/individual; never remove before verified replacement | ✅ |
 | FR-P3 | Offline: show last status, no errors | ✅ |
-| FR-P4 | Application updates: signed, rollback, offline packages, never mandatory | ⏳ (2) |
+| FR-P4 | Application updates: signed, rollback, offline packages, never mandatory | ✅ (needs maintainer key in releases) |
 | FR-P5 | Delta updates where formats allow | ⏳ (no ZIM deltas published upstream) |
 
 ## Reading and search
 | ID | Requirement | Status |
 |---|---|---|
 | FR-R1 | Browse all installed resources offline | ✅ ZIM via reader; PDF/EPUB opened by browser |
-| FR-R2 | Full-text search within and across resources, with snippets and source | ✅ across ZIMs (grouped by language) |
-| FR-R3 | Bookmarks, recent, favorites, notes, user documents | ⏳ (2) |
+| FR-R2 | Full-text search within and across resources, with snippets and source | ✅ ZIMs (grouped by language) and documents |
+| FR-R3 | Bookmarks, recent, favorites, notes, user documents | ✅ |
 | FR-R4 | Metadata and publication dates visible while reading | ✅ |
 | FR-R5 | Optional local AI with citations | ⏳ (6, optional) |
 
@@ -97,4 +97,4 @@ Status: ✅ implemented and tested · 🟡 partial · ⏳ planned (phase).
 |---|---|---|
 | FR-T1 | Integrity checker (missing, corrupted, orphaned) | ✅ quick + full |
 | FR-T2 | Separate binaries, content, staging, indexes, metadata, settings, user data, logs | ✅ |
-| FR-T3 | Portable manifest; export/merge between drives without duplication | ⏳ (2) |
+| FR-T3 | Portable manifest; export/merge between drives without duplication | ✅ |

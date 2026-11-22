@@ -1,5 +1,6 @@
 import { api, getSession } from '../api.js';
 import { h, clear, fmtBytes, fmtDuration, fmtAgo, toast } from '../util.js';
+import { tasksPanel } from './tasks.js';
 
 const STATE_TEXT = {
   queued: 'Queued', resolving: 'Locating', downloading: 'Downloading', waiting: 'Waiting to retry', paused: 'Paused',
@@ -11,6 +12,8 @@ export async function downloadsView(main) {
   const canChange = s.admin && !s.readOnly;
   const body = h('div', { class: 'body flush table-wrap' });
   const summary = h('span', { class: 'muted small' });
+  const tp = tasksPanel();
+  main.appendChild(tp.el);
   main.appendChild(h('section', { class: 'panel' },
     h('header', null, h('h2', null, 'Downloads'), summary),
     h('div', { class: 'toolbar small muted' },
@@ -65,5 +68,5 @@ export async function downloadsView(main) {
   }
   await load();
   const timer = setInterval(() => { if (!document.hidden) load(); }, 1500);
-  return () => clearInterval(timer);
+  return () => { clearInterval(timer); tp.stop(); };
 }

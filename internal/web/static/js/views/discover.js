@@ -72,6 +72,7 @@ export async function discoverView(main, params) {
   sortSel.addEventListener('change', () => { state.sort = sortSel.value; load(); });
 
   const list = h('div', { class: 'body flush table-wrap' });
+  let lastPage = [];
   const pager = h('div', { class: 'toolbar small muted' });
   const detail = h('div');
   const selBar = h('div', { class: 'selectionbar', hidden: true });
@@ -92,6 +93,7 @@ export async function discoverView(main, params) {
     let r;
     try { r = await api.get(`/api/catalog?${q}`); } catch (e) { clear(list).appendChild(h('div', { class: 'banner err' }, e.message)); return; }
     clear(list);
+    lastPage = r.resources;
     if (!r.resources.length) {
       list.appendChild(h('p', { class: 'empty' }, 'No resources match. Try another category or language, or refresh the catalog.'));
     } else {
@@ -103,6 +105,7 @@ export async function discoverView(main, params) {
     }
     fill(pager,
       `${r.total} resources`, ' ',
+      canChange && r.resources.length ? h('button', { class: 'link', onclick: selectShown, title: 'Add every resource on this page that is not installed or queued' }, 'Select all shown') : null, ' ',
       state.offset > 0 ? h('button', { class: 'link', onclick: () => { state.offset = Math.max(0, state.offset - 100); load(); } }, 'Previous') : null, ' ',
       state.offset + 100 < r.total ? h('button', { class: 'link', onclick: () => { state.offset += 100; load(); } }, 'Next 100') : null);
   }
@@ -125,6 +128,29 @@ export async function discoverView(main, params) {
       h('td', { class: 'hide-sm' }, licenseBadge(res.license)),
       h('td', { class: 'hide-sm small' }, STATUS_LABEL[res.status]));
     return tr;
+  }
+
+  function selectShown() {
+    let n = 0;
+    for (const res of lastPage) {
+      if (res.status === 'available' && res.fits && !selection.has(res.id)) {
+        selection.set(res.id, { title: res.title, size: res.downloadSize });
+        n++;
+      }
+    }
+    persist();
+    updateSelectionBar();
+    load();
+    toast(`Added ${n} resources to the selection.`);
+  }
+
+  async function saveCollection() {
+    const title = prompt('Name for this collection (saved on the drive under user/presets):');
+    if (!title) return;
+    try {
+      await api.post('/api/presets', { title, description: `Saved selection of ${selection.size} resources.`, resourceIds: [...selection.keys()] });
+      toast(`Saved collection “${title}”. It appears under Collections and recommendations.`);
+    } catch (e) { toast(e.message); }
   }
 
   function toggle(res, on) {
@@ -214,6 +240,7 @@ export async function discoverView(main, params) {
         p.status === 'over' ? h('span', { class: 'status-over' }, 'Does not fit') : p.status === 'tight' ? h('span', { class: 'status-tight' }, 'Tight: sizes are estimates') : null,
         h('span', { style: 'flex:1' }),
         h('button', { onclick: () => showSelection() }, 'Review'),
+        h('button', { onclick: saveCollection }, 'Save as collection'),
         h('button', { onclick: () => { selection.clear(); persist(); updateSelectionBar(); load(); } }, 'Clear'),
         h('button', { class: 'primary', disabled: p.status === 'over', onclick: enqueue }, 'Download selected')),
       storageBar(p),

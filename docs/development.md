@@ -76,9 +76,35 @@ docs/design/14-radio-and-integrations.md.
 | `GET/PUT /api/settings` | Settings |
 | `GET /api/server` | Addresses and ports |
 | `GET /api/setup/volumes`, `POST /api/setup/init` | First-run setup |
+| `GET/POST /api/user/bookmarks`, `DELETE /api/user/bookmarks/{id}` | Bookmarks (readable by network clients) |
+| `GET/PUT /api/user/favorites` | Favorite resources |
+| `GET/POST/DELETE /api/user/recent` | Reading history (host only) |
+| `GET/POST /api/user/notes`, `DELETE /api/user/notes/{id}` | Notes (host only) |
+| `GET/POST /api/user/documents`, `DELETE /api/user/documents/{name}` | User documents (host only; upload body is the file, name in `X-Filename`) |
+| `GET /api/documents/text?key=` | Extracted text for in-app preview |
+| `GET /api/tasks`, `POST /api/tasks/{id}/cancel` | Background tasks |
+| `POST /api/transfer/export`, `GET /api/transfer/scan?source=`, `POST /api/transfer/import`, `POST /api/manifest` | Drive-to-drive transfer |
+| `POST /api/check/full`, `POST /api/documents/reindex` | Maintenance |
+| `GET /api/app/update`, `POST /api/app/update/{check,download,stage,apply,rollback}` | Application updates |
+| `POST /api/presets` | Save a selection as a collection |
 
-The content origin (port + 1) serves `/kiwix/*` (proxied kiwix-serve) and
-`/files/{id}/{name}` (installed documents).
+The content origin (port + 1) serves `/kiwix/*` (proxied kiwix-serve, with
+`/_arcana/frame.js` added to HTML pages so the reader learns the current page),
+`/files/{id}/{name}` (installed documents) and `/userdocs/{name}` (the
+user's documents, host only).
+
+## Release signing
+
+```
+go run ./tools/release-sign keygen -out arcana-release.key   # once; keep offline; prints the public key
+ARCANA_UPDATE_PUBKEY=<public key> ARCANA_SIGNING_KEY=$(cat arcana-release.key) scripts/package.sh 0.2.0
+```
+
+`package.sh` writes `dist/Arcana/release.json` (offline updates from a copied
+folder) and `dist/release.json` (online updates of the zip), and signs both
+when `ARCANA_SIGNING_KEY` is set. The release workflow reads the key from the
+`ARCANA_SIGNING_KEY` secret and the public key from the `ARCANA_UPDATE_PUBKEY`
+variable.
 
 ## Dependency review
 

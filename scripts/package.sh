@@ -18,6 +18,10 @@ PLATFORMS=${*:-"windows-amd64 linux-amd64 linux-arm64 darwin-arm64 darwin-amd64"
 COMMIT=$(git -C "$ROOT" rev-parse --short HEAD 2>/dev/null || echo unknown)
 DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 LDFLAGS="-s -w -X github.com/KK4ODA/arcana/internal/buildinfo.Version=$VERSION -X github.com/KK4ODA/arcana/internal/buildinfo.Commit=$COMMIT -X github.com/KK4ODA/arcana/internal/buildinfo.Date=$DATE"
+# Public key(s) that verify application updates (see tools/release-sign).
+if [ -n "${ARCANA_UPDATE_PUBKEY:-}" ]; then
+	LDFLAGS="$LDFLAGS -X github.com/KK4ODA/arcana/internal/buildinfo.UpdateKeys=$ARCANA_UPDATE_PUBKEY"
+fi
 OUT="$ROOT/dist/Arcana"
 
 if [ -e "$OUT" ]; then
@@ -57,6 +61,17 @@ mkdir -p "$OUT/content"
 cp -R "$SCRATCH/lib/content/arcana.sample" "$OUT/content/"
 rm -rf "$HOSTBIN" "$SCRATCH"
 
+# Release manifest inside the folder (offline updates from another drive),
+# signed when ARCANA_SIGNING_KEY is available (CI secret or offline machine).
+(cd "$ROOT" && go run ./tools/release-sign manifest -dir "$OUT" -version "$VERSION" >/dev/null)
+if [ -n "${ARCANA_SIGNING_KEY:-}" ]; then
+	(cd "$ROOT" && go run ./tools/release-sign sign -in "$OUT/release.json")
+fi
 (cd "$ROOT/dist" && rm -f "arcana-$VERSION-portable.zip" && zip -qr "arcana-$VERSION-portable.zip" Arcana)
+# Top-level manifest describing the zip (online updates).
+(cd "$ROOT" && go run ./tools/release-sign manifest -dir "$OUT" -version "$VERSION" -archive "$ROOT/dist/arcana-$VERSION-portable.zip" >/dev/null)
+if [ -n "${ARCANA_SIGNING_KEY:-}" ]; then
+	(cd "$ROOT" && go run ./tools/release-sign sign -in "$ROOT/dist/release.json")
+fi
 (cd "$ROOT/dist" && (sha256sum "arcana-$VERSION-portable.zip" 2>/dev/null || shasum -a 256 "arcana-$VERSION-portable.zip") > "arcana-$VERSION-portable.zip.sha256")
 echo "dist/Arcana and dist/arcana-$VERSION-portable.zip ready"

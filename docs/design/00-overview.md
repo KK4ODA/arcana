@@ -26,7 +26,7 @@ share essential knowledge independently of internet infrastructure.
 6. **Honest status.** Planned features are described as planned, not shown
    as buttons that do nothing.
 
-## What exists today (0.1.0, Phase 1)
+## What exists today (0.2.0, Phases 1–2)
 
 | Area | State |
 |---|---|
@@ -40,6 +40,11 @@ share essential knowledge independently of internet infrastructure.
 | Web UI (Library, Discover, Downloads, Updates, Server, Settings, Setup, Reader) | Implemented; checked in headless Chromium, including phone width and dark theme |
 | LAN sharing, read-only for network clients | Implemented, acceptance-tested |
 | Integrity check, database rebuild | Implemented, tested |
+| User data: bookmarks, favorites, history, notes, user documents | Implemented, tested (plain files in `user/`) |
+| Document adapters and full-text index (PDF, EPUB, HTML, Markdown, text) | Implemented, tested |
+| Collection transfer between drives, library manifest | Implemented, acceptance-tested |
+| Signed application updates with rollback and offline packages | Implemented, tested; inactive until a maintainer key is configured |
+| Project Gutenberg provider (opt-in) | Implemented, tested against the live catalog |
 | Portable release bundle for 5 platforms | Implemented (`scripts/package.sh`) |
 | Offline acceptance test | Implemented; steps 5 (maps) and 6 (GPS) skipped as not implemented |
 | CI (lint, tests on Linux/Windows/macOS, acceptance, packaging) | Written; not yet run on GitHub |

@@ -27,6 +27,7 @@ type Settings struct {
 	AllowPrivateNetworkDownloads bool            `json:"allowPrivateNetworkDownloads"`
 	Server                       ServerSettings  `json:"server"`
 	Catalog                      CatalogSettings `json:"catalog"`
+	Updates                      UpdateSettings  `json:"updates"`
 }
 
 // ServerSettings control the embedded HTTP server.
@@ -40,9 +41,22 @@ type ServerSettings struct {
 
 // CatalogSettings select which catalog providers are active.
 type CatalogSettings struct {
-	KiwixEnabled bool         `json:"kiwixEnabled"`
-	KiwixURL     string       `json:"kiwixUrl"`
-	Feeds        []FeedSource `json:"feeds"`
+	KiwixEnabled bool   `json:"kiwixEnabled"`
+	KiwixURL     string `json:"kiwixUrl"`
+	// GutenbergEnabled imports Project Gutenberg's practical bookshelves.
+	GutenbergEnabled bool         `json:"gutenbergEnabled"`
+	GutenbergMirror  string       `json:"gutenbergMirror"`
+	Feeds            []FeedSource `json:"feeds"`
+	// AutoRefreshHours, when positive, refreshes catalogs in the background
+	// while Arcana is running. Off by default: Arcana makes no network
+	// requests unless asked.
+	AutoRefreshHours int `json:"autoRefreshHours"`
+}
+
+// UpdateSettings control application updates.
+type UpdateSettings struct {
+	// URL is where release.json and its signature are published.
+	URL string `json:"url"`
 }
 
 // FeedSource is a user-added Arcana JSON catalog feed.
@@ -59,9 +73,11 @@ func DefaultSettings() Settings {
 		MaxConcurrentDownloads: 2,
 		Server:                 ServerSettings{Port: 8470},
 		Catalog: CatalogSettings{
-			KiwixEnabled: true,
-			KiwixURL:     "https://library.kiwix.org",
+			KiwixEnabled:    true,
+			KiwixURL:        "https://library.kiwix.org",
+			GutenbergMirror: "https://gutenberg.pglaf.org",
 		},
+		Updates: UpdateSettings{URL: "https://github.com/KK4ODA/arcana/releases/latest/download"},
 	}
 }
 

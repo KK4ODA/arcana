@@ -1,6 +1,6 @@
 # ADR-0011: Signed application updates that are never mandatory (Phase 2)
 
-- Status: Accepted (implementation planned)
+- Status: Accepted (implemented in 0.2.0; active once a release key is configured)
 - Date: 2026-11-22
 
 ## Context

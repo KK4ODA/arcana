@@ -138,7 +138,7 @@ func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request, a *app.App
 		"downloads":    map[string]any{"active": active, "failed": failed, "waiting": waiting},
 		"updates":      map[string]any{"available": len(updates), "highPriority": high, "lastCatalogRefresh": lastCheck},
 		"sharing":      s.sharingInfo(r),
-		"gps":          map[string]any{"state": "not-available", "note": "GPS support is planned for Phase 3 and is not part of this build."},
+		"gps":          map[string]any{"state": "not-available", "label": "Not in this build", "sub": "planned for Phase 3"},
 		"attention":    att,
 		"serverUptime": int64(time.Since(s.startedAt).Seconds()),
 	})

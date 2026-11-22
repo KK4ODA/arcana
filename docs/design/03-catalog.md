@@ -84,13 +84,13 @@ type Fetcher interface {
 |---|---|---|
 | `arcana` (bundled) | `internal/catalog/bundled/catalog.json`, compiled in | Curated, license-verified entries with SHA-256: the sample library and 47 CFR Part 97 |
 | `kiwix` | `library.kiwix.org/catalog/v2/entries` (OPDS v2, paginated) | 3,682 entries on 2026-11-22, all accepted by validation. Maps Kiwix categories and names to Arcana's 16 categories, assigns reviewed licenses per family, adds warnings. Resolves `.meta4` at download for exact size, SHA-256 and geo-ranked mirrors |
+| `gutenberg` (opt-in) | `pg_catalog.csv.gz` from the official mirror (gutenberg.pglaf.org) | 6,572 practical titles (health, farming, cooking, engineering, crafts, sciences, scouting) mapped to categories; EPUB downloads from the mirror; no checksums published, so installs are marked unverified; historical medical books carry an "obsolete or dangerous" warning |
 | feeds (user-added) | Any URL serving an Arcana feed | Namespace = the ID the user gives the feed; may use metalinks |
 
 ### Planned providers
 
 | Provider | Phase | Source |
 |---|---|---|
-| `gutenberg` | 2 | `pg_catalog.csv` or RDF from a mirror (the website blocks robots); EPUB/TXT from rsync mirrors; Project Gutenberg trademark notes |
 | `maps` | 3 | Protomaps daily builds, extracted to PMTiles by region and zoom (see 05-maps-gps.md), or prebuilt regional extracts |
 | `govdocs` | 2 | Curated public-domain US government publications (FEMA, CDC, NOAA, govinfo CFR), hashed at curation time |
 | `local` | 2 | A folder or drive containing an Arcana export (offline transfer) |

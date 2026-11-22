@@ -10,7 +10,7 @@ share it with no internet connection.
 > but whether you can depend on the information stored in it when
 > everything else is offline.
 
-Status: **0.1.0 — Phase 1 vertical slice.** It works end to end on Linux
+Status: **0.2.0 — Phases 1 and 2.** It works end to end on Linux
 and is packaged for Windows and macOS, but **has not yet been run on real
 Windows or macOS hardware** (see [Status](#status)).
 
@@ -96,7 +96,8 @@ See [docs/development.md](docs/development.md).
 |---|---|
 | **Implemented and tested** | Portable library layout; drive detection (Linux tested; Windows and macOS code compiled); capacity planning; catalog (bundled, Kiwix OPDS, feeds); recommender; verified resumable downloads; offline import; ZIM reading and search via kiwix-serve; web UI; read-only LAN sharing; integrity check; offline acceptance test |
 | **Built, not yet run on hardware** | Windows `Arcana.exe`, macOS binaries, Linux ARM64 |
-| **Planned** | Bookmarks, notes and user documents; Gutenberg and government-document providers; drive-to-drive collection transfer; signed application updates (Phase 2). Offline maps and GPS (Phase 3). mDNS, QR codes, remote admin login, hotspot helpers (Phase 4). Raspberry Pi appliance image (Phase 5) |
+| **Implemented (Phase 2)** | Bookmarks, favorites, history and notes; your own documents with full-text search (PDF, EPUB, HTML, Markdown, text); drive-to-drive collection transfer; signed application updates with rollback; Project Gutenberg provider |
+| **Planned** | Offline maps and GPS (Phase 3). mDNS, QR codes, remote admin login, hotspot helpers (Phase 4). Raspberry Pi appliance image (Phase 5) |
 | **Needs a decision** | License confirmation (GPL-3.0-or-later proposed); code-signing certificates; GPL source bundle for kiwix-serve in releases |
 
 The full design package is in [docs/](docs/README.md).

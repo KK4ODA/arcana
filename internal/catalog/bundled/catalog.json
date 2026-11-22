@@ -17,18 +17,43 @@
       "version": "2026-11",
       "published": "2026-11-22",
       "lastVerified": "2026-11-22T00:00:00Z",
-      "languages": ["en"],
-      "coverage": {"scope": "none"},
+      "languages": [
+        "en"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
       "format": "zim",
-      "files": [{
-        "name": "arcana-sample_en_2026-11.zim",
-        "size": 62843,
-        "hashes": {"sha256": "14b4d4f0e4710b42bd89de45254e99cf84f7d0e859eb6ec280f7f5cdd4e8010c"},
-        "mirrors": [{"url": "https://raw.githubusercontent.com/KK4ODA/arcana/main/testdata/sample/arcana-sample_en_2026-11.zim"}]
-      }],
-      "license": {"id": "CC0-1.0", "name": "Creative Commons Zero 1.0", "url": "https://creativecommons.org/publicdomain/zero/1.0/", "redistribution": "permitted", "verified": true},
-      "capabilities": {"fullTextSearch": true, "titleSearch": true},
-      "media": {"pictures": false, "videos": false, "detail": "full"},
+      "files": [
+        {
+          "name": "arcana-sample_en_2026-11.zim",
+          "size": 62843,
+          "hashes": {
+            "sha256": "14b4d4f0e4710b42bd89de45254e99cf84f7d0e859eb6ec280f7f5cdd4e8010c"
+          },
+          "mirrors": [
+            {
+              "url": "https://raw.githubusercontent.com/KK4ODA/arcana/main/testdata/sample/arcana-sample_en_2026-11.zim"
+            }
+          ]
+        }
+      ],
+      "license": {
+        "id": "CC0-1.0",
+        "name": "Creative Commons Zero 1.0",
+        "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+        "redistribution": "permitted",
+        "verified": true
+      },
+      "capabilities": {
+        "fullTextSearch": true,
+        "titleSearch": true
+      },
+      "media": {
+        "pictures": false,
+        "videos": false,
+        "detail": "full"
+      },
       "updateStrategy": "snapshot-replace"
     },
     {
@@ -47,20 +72,117 @@
       "version": "2025",
       "published": "2025-10-01",
       "lastVerified": "2026-11-22T00:00:00Z",
-      "languages": ["en"],
-      "coverage": {"scope": "regional", "regions": ["US"]},
+      "languages": [
+        "en"
+      ],
+      "coverage": {
+        "scope": "regional",
+        "regions": [
+          "US"
+        ]
+      },
       "format": "pdf",
-      "files": [{
-        "name": "CFR-2025-title47-vol5-part97.pdf",
-        "size": 355690,
-        "hashes": {"sha256": "4e8f45e96995535627470506db9e2d2ba698e74c9ea170010b88c740c00b8653"},
-        "mirrors": [{"url": "https://www.govinfo.gov/content/pkg/CFR-2025-title47-vol5/pdf/CFR-2025-title47-vol5-part97.pdf"}]
-      }],
-      "license": {"id": "LicenseRef-PD-USGov", "name": "US federal government work (public domain in the US)", "redistribution": "permitted", "verified": true, "notes": "Works of the US federal government are not subject to US copyright (17 U.S.C. 105)."},
-      "capabilities": {"fullTextSearch": false, "titleSearch": false},
-      "media": {"pictures": false, "videos": false, "detail": "full"},
+      "files": [
+        {
+          "name": "CFR-2025-title47-vol5-part97.pdf",
+          "size": 355690,
+          "hashes": {
+            "sha256": "4e8f45e96995535627470506db9e2d2ba698e74c9ea170010b88c740c00b8653"
+          },
+          "mirrors": [
+            {
+              "url": "https://www.govinfo.gov/content/pkg/CFR-2025-title47-vol5/pdf/CFR-2025-title47-vol5-part97.pdf"
+            }
+          ]
+        }
+      ],
+      "license": {
+        "id": "LicenseRef-PD-USGov",
+        "name": "US federal government work (public domain in the US)",
+        "redistribution": "permitted",
+        "verified": true,
+        "notes": "Works of the US federal government are not subject to US copyright (17 U.S.C. 105)."
+      },
+      "capabilities": {
+        "fullTextSearch": true,
+        "titleSearch": true
+      },
+      "media": {
+        "pictures": false,
+        "videos": false,
+        "detail": "full"
+      },
       "updateStrategy": "snapshot-replace",
-      "warnings": [{"kind": "regulatory", "text": "Jurisdiction: United States. This is the edition revised as of 1 October 2025; rules may have been amended since. The electronic CFR (ecfr.gov) has the current text."}]
+      "warnings": [
+        {
+          "kind": "regulatory",
+          "text": "Jurisdiction: United States. This is the edition revised as of 1 October 2025; rules may have been amended since. The electronic CFR (ecfr.gov) has the current text."
+        }
+      ]
+    },
+    {
+      "id": "arcana.us-cfr47-part95",
+      "provider": "arcana",
+      "title": "47 CFR Part 95 — Personal Radio Services (United States)",
+      "description": "US federal rules for the personal radio services: GMRS, FRS, CB, MURS and others commonly used by families and community groups in emergencies. Annual edition of the Code of Federal Regulations.",
+      "category": "radio-communications",
+      "subcategory": "regulations",
+      "family": "arcana.us-cfr47-part95",
+      "variant": "standard",
+      "variantLabel": "Annual edition (PDF)",
+      "publisher": "US Government Publishing Office",
+      "creator": "Federal Communications Commission",
+      "sourceUrl": "https://www.govinfo.gov/app/collection/cfr",
+      "version": "2025",
+      "published": "2025-10-01",
+      "lastVerified": "2026-11-22T00:00:00Z",
+      "languages": [
+        "en"
+      ],
+      "coverage": {
+        "scope": "regional",
+        "regions": [
+          "US"
+        ]
+      },
+      "format": "pdf",
+      "files": [
+        {
+          "name": "CFR-2025-title47-vol5-part95.pdf",
+          "size": 463026,
+          "hashes": {
+            "sha256": "99ecd35afec7566a92f0edb92ff02f39cc7c9fa7f47f2c586e3372d9892118ed"
+          },
+          "mirrors": [
+            {
+              "url": "https://www.govinfo.gov/content/pkg/CFR-2025-title47-vol5/pdf/CFR-2025-title47-vol5-part95.pdf"
+            }
+          ]
+        }
+      ],
+      "license": {
+        "id": "LicenseRef-PD-USGov",
+        "name": "US federal government work (public domain in the US)",
+        "redistribution": "permitted",
+        "verified": true,
+        "notes": "Works of the US federal government are not subject to US copyright (17 U.S.C. 105)."
+      },
+      "capabilities": {
+        "fullTextSearch": true,
+        "titleSearch": true
+      },
+      "media": {
+        "pictures": false,
+        "videos": false,
+        "detail": "full"
+      },
+      "updateStrategy": "snapshot-replace",
+      "warnings": [
+        {
+          "kind": "regulatory",
+          "text": "Jurisdiction: United States. This is the edition revised as of 1 October 2025; rules may have been amended since. The electronic CFR (ecfr.gov) has the current text."
+        }
+      ]
     }
   ]
 }

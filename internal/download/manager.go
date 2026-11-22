@@ -44,6 +44,9 @@ type Options struct {
 	Settings func() library.Settings
 	// Resolvers refine resources before download, keyed by provider ID.
 	Resolvers map[string]catalog.Resolver
+	// ResolverFor, when set, is consulted instead of Resolvers so that
+	// providers enabled after startup are honored.
+	ResolverFor func(provider string) catalog.Resolver
 	// Fetcher is used by resolvers. Defaults to one using Client.
 	Fetcher catalog.Fetcher
 	// Client performs transfers. Defaults to NewClient(settings).
@@ -250,7 +253,9 @@ func (m *Manager) schedule(ctx context.Context) {
 	}
 	jobs, err := m.opts.Store.ListJobs(ctx)
 	if err != nil {
-		m.log.Error("list jobs", "err", err)
+		if ctx.Err() == nil {
+			m.log.Error("list jobs", "err", err)
+		}
 		return
 	}
 	m.mu.Lock()

@@ -14,10 +14,8 @@ import (
 	"fmt"
 	"io/fs"
 	"log/slog"
-	"mime"
 	"net"
 	"net/http"
-	"os"
 	"path"
 	"path/filepath"
 	"strconv"
@@ -29,6 +27,7 @@ import (
 	"github.com/KK4ODA/arcana/internal/buildinfo"
 	"github.com/KK4ODA/arcana/internal/catalog"
 	"github.com/KK4ODA/arcana/internal/content"
+	"github.com/KK4ODA/arcana/internal/docs"
 	"github.com/KK4ODA/arcana/internal/kiwix"
 	"github.com/KK4ODA/arcana/internal/library"
 	"github.com/KK4ODA/arcana/internal/storage"
@@ -189,6 +188,7 @@ func (s *Server) appHandler() http.Handler {
 	mux.HandleFunc("GET /api/server", s.handleServerInfo)
 	mux.HandleFunc("GET /api/setup/volumes", localOnly(s.handleVolumes))
 	mux.HandleFunc("POST /api/setup/init", s.handleInit)
+	s.registerPhase2(mux)
 	mux.HandleFunc("GET /api/", func(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusNotFound, "unknown API endpoint")
 	})
@@ -199,6 +199,8 @@ func (s *Server) appHandler() http.Handler {
 	h = s.policy.guardHost(h)
 	return h
 }
+
+func init() { kiwix.InjectScript = "/_arcana/frame.js" }
 
 func (s *Server) contentHandler() http.Handler {
 	mux := http.NewServeMux()
@@ -211,6 +213,12 @@ func (s *Server) contentHandler() http.Handler {
 		a.Kiwix.Handler().ServeHTTP(w, r)
 	})
 	mux.HandleFunc("GET /files/{id}/{name}", s.handleFile)
+	mux.HandleFunc("GET /userdocs/{name}", s.handleUserDocFile)
+	mux.HandleFunc("GET /_arcana/frame.js", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/javascript; charset=utf-8")
+		w.Header().Set("Cache-Control", "no-cache")
+		w.Write(frameScript)
+	})
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Arcana content server. Open the library from the Arcana interface.", http.StatusNotFound)
 	})
@@ -250,26 +258,7 @@ func (s *Server) handleFile(w http.ResponseWriter, r *http.Request) {
 			http.NotFound(w, r)
 			return
 		}
-		fh, err := os.Open(p)
-		if err != nil {
-			http.Error(w, "File is missing from the drive. Run a library check.", http.StatusNotFound)
-			return
-		}
-		defer fh.Close()
-		st, _ := fh.Stat()
-		ctype := mime.TypeByExtension(strings.ToLower(filepath.Ext(p)))
-		switch ctype {
-		case "application/pdf", "application/epub+zip", "text/plain; charset=utf-8", "image/png", "image/jpeg",
-			"audio/mpeg", "video/mp4", "application/gpx+xml":
-		default:
-			// Anything that could execute in the browser is downloaded,
-			// not rendered.
-			ctype = "application/octet-stream"
-			w.Header().Set("Content-Disposition", "attachment")
-		}
-		w.Header().Set("Content-Type", ctype)
-		w.Header().Set("Content-Security-Policy", "default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'; sandbox")
-		http.ServeContent(w, r, "", st.ModTime(), fh)
+		serveDocument(w, r, p)
 		return
 	}
 	http.NotFound(w, r)
@@ -449,6 +438,13 @@ func (s *Server) handleSearch(w http.ResponseWriter, r *http.Request, a *app.App
 			resp["results"], resp["total"] = results, total
 		}
 	}
+	// Documents (PDF, EPUB, user files) from Arcana's own index.
+	if hits, n, err := a.Docs.Search(r.Context(), q, 25); err == nil {
+		if hits == nil {
+			hits = []docs.Hit{}
+		}
+		resp["documents"], resp["documentTotal"] = hits, n
+	}
 	// Titles of installed resources also match, so documents without a
 	// full-text index can still be found.
 	views, _ := s.installedViews(r, a)
@@ -579,7 +575,7 @@ func (s *Server) handleRefresh(w http.ResponseWriter, r *http.Request, a *app.Ap
 }
 
 func (s *Server) handlePresets(w http.ResponseWriter, r *http.Request, a *app.App) {
-	presets, err := catalog.BundledPresets()
+	presets, err := a.Presets()
 	if err != nil {
 		writeError(w, 500, err.Error())
 		return
@@ -722,6 +718,9 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *ap
 		AllowPrivateNetworkDownloads *bool                 `json:"allowPrivateNetworkDownloads"`
 		ShareOnLAN                   *bool                 `json:"shareOnLan"`
 		KiwixEnabled                 *bool                 `json:"kiwixEnabled"`
+		GutenbergEnabled             *bool                 `json:"gutenbergEnabled"`
+		AutoRefreshHours             *int                  `json:"autoRefreshHours"`
+		UpdateURL                    *string               `json:"updateUrl"`
 		Feeds                        *[]library.FeedSource `json:"feeds"`
 	}
 	if err := readJSON(r, &req); err != nil {
@@ -755,6 +754,22 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *ap
 		}
 		if req.KiwixEnabled != nil {
 			st.Catalog.KiwixEnabled = *req.KiwixEnabled
+		}
+		if req.GutenbergEnabled != nil {
+			st.Catalog.GutenbergEnabled = *req.GutenbergEnabled
+		}
+		if req.AutoRefreshHours != nil {
+			if *req.AutoRefreshHours < 0 || *req.AutoRefreshHours > 24*90 {
+				return errors.New("automatic refresh interval must be between 0 (off) and 2160 hours")
+			}
+			st.Catalog.AutoRefreshHours = *req.AutoRefreshHours
+		}
+		if req.UpdateURL != nil {
+			u := strings.TrimSpace(*req.UpdateURL)
+			if u != "" && !strings.HasPrefix(u, "https://") {
+				return errors.New("the update address must start with https://")
+			}
+			st.Updates.URL = u
 		}
 		if req.Feeds != nil {
 			seen := map[string]bool{"arcana": true, "kiwix": true}

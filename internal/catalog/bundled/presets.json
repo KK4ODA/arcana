@@ -5,15 +5,69 @@
       "title": "Essential Knowledge",
       "description": "A general encyclopedia, medical reference, repair guides and practical survival material. The core of most libraries.",
       "items": [
-        {"family": "kiwix.wikipedia_{lang}_all", "variants": ["maxi", "nopic", "mini"], "priority": 1, "reason": "General encyclopedia covering almost every topic."},
-        {"family": "kiwix.wikipedia_{lang}_medicine", "variants": ["maxi", "nopic", "mini"], "priority": 1, "reason": "Medical articles from Wikipedia in one archive."},
-        {"family": "kiwix.zimgit-post-disaster_en", "priority": 1, "reason": "Practical guides for disaster recovery."},
-        {"family": "kiwix.zimgit-water_en", "priority": 1, "reason": "Water treatment and sanitation."},
-        {"family": "kiwix.zimgit-medicine_en", "priority": 1, "reason": "Field medicine references."},
-        {"family": "kiwix.zimgit-food-preparation_en", "priority": 2, "reason": "Food preparation and preservation."},
-        {"family": "kiwix.ifixit_{lang}_all", "priority": 2, "reason": "Repair guides for devices and equipment."},
-        {"family": "kiwix.wiktionary_{lang}_all", "variants": ["nopic", "maxi"], "priority": 3, "reason": "Dictionary."},
-        {"family": "kiwix.wikivoyage_{lang}_all", "variants": ["maxi", "nopic"], "priority": 3, "reason": "Travel and regional information."}
+        {
+          "family": "kiwix.wikipedia_{lang}_all",
+          "variants": [
+            "maxi",
+            "nopic",
+            "mini"
+          ],
+          "priority": 1,
+          "reason": "General encyclopedia covering almost every topic."
+        },
+        {
+          "family": "kiwix.wikipedia_{lang}_medicine",
+          "variants": [
+            "maxi",
+            "nopic",
+            "mini"
+          ],
+          "priority": 1,
+          "reason": "Medical articles from Wikipedia in one archive."
+        },
+        {
+          "family": "kiwix.zimgit-post-disaster_en",
+          "priority": 1,
+          "reason": "Practical guides for disaster recovery."
+        },
+        {
+          "family": "kiwix.zimgit-water_en",
+          "priority": 1,
+          "reason": "Water treatment and sanitation."
+        },
+        {
+          "family": "kiwix.zimgit-medicine_en",
+          "priority": 1,
+          "reason": "Field medicine references."
+        },
+        {
+          "family": "kiwix.zimgit-food-preparation_en",
+          "priority": 2,
+          "reason": "Food preparation and preservation."
+        },
+        {
+          "family": "kiwix.ifixit_{lang}_all",
+          "priority": 2,
+          "reason": "Repair guides for devices and equipment."
+        },
+        {
+          "family": "kiwix.wiktionary_{lang}_all",
+          "variants": [
+            "nopic",
+            "maxi"
+          ],
+          "priority": 3,
+          "reason": "Dictionary."
+        },
+        {
+          "family": "kiwix.wikivoyage_{lang}_all",
+          "variants": [
+            "maxi",
+            "nopic"
+          ],
+          "priority": 3,
+          "reason": "Travel and regional information."
+        }
       ]
     },
     {
@@ -21,14 +75,60 @@
       "title": "Family Emergency Preparedness",
       "description": "Compact, practical material for a household: first aid, water, food, shelter and repairs. Fits small drives.",
       "items": [
-        {"family": "kiwix.zimgit-post-disaster_en", "priority": 1, "reason": "Disaster recovery guides."},
-        {"family": "kiwix.zimgit-water_en", "priority": 1, "reason": "Safe drinking water."},
-        {"family": "kiwix.zimgit-medicine_en", "priority": 1, "reason": "Field medicine."},
-        {"family": "kiwix.wikipedia_{lang}_medicine", "variants": ["maxi", "nopic", "mini"], "priority": 1, "reason": "Medical encyclopedia."},
-        {"family": "kiwix.zimgit-food-preparation_en", "priority": 2, "reason": "Food preparation."},
-        {"family": "kiwix.zimgit-knots_en", "priority": 2, "reason": "Knots and rope work."},
-        {"family": "kiwix.ifixit_{lang}_all", "priority": 3, "reason": "Repair guides."},
-        {"family": "kiwix.wikipedia_{lang}_all", "variants": ["nopic", "mini"], "priority": 3, "reason": "General encyclopedia."}
+        {
+          "family": "kiwix.zimgit-post-disaster_en",
+          "priority": 1,
+          "reason": "Disaster recovery guides."
+        },
+        {
+          "family": "kiwix.zimgit-water_en",
+          "priority": 1,
+          "reason": "Safe drinking water."
+        },
+        {
+          "family": "kiwix.zimgit-medicine_en",
+          "priority": 1,
+          "reason": "Field medicine."
+        },
+        {
+          "family": "kiwix.wikipedia_{lang}_medicine",
+          "variants": [
+            "maxi",
+            "nopic",
+            "mini"
+          ],
+          "priority": 1,
+          "reason": "Medical encyclopedia."
+        },
+        {
+          "family": "kiwix.zimgit-food-preparation_en",
+          "priority": 2,
+          "reason": "Food preparation."
+        },
+        {
+          "family": "kiwix.zimgit-knots_en",
+          "priority": 2,
+          "reason": "Knots and rope work."
+        },
+        {
+          "family": "kiwix.ifixit_{lang}_all",
+          "priority": 3,
+          "reason": "Repair guides."
+        },
+        {
+          "family": "kiwix.wikipedia_{lang}_all",
+          "variants": [
+            "nopic",
+            "mini"
+          ],
+          "priority": 3,
+          "reason": "General encyclopedia."
+        },
+        {
+          "family": "arcana.us-cfr47-part95",
+          "priority": 3,
+          "reason": "Rules for family radios (FRS/GMRS) in the US."
+        }
       ]
     },
     {
@@ -36,12 +136,45 @@
       "title": "Amateur Radio Operator",
       "description": "Regulations, operating practice, electronics and antenna knowledge for radio amateurs and emergency communicators.",
       "items": [
-        {"family": "arcana.us-cfr47-part97", "priority": 1, "reason": "US amateur radio rules (US operators)."},
-        {"family": "kiwix.ham.stackexchange.com_en_all", "priority": 1, "reason": "Amateur radio questions and answers."},
-        {"family": "kiwix.electronics.stackexchange.com_en_all", "priority": 2, "reason": "Electronics design and troubleshooting."},
-        {"family": "kiwix.wikipedia_{lang}_all", "variants": ["nopic", "mini"], "priority": 2, "reason": "Background on radio, propagation and geography."},
-        {"family": "kiwix.raspberrypi.stackexchange.com_en_all", "priority": 3, "reason": "Small computers used for digital modes."},
-        {"family": "kiwix.arduino.stackexchange.com_en_all", "priority": 3, "reason": "Microcontrollers for station accessories."}
+        {
+          "family": "arcana.us-cfr47-part97",
+          "priority": 1,
+          "reason": "US amateur radio rules (US operators)."
+        },
+        {
+          "family": "arcana.us-cfr47-part95",
+          "priority": 2,
+          "reason": "US personal radio services (GMRS, FRS, CB, MURS)."
+        },
+        {
+          "family": "kiwix.ham.stackexchange.com_en_all",
+          "priority": 1,
+          "reason": "Amateur radio questions and answers."
+        },
+        {
+          "family": "kiwix.electronics.stackexchange.com_en_all",
+          "priority": 2,
+          "reason": "Electronics design and troubleshooting."
+        },
+        {
+          "family": "kiwix.wikipedia_{lang}_all",
+          "variants": [
+            "nopic",
+            "mini"
+          ],
+          "priority": 2,
+          "reason": "Background on radio, propagation and geography."
+        },
+        {
+          "family": "kiwix.raspberrypi.stackexchange.com_en_all",
+          "priority": 3,
+          "reason": "Small computers used for digital modes."
+        },
+        {
+          "family": "kiwix.arduino.stackexchange.com_en_all",
+          "priority": 3,
+          "reason": "Microcontrollers for station accessories."
+        }
       ]
     },
     {
@@ -49,12 +182,45 @@
       "title": "Medical and Public Health",
       "description": "Medical encyclopedias and public-health references. Dated reference material, not current clinical guidance.",
       "items": [
-        {"family": "kiwix.wikipedia_{lang}_medicine", "variants": ["maxi", "nopic", "mini"], "priority": 1, "reason": "Medical encyclopedia."},
-        {"family": "kiwix.mdwiki_en_all", "variants": ["maxi", "standard"], "priority": 1, "reason": "WikiProject Medicine articles."},
-        {"family": "kiwix.zimgit-medicine_en", "priority": 1, "reason": "Field medicine."},
-        {"family": "kiwix.irp.fas.org_en_military-medicine", "priority": 2, "reason": "Military field medicine manuals."},
-        {"family": "kiwix.wwwnc.cdc.gov_en_all", "priority": 2, "reason": "CDC travel health information."},
-        {"family": "kiwix.libretexts.org_en_med", "priority": 3, "reason": "Medicine textbooks."}
+        {
+          "family": "kiwix.wikipedia_{lang}_medicine",
+          "variants": [
+            "maxi",
+            "nopic",
+            "mini"
+          ],
+          "priority": 1,
+          "reason": "Medical encyclopedia."
+        },
+        {
+          "family": "kiwix.mdwiki_en_all",
+          "variants": [
+            "maxi",
+            "standard"
+          ],
+          "priority": 1,
+          "reason": "WikiProject Medicine articles."
+        },
+        {
+          "family": "kiwix.zimgit-medicine_en",
+          "priority": 1,
+          "reason": "Field medicine."
+        },
+        {
+          "family": "kiwix.irp.fas.org_en_military-medicine",
+          "priority": 2,
+          "reason": "Military field medicine manuals."
+        },
+        {
+          "family": "kiwix.wwwnc.cdc.gov_en_all",
+          "priority": 2,
+          "reason": "CDC travel health information."
+        },
+        {
+          "family": "kiwix.libretexts.org_en_med",
+          "priority": 3,
+          "reason": "Medicine textbooks."
+        }
       ]
     },
     {
@@ -62,12 +228,40 @@
       "title": "Field Technician",
       "description": "Repair, electrical, mechanical and computing references for maintaining equipment.",
       "items": [
-        {"family": "kiwix.ifixit_{lang}_all", "priority": 1, "reason": "Repair guides."},
-        {"family": "kiwix.electronics.stackexchange.com_en_all", "priority": 1, "reason": "Electronics."},
-        {"family": "kiwix.diy.stackexchange.com_en_all", "priority": 1, "reason": "Home and building repair."},
-        {"family": "kiwix.mechanics.stackexchange.com_en_all", "priority": 2, "reason": "Vehicle maintenance."},
-        {"family": "kiwix.energypedia_en_all", "variants": ["maxi", "nopic"], "priority": 2, "reason": "Off-grid and renewable energy."},
-        {"family": "kiwix.libretexts.org_en_eng", "priority": 3, "reason": "Engineering textbooks."}
+        {
+          "family": "kiwix.ifixit_{lang}_all",
+          "priority": 1,
+          "reason": "Repair guides."
+        },
+        {
+          "family": "kiwix.electronics.stackexchange.com_en_all",
+          "priority": 1,
+          "reason": "Electronics."
+        },
+        {
+          "family": "kiwix.diy.stackexchange.com_en_all",
+          "priority": 1,
+          "reason": "Home and building repair."
+        },
+        {
+          "family": "kiwix.mechanics.stackexchange.com_en_all",
+          "priority": 2,
+          "reason": "Vehicle maintenance."
+        },
+        {
+          "family": "kiwix.energypedia_en_all",
+          "variants": [
+            "maxi",
+            "nopic"
+          ],
+          "priority": 2,
+          "reason": "Off-grid and renewable energy."
+        },
+        {
+          "family": "kiwix.libretexts.org_en_eng",
+          "priority": 3,
+          "reason": "Engineering textbooks."
+        }
       ]
     },
     {
@@ -75,13 +269,49 @@
       "title": "Remote Expedition",
       "description": "Light-weight travel, outdoor, first-aid and reference material for expeditions.",
       "items": [
-        {"family": "kiwix.wikivoyage_{lang}_all", "variants": ["maxi", "nopic"], "priority": 1, "reason": "Travel guides."},
-        {"family": "kiwix.outdoors.stackexchange.com_en_all", "priority": 1, "reason": "Outdoor skills."},
-        {"family": "kiwix.zimgit-medicine_en", "priority": 1, "reason": "Field medicine."},
-        {"family": "kiwix.zimgit-water_en", "priority": 1, "reason": "Water treatment."},
-        {"family": "kiwix.zimgit-knots_en", "priority": 2, "reason": "Knots."},
-        {"family": "kiwix.theworldfactbook_en_all", "priority": 2, "reason": "Country reference."},
-        {"family": "kiwix.wikipedia_{lang}_all", "variants": ["mini", "nopic"], "priority": 3, "reason": "General encyclopedia."}
+        {
+          "family": "kiwix.wikivoyage_{lang}_all",
+          "variants": [
+            "maxi",
+            "nopic"
+          ],
+          "priority": 1,
+          "reason": "Travel guides."
+        },
+        {
+          "family": "kiwix.outdoors.stackexchange.com_en_all",
+          "priority": 1,
+          "reason": "Outdoor skills."
+        },
+        {
+          "family": "kiwix.zimgit-medicine_en",
+          "priority": 1,
+          "reason": "Field medicine."
+        },
+        {
+          "family": "kiwix.zimgit-water_en",
+          "priority": 1,
+          "reason": "Water treatment."
+        },
+        {
+          "family": "kiwix.zimgit-knots_en",
+          "priority": 2,
+          "reason": "Knots."
+        },
+        {
+          "family": "kiwix.theworldfactbook_en_all",
+          "priority": 2,
+          "reason": "Country reference."
+        },
+        {
+          "family": "kiwix.wikipedia_{lang}_all",
+          "variants": [
+            "mini",
+            "nopic"
+          ],
+          "priority": 3,
+          "reason": "General encyclopedia."
+        }
       ]
     },
     {
@@ -89,13 +319,54 @@
       "title": "Education and Learning",
       "description": "Textbooks, courses and simulations for self-study and teaching.",
       "items": [
-        {"family": "kiwix.wikibooks_{lang}_all", "variants": ["maxi", "nopic"], "priority": 1, "reason": "Open textbooks."},
-        {"family": "kiwix.wikiversity_{lang}_all", "variants": ["maxi", "nopic"], "priority": 2, "reason": "Learning resources."},
-        {"family": "kiwix.phet_{lang}_all", "priority": 1, "reason": "Interactive science simulations."},
-        {"family": "kiwix.libretexts.org_en_math", "priority": 2, "reason": "Mathematics textbooks."},
-        {"family": "kiwix.libretexts.org_en_phys", "priority": 2, "reason": "Physics textbooks."},
-        {"family": "kiwix.libretexts.org_en_chem", "priority": 3, "reason": "Chemistry textbooks."},
-        {"family": "kiwix.wikipedia_{lang}_all", "variants": ["maxi", "nopic", "mini"], "priority": 1, "reason": "General encyclopedia."}
+        {
+          "family": "kiwix.wikibooks_{lang}_all",
+          "variants": [
+            "maxi",
+            "nopic"
+          ],
+          "priority": 1,
+          "reason": "Open textbooks."
+        },
+        {
+          "family": "kiwix.wikiversity_{lang}_all",
+          "variants": [
+            "maxi",
+            "nopic"
+          ],
+          "priority": 2,
+          "reason": "Learning resources."
+        },
+        {
+          "family": "kiwix.phet_{lang}_all",
+          "priority": 1,
+          "reason": "Interactive science simulations."
+        },
+        {
+          "family": "kiwix.libretexts.org_en_math",
+          "priority": 2,
+          "reason": "Mathematics textbooks."
+        },
+        {
+          "family": "kiwix.libretexts.org_en_phys",
+          "priority": 2,
+          "reason": "Physics textbooks."
+        },
+        {
+          "family": "kiwix.libretexts.org_en_chem",
+          "priority": 3,
+          "reason": "Chemistry textbooks."
+        },
+        {
+          "family": "kiwix.wikipedia_{lang}_all",
+          "variants": [
+            "maxi",
+            "nopic",
+            "mini"
+          ],
+          "priority": 1,
+          "reason": "General encyclopedia."
+        }
       ]
     },
     {
@@ -103,13 +374,61 @@
       "title": "Community Knowledge Server",
       "description": "Broad coverage for a shared library serving many people on a local network.",
       "items": [
-        {"family": "kiwix.wikipedia_{lang}_all", "variants": ["maxi", "nopic", "mini"], "priority": 1, "reason": "General encyclopedia."},
-        {"family": "kiwix.wikipedia_{lang}_medicine", "variants": ["maxi", "nopic"], "priority": 1, "reason": "Medical encyclopedia."},
-        {"family": "kiwix.wiktionary_{lang}_all", "variants": ["nopic"], "priority": 2, "reason": "Dictionary."},
-        {"family": "kiwix.wikibooks_{lang}_all", "variants": ["maxi", "nopic"], "priority": 2, "reason": "Open textbooks."},
-        {"family": "kiwix.ifixit_{lang}_all", "priority": 2, "reason": "Repair guides."},
-        {"family": "kiwix.wikivoyage_{lang}_all", "variants": ["maxi", "nopic"], "priority": 3, "reason": "Travel guides."},
-        {"family": "kiwix.zimgit-post-disaster_en", "priority": 2, "reason": "Disaster recovery."}
+        {
+          "family": "kiwix.wikipedia_{lang}_all",
+          "variants": [
+            "maxi",
+            "nopic",
+            "mini"
+          ],
+          "priority": 1,
+          "reason": "General encyclopedia."
+        },
+        {
+          "family": "kiwix.wikipedia_{lang}_medicine",
+          "variants": [
+            "maxi",
+            "nopic"
+          ],
+          "priority": 1,
+          "reason": "Medical encyclopedia."
+        },
+        {
+          "family": "kiwix.wiktionary_{lang}_all",
+          "variants": [
+            "nopic"
+          ],
+          "priority": 2,
+          "reason": "Dictionary."
+        },
+        {
+          "family": "kiwix.wikibooks_{lang}_all",
+          "variants": [
+            "maxi",
+            "nopic"
+          ],
+          "priority": 2,
+          "reason": "Open textbooks."
+        },
+        {
+          "family": "kiwix.ifixit_{lang}_all",
+          "priority": 2,
+          "reason": "Repair guides."
+        },
+        {
+          "family": "kiwix.wikivoyage_{lang}_all",
+          "variants": [
+            "maxi",
+            "nopic"
+          ],
+          "priority": 3,
+          "reason": "Travel guides."
+        },
+        {
+          "family": "kiwix.zimgit-post-disaster_en",
+          "priority": 2,
+          "reason": "Disaster recovery."
+        }
       ]
     },
     {
@@ -117,14 +436,67 @@
       "title": "Comprehensive Reference Library",
       "description": "The largest editions of the major references, for drives of 1 TB and more.",
       "items": [
-        {"family": "kiwix.wikipedia_{lang}_all", "variants": ["maxi", "nopic"], "priority": 1, "reason": "General encyclopedia with images."},
-        {"family": "kiwix.wikipedia_{lang}_medicine", "variants": ["maxi"], "priority": 1, "reason": "Medical encyclopedia."},
-        {"family": "kiwix.wiktionary_{lang}_all", "variants": ["maxi", "nopic"], "priority": 2, "reason": "Dictionary."},
-        {"family": "kiwix.wikibooks_{lang}_all", "variants": ["maxi"], "priority": 2, "reason": "Open textbooks."},
-        {"family": "kiwix.wikisource_{lang}_all", "variants": ["maxi", "nopic"], "priority": 3, "reason": "Source texts."},
-        {"family": "kiwix.gutenberg_{lang}_all", "priority": 3, "reason": "Public-domain books."},
-        {"family": "kiwix.ifixit_{lang}_all", "priority": 2, "reason": "Repair guides."},
-        {"family": "kiwix.wikivoyage_{lang}_all", "variants": ["maxi"], "priority": 3, "reason": "Travel guides."}
+        {
+          "family": "kiwix.wikipedia_{lang}_all",
+          "variants": [
+            "maxi",
+            "nopic"
+          ],
+          "priority": 1,
+          "reason": "General encyclopedia with images."
+        },
+        {
+          "family": "kiwix.wikipedia_{lang}_medicine",
+          "variants": [
+            "maxi"
+          ],
+          "priority": 1,
+          "reason": "Medical encyclopedia."
+        },
+        {
+          "family": "kiwix.wiktionary_{lang}_all",
+          "variants": [
+            "maxi",
+            "nopic"
+          ],
+          "priority": 2,
+          "reason": "Dictionary."
+        },
+        {
+          "family": "kiwix.wikibooks_{lang}_all",
+          "variants": [
+            "maxi"
+          ],
+          "priority": 2,
+          "reason": "Open textbooks."
+        },
+        {
+          "family": "kiwix.wikisource_{lang}_all",
+          "variants": [
+            "maxi",
+            "nopic"
+          ],
+          "priority": 3,
+          "reason": "Source texts."
+        },
+        {
+          "family": "kiwix.gutenberg_{lang}_all",
+          "priority": 3,
+          "reason": "Public-domain books."
+        },
+        {
+          "family": "kiwix.ifixit_{lang}_all",
+          "priority": 2,
+          "reason": "Repair guides."
+        },
+        {
+          "family": "kiwix.wikivoyage_{lang}_all",
+          "variants": [
+            "maxi"
+          ],
+          "priority": 3,
+          "reason": "Travel guides."
+        }
       ]
     }
   ]

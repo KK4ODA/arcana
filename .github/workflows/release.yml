@@ -17,11 +17,14 @@ jobs:
           go-version-file: go.mod
       - name: Test
         run: scripts/fetch-kiwix.sh && go test -count=1 ./...
-      - name: Package
+      - name: Package (signed when the signing secret is configured)
+        env:
+          ARCANA_UPDATE_PUBKEY: ${{ vars.ARCANA_UPDATE_PUBKEY }}
+          ARCANA_SIGNING_KEY: ${{ secrets.ARCANA_SIGNING_KEY }}
         run: scripts/package.sh "${GITHUB_REF_NAME#v}"
       - name: Publish release (draft)
         env:
           GH_TOKEN: ${{ github.token }}
         # Drafts are reviewed and the release manifest signed offline by a
         # maintainer before publication (docs/adr/0011).
-        run: gh release create "$GITHUB_REF_NAME" dist/*.zip dist/*.sha256 --draft --title "Arcana $GITHUB_REF_NAME" --notes-file CHANGELOG.md
+        run: gh release create "$GITHUB_REF_NAME" dist/*.zip dist/*.sha256 dist/release.json* --draft --title "Arcana $GITHUB_REF_NAME" --notes-file CHANGELOG.md

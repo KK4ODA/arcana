@@ -4,6 +4,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -39,6 +40,13 @@ Usage:
   arcana import FILE... [--id ID] [--allow-unverified]
                                 Install archives from another drive (offline);
                                 verified against the catalog checksum
+  arcana import --from DIR [ID...] [--user-documents]
+                                Copy resources from an export or another library
+  arcana export --to DIR [ID...|--all] [--user-documents]
+                                Copy resources to a folder or drive (verified)
+  arcana manifest               Write manifest/library.json describing this library
+  arcana update stage DIR | apply | rollback | status
+                                Install a signed application update (offline)
   arcana volumes                List drives and their file systems
   arcana version                Print version information
 
@@ -73,6 +81,12 @@ func main() {
 		err = cmdGet(args)
 	case "import":
 		err = cmdImport(args)
+	case "export":
+		err = cmdExport(args)
+	case "manifest":
+		err = cmdManifest(args)
+	case "update":
+		err = cmdUpdate(args)
 	case "volumes":
 		err = cmdVolumes()
 	case "version", "--version", "-v":
@@ -279,7 +293,7 @@ func cmdInit(args []string) error {
 }
 
 var boolFlags = map[string]bool{"full": true, "lan": true, "read-only": true, "no-browser": true,
-	"allow-unverified": true, "online": true, "verbose": true}
+	"allow-unverified": true, "online": true, "verbose": true, "all": true, "user-documents": true}
 
 // reorder moves flags before positional arguments so "init DIR --label X"
 // works as users expect.
@@ -503,15 +517,20 @@ func cmdGet(args []string) error {
 }
 
 func cmdImport(args []string) error {
-	var id string
-	var allowUnverified, online bool
+	var id, from string
+	var allowUnverified, online, userDocs bool
 	c, fs, err := parseFlags("import", reorder(args), func(fs *flag.FlagSet) {
 		fs.StringVar(&id, "id", "", "")
+		fs.StringVar(&from, "from", "", "")
 		fs.BoolVar(&allowUnverified, "allow-unverified", false, "")
 		fs.BoolVar(&online, "online", false, "")
+		fs.BoolVar(&userDocs, "user-documents", false, "")
 	})
 	if err != nil {
 		return err
+	}
+	if from != "" {
+		return importCollection(c, from, fs.Args(), userDocs)
 	}
 	if fs.NArg() == 0 {
 		return errors.New("usage: arcana import FILE... [--id RESOURCE-ID] [--allow-unverified] [--online]")
@@ -535,6 +554,167 @@ func cmdImport(args []string) error {
 		return fmt.Errorf("%d file(s) not imported", failed)
 	}
 	return nil
+}
+
+func importCollection(c *commonFlags, from string, ids []string, userDocs bool) error {
+	a, done, err := openCLI(c)
+	if err != nil {
+		return err
+	}
+	defer done()
+	ctx := context.Background()
+	src, err := filepath.Abs(from)
+	if err != nil {
+		return err
+	}
+	m, plans, err := a.ScanSource(ctx, src)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Source: %s (%d resources)\n", m.SourceLabel, len(plans))
+	for _, p := range plans {
+		fmt.Printf("  %-10s %-40s %s\n", p.Action, p.ResourceID, p.Version)
+	}
+	t, err := a.StartImport(src, ids, userDocs)
+	if err != nil {
+		return err
+	}
+	return waitTask(a, t.ID)
+}
+
+func cmdExport(args []string) error {
+	var to string
+	var all, userDocs bool
+	c, fs, err := parseFlags("export", reorder(args), func(fs *flag.FlagSet) {
+		fs.StringVar(&to, "to", "", "")
+		fs.BoolVar(&all, "all", false, "")
+		fs.BoolVar(&userDocs, "user-documents", false, "")
+	})
+	if err != nil {
+		return err
+	}
+	if to == "" {
+		return errors.New("usage: arcana export --to DIR [ID...|--all] [--user-documents]")
+	}
+	a, done, err := openCLI(c)
+	if err != nil {
+		return err
+	}
+	defer done()
+	ids := fs.Args()
+	if all {
+		installed, _ := a.Store.ListInstalled(context.Background())
+		ids = nil
+		for _, in := range installed {
+			ids = append(ids, in.ResourceID)
+		}
+	}
+	dest, err := filepath.Abs(to)
+	if err != nil {
+		return err
+	}
+	t, err := a.StartExport(ids, dest, userDocs)
+	if err != nil {
+		return err
+	}
+	return waitTask(a, t.ID)
+}
+
+// waitTask prints progress of a background task until it finishes.
+func waitTask(a *app.App, id string) error {
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	for {
+		t, ok := a.Tasks.Get(id)
+		if !ok {
+			return errors.New("task disappeared")
+		}
+		if t.Total > 0 {
+			fmt.Printf("\r%-70s %5.1f%%", t.Message, 100*float64(t.Done)/float64(t.Total))
+		}
+		if t.State != "running" {
+			fmt.Println()
+			if t.Error != "" {
+				return errors.New(t.Error)
+			}
+			if t.Result != nil {
+				out, _ := json.MarshalIndent(t.Result, "", "  ")
+				fmt.Println(string(out))
+			}
+			return nil
+		}
+		select {
+		case <-ctx.Done():
+			a.Tasks.Cancel(id)
+			fmt.Println("\nCancelled.")
+			return nil
+		case <-time.After(300 * time.Millisecond):
+		}
+	}
+}
+
+func cmdManifest(args []string) error {
+	c, _, err := parseFlags("manifest", args, nil)
+	if err != nil {
+		return err
+	}
+	a, done, err := openCLI(c)
+	if err != nil {
+		return err
+	}
+	defer done()
+	p, err := a.WriteLibraryManifest(context.Background())
+	if err != nil {
+		return err
+	}
+	fmt.Println("Wrote", p)
+	return nil
+}
+
+func cmdUpdate(args []string) error {
+	if len(args) == 0 {
+		return errors.New("usage: arcana update stage DIR | apply | rollback | status")
+	}
+	sub := args[0]
+	c, fs, err := parseFlags("update", reorder(args[1:]), nil)
+	if err != nil {
+		return err
+	}
+	a, done, err := openCLI(c)
+	if err != nil {
+		return err
+	}
+	defer done()
+	switch sub {
+	case "status":
+		out, _ := json.MarshalIndent(a.AppUpdateInfo(), "", "  ")
+		fmt.Println(string(out))
+		return nil
+	case "stage":
+		if fs.NArg() != 1 {
+			return errors.New("usage: arcana update stage DIR")
+		}
+		m, err := a.StageAppUpdateFromDir(context.Background(), fs.Arg(0))
+		if err != nil {
+			return err
+		}
+		fmt.Printf("Verified and staged version %s. Run: arcana update apply\n", m.Version)
+		return nil
+	case "apply":
+		st, err := a.Updater.Apply()
+		if err != nil {
+			return err
+		}
+		fmt.Printf("Installed version %s (%d files). Start Arcana again to use it.\n", st.AppliedVersion, len(st.AppliedFiles))
+		return nil
+	case "rollback":
+		if _, err := a.Updater.Rollback(); err != nil {
+			return err
+		}
+		fmt.Println("Restored the previous version.")
+		return nil
+	}
+	return fmt.Errorf("unknown update command %q", sub)
 }
 
 func cmdVolumes() error {

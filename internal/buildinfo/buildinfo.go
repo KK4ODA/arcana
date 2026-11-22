@@ -11,6 +11,10 @@ var (
 	Commit = "unknown"
 	// Date is the build date (UTC, RFC 3339).
 	Date = "unknown"
+	// UpdateKeys lists base64 Ed25519 public keys trusted to sign release
+	// manifests, comma-separated. Release builds set it with -ldflags;
+	// development builds have none and cannot verify updates.
+	UpdateKeys = ""
 )
 
 // Platform returns the directory name used for this build's binaries inside

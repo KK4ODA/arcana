@@ -16,8 +16,14 @@ Arcana/                        ← library root; any folder works, "Arcana" at d
 ├─ state/arcana.db (+-wal)     ← SQLite index (rebuildable cache)
 ├─ state/arcana.lock           ← OS-level lock (released automatically on crash)
 ├─ catalog/<provider>.json     ← last good catalog per provider (for offline browsing)
-├─ index/                      ← search indexes for non-ZIM content (Phase 2; rebuildable)
-├─ user/                       ← settings.json, documents/, notes, bookmarks, tracks (never touched by content ops)
+├─ index/documents.db          ← full-text index of documents (rebuildable cache)
+├─ user/                       ← never touched by content operations
+│  ├─ settings.json            ← settings (unknown keys preserved)
+│  ├─ bookmarks.json, favorites.json, recent.json (+ .bak previous copies)
+│  ├─ notes/<id>.md            ← one Markdown file per note; notes/deleted/ keeps removed notes
+│  ├─ documents/               ← the user's own files; .deleted/ keeps removed ones
+│  └─ presets/user-*.json      ← saved collections
+├─ manifest/library.json       ← portable description of installed resources (on request)
 └─ logs/arcana.log             ← diagnostics (rotated at 5 MB)
 ```
 
@@ -136,7 +142,7 @@ erDiagram
 - A verification statement, e.g. "sha256 matched the value published by
   kiwix", and an `unverified` flag.
 
-## Portable manifest and transfer (Phase 2 design)
+## Portable manifest and transfer (implemented)
 
 - **Library manifest.** `manifest/library.json` holds the library ID and
   label, then per resource the ID, version, files, SHA-256 and license

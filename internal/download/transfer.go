@@ -165,7 +165,12 @@ func (m *Manager) execute(ctx context.Context, j *store.Job, rs *runState, persi
 		j.State = store.JobResolving
 		persist()
 		res := j.Resource
-		if r, ok := m.opts.Resolvers[res.Provider]; ok {
+		r, ok := m.opts.Resolvers[res.Provider]
+		if m.opts.ResolverFor != nil {
+			r = m.opts.ResolverFor(res.Provider)
+			ok = r != nil
+		}
+		if ok {
 			resolved, err := r.Resolve(ctx, m.opts.Fetcher, res)
 			if err != nil {
 				return classifyNetErr(err, "resolve download locations")
