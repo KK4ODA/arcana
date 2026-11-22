@@ -129,8 +129,9 @@ erDiagram
   `data` (the sidecar JSON).
 - **`jobs`:** id, resource_id, state, timestamps, and `data` (the job JSON,
   including resolved resource, file index, offset, hash state, validator,
-  mirror index, bad mirrors, attempts, integrity failures, next attempt,
-  completed files, and the version it replaces).
+  mirror index, bad mirrors, attempts, integrity failures (and whether one
+  followed a download from several mirrors), next attempt, completed files,
+  and the version it replaces).
 - **`providers`:** id, name, fetched_at, resource_count, last_attempt,
   last_error.
 

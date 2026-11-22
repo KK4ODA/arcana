@@ -3,6 +3,21 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
+## 0.6.2 — Unreleased
+
+### Changed
+- **Much faster downloads.** Large files now download in 4 MiB pieces over
+  up to six connections and several mirrors at once. Arcana measures each
+  mirror and gives most of the work to the fastest one, and re-requests a
+  piece from a faster mirror rather than waiting for a slow one. Pieces
+  are still written and checked in order, so pausing, resuming after a
+  crash and verification work as before. On a 306 MB Kiwix file this went
+  from 2.4–5.8 MB/s to 64–80 MB/s (ADR-0019).
+- **Faster map regions.** Map tiles are fetched with up to eight requests
+  in flight instead of one at a time; a test region went from 30 s to 4 s.
+- The Downloads view names the main mirror in use and how many others
+  help.
+
 ## 0.6.1 — 2026-11-22
 
 Reading ZIM archives now works on Windows computers that do not have the

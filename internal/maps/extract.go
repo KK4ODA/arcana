@@ -473,6 +473,71 @@ func (p *Plan) OutputSize() uint64 {
 	return uint64(len(prefix)) + total
 }
 
+// Tile data is fetched with several requests in flight and written in
+// order. A region at high zoom levels needs thousands of separate ranges;
+// asking for each only after the previous one arrived would make the round
+// trip to the server, not the connection's speed, the limit.
+var (
+	extractParallel        = 8
+	extractAhead    uint64 = 96 << 20 // bytes fetched but not yet written
+)
+
+// prefetchRanges starts fetching ranges[from:] in the background. get(i)
+// returns range i (called in order); stop cancels what is still running.
+func prefetchRanges(ctx context.Context, rr RangeReader, base uint64, ranges []Range, from int) (get func(int) ([]byte, error), stop func()) {
+	ctx, cancel := context.WithCancel(ctx)
+	type result struct {
+		buf []byte
+		err error
+	}
+	var (
+		mu       sync.Mutex
+		next     = from
+		inflight int
+		ahead    uint64
+		results  = make([]chan result, len(ranges))
+	)
+	var launch func()
+	launch = func() { // with mu held
+		for next < len(ranges) && inflight < extractParallel &&
+			(ahead == 0 || ahead+ranges[next].Length <= extractAhead) {
+			i := next
+			next++
+			inflight++
+			ahead += ranges[i].Length
+			ch := make(chan result, 1)
+			results[i] = ch
+			go func() {
+				buf, err := rr.ReadRange(ctx, base+ranges[i].Offset, ranges[i].Length)
+				ch <- result{buf, err}
+				mu.Lock()
+				inflight--
+				launch()
+				mu.Unlock()
+			}()
+		}
+	}
+	get = func(i int) ([]byte, error) {
+		mu.Lock()
+		launch()
+		ch := results[i]
+		mu.Unlock()
+		var r result
+		select {
+		case r = <-ch:
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		}
+		mu.Lock()
+		ahead -= ranges[i].Length
+		results[i] = nil
+		launch()
+		mu.Unlock()
+		return r.buf, r.err
+	}
+	return get, cancel
+}
+
 // Extract downloads the planned tiles straight into the output archive (its
 // header and directories are computed first), checkpointing progress next
 // to it so an interrupted extraction resumes while the source is unchanged.
@@ -520,9 +585,11 @@ func Extract(ctx context.Context, rr RangeReader, p *Plan, out string, progress 
 		written += uint64(uniq[offs[oi]])
 		oi++
 	}
+	get, stop := prefetchRanges(ctx, rr, p.Header.DataOffset, p.Ranges, st.RangesDone)
+	defer stop()
 	for ri := st.RangesDone; ri < len(p.Ranges); ri++ {
 		r := p.Ranges[ri]
-		buf, err := rr.ReadRange(ctx, p.Header.DataOffset+r.Offset, r.Length)
+		buf, err := get(ri)
 		if err != nil {
 			_ = saveState()
 			return "", err

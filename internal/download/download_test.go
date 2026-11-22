@@ -38,6 +38,8 @@ type fixture struct {
 	cancel  context.CancelFunc
 	// extractors are passed to the manager.
 	extractors map[string]Extractor
+	// opts, when set, adjusts the manager's options.
+	opts func(*Options)
 }
 
 func newFixture(t testing.TB) *fixture {
@@ -68,7 +70,7 @@ func (f *fixture) start() {
 	settings := library.DefaultSettings()
 	settings.AllowPrivateNetworkDownloads = true
 	settings.ReserveBytes = 1 << 20
-	f.mgr = New(Options{
+	o := Options{
 		Store:    f.st,
 		Layout:   f.lib,
 		Content:  f.content,
@@ -83,7 +85,11 @@ func (f *fixture) start() {
 		MaxHTTPAttempts:    4,
 		StallTimeout:       2 * time.Second,
 		Extractors:         f.extractors,
-	})
+	}
+	if f.opts != nil {
+		f.opts(&o)
+	}
+	f.mgr = New(o)
 	ctx, cancel := context.WithCancel(context.Background())
 	f.cancel = cancel
 	if err := f.mgr.Start(ctx); err != nil {

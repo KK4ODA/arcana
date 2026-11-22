@@ -113,7 +113,11 @@ func (m *Manager) run(ctx context.Context, j *store.Job, rs *runState) {
 		log.Error("failed", "err", err)
 	case kindIntegrity:
 		j.IntegrityFailures++
-		if j.IntegrityFailures >= 2 {
+		limit := 2
+		if j.MixedIntegrityFailure {
+			limit = 3
+		}
+		if j.IntegrityFailures >= limit {
 			j.State = store.JobFailed
 			m.removeStaging(j.ID)
 			log.Error("failed integrity verification twice", "err", err)
@@ -445,6 +449,17 @@ func (m *Manager) transferFile(ctx context.Context, j *store.Job, rs *runState, 
 	rs.bytesDone.Store(baseDone + offset)
 
 	complete := f.Size > 0 && offset == f.Size
+	if !complete && m.useSegments(j, f) {
+		err := m.fetchSegmented(ctx, j, rs, f, fh, hs, baseDone, persist)
+		switch {
+		case err == nil:
+			complete = true
+		case errors.Is(err, errNoRanges):
+			m.log.Info("mirrors do not serve byte ranges; downloading over one connection", "file", f.Name)
+		default:
+			return store.InstalledFile{}, err
+		}
+	}
 	var lastErr error
 	if !complete {
 		mirrors := f.Mirrors
@@ -517,6 +532,9 @@ func (m *Manager) transferFile(ctx context.Context, j *store.Job, rs *runState, 
 		got[k] = hex.EncodeToString(h.Sum(nil))
 	}
 	if algo != "" && got[algo] != want {
+		if m.useSegments(j, f) {
+			j.MixedIntegrityFailure = true
+		}
 		m.resetFile(fh, j)
 		return store.InstalledFile{}, fail(kindIntegrity,
 			"%s failed verification: %s is %s, publisher states %s", f.Name, algo, got[algo], want)

@@ -18,7 +18,9 @@ too slow on USB.
 - **Retry.** Network errors retry indefinitely with capped jittered
   backoff; server errors retry a bounded number of times; 4xx responses
   reject a mirror. A hash mismatch restarts once from another mirror, then
-  fails.
+  fails (one more attempt after a download assembled from several mirrors;
+  see ADR-0019, which also describes how large files are fetched in
+  pieces).
 - **Publish.** Rename into `content/<id>/<version>/`, commit the sidecar,
   then remove the old version.
 - **Implementation.** Built in Go rather than with aria2, which cannot

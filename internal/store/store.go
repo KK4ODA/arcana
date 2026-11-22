@@ -685,9 +685,13 @@ type Job struct {
 	Attempts    int      `json:"attempts"`
 	// IntegrityFailures counts verification failures; a second failure
 	// fails the job rather than retrying forever.
-	IntegrityFailures int       `json:"integrityFailures,omitempty"`
-	Error             string    `json:"error,omitempty"`
-	NextAttempt       time.Time `json:"nextAttempt,omitempty"`
+	IntegrityFailures int `json:"integrityFailures,omitempty"`
+	// MixedIntegrityFailure records that a failed check followed a download
+	// whose pieces came from several mirrors: the faulty mirror is unknown,
+	// so one more attempt (over one connection, mirror by mirror) is allowed.
+	MixedIntegrityFailure bool      `json:"mixedIntegrityFailure,omitempty"`
+	Error                 string    `json:"error,omitempty"`
+	NextAttempt           time.Time `json:"nextAttempt,omitempty"`
 	// Done holds per-file results for files already completed.
 	Done      []InstalledFile `json:"done,omitempty"`
 	CreatedAt time.Time       `json:"createdAt"`

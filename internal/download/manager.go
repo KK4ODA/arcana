@@ -71,6 +71,16 @@ type Options struct {
 	MaxHTTPAttempts int
 	// StallTimeout aborts a transfer that receives no data for this long.
 	StallTimeout time.Duration
+	// Connections is how many requests one large download may run at once
+	// (pieces from several mirrors); ConnectionsPerMirror caps each mirror.
+	// SegmentSize is the piece size and SegmentWindow how many pieces may be
+	// fetched ahead of the write position (memory use is about
+	// SegmentSize × SegmentWindow per download). Connections of 1 downloads
+	// every file over a single connection.
+	Connections          int
+	ConnectionsPerMirror int
+	SegmentSize          int64
+	SegmentWindow        int
 	// ReadOnly disables all writes.
 	ReadOnly bool
 }
@@ -80,6 +90,8 @@ type Manager struct {
 	opts    Options
 	log     *slog.Logger
 	limiter *rate.Limiter
+	// segClient makes piece requests over separate HTTP/1.1 connections.
+	segClient *http.Client
 
 	mu      sync.Mutex
 	running map[string]*runState
@@ -124,6 +136,18 @@ func New(opts Options) *Manager {
 	if opts.StallTimeout <= 0 {
 		opts.StallTimeout = 90 * time.Second
 	}
+	if opts.Connections <= 0 {
+		opts.Connections = 6
+	}
+	if opts.ConnectionsPerMirror <= 0 {
+		opts.ConnectionsPerMirror = 3
+	}
+	if opts.SegmentSize <= 0 {
+		opts.SegmentSize = 4 << 20
+	}
+	if opts.SegmentWindow <= 0 {
+		opts.SegmentWindow = 16
+	}
 	if opts.Log == nil {
 		opts.Log = slog.Default()
 	}
@@ -148,6 +172,7 @@ func New(opts Options) *Manager {
 		wake:    make(chan struct{}, 1),
 		limiter: rate.NewLimiter(rate.Inf, 256<<10),
 	}
+	m.segClient = segmentClient(opts.Client)
 	m.applyBandwidth(opts.Settings().BandwidthLimit)
 	return m
 }

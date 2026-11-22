@@ -32,6 +32,8 @@ Windows or macOS hardware** (see [Status](#status)).
   …). Arcana recommends editions that fit your drive and explains each
   choice.
 - **Downloads you can trust.**
+  - Large files download in pieces from several mirrors at once, with
+    most of the work going to whichever mirror is fastest for you.
   - Downloads resume after network failures, crashes and power loss, and
     retry across mirrors.
   - Every file is verified against the publisher's SHA-256 before it is
