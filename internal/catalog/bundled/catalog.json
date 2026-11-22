@@ -1,0 +1,66 @@
+{
+  "format": "arcana-catalog",
+  "formatVersion": 1,
+  "title": "Arcana curated catalog",
+  "generated": "2026-11-22T00:00:00Z",
+  "resources": [
+    {
+      "id": "arcana.sample",
+      "provider": "arcana",
+      "title": "Arcana sample library",
+      "description": "A very small archive (Morse code, spelling alphabet, Q codes, coordinate formats, unit conversions) used to check that offline browsing and search work. Written for Arcana and dedicated to the public domain.",
+      "category": "reference",
+      "family": "arcana.sample",
+      "variant": "standard",
+      "publisher": "Arcana project",
+      "sourceUrl": "https://github.com/KK4ODA/arcana",
+      "version": "2026-11",
+      "published": "2026-11-22",
+      "lastVerified": "2026-11-22T00:00:00Z",
+      "languages": ["en"],
+      "coverage": {"scope": "none"},
+      "format": "zim",
+      "files": [{
+        "name": "arcana-sample_en_2026-11.zim",
+        "size": 62843,
+        "hashes": {"sha256": "14b4d4f0e4710b42bd89de45254e99cf84f7d0e859eb6ec280f7f5cdd4e8010c"},
+        "mirrors": [{"url": "https://raw.githubusercontent.com/KK4ODA/arcana/main/testdata/sample/arcana-sample_en_2026-11.zim"}]
+      }],
+      "license": {"id": "CC0-1.0", "name": "Creative Commons Zero 1.0", "url": "https://creativecommons.org/publicdomain/zero/1.0/", "redistribution": "permitted", "verified": true},
+      "capabilities": {"fullTextSearch": true, "titleSearch": true},
+      "media": {"pictures": false, "videos": false, "detail": "full"},
+      "updateStrategy": "snapshot-replace"
+    },
+    {
+      "id": "arcana.us-cfr47-part97",
+      "provider": "arcana",
+      "title": "47 CFR Part 97 — Amateur Radio Service (United States)",
+      "description": "The US federal rules governing the amateur radio service: licensing, station operation, frequency privileges and technical standards. Annual edition of the Code of Federal Regulations as published by the US Government Publishing Office.",
+      "category": "radio-communications",
+      "subcategory": "regulations",
+      "family": "arcana.us-cfr47-part97",
+      "variant": "standard",
+      "variantLabel": "Annual edition (PDF)",
+      "publisher": "US Government Publishing Office",
+      "creator": "Federal Communications Commission",
+      "sourceUrl": "https://www.govinfo.gov/app/collection/cfr",
+      "version": "2025",
+      "published": "2025-10-01",
+      "lastVerified": "2026-11-22T00:00:00Z",
+      "languages": ["en"],
+      "coverage": {"scope": "regional", "regions": ["US"]},
+      "format": "pdf",
+      "files": [{
+        "name": "CFR-2025-title47-vol5-part97.pdf",
+        "size": 355690,
+        "hashes": {"sha256": "4e8f45e96995535627470506db9e2d2ba698e74c9ea170010b88c740c00b8653"},
+        "mirrors": [{"url": "https://www.govinfo.gov/content/pkg/CFR-2025-title47-vol5/pdf/CFR-2025-title47-vol5-part97.pdf"}]
+      }],
+      "license": {"id": "LicenseRef-PD-USGov", "name": "US federal government work (public domain in the US)", "redistribution": "permitted", "verified": true, "notes": "Works of the US federal government are not subject to US copyright (17 U.S.C. 105)."},
+      "capabilities": {"fullTextSearch": false, "titleSearch": false},
+      "media": {"pictures": false, "videos": false, "detail": "full"},
+      "updateStrategy": "snapshot-replace",
+      "warnings": [{"kind": "regulatory", "text": "Jurisdiction: United States. This is the edition revised as of 1 October 2025; rules may have been amended since. The electronic CFR (ecfr.gov) has the current text."}]
+    }
+  ]
+}

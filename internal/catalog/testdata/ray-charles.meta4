@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metalink xmlns="urn:ietf:params:xml:ns:metalink">
+  <generator>MirrorBrain/2.19.0</generator>
+  <file name="wikipedia_en_ray-charles_mini_2026-10.zim">
+    <size>26229009</size>
+    <hash type="md5">11652dc0f7d9a9d7e457e5bfcc9bc60f</hash>
+    <hash type="sha-1">a505b3415273ebd46c494f902627db724a97b129</hash>
+    <hash type="sha-256">ad37a9355a356b12cc4f2e339fcd15940dd93099de0c2851b6a25cc5b9c33c31</hash>
+    <url location="us" priority="2">https://dumps.wikimedia.org/kiwix/zim/wikipedia/wikipedia_en_ray-charles_mini_2026-10.zim</url>
+    <url location="us" priority="1">https://wi.mirror.driftle.ss/kiwix/zim/wikipedia/wikipedia_en_ray-charles_mini_2026-10.zim</url>
+    <url location="xx" priority="3">ftp://ftp.example/not-http.zim</url>
+  </file>
+</metalink>

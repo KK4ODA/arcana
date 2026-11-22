@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/terms/" xmlns:opds="https://specs.opds.io/opds-1.2" xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">
+  <id>fixture</id>
+  <title>All Entries</title>
+  <totalResults>5</totalResults>
+  <entry>
+    <id>urn:uuid:1069cd95-bab8-1494-b6ec-f402f990833b</id>
+    <title>Ray Charles</title>
+    <updated>2026-10-31T00:00:00Z</updated>
+    <summary>Wikipedia articles about Ray Charles</summary>
+    <language>eng</language>
+    <name>wikipedia_en_ray-charles</name>
+    <flavour>mini</flavour>
+    <category>wikipedia</category>
+    <tags>wikipedia;_category:wikipedia;_pictures:no;_videos:no;_details:no;_ftindex:yes</tags>
+    <articleCount>25562</articleCount>
+    <mediaCount>135</mediaCount>
+    <author><name>Wikipedia</name></author>
+    <publisher><name>openZIM</name></publisher>
+    <dc:issued>2026-10-31T00:00:00Z</dc:issued>
+    <link rel="http://opds-spec.org/acquisition/open-access" type="application/x-zim" href="https://lb.download.kiwix.org/zim/wikipedia/wikipedia_en_ray-charles_mini_2026-10.zim.meta4" length="26229760" />
+  </entry>
+  <entry>
+    <id>urn:uuid:2a6a29b1-0000-0000-0000-000000000001</id>
+    <title>Wikipedia</title>
+    <updated>2026-08-01T00:00:00Z</updated>
+    <summary>The free encyclopedia</summary>
+    <language>eng</language>
+    <name>wikipedia_en_all</name>
+    <flavour>maxi</flavour>
+    <category>wikipedia</category>
+    <tags>wikipedia;_category:wikipedia;_pictures:yes;_videos:no;_details:yes;_ftindex:yes</tags>
+    <articleCount>6900000</articleCount>
+    <mediaCount>5000000</mediaCount>
+    <author><name>Wikipedia</name></author>
+    <dc:issued>2026-08-01T00:00:00Z</dc:issued>
+    <link rel="http://opds-spec.org/acquisition/open-access" type="application/x-zim" href="https://lb.download.kiwix.org/zim/wikipedia/wikipedia_en_all_maxi_2026-08.zim.meta4" length="127418000000" />
+  </entry>
+  <entry>
+    <id>urn:uuid:2a6a29b1-0000-0000-0000-000000000002</id>
+    <title>Medical Wikipedia</title>
+    <updated>2026-10-01T00:00:00Z</updated>
+    <summary>Medicine articles</summary>
+    <language>eng</language>
+    <name>wikipedia_en_medicine</name>
+    <flavour>nopic</flavour>
+    <category>wikipedia</category>
+    <tags>_ftindex:yes;_pictures:no</tags>
+    <articleCount>70000</articleCount>
+    <mediaCount>10</mediaCount>
+    <dc:issued>2026-10-01T00:00:00Z</dc:issued>
+    <link rel="http://opds-spec.org/acquisition/open-access" type="application/x-zim" href="/zim/wikipedia/wikipedia_en_medicine_nopic_2026-10.zim.meta4" length="1048000000" />
+  </entry>
+  <entry>
+    <id>urn:uuid:2a6a29b1-0000-0000-0000-000000000003</id>
+    <title>Bash docs</title>
+    <updated>2026-10-05T00:00:00Z</updated>
+    <summary>Bash documentation</summary>
+    <language>eng</language>
+    <name>devdocs_en_bash</name>
+    <flavour></flavour>
+    <category></category>
+    <tags>devdocs;_ftindex:yes</tags>
+    <articleCount>100</articleCount>
+    <mediaCount>0</mediaCount>
+    <link rel="http://opds-spec.org/acquisition/open-access" type="application/x-zim" href="https://lb.download.kiwix.org/zim/devdocs/devdocs_en_bash_2026-10.zim.meta4" length="572416" />
+  </entry>
+  <entry>
+    <id>urn:uuid:evil</id>
+    <title>Hostile entry</title>
+    <updated>2026-10-05T00:00:00Z</updated>
+    <language>eng</language>
+    <name>../../etc/passwd</name>
+    <link rel="http://opds-spec.org/acquisition/open-access" type="application/x-zim" href="https://evil.example/x/..%2f..%2fbad.zim.meta4" length="1" />
+  </entry>
+</feed>
