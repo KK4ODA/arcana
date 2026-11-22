@@ -21,6 +21,7 @@ import (
 	"io"
 	"math"
 	"net/http"
+	"net/http/httptrace"
 	"os"
 	"sort"
 	"strings"
@@ -68,7 +69,7 @@ type segAttempt struct {
 	cancel context.CancelFunc
 	begin  time.Time
 	got    atomic.Int64 // bytes received so far
-	first  atomic.Int64 // when the first byte arrived (UnixNano), 0 before
+	ready  atomic.Int64 // when the connection was ready (UnixNano), 0 before
 }
 
 type segMirror struct {
@@ -357,10 +358,11 @@ func (t *segTransfer) worker(ctx context.Context) {
 			}
 			mi.fails = 0
 			mi.bytes += int64(len(data))
-			// The rate counts from the first byte: connection setup is paid
-			// once per connection, not per piece.
+			// The rate counts from the moment the connection was ready: the
+			// wait for each response is part of a piece's cost, but setting
+			// up a connection (TCP, TLS, proxy) is paid once, not per piece.
 			from := att.begin
-			if ns := att.first.Load(); ns != 0 {
+			if ns := att.ready.Load(); ns != 0 {
 				from = time.Unix(0, ns)
 			}
 			r := float64(len(data)) / max(time.Since(from).Seconds(), 1e-3)
@@ -525,6 +527,10 @@ func (t *segTransfer) fetchSegment(ctx context.Context, seg *segment, att *segAt
 	req.Header.Set("Accept-Encoding", "identity")
 	req.Header.Set("Range", fmt.Sprintf("bytes=%d-%d", seg.start, seg.end-1))
 
+	trace := &httptrace.ClientTrace{GotConn: func(httptrace.GotConnInfo) {
+		att.ready.Store(time.Now().UnixNano())
+	}}
+	req = req.WithContext(httptrace.WithClientTrace(req.Context(), trace))
 	resp, err := m.segClient.Do(req)
 	if err != nil {
 		return nil, classifyNetErr(err, "connect to "+mi.host)
@@ -562,9 +568,6 @@ func (t *segTransfer) fetchSegment(ctx context.Context, seg *segment, att *segAt
 			stall.Reset(m.opts.StallTimeout)
 			if err := m.throttle(ctx, k); err != nil {
 				return nil, err
-			}
-			if n == 0 {
-				att.first.Store(time.Now().UnixNano())
 			}
 			n += k
 			att.got.Store(int64(n))

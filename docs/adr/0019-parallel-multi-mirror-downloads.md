@@ -24,7 +24,9 @@ arrived.
   per mirror, using HTTP/1.1 so each request gets its own connection.
 - **Mirror choice.** Each of the publisher's first six mirrors gets one
   piece to measure it; then each new piece goes to the fastest measured
-  mirror with a free connection (speed counted from the first byte).
+  mirror with a free connection. Speed is counted from the moment the
+  connection is ready, so each request's wait counts but connection setup
+  (TCP, TLS, proxy) does not.
   Mirrors slower than a quarter of the best are left alone.
 - **No straggler waits.** When nothing new can start, a piece still in
   flight is requested again from a faster mirror if that would finish it
