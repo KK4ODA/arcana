@@ -20,8 +20,10 @@ import (
 	"github.com/KK4ODA/arcana/internal/docs"
 	"github.com/KK4ODA/arcana/internal/download"
 	"github.com/KK4ODA/arcana/internal/fsutil"
+	"github.com/KK4ODA/arcana/internal/gps"
 	"github.com/KK4ODA/arcana/internal/kiwix"
 	"github.com/KK4ODA/arcana/internal/library"
+	"github.com/KK4ODA/arcana/internal/maps"
 	"github.com/KK4ODA/arcana/internal/storage"
 	"github.com/KK4ODA/arcana/internal/store"
 	"github.com/KK4ODA/arcana/internal/tasks"
@@ -53,6 +55,9 @@ type App struct {
 	Tasks     *tasks.Manager
 	Updater   *appupdate.Updater
 	reindex   chan struct{}
+	maps      *mapState
+	GPS       *gps.Manager
+	runCtx    context.Context
 
 	opts         Options
 	refreshMu    sync.Mutex
@@ -90,7 +95,7 @@ func Open(root string, opts Options) (*App, error) {
 		return nil, err
 	}
 	a.Content = &content.Manager{Layout: lib.Layout, Store: a.Store, Log: log}
-	a.Content.OnChange = func() { a.reloadKiwix(); a.RequestReindex() }
+	a.Content.OnChange = func() { a.reloadKiwix(); a.reloadMaps(); a.RequestReindex() }
 	a.reindex = make(chan struct{}, 1)
 	a.Tasks = tasks.New(context.Background())
 	a.Updater = &appupdate.Updater{Lib: lib, Keys: appupdate.TrustedKeys()}
@@ -102,6 +107,11 @@ func Open(root string, opts Options) (*App, error) {
 		a.Close()
 		return nil, err
 	}
+	if err := a.openMaps(); err != nil {
+		a.Close()
+		return nil, err
+	}
+	a.openGPS()
 
 	ctx := context.Background()
 	// Sidecars are the source of truth for installed content; re-index on
@@ -128,6 +138,7 @@ func Open(root string, opts Options) (*App, error) {
 		ResolverFor: func(p string) catalog.Resolver { return a.resolvers()[p] },
 		Fetcher:     a.Fetcher,
 		Client:      client,
+		Extractors:  map[string]download.Extractor{maps.MethodExtract: a.mapExtractor},
 		Log:         log,
 		ReadOnly:    lib.ReadOnly,
 	})
@@ -148,11 +159,15 @@ func (a *App) note(s string) { a.StartupNotes = append(a.StartupNotes, s) }
 // Start begins background services.
 func (a *App) Start(ctx context.Context) error {
 	ctx, a.cancel = context.WithCancel(ctx)
+	a.runCtx = ctx
 	if err := a.Downloads.Start(ctx); err != nil {
 		return err
 	}
 	a.Tasks = tasks.New(ctx)
 	a.reloadKiwix()
+	a.reloadMaps()
+	go a.placesLoop(ctx)
+	a.ApplyGPSSettings()
 	go a.reindexLoop(ctx)
 	go a.autoRefreshLoop(ctx)
 	a.RequestReindex()
@@ -168,12 +183,16 @@ func (a *App) Close() {
 	if a.Downloads != nil {
 		a.Downloads.Stop()
 	}
+	if a.GPS != nil {
+		a.GPS.Stop()
+	}
 	if a.Kiwix != nil {
 		a.Kiwix.Stop()
 	}
 	if a.Docs != nil {
 		a.Docs.Close()
 	}
+	a.closeMaps()
 	if a.Store != nil {
 		a.Store.Close()
 	}
@@ -235,6 +254,9 @@ func (a *App) Providers() []catalog.Provider {
 	if s.Catalog.GutenbergEnabled {
 		ps = append(ps, &catalog.GutenbergProvider{Mirror: s.Catalog.GutenbergMirror})
 	}
+	if mp := a.MapProvider(); mp != nil {
+		ps = append(ps, mp)
+	}
 	for _, f := range s.Catalog.Feeds {
 		if f.Enabled {
 			ps = append(ps, &catalog.FeedProvider{ProviderID: f.ID, ProviderName: f.Name, URL: f.URL})
@@ -274,15 +296,20 @@ func (a *App) loadCatalogCaches(ctx context.Context) error {
 	if err := a.Store.ReplaceProviderResources(ctx, b.ID(), b.Name(), valid, time.Now()); err != nil {
 		return err
 	}
-	entries, err := os.ReadDir(a.Lib.CatalogCache())
-	if err != nil {
-		return nil
-	}
 	existing := map[string]string{}
 	if ps, err := a.Store.Providers(ctx); err == nil {
 		for _, p := range ps {
 			existing[p.ID] = p.FetchedAt
 		}
+	}
+	defer func() {
+		if err := a.loadMapCatalog(ctx, existing); err != nil {
+			a.Log.Warn("map regions", "err", err)
+		}
+	}()
+	entries, err := os.ReadDir(a.Lib.CatalogCache())
+	if err != nil {
+		return nil
 	}
 	for _, e := range entries {
 		if e.IsDir() || !strings.HasSuffix(e.Name(), ".json") {

@@ -67,19 +67,23 @@ Deliverables are in `docs/design/` and `docs/adr/`:
 | Saved custom presets | **Done** (`user/presets/`); geography step moves to Phase 3 with map regions |
 | Scheduled catalog refresh (opt-in) | **Done**; off by default |
 
-## Phase 3 — Offline maps and GPS · Planned
+## Phase 3 — Offline maps and GPS · Done (0.3.0), except 3b terrain/overlays and 3c routing
 
 **Dependencies:** the Phase 2 adapters (for GPX in the library) and the
-Phase 1 content origin.
+Phase 1 content origin. Details: [05-maps-gps.md](05-maps-gps.md#implementation-status-phase-3).
 
-| Milestone | Acceptance |
+| Milestone | Status |
 |---|---|
-| `maps` provider with regional PMTiles (overview/standard/detailed) and size estimates | Region download verified like any resource |
-| Map view: MapLibre (vendored), Protomaps style/glyphs/sprites offline, attribution | Acceptance step 5 passes in the network namespace |
-| GPS: serial/COM, UDP, TCP, gpsd, GPX playback, manual; fix state machine; SSE | Acceptance step 6: simulated NMEA over UDP shows on map, stale/lost states correct |
-| Waypoints, tracks, GPX import/export, distance and bearing | Stored under `user/`; round-trip GPX tests |
-| 3b: gazetteer, terrain, emergency overlays, custom bbox | Place search works offline |
-| 3c: routing evaluation (Valhalla sidecar; BRouter alternative) | Decision ADR with measured sizes and Pi 5 memory |
+| `maps` provider with regional PMTiles (overview/standard/detailed) and sizes | **Done.** 541 regions with sizes measured against planet build 20261121; extracted on demand from the newest build through the download manager (resumable, ETag-pinned, structure-checked, SHA-256 recorded; labelled unverified because no publisher hash exists). Real extractions: Luxembourg z13 (34.5 MB) and the world z6 overview (45.1 MB) in 12 s |
+| Map view: MapLibre (vendored), Protomaps style/glyphs/sprites offline, attribution | **Done.** Acceptance step 5 passes in the network namespace; browser check finds no external requests, CSP violations or script errors |
+| Seamless overlapping maps | **Done.** Merged tile pyramid with server-side overzoom (ADR-0015) |
+| GPS: serial/COM, UDP, TCP, gpsd, GPX playback, manual; fix state machine; SSE | **Done** (TCP server mode and baud autodetection not implemented). Acceptance step 6: simulator and NMEA over UDP, privacy from LAN clients |
+| Waypoints, tracks, GPX import/export | **Done.** Round-trip GPX tests |
+| Distance and bearing tool, DDM/MGRS coordinates | Planned |
+| 3b: gazetteer, custom bbox | **Done.** Place search works offline |
+| 3b: terrain, contours, emergency overlays | Planned |
+| 3c: routing evaluation (Valhalla sidecar; BRouter alternative) | Planned: decision ADR with measured sizes and Pi 5 memory |
+| Geography step in the selection wizard | Planned |
 
 ## Phase 4 — Network serving · Partial
 

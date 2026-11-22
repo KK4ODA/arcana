@@ -150,7 +150,7 @@ func appHeaders(contentPort int) func(http.Handler) http.Handler {
 				host = "[" + host + "]"
 			}
 			contentOrigin := "http://" + host + ":" + itoa(contentPort)
-			h.Set("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; "+
+			h.Set("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; worker-src 'self'; "+
 				"connect-src 'self'; frame-src "+contentOrigin+"; frame-ancestors 'none'; base-uri 'none'; form-action 'self'; object-src 'none'")
 			h.Set("X-Content-Type-Options", "nosniff")
 			h.Set("Referrer-Policy", "no-referrer")

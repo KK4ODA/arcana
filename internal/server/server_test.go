@@ -106,6 +106,16 @@ func TestSessionAndAccessPolicy(t *testing.T) {
 		{"local mutation needs token", "POST", "/api/catalog/refresh", local, "127.0.0.1:18470", nil, 403},
 		{"cross-site refused", "PUT", "/api/settings", local, "127.0.0.1:18470", map[string]string{"X-Arcana-Token": token, "Sec-Fetch-Site": "cross-site"}, 403},
 		{"unknown api", "GET", "/api/nope", local, "127.0.0.1:18470", nil, 404},
+		{"lan reads map status", "GET", "/api/maps", lanClient, "127.0.0.1:18470", nil, 200},
+		{"lan reads empty tiles", "GET", "/maps/tiles/3/1/2.mvt", lanClient, "127.0.0.1:18470", nil, 204},
+		{"lan reads glyphs", "GET", "/maps/fonts/Noto%20Sans%20Regular/0-255.pbf", lanClient, "127.0.0.1:18470", nil, 200},
+		{"lan cannot plan map areas", "POST", "/api/maps/plan", lanClient, "127.0.0.1:18470", map[string]string{"X-Arcana-Token": token}, 403},
+		{"lan cannot see private position", "GET", "/api/gps", lanClient, "127.0.0.1:18470", nil, 403},
+		{"lan cannot see private waypoints", "GET", "/api/gps/waypoints", lanClient, "127.0.0.1:18470", nil, 403},
+		{"lan cannot add waypoints", "POST", "/api/gps/waypoints", lanClient, "127.0.0.1:18470", map[string]string{"X-Arcana-Token": token}, 403},
+		{"lan cannot list serial ports", "GET", "/api/gps/ports", lanClient, "127.0.0.1:18470", nil, 403},
+		{"local reads position", "GET", "/api/gps", local, "127.0.0.1:18470", nil, 200},
+		{"bad tile coordinates", "GET", "/maps/tiles/3/99/2.mvt", local, "127.0.0.1:18470", nil, 204},
 	}
 	for _, c := range cases {
 		rec := e.do(e.appH, c.method, c.url, c.remote, c.host, c.hdr, strings.NewReader("{}"))
@@ -136,11 +146,21 @@ func TestSessionAndAccessPolicy(t *testing.T) {
 func TestInterfaceMakesNoExternalRequests(t *testing.T) {
 	allowed := map[string]bool{
 		"https://example.org/arcana-catalog.json": true, // input placeholder text
+		// Map attribution links required by the ODbL; followed only if
+		// the user clicks them.
+		"https://www.openstreetmap.org/copyright": true,
+		"https://protomaps.com":                   true,
 	}
 	urlRe := regexp.MustCompile(`https?://[^\s'"` + "`" + `)<>]+`)
 	err := fs.WalkDir(web.Static, "static", func(p string, d fs.DirEntry, err error) error {
 		if err != nil || d.IsDir() {
 			return err
+		}
+		// Vendored third-party code (MapLibre) and license texts mention
+		// their project URLs; the browser tripwire in the acceptance test
+		// checks that the running interface never requests them.
+		if strings.HasPrefix(p, "static/vendor/") || strings.HasSuffix(p, ".txt") {
+			return nil
 		}
 		data, _ := fs.ReadFile(web.Static, p)
 		for _, u := range urlRe.FindAllString(string(data), -1) {

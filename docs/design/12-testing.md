@@ -25,8 +25,8 @@ run in the lint job.
 | Version comparison | `catalog.TestCompareVersions`: dates, Kiwix `2026-11a` rebuilds, dotted versions, pre-releases |
 | Safe resource updates | `download.TestUpdateReplacesOnlyAfterVerification`: corrupted v2 leaves v1 intact; good v2 replaces v1 and removes old directory |
 | Platform path handling | `fsutil`: traversal, absolute, backslash, drive-letter, Windows device names, trailing dot/space, length; `library`: relocation to a new path |
-| GPS parsing, UDP reception | Phase 3: recorded NMEA fixtures (valid, bad checksum, dropouts, time jumps), UDP flood/oversize tests, GPX playback |
-| Offline map loading | Phase 3: acceptance step 5 |
+| GPS parsing, UDP reception | `internal/gps`: real receiver sentences, bad checksums and garbage lines, no-fix sentences, generated sentences round-tripped for all hemispheres, UDP/TCP/gpsd sources against local servers, connection errors, simulator, current/stale/lost timing. Not yet: recorded logs with dropouts and clock jumps, UDP flood tests |
+| Offline map loading | `internal/maps`: PMTiles header/directory round trips, Hilbert IDs, region extraction with interruption and resume, source-change detection, plan caching, overzoom (synthetic and real tiles), region catalog validation; acceptance step 5 |
 | Library searching | `store` (FTS5, diacritics, injection-proof queries), `kiwix` (real kiwix-serve, highlight extraction), `server` end-to-end, acceptance |
 | HTTP server authorization | `server.TestSessionAndAccessPolicy`: Host rebinding, LAN read vs. write, token, cross-site, local-only endpoints, content origin read-only; acceptance step 7 over a real second address |
 | Unexpected drive removal | Simulated by kill -9 + relocation (acceptance 8–9) and by damaged/missing DB (store, acceptance 11). Physical unplug tests are manual (checklist) |
@@ -52,8 +52,8 @@ the kiwix-serve fetched by `scripts/fetch-kiwix.sh`):
    - Run a full-text search.
    - Browse the catalog.
    - Open Updates.
-5. **Offline maps.** Reported as SKIP (Phase 3).
-6. **Simulated GPS.** Reported as SKIP (Phase 3).
+5. **Offline maps.** A synthetic map (generated with Arcana's own PMTiles writer and imported offline; a real Luxembourg extract when `ARCANA_ACCEPTANCE_ONLINE=1`) is indexed and found by place search; native and derived tiles, glyphs, style, sprites and the MapLibre files are served; tiles outside every map return 204; planning a new area fails promptly with an explanation.
+6. **Simulated GPS.** The simulator produces a current, simulated fix on the installed map while a track records; the SSE stream delivers it; a waypoint is saved and exported as GPX; then NMEA sent over UDP becomes the position, and a LAN client is refused the position.
 7. **Second client.** From 10.99.0.1:
    - read the library;
    - read an article;

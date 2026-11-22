@@ -16,7 +16,7 @@ const { chromium } = require('playwright');
   });
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
-  const views = ['library', 'discover', 'downloads', 'updates', 'server', 'settings', 'library?q=morse', 'read/arcana.sample'];
+  const views = ['library', 'discover', 'maps', 'downloads', 'updates', 'server', 'settings', 'library?q=morse', 'read/arcana.sample'];
   for (const v of views) {
     await page.goto(`${base.href}#/${v}`, { waitUntil: 'networkidle' });
     await page.waitForTimeout(400);

@@ -5,8 +5,10 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -34,6 +36,8 @@ type fixture struct {
 	mgr     *Manager
 	avail   atomic.Int64
 	cancel  context.CancelFunc
+	// extractors are passed to the manager.
+	extractors map[string]Extractor
 }
 
 func newFixture(t testing.TB) *fixture {
@@ -78,6 +82,7 @@ func (f *fixture) start() {
 		RetryMax:           50 * time.Millisecond,
 		MaxHTTPAttempts:    4,
 		StallTimeout:       2 * time.Second,
+		Extractors:         f.extractors,
 	})
 	ctx, cancel := context.WithCancel(context.Background())
 	f.cancel = cancel
@@ -537,5 +542,71 @@ func BenchmarkDownloadThroughput(b *testing.B) {
 		}
 		b.StopTimer()
 		srv.Close()
+	}
+}
+
+func TestExtractorResumesAndRestarts(t *testing.T) {
+	f := newFixture(t)
+	data := payload(200<<10, 7)
+	var calls atomic.Int32
+	var log []string
+	f.extractors = map[string]Extractor{"fake": func(ctx context.Context, req ExtractRequest) (int64, string, error) {
+		n := calls.Add(1)
+		_, statErr := os.Stat(req.Out)
+		log = append(log, fmt.Sprintf("call %d partial=%v", n, statErr == nil))
+		if err := req.Planned(int64(len(data))); err != nil {
+			return 0, "", err
+		}
+		switch n {
+		case 1: // network drops halfway; the partial output stays
+			os.WriteFile(req.Out, data[:len(data)/2], 0o644)
+			req.Progress(int64(len(data) / 2))
+			return 0, "", &net.OpError{Op: "read", Net: "tcp", Err: errors.New("connection reset by peer")}
+		case 2: // the source changed: partial work must be discarded
+			if statErr != nil {
+				return 0, "", errors.New("partial output was not kept for resumption")
+			}
+			return 0, "", fmt.Errorf("%w: build replaced", ErrRestart)
+		}
+		if statErr == nil {
+			return 0, "", errors.New("stale partial output survived a restart")
+		}
+		if err := os.WriteFile(req.Out, data, 0o644); err != nil {
+			return 0, "", err
+		}
+		req.Progress(int64(len(data)))
+		return int64(len(data)), sum(data), nil
+	}}
+	f.start()
+	res := catalog.Resource{
+		ID: "test.area", Provider: "test", Title: "Area", Version: "2026-11", Format: "pmtiles", Languages: []string{"mul"},
+		Files:        []catalog.File{{Name: "area.pmtiles", Mirrors: []catalog.Mirror{{URL: "https://example.invalid/planet.pmtiles"}}}},
+		DownloadSize: 999_999, SizeEstimated: true, ProviderRef: map[string]string{"method": "fake"},
+	}
+	job, err := f.mgr.Enqueue(context.Background(), res)
+	if err != nil {
+		t.Fatal(err)
+	}
+	f.wait(job.ID, store.JobCompleted)
+	if got := f.installedFile("test.area"); !bytes.Equal(got, data) {
+		t.Fatal("installed data differs")
+	}
+	in, _ := f.st.GetInstalled(context.Background(), "test.area")
+	if in.Resource.DownloadSize != int64(len(data)) || in.Resource.SizeEstimated {
+		t.Fatalf("exact size not recorded: %d estimated=%v", in.Resource.DownloadSize, in.Resource.SizeEstimated)
+	}
+	if calls.Load() != 3 {
+		t.Fatalf("calls %d: %v", calls.Load(), log)
+	}
+
+	// A method this build does not know fails clearly.
+	res.ID, res.ProviderRef = "test.other", map[string]string{"method": "teleport"}
+	job, err = f.mgr.Enqueue(context.Background(), res)
+	if err != nil {
+		t.Fatal(err)
+	}
+	j := f.wait(job.ID, store.JobFailed)
+	if !strings.Contains(j.Error, "teleport") {
+		t.Fatalf("error %q", j.Error)
 	}
 }

@@ -181,7 +181,7 @@ func (m *Manager) execute(ctx context.Context, j *store.Job, rs *runState, persi
 			return fail(kindFatal, "resolved resource does not match the queued version")
 		}
 		for _, f := range res.Files {
-			if f.Size <= 0 && !hasHash(f) {
+			if f.Size <= 0 && !hasHash(f) && res.ProviderRef["method"] == "" {
 				// Without a size or hash nothing can be verified; accept
 				// only with a warning recorded at install.
 				m.log.Warn("file has no published size or hash", "file", f.Name)
@@ -196,9 +196,19 @@ func (m *Manager) execute(ctx context.Context, j *store.Job, rs *runState, persi
 	j.State = store.JobRunning
 	persist()
 
+	ex, method := m.extractor(j.Resource)
+	if method != "" && ex == nil {
+		return fail(kindFatal, "this version of Arcana cannot install resources of type %q", method)
+	}
 	for j.FileIndex < len(j.Resource.Files) {
 		f := j.Resource.Files[j.FileIndex]
-		done, err := m.transferFile(ctx, j, rs, f, persist)
+		var done store.InstalledFile
+		var err error
+		if ex != nil {
+			done, err = m.extractFile(ctx, j, rs, ex, persist)
+		} else {
+			done, err = m.transferFile(ctx, j, rs, f, persist)
+		}
 		if err != nil {
 			return err
 		}
@@ -230,6 +240,12 @@ func (m *Manager) install(ctx context.Context, j *store.Job, persist func()) err
 			SHA256: j.Done[i].SHA256,
 		})
 		algo, _ := verifyAlgo(f)
+		if j.Resource.ProviderRef["method"] != "" {
+			unverified = true
+			verification = "built by Arcana from a single version of the source (" + hostOf(f.Mirrors[0].URL) +
+				"); structure checked; no publisher checksum exists, SHA-256 recorded for future integrity checks"
+			continue
+		}
 		switch algo {
 		case "sha256", "sha512":
 			verification = fmt.Sprintf("%s matched the value published by %s", algo, j.Resource.Provider)

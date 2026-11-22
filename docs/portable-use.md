@@ -69,6 +69,33 @@ The release binaries are not yet code-signed.
   `arcana import /path/to/file.zim`. Arcana checks the file against the
   catalog's checksum before installing it.
 
+## Maps and GPS
+
+- **Get maps while online.** In Discover, choose the *Maps* category. Start
+  with the world overview (about 46 MB), then add countries or states in
+  more detail. In the Maps view, *Download this area* measures and fetches
+  exactly the area on screen. After that, maps and place search work
+  without internet.
+- Maps you install are combined automatically: a detailed state shows on
+  top of the world overview.
+- **Connect a receiver** in *Settings → Maps and position*:
+  - *USB or serial*: pick the port. Most receivers use 4800 or 9600 baud.
+    On Linux, add your user to the `dialout` group (then log out and in)
+    if the port cannot be opened. On Windows the receiver appears as a COM
+    port.
+  - *gpsd* (Linux): leave the address empty for gpsd on the same computer.
+  - *NMEA over UDP or TCP*: for phone apps and marine multiplexers that
+    share positions on the network (UDP port 10110 is common). Anyone on
+    the network can send to the UDP port, so use it on networks you trust.
+  - *Simulator*: replays a GPX track (or circles your map) to try
+    everything without hardware; positions are labelled *simulated*.
+  - *Fixed position*: enter coordinates by hand.
+- The position is **current** for 5 seconds after the last valid fix,
+  **stale** up to a minute, then **lost**. Other devices on the network see
+  it only if you turn on *Share position*.
+- Waypoints are kept in `user/waypoints.json` and tracks as GPX files in
+  `user/tracks/` on the drive; both export as GPX for other programs.
+
 ## Checking the library
 
 *Settings → Library integrity* offers two checks:

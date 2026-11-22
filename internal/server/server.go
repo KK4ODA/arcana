@@ -114,7 +114,10 @@ func (s *Server) AppPort() int { return s.appPort }
 // Serve runs until ctx is cancelled.
 func (s *Server) Serve(ctx context.Context, la, lc net.Listener) error {
 	s.startedAt = time.Now()
-	s.appSrv = &http.Server{Handler: s.appHandler(), ReadHeaderTimeout: 15 * time.Second, IdleTimeout: 120 * time.Second}
+	// Requests inherit ctx so long-lived streams (GPS updates) end when
+	// the server stops.
+	s.appSrv = &http.Server{Handler: s.appHandler(), ReadHeaderTimeout: 15 * time.Second, IdleTimeout: 120 * time.Second,
+		BaseContext: func(net.Listener) context.Context { return ctx }}
 	s.contentSrv = &http.Server{Handler: s.contentHandler(), ReadHeaderTimeout: 15 * time.Second, IdleTimeout: 120 * time.Second}
 	errc := make(chan error, 2)
 	go func() { errc <- s.appSrv.Serve(la) }()
@@ -189,6 +192,8 @@ func (s *Server) appHandler() http.Handler {
 	mux.HandleFunc("GET /api/setup/volumes", localOnly(s.handleVolumes))
 	mux.HandleFunc("POST /api/setup/init", s.handleInit)
 	s.registerPhase2(mux)
+	s.registerMaps(mux)
+	s.registerGPS(mux)
 	mux.HandleFunc("GET /api/", func(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusNotFound, "unknown API endpoint")
 	})
@@ -722,6 +727,8 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *ap
 		AutoRefreshHours             *int                  `json:"autoRefreshHours"`
 		UpdateURL                    *string               `json:"updateUrl"`
 		Feeds                        *[]library.FeedSource `json:"feeds"`
+		MapsEnabled                  *bool                 `json:"mapsEnabled"`
+		GPS                          *library.GPSSettings  `json:"gps"`
 	}
 	if err := readJSON(r, &req); err != nil {
 		writeError(w, 400, err.Error())
@@ -772,7 +779,7 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *ap
 			st.Updates.URL = u
 		}
 		if req.Feeds != nil {
-			seen := map[string]bool{"arcana": true, "kiwix": true}
+			seen := map[string]bool{"arcana": true, "kiwix": true, "gutenberg": true, "maps": true, "local": true}
 			for _, f := range *req.Feeds {
 				probe := catalog.Resource{ID: f.ID + ".x", Provider: f.ID, Title: "x", Version: "1", Format: "pdf",
 					Files: []catalog.File{{Name: "x.pdf", Mirrors: []catalog.Mirror{{URL: f.URL}}}}}
@@ -783,6 +790,28 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *ap
 			}
 			st.Catalog.Feeds = *req.Feeds
 		}
+		if req.MapsEnabled != nil {
+			st.Maps.Enabled = *req.MapsEnabled
+		}
+		if req.GPS != nil {
+			g := *req.GPS
+			switch g.Source {
+			case "", "serial", "udp", "tcp", "gpsd", "simulator", "manual":
+			default:
+				return fmt.Errorf("unknown position source %q", g.Source)
+			}
+			if g.BaudRate < 0 || g.BaudRate > 921600 || g.UDPPort < 0 || g.UDPPort > 65535 ||
+				g.SimulatorSpeed < 0 || g.SimulatorSpeed > 100 {
+				return errors.New("invalid GPS settings")
+			}
+			if g.Source == "manual" && (g.ManualLat < -90 || g.ManualLat > 90 || g.ManualLon < -180 || g.ManualLon > 180) {
+				return errors.New("latitude must be -90..90 and longitude -180..180")
+			}
+			if len(g.SerialPort) > 200 || len(g.Address) > 200 || len(g.SimulatorTrack) > 200 {
+				return errors.New("invalid GPS settings")
+			}
+			st.GPS = g
+		}
 		return nil
 	})
 	if err != nil {
@@ -790,6 +819,9 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *ap
 		return
 	}
 	a.Downloads.ApplySettings()
+	if req.GPS != nil {
+		a.ApplyGPSSettings()
+	}
 	writeJSON(w, 200, map[string]any{"settings": next, "restartRequired": req.ShareOnLAN != nil})
 }
 

@@ -326,7 +326,8 @@ func (s *Store) SearchResources(ctx context.Context, q Query) ([]catalog.Resourc
 		args = append(args, q.Category)
 	}
 	if q.Language != "" {
-		where = append(where, "(r.languages LIKE ? OR r.languages LIKE ?)")
+		// Multilingual resources (maps, for example) match every language.
+		where = append(where, "(r.languages LIKE ? OR r.languages LIKE ? OR r.languages LIKE '%,mul,%')")
 		args = append(args, "%,"+q.Language+",%", "%,"+q.Language+"-%")
 	}
 	if q.Provider != "" {
@@ -497,7 +498,7 @@ func (s *Store) CategoryCounts(ctx context.Context, lang string) ([]Count, error
 	q := "SELECT category, count(*) FROM resources"
 	var args []any
 	if lang != "" {
-		q += " WHERE (languages LIKE ? OR languages LIKE ?)"
+		q += " WHERE (languages LIKE ? OR languages LIKE ? OR languages LIKE '%,mul,%')"
 		args = append(args, "%,"+lang+",%", "%,"+lang+"-%")
 	}
 	return s.counts(ctx, q+" GROUP BY category", args...)

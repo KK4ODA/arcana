@@ -2,6 +2,7 @@ import { loadSession, getSession, api } from './api.js';
 import { h, clear } from './util.js';
 import { libraryView } from './views/library.js';
 import { discoverView } from './views/discover.js';
+import { mapsView } from './views/maps.js';
 import { downloadsView } from './views/downloads.js';
 import { updatesView } from './views/updates.js';
 import { serverView } from './views/server.js';
@@ -12,6 +13,7 @@ import { readerView, documentView } from './views/reader.js';
 const views = {
   library: { title: 'Library', render: libraryView },
   discover: { title: 'Discover', render: discoverView },
+  maps: { title: 'Maps', render: mapsView },
   downloads: { title: 'Downloads', render: downloadsView },
   updates: { title: 'Updates', render: updatesView },
   server: { title: 'Server', render: serverView },

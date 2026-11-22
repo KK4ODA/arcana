@@ -97,7 +97,8 @@ See [docs/development.md](docs/development.md).
 | **Implemented and tested** | Portable library layout; drive detection (Linux tested; Windows and macOS code compiled); capacity planning; catalog (bundled, Kiwix OPDS, feeds); recommender; verified resumable downloads; offline import; ZIM reading and search via kiwix-serve; web UI; read-only LAN sharing; integrity check; offline acceptance test |
 | **Built, not yet run on hardware** | Windows `Arcana.exe`, macOS binaries, Linux ARM64 |
 | **Implemented (Phase 2)** | Bookmarks, favorites, history and notes; your own documents with full-text search (PDF, EPUB, HTML, Markdown, text); drive-to-drive collection transfer; signed application updates with rollback; Project Gutenberg provider |
-| **Planned** | Offline maps and GPS (Phase 3). mDNS, QR codes, remote admin login, hotspot helpers (Phase 4). Raspberry Pi appliance image (Phase 5) |
+| **Implemented (Phase 3)** | Offline vector maps: 541 OpenStreetMap regions (world, continents, countries, states) extracted on demand from Protomaps planet builds, custom areas, seamless merging of overlapping maps, offline place search; GPS from USB/serial receivers, gpsd, NMEA over UDP/TCP, a GPX simulator or a fixed position; waypoints, track recording, GPX import/export |
+| **Planned** | mDNS, QR codes, remote admin login, hotspot helpers (Phase 4). Raspberry Pi appliance image (Phase 5). Map routing, terrain and measuring tools |
 | **Needs a decision** | License confirmation (GPL-3.0-or-later proposed); code-signing certificates; GPL source bundle for kiwix-serve in releases |
 
 The full design package is in [docs/](docs/README.md).

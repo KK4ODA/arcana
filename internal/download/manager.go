@@ -47,6 +47,9 @@ type Options struct {
 	// ResolverFor, when set, is consulted instead of Resolvers so that
 	// providers enabled after startup are honored.
 	ResolverFor func(provider string) catalog.Resolver
+	// Extractors install resources whose provider reference names a method
+	// (for example "pmtiles-extract") instead of downloading their files.
+	Extractors map[string]Extractor
 	// Fetcher is used by resolvers. Defaults to one using Client.
 	Fetcher catalog.Fetcher
 	// Client performs transfers. Defaults to NewClient(settings).

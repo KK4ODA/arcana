@@ -28,6 +28,43 @@ type Settings struct {
 	Server                       ServerSettings  `json:"server"`
 	Catalog                      CatalogSettings `json:"catalog"`
 	Updates                      UpdateSettings  `json:"updates"`
+	Maps                         MapSettings     `json:"maps"`
+	GPS                          GPSSettings     `json:"gps"`
+}
+
+// MapSettings control the map region provider.
+type MapSettings struct {
+	// Enabled offers OpenStreetMap regions extracted from Protomaps planet
+	// builds. Region sizes are bundled, so browsing works offline.
+	Enabled bool `json:"enabled"`
+	// BuildsURL lists planet builds; BaseURL serves them. Empty means the
+	// Protomaps defaults.
+	BuildsURL string `json:"buildsUrl,omitempty"`
+	BaseURL   string `json:"baseUrl,omitempty"`
+}
+
+// GPSSettings select a position source. Arcana only reads positions; it
+// never sends them anywhere.
+type GPSSettings struct {
+	// Source is "", "serial", "udp", "tcp", "gpsd", "simulator" or "manual".
+	Source     string `json:"source"`
+	SerialPort string `json:"serialPort,omitempty"`
+	BaudRate   int    `json:"baudRate,omitempty"`
+	// UDPPort listens for NMEA datagrams (default 10110).
+	UDPPort int `json:"udpPort,omitempty"`
+	// Address is host:port for "tcp" (an NMEA stream) or "gpsd".
+	Address string `json:"address,omitempty"`
+	// SimulatorTrack is a GPX file in the user folder replayed as NMEA.
+	SimulatorTrack string `json:"simulatorTrack,omitempty"`
+	// SimulatorSpeed multiplies the replay rate (default 1).
+	SimulatorSpeed float64 `json:"simulatorSpeed,omitempty"`
+	// Manual is a fixed position for "manual".
+	ManualLat float64 `json:"manualLat,omitempty"`
+	ManualLon float64 `json:"manualLon,omitempty"`
+	// ShareWithClients shows the position to LAN clients. Off by default.
+	ShareWithClients bool `json:"shareWithClients"`
+	// RecordTrack keeps a breadcrumb track while a fix is available.
+	RecordTrack bool `json:"recordTrack"`
 }
 
 // ServerSettings control the embedded HTTP server.
@@ -78,6 +115,8 @@ func DefaultSettings() Settings {
 			GutenbergMirror: "https://gutenberg.pglaf.org",
 		},
 		Updates: UpdateSettings{URL: "https://github.com/KK4ODA/arcana/releases/latest/download"},
+		Maps:    MapSettings{Enabled: true},
+		GPS:     GPSSettings{BaudRate: 4800, UDPPort: 10110, SimulatorSpeed: 1},
 	}
 }
 

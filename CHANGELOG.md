@@ -3,7 +3,47 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
-## Unreleased — 0.2.0 (Phase 2: content management and updates)
+## Unreleased — 0.3.0 (Phase 3: offline maps and GPS)
+
+### Added
+- **Maps** view with offline vector maps rendered in the browser by
+  MapLibre GL JS 5 (vendored; no CDN), Protomaps light and dark styles,
+  bundled Noto glyphs and sprites, and permanent OpenStreetMap attribution.
+- A `maps` catalog provider with 541 regions: the world (zoom 6 and 7), six
+  continents, 241 countries and 293 states and provinces at overview,
+  standard and detailed levels, with sizes measured against a real planet
+  build and bundled, so regions can be browsed offline.
+- Region downloads extract only the needed tiles from the newest Protomaps
+  planet build with HTTP range requests. They run in the download manager,
+  resume after interruptions, restart cleanly if the build changes or is
+  deleted, and record a SHA-256 for later integrity checks.
+- "Download this area": measure the visible map area against the newest
+  build (exact size before downloading) and queue it.
+- Overlapping maps are merged into one map; where only a low-detail map
+  exists, tiles are derived from it so zooming in never shows a blank map.
+- Offline place search from the installed maps' place names.
+- Position from USB/serial GPS receivers, gpsd, NMEA over UDP or TCP, a
+  simulator that replays GPX tracks as NMEA, or a fixed position, with
+  current/stale/lost states, live updates, coordinates in decimal degrees,
+  DMS and Maidenhead locator, follow mode, and a dashboard readout.
+- Waypoints (click the map or save the current position), track recording
+  to GPX, GPX import and export.
+- Settings → Maps and position.
+- Acceptance steps 5 (offline maps) and 6 (simulated GPS and a UDP receiver)
+  are implemented and pass without internet.
+
+### Changed
+- Resources marked as multilingual (`mul`), such as maps, now appear under
+  every language filter in Discover.
+- The content security policy allows `blob:` images and same-origin workers
+  for the map renderer.
+
+### Security
+- Position, waypoints and tracks are shown to network clients only when the
+  host turns on "Share position" (off by default). Planning a map area,
+  which contacts the map source, is a host-only action.
+
+## 0.2.0 (Phase 2: content management and updates)
 
 ### Added
 - User data in `user/` as plain, human-readable files: bookmarks, favorites,

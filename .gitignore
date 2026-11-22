@@ -25,3 +25,4 @@ Thumbs.db
 /coverage.out
 /test-results/
 node_modules/
+/map-regions

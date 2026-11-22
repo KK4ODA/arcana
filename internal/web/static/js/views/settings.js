@@ -75,6 +75,62 @@ export async function settingsView(main) {
       'Catalogs in Arcana\u2019s JSON feed format (see docs/spec). Entries are validated and can only use their own identifier namespace.'),
     field('Automatic refresh', autoRefresh, 'Arcana makes no network requests unless you ask, or you turn this on. Failed attempts (no internet) are retried at the next interval.')));
 
+  // Maps and position.
+  const g = { source: '', baudRate: 4800, udpPort: 10110, simulatorSpeed: 1, ...(st.gps || {}) };
+  const mapsOn = h('input', { type: 'checkbox', checked: st.maps ? st.maps.enabled : true, disabled: ro });
+  const gpsSource = h('select', { disabled: ro }, [['', 'Off'], ['serial', 'USB or serial receiver (NMEA)'], ['gpsd', 'gpsd'],
+    ['udp', 'NMEA over UDP (network multiplexer, phone app)'], ['tcp', 'NMEA over TCP'], ['simulator', 'Simulator (replays a GPX track)'],
+    ['manual', 'Fixed position (entered by hand)']].map(([v, t]) => h('option', { value: v, selected: v === (g.source || '') }, t)));
+  const serialPort = h('select', { disabled: ro, style: 'min-width:200px' });
+  const fillPorts = async () => {
+    let ports = [];
+    try { ports = (await api.get('/api/gps/ports')).ports || []; } catch (_) { /* unavailable */ }
+    if (g.serialPort && !ports.includes(g.serialPort)) ports.unshift(g.serialPort);
+    fill(serialPort, ports.length ? ports.map((p) => h('option', { value: p, selected: p === g.serialPort }, p)) : h('option', { value: '' }, 'No serial ports found'));
+  };
+  fillPorts();
+  const baud = h('select', { disabled: ro }, [4800, 9600, 19200, 38400, 57600, 115200].map((b) => h('option', { value: b, selected: b === (g.baudRate || 4800) }, b)));
+  const udpPort = h('input', { type: 'number', min: 1, max: 65535, value: g.udpPort || 10110, style: 'width:110px', disabled: ro });
+  const address = h('input', { type: 'text', value: g.address || '', placeholder: 'host:port, e.g. 192.168.1.20:10110 (gpsd: 127.0.0.1:2947)', style: 'width:min(360px,100%)', disabled: ro });
+  const simTrack = h('input', { type: 'text', value: g.simulatorTrack || '', placeholder: 'empty: a 1 km loop on your map', style: 'width:min(300px,100%)', disabled: ro });
+  const simSpeed = h('select', { disabled: ro }, [1, 2, 5, 10, 30].map((v) => h('option', { value: v, selected: v === (g.simulatorSpeed || 1) }, `${v}×`)));
+  const mLat = h('input', { type: 'number', step: 'any', min: -90, max: 90, value: g.manualLat || '', placeholder: 'latitude', style: 'width:130px', disabled: ro });
+  const mLon = h('input', { type: 'number', step: 'any', min: -180, max: 180, value: g.manualLon || '', placeholder: 'longitude', style: 'width:130px', disabled: ro });
+  const record = h('input', { type: 'checkbox', checked: !!g.recordTrack, disabled: ro });
+  const shareGPS = h('input', { type: 'checkbox', checked: !!g.shareWithClients, disabled: ro });
+  const sourceFields = h('div');
+  const renderSource = () => {
+    const v = gpsSource.value;
+    fill(sourceFields,
+      v === 'serial' ? field('Port', h('span', { class: 'row' }, serialPort, baud, h('button', { onclick: fillPorts }, 'Rescan')),
+        'Most USB receivers use 4800 or 9600 baud. On Linux, your user may need to be in the dialout group.') : null,
+      v === 'udp' ? field('UDP port', udpPort, 'Arcana listens on this port on every network interface for NMEA sentences (10110 is the common default). It only reads; nothing is sent.') : null,
+      v === 'tcp' || v === 'gpsd' ? field('Address', address, v === 'gpsd' ? 'Leave empty for gpsd on this computer (127.0.0.1:2947).' : 'Arcana connects to this address and reads NMEA sentences.') : null,
+      v === 'simulator' ? field('Track', h('span', { class: 'row' }, simTrack, simSpeed),
+        'Name of a GPX file in the user folder (tracks or documents). The simulator produces real NMEA sentences, so it tests the same path as a receiver. Positions are labelled as simulated.') : null,
+      v === 'manual' ? field('Position', h('span', { class: 'row' }, mLat, mLon), 'Decimal degrees; south and west are negative.') : null);
+  };
+  gpsSource.addEventListener('change', renderSource);
+  renderSource();
+  const gpsBody = () => ({
+    source: gpsSource.value, serialPort: (gpsSource.value === 'serial' && serialPort.value) || g.serialPort || '', baudRate: parseInt(baud.value, 10),
+    udpPort: parseInt(udpPort.value, 10) || 10110, address: address.value.trim(), simulatorTrack: simTrack.value.trim(),
+    simulatorSpeed: parseFloat(simSpeed.value), manualLat: parseFloat(mLat.value) || 0, manualLon: parseFloat(mLon.value) || 0,
+    shareWithClients: shareGPS.checked, recordTrack: record.checked,
+  });
+  let gpsInitial = JSON.stringify(gpsBody());
+
+  main.appendChild(h('section', { class: 'panel' },
+    h('header', null, h('h2', null, 'Maps and position')),
+    field('Map regions', h('label', { class: 'inline' }, mapsOn, 'Offer OpenStreetMap regions in Discover'),
+      'Region sizes are bundled with Arcana. Downloading a region extracts it from the newest Protomaps planet build.'),
+    field('Position source', gpsSource, 'Arcana only reads positions. It never transmits them; network clients see them only if you allow it below.'),
+    sourceFields,
+    field('Track recording', h('label', { class: 'inline' }, record, 'Record a track while a position is available'),
+      'Tracks are saved as GPX files in user/tracks on the drive.'),
+    field('Share position', h('label', { class: 'inline' }, shareGPS, 'Show the position, waypoints and tracks to network clients'),
+      'Off by default. Applies only when network sharing is on.')));
+
   main.appendChild(h('section', { class: 'panel' },
     h('header', null, h('h2', null, 'Appearance')),
     field('Theme', themeSel, 'Stored in this browser only.')));
@@ -91,11 +147,15 @@ export async function settingsView(main) {
       autoRefreshHours: parseInt(autoRefresh.value, 10),
       updateUrl: updateURL.value.trim(),
       feeds,
+      mapsEnabled: mapsOn.checked,
     };
+    const gb = gpsBody();
+    if (JSON.stringify(gb) !== gpsInitial || !st.gps) body.gps = gb;
     try {
       const res = await api.put('/api/settings', body);
       toast(lan.checked !== st.server.shareOnLan ? 'Saved. Restart Arcana to change network sharing.' : 'Settings saved to the drive.');
       Object.assign(st, res.settings);
+      gpsInitial = JSON.stringify(gpsBody());
     } catch (e) { toast(e.message); }
   } }, 'Save settings');
   main.appendChild(h('div', { class: 'row', style: 'margin-bottom:14px' }, save,

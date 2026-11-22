@@ -14,8 +14,11 @@ the maintainers.
 | T5 | SQLite corruption on USB bridges that ignore flushes | 2 | 1 | 2 | DB is a cache: quick_check, move aside, rebuild from sidecars (tested) | Mitigated |
 | T6 | exFAT has no journal: sidecar or content damaged by unplugging | 2 | 2 | 4 | Atomic writes, verify-before-publish, full integrity check, eject reminders; sidecar loss leaves an "orphan" that re-import or re-download repairs | Mitigated |
 | T7 | Routing engines too heavy for portable use | 3 | 2 | 6 | Valhalla sidecar evaluation with measured gates; BRouter alternative; straight-line tools clearly labeled | Open (Phase 3) |
-| T8 | MapLibre v6 requires WebGL2; old phones excluded | 2 | 2 | 4 | v5 fallback bundle; raster fallback for small areas | Open (Phase 3) |
-| T9 | PMTiles custom extracts have no per-tile hashes | 2 | 2 | 4 | Prefer maintainer-published regional files with SHA-256; label custom extracts "unverified" | Open (Phase 3) |
+| T8 | MapLibre 5 requires WebGL2; old phones and some blocklisted GPUs cannot show maps | 2 | 2 | 4 | Detect and explain; raster fallback for small areas still to be built | Open |
+| T9 | Map extracts have no publisher checksum | 2 | 2 | 4 | Every range response must carry the ETag seen first; output must open as a valid archive; SHA-256 recorded for later integrity checks; labelled "unverified" (implemented) | Accepted |
+| T11 | Protomaps changes its build hosting, retention or schema | 2 | 3 | 6 | Builds URL and base URL are settings; a deleted build restarts from the newest; region sizes regenerated with `tools/map-regions`; styles pinned with the binary (basemaps 5.7.2). A schema change needs a new Arcana release | Open |
+| T12 | Overzoomed tiles look sparse far beyond the source zoom | 2 | 1 | 2 | Limited to 10 levels; users add detailed regions where needed | Accepted |
+| T13 | No GPS receiver tested on real hardware yet | 3 | 2 | 6 | Single NMEA path tested with real receiver sentences, simulator and network sources; hardware test plan needed (u-blox USB, phone NMEA apps, gpsd on a Pi) | Open |
 | T10 | Pure-Go SQLite slower than cgo SQLite | 1 | 1 | 1 | Measured: catalog queries 2–12 ms on 3,684 entries | Accepted |
 
 ## Licensing
@@ -50,6 +53,8 @@ the maintainers.
 | S4 | Catalog triggers requests to LAN devices | 2 | 2 | 4 | Private destinations blocked by default, checked at dial time (tested) | Mitigated |
 | S5 | LAN client modifies the library | 1 | 3 | 3 | Loopback-only mutations; token not sent to remote clients (acceptance-tested) | Mitigated |
 | S6 | Compromised update channel (Phase 2) | 2 | 3 | 6 | Ed25519-signed manifests, offline keys, staged swap with rollback | Planned |
+| S7 | Someone on the LAN injects false positions through the UDP listener | 2 | 2 | 4 | UDP is off unless chosen; checksums required; the help text says it listens on every interface; sender allow-list not yet implemented | Open |
+| S8 | Position disclosed to other people on the network | 2 | 2 | 4 | Position, waypoints and tracks are host-only unless "Share position" is on (acceptance-tested); never transmitted | Mitigated |
 | S7 | kiwix-serve vulnerability exposed on LAN | 2 | 2 | 4 | kiwix-serve binds loopback only; reached only through Arcana's read-only proxy; pinned and updated with releases | Mitigated |
 
 ## Performance

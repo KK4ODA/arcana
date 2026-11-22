@@ -138,7 +138,8 @@ func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request, a *app.App
 		"downloads":    map[string]any{"active": active, "failed": failed, "waiting": waiting},
 		"updates":      map[string]any{"available": len(updates), "highPriority": high, "lastCatalogRefresh": lastCheck},
 		"sharing":      s.sharingInfo(r),
-		"gps":          map[string]any{"state": "not-available", "label": "Not in this build", "sub": "planned for Phase 3"},
+		"gps":          gpsSummary(r, a),
+		"maps":         mapSummary(a),
 		"attention":    att,
 		"serverUptime": int64(time.Since(s.startedAt).Seconds()),
 	})
@@ -203,4 +204,39 @@ func lanAddresses() []string {
 		return pi && !pj
 	})
 	return out
+}
+
+// gpsSummary is the dashboard's position readout.
+func gpsSummary(r *http.Request, a *app.App) map[string]any {
+	if !isLocal(r) && !a.Lib.Settings.Get().GPS.ShareWithClients {
+		return map[string]any{"state": "private", "label": "Not shared", "sub": "the host keeps its position private"}
+	}
+	st := a.GPS.Status()
+	out := map[string]any{"state": st.State, "source": st.Source}
+	labels := map[string]string{
+		"off": "Off", "connecting": "Connecting", "waiting": "Waiting for data", "searching": "Searching for satellites",
+		"current": "Position current", "stale": "Position stale", "lost": "Signal lost", "manual": "Fixed position", "error": "Receiver problem",
+	}
+	out["label"] = labels[st.State]
+	out["href"] = "#/maps"
+	out["dot"] = map[string]string{"current": "ok", "stale": "warn", "lost": "err", "error": "err",
+		"searching": "info", "waiting": "info", "connecting": "info", "manual": "info"}[st.State]
+	switch {
+	case st.State == "off":
+		out["sub"] = "choose a receiver in Settings"
+	case st.State == "error":
+		out["sub"] = st.Error
+	case st.Fix != nil:
+		out["sub"] = fmt.Sprintf("%.5f, %.5f", st.Fix.Lat, st.Fix.Lon)
+		out["fix"] = st.Fix
+		out["age"] = st.Age
+	default:
+		out["sub"] = st.Detail
+	}
+	return out
+}
+
+func mapSummary(a *app.App) map[string]any {
+	ms := a.MapStatus()
+	return map[string]any{"sets": len(ms.Sets), "indexing": ms.Indexing, "maxZoom": ms.MaxZoom}
 }

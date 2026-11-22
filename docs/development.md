@@ -41,12 +41,16 @@ internal/server/       HTTP listeners, access policy, JSON API
 internal/storage/      volume detection (per OS) and capacity planning
 internal/store/        SQLite index
 internal/fsutil/       atomic writes, safe paths, OS locks
+internal/maps/         PMTiles reader/writer, region extraction, overzoom, gazetteer, maps provider
+internal/gps/          NMEA tracker, position sources, simulator, tracks, waypoints, GPX
 internal/web/static/   embedded UI (ES modules, CSS)
 packaging/             launcher and first-run readme for release bundles
 scripts/               fetch-kiwix.sh, package.sh
 test/acceptance/       offline acceptance test and UI tripwire
 testdata/sample/       CC0 sample ZIM
 tools/sample-zim/      generator for the sample ZIM
+tools/map-regions/     generator for internal/maps/regions.json (measured region sizes)
+tools/fetch-map-assets.sh  refreshes vendored MapLibre, map styles, glyphs and sprites
 docs/                  design package, ADRs, specs, guides
 ```
 
@@ -87,6 +91,15 @@ docs/design/14-radio-and-integrations.md.
 | `POST /api/check/full`, `POST /api/documents/reindex` | Maintenance |
 | `GET /api/app/update`, `POST /api/app/update/{check,download,stage,apply,rollback}` | Application updates |
 | `POST /api/presets` | Save a selection as a collection |
+| `GET /maps/tiles/{z}/{x}/{y}.mvt` | Merged vector tiles from every installed map (derived from an ancestor where missing; 204 when nothing covers the tile) |
+| `GET /maps/fonts/{fontstack}/{range}.pbf` | Map label glyphs (empty set for ranges not bundled) |
+| `GET /api/maps`, `GET /api/maps/search?q=` | Installed map sets and indexing progress; offline place search |
+| `POST /api/maps/plan`, `POST /api/maps/areas` | Measure / queue a custom area (`{name, bbox:[w,s,e,n], maxZoom}`; contacts the map source) |
+| `GET /api/gps`, `GET /api/gps/stream` | Position status; server-sent events (host only unless sharing is on) |
+| `GET /api/gps/ports` | Serial ports (host only) |
+| `GET/POST /api/gps/waypoints`, `DELETE /api/gps/waypoints/{id}` | Waypoints |
+| `GET /api/gps/tracks`, `GET/DELETE /api/gps/tracks/{name}` | Recorded and imported tracks (single track as GeoJSON) |
+| `GET /api/gps/export?tracks=a.gpx,b.gpx`, `POST /api/gps/import?name=` | GPX export (waypoints plus chosen tracks); import (body is the GPX file) |
 
 The content origin (port + 1) serves `/kiwix/*` (proxied kiwix-serve, with
 `/_arcana/frame.js` added to HTML pages so the reader learns the current page),
@@ -117,6 +130,30 @@ Before each release:
    `scripts/fetch-kiwix.sh` after verifying the archives against Kiwix's
    published checksums. Then run the kiwix integration tests and the
    acceptance test.
+
+## Map regions and assets
+
+`internal/maps/regions.json` lists every offered region with sizes measured
+against one planet build. To regenerate it after a basemap schema change:
+
+```sh
+# Natural Earth 1:50m admin-0 and admin-1 boundaries as GeoJSON (public domain)
+go build -o /tmp/map-regions ./tools/map-regions
+/tmp/map-regions -admin0 ne_50m_admin_0_countries.geojson -admin1 ne_50m_admin_1_states_provinces.geojson \
+  -planet https://build.protomaps.com/YYYYMMDD.pmtiles -cache /tmp/planet-dirs -out internal/maps/regions.json
+```
+
+The first run downloads the planet's leaf directories (about 350 MB) into
+the cache; planning all regions then takes about 15 minutes. Map styles,
+glyphs, sprites and MapLibre are refreshed with `tools/fetch-map-assets.sh`
+(needs node and npm).
+
+To try GPS without hardware, choose Settings → Maps and position →
+Simulator, or send NMEA over UDP:
+
+```sh
+printf '$GPRMC,120000.00,A,4936.6600,N,00607.8000,E,0.0,0.0,221126,,,A*58\r\n' | nc -u -w1 127.0.0.1 10110
+```
 
 ## Regenerating the sample archive
 

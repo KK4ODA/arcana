@@ -37,13 +37,22 @@
 - **Local-only by default.** It binds 127.0.0.1 unless `--lan` or the
   setting is used. There is no UPnP, no port mapping, and no public
   exposure.
-- **No telemetry.** Arcana makes no network request except catalog refresh
-  and downloads the user starts. The acceptance test confirms that nothing
+- **No telemetry.** Arcana makes no network request except catalog refresh,
+  downloads the user starts, and measuring a custom map area when the host
+  asks for it. The acceptance test confirms that nothing
   is attempted at startup or while browsing. The User-Agent names only
   "Arcana/<version>" and the project URL.
 - **Least privilege.** Arcana never needs administrator rights. Appliance
   networking (AP, DNS, DHCP, captive portal) lives in a separate systemd
   unit with its own privileges (Phase 5).
+
+- **Untrusted map tiles.** Map archives and their tiles are parsed with
+  bounded readers (directory sizes, varints, tile lengths, MVT commands);
+  malformed input fails cleanly (tested). Glyph requests are restricted to
+  bundled font names and numeric ranges.
+- **Position privacy.** GPS positions, waypoints and tracks are served only
+  to the host unless sharing is enabled. GPS sources only read; Arcana
+  never sends position data.
 
 ## Planned (Phase 4) remote administration
 

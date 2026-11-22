@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
 	"net"
 	"net/http"
 	"os"
@@ -113,11 +114,27 @@ func prepare(work string) error {
 		if err := run(bin, "catalog", "refresh", "--library", drive); err != nil {
 			return err
 		}
-		if err := run(bin, "get", "--library", drive, "kiwix.wikipedia_en_ray-charles_mini"); err != nil {
+		// A real map region, extracted from the newest planet build.
+		if err := run(bin, "get", "--library", drive, "kiwix.wikipedia_en_ray-charles_mini", "maps.country-lu-z10"); err != nil {
 			return err
 		}
+		return nil
 	}
-	return nil
+	// Offline preparation: a synthetic map installed as the Luxembourg
+	// overview, so the map pipeline (tiles, glyphs, place index) can be
+	// exercised without any download.
+	mapFile := filepath.Join(work, "country-lu-z10.pmtiles")
+	if err := writeSampleMap(mapFile); err != nil {
+		return err
+	}
+	return run(bin, "import", "--library", drive, "--id", "maps.country-lu-z10", "--allow-unverified", mapFile)
+}
+
+func mapPlaceQuery() (query, want string) {
+	if os.Getenv("ARCANA_ACCEPTANCE_ONLINE") == "1" {
+		return "esch", "Esch-sur-Alzette"
+	}
+	return "arcana test", sampleTown
 }
 
 // configureNamespace brings up loopback and adds a second address that
@@ -371,10 +388,167 @@ func TestOfflineAcceptance(t *testing.T) {
 	})
 
 	t.Run("05-offline-maps", func(t *testing.T) {
-		t.Skip("NOT IMPLEMENTED: offline maps are planned for Phase 3")
+		var ms struct {
+			Sets []struct {
+				ResourceID string     `json:"resourceId"`
+				Bounds     [4]float64 `json:"bounds"`
+				MaxZoom    int        `json:"maxZoom"`
+				Error      string     `json:"error"`
+			} `json:"sets"`
+			Indexing string `json:"indexing"`
+		}
+		query, want := mapPlaceQuery()
+		var found bool
+		deadline := time.Now().Add(30 * time.Second)
+		for time.Now().Before(deadline) && !found {
+			if err := in.getJSON("/api/maps", &ms); err != nil {
+				t.Fatal(err)
+			}
+			var sr struct {
+				Places []struct {
+					Name string  `json:"name"`
+					Lon  float64 `json:"lon"`
+					Lat  float64 `json:"lat"`
+				} `json:"places"`
+			}
+			if err := in.getJSON("/api/maps/search?q="+strings.ReplaceAll(query, " ", "+"), &sr); err != nil {
+				t.Fatal(err)
+			}
+			for _, p := range sr.Places {
+				found = found || p.Name == want
+			}
+			if !found {
+				time.Sleep(300 * time.Millisecond)
+			}
+		}
+		if len(ms.Sets) != 1 || ms.Sets[0].Error != "" || ms.Sets[0].MaxZoom != 10 {
+			t.Fatalf("map sets: %+v", ms.Sets)
+		}
+		if !found {
+			t.Fatalf("place search did not find %q offline", want)
+		}
+		get := func(p string) (int, int) {
+			resp, err := http.Get(in.url(p))
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer resp.Body.Close()
+			b, _ := io.ReadAll(resp.Body)
+			return resp.StatusCode, len(b)
+		}
+		// Native tile at the map's detail level, a tile derived from it
+		// beyond that level, and everything the viewer needs.
+		for _, p := range []string{"/maps/tiles/10/529/349.mvt", "/maps/tiles/13/4235/2792.mvt",
+			"/maps/fonts/Noto%20Sans%20Regular/0-255.pbf", "/maps/layers-light.json", "/maps/sprites/light.json",
+			"/vendor/maplibre-gl/maplibre-gl-csp.js", "/vendor/maplibre-gl/maplibre-gl-csp-worker.js"} {
+			if code, n := get(p); code != 200 || n == 0 {
+				t.Fatalf("%s: %d (%d bytes)", p, code, n)
+			}
+		}
+		if code, _ := get("/maps/tiles/12/0/0.mvt"); code != 204 {
+			t.Fatalf("tile outside every map: %d, want 204", code)
+		}
+		// Measuring a new area needs the internet; offline it must fail
+		// promptly with an explanation, not hang.
+		start := time.Now()
+		code, body := in.send("POST", "/api/maps/plan", `{"name":"x","bbox":[6,49.5,6.2,49.7],"maxZoom":13}`)
+		if code == 200 || time.Since(start) > 40*time.Second || !strings.Contains(body, "error") {
+			t.Fatalf("offline area planning: %d after %s: %s", code, time.Since(start), body)
+		}
 	})
+
 	t.Run("06-simulated-gps", func(t *testing.T) {
-		t.Skip("NOT IMPLEMENTED: GPS input is planned for Phase 3")
+		type gpsStatus struct {
+			State string `json:"state"`
+			Fix   *struct {
+				Lat  float64 `json:"lat"`
+				Lon  float64 `json:"lon"`
+				Mode string  `json:"mode"`
+			} `json:"fix"`
+			Recording bool `json:"recording"`
+			Points    int  `json:"points"`
+		}
+		wait := func(want string, check func(gpsStatus) bool) gpsStatus {
+			var st gpsStatus
+			deadline := time.Now().Add(15 * time.Second)
+			for time.Now().Before(deadline) {
+				st = gpsStatus{}
+				if err := in.getJSON("/api/gps", &st); err != nil {
+					t.Fatal(err)
+				}
+				if st.State == want && (check == nil || check(st)) {
+					return st
+				}
+				time.Sleep(200 * time.Millisecond)
+			}
+			t.Fatalf("GPS state %+v, want %s", st, want)
+			return st
+		}
+		// The simulator replays NMEA through the same parser as a
+		// receiver; with no track given it circles the installed map.
+		if code, body := in.send("PUT", "/api/settings", `{"gps":{"source":"simulator","simulatorSpeed":10,"recordTrack":true}}`); code != 200 {
+			t.Fatalf("settings: %d %s", code, body)
+		}
+		st := wait("current", func(s gpsStatus) bool { return s.Fix != nil && s.Points >= 2 })
+		if st.Fix.Mode != "simulated" || math.Abs(st.Fix.Lat-49.8) > 0.5 || math.Abs(st.Fix.Lon-6.1) > 0.5 || !st.Recording {
+			t.Fatalf("simulated fix %+v", st)
+		}
+		// Live updates arrive as server-sent events.
+		resp, err := http.Get(in.url("/api/gps/stream"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		line, _ := bufioReadLine(resp.Body)
+		resp.Body.Close()
+		if !strings.HasPrefix(line, "data: {") || !strings.Contains(line, `"simulated"`) {
+			t.Fatalf("stream: %q", line)
+		}
+		// Waypoints are saved to the drive and exported as GPX.
+		if code, body := in.send("POST", "/api/gps/waypoints", `{"name":"Spring","lat":49.6,"lon":6.12}`); code != 200 {
+			t.Fatalf("waypoint: %d %s", code, body)
+		}
+		r2, err := http.Get(in.url("/api/gps/export"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		gpx, _ := io.ReadAll(r2.Body)
+		r2.Body.Close()
+		if !strings.Contains(string(gpx), "<name>Spring</name>") {
+			t.Fatalf("GPX export: %s", gpx)
+		}
+		// A network receiver: NMEA over UDP on the loopback interface.
+		port := freeUDPPort(t)
+		if code, body := in.send("PUT", "/api/settings", fmt.Sprintf(`{"gps":{"source":"udp","udpPort":%d}}`, port)); code != 200 {
+			t.Fatalf("settings: %d %s", code, body)
+		}
+		wait("waiting", nil)
+		conn, err := net.Dial("udp", fmt.Sprintf("127.0.0.1:%d", port))
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer conn.Close()
+		now := time.Now().UTC()
+		rmc := nmeaChecksum(fmt.Sprintf("GPRMC,%s,A,4936.6600,N,00607.8000,E,0.5,10.0,%s,,,A", now.Format("150405.00"), now.Format("020106")))
+		fmt.Fprintf(conn, "%s\r\n", rmc)
+		st = wait("current", nil)
+		if math.Abs(st.Fix.Lat-49.611) > 1e-3 || math.Abs(st.Fix.Lon-6.13) > 1e-3 {
+			t.Fatalf("UDP fix %+v", st.Fix)
+		}
+		// The position is private to the host unless shared.
+		dialer := &net.Dialer{LocalAddr: &net.TCPAddr{IP: net.ParseIP(lanClientIP)}}
+		client := &http.Client{Transport: &http.Transport{DialContext: dialer.DialContext}}
+		r3, err := client.Get(fmt.Sprintf("http://%s:%d/api/gps", lanClientIP, in.port))
+		if err != nil {
+			t.Fatal(err)
+		}
+		r3.Body.Close()
+		if r3.StatusCode != 403 {
+			t.Fatalf("LAN client read the position: %s", r3.Status)
+		}
+		if code, body := in.send("PUT", "/api/settings", `{"gps":{"source":""}}`); code != 200 {
+			t.Fatalf("settings: %d %s", code, body)
+		}
+		wait("off", nil)
 	})
 
 	t.Run("07-second-client-on-local-network", func(t *testing.T) {
@@ -532,4 +706,36 @@ func TestOfflineAcceptance(t *testing.T) {
 		}
 	})
 	_ = context.Background
+}
+
+func bufioReadLine(r io.Reader) (string, error) {
+	var b []byte
+	buf := make([]byte, 1)
+	for len(b) < 1<<16 {
+		if _, err := r.Read(buf); err != nil {
+			return string(b), err
+		}
+		if buf[0] == '\n' {
+			break
+		}
+		b = append(b, buf[0])
+	}
+	return string(b), nil
+}
+
+func freeUDPPort(t *testing.T) int {
+	c, err := net.ListenPacket("udp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.Close()
+	return c.LocalAddr().(*net.UDPAddr).Port
+}
+
+func nmeaChecksum(body string) string {
+	var cs byte
+	for i := 0; i < len(body); i++ {
+		cs ^= body[i]
+	}
+	return fmt.Sprintf("$%s*%02X", body, cs)
 }
