@@ -25,4 +25,5 @@
 - [Architecture Decision Records](adr/README.md)
 - [Catalog feed JSON Schema](spec/catalog-feed.schema.json)
 - [Portable use guide](portable-use.md)
+- [Appliance guide (Raspberry Pi / Linux)](appliance.md)
 - [Development guide](development.md)

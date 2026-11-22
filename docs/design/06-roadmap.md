@@ -98,22 +98,32 @@ Phase 1 content origin. Details: [05-maps-gps.md](05-maps-gps.md#implementation-
 | Hotspot helpers: NetworkManager (Linux), documented Windows Mobile Hotspot use | **Done** for Linux (`nmcli`, tested against a simulated nmcli; not yet on hardware). Windows and macOS show guidance. **Unresolved**: no supported no-upstream hotspot API on Windows, none on macOS |
 | Optional local TLS (user cert or self-signed) for Geolocation/service workers on LAN | **Done.** HTTP and HTTPS on the same ports; a LAN browser over HTTPS gets a secure context (verified in a browser test) |
 
-## Phase 5 — Cross-platform and appliance · Planned
+## Phase 5 — Cross-platform and appliance · Implemented (0.5.0), not yet run on hardware
 
-**Dependencies:** Phase 4.
+**Dependencies:** Phase 4. Guide: [docs/appliance.md](../appliance.md).
 - Linux ARM64 portable builds: **done**, packaged.
 - macOS signing and notarization: **Unresolved**; needs an Apple Developer
   account.
 - Windows code signing: **Unresolved**; needs a certificate.
-- Raspberry Pi 4/5 appliance image (pi-gen):
-  - read-only root (overlayfs) with the library on USB SSD/NVMe;
-  - a systemd service with `Restart=always`;
-  - hostapd + dnsmasq AP with a local DNS name;
-  - optional captive portal that answers OS probes with a local landing
-    page (not an internet emulation);
-  - watchdog;
-  - power-loss tests (cut power during download, update and indexing ×
-    100 cycles).
+- Raspberry Pi 4/5 appliance:
+  - **Done:** installer (`packaging/appliance/install.sh`, with dry run and
+    uninstall) for Raspberry Pi OS Bookworm and other systemd Linux;
+    unprivileged, confined `arcana.service` (`Type=notify`,
+    `Restart=on-failure`, watchdog fed by an HTTP health check);
+  - **Done, differs:** the access point uses NetworkManager shared mode
+    (Bookworm's default network stack) instead of hostapd + dnsmasq;
+    captive DNS through NetworkManager's dnsmasq and an nftables
+    port-80 redirect in a separate privileged unit (ADR-0010);
+  - **Done:** captive portal (`--captive-port`) that only redirects OS
+    probes and typed addresses to the library;
+  - **Documented:** read-only root with raspi-config's overlay file
+    system and the library on a separate drive (fstab examples);
+  - **Checked in CI:** shellcheck, dry run, `systemd-analyze verify`,
+    nftables syntax; sd_notify and watchdog verified with a simulated
+    service manager;
+  - **Planned:** SD card image (pi-gen); hardware tests; power-loss tests
+    (cut power during download, update and indexing × 100 cycles);
+    client capacity on a Pi 4/5.
 - The library is prepared on a desktop and moved to the appliance with no
   conversion. Already true of the format; to be verified on hardware.
 

@@ -49,6 +49,8 @@ internal/tlsutil/      self-signed and custom certificates, HTTP/HTTPS on one po
 internal/hotspot/      Wi-Fi hotspot through NetworkManager (Linux)
 internal/web/static/   embedded UI (ES modules, CSS)
 packaging/             launcher and first-run readme for release bundles
+packaging/appliance/   appliance installer, systemd units, captive-portal rules (docs/appliance.md)
+internal/sdnotify/     systemd readiness and watchdog notifications
 scripts/               fetch-kiwix.sh, package.sh
 test/acceptance/       offline acceptance test and UI tripwire
 testdata/sample/       CC0 sample ZIM

@@ -49,7 +49,10 @@ type Config struct {
 	OpenLibrary func(root string) (*app.App, error)
 	// DefaultLibraryPath is suggested in setup mode.
 	DefaultLibraryPath string
-	Log                *slog.Logger
+	// CaptivePort, when set, serves the appliance's captive portal: every
+	// request is redirected to the library (requires ShareOnLAN).
+	CaptivePort int
+	Log         *slog.Logger
 }
 
 // Server serves the UI, API and content.
@@ -133,6 +136,17 @@ func (s *Server) Serve(ctx context.Context, la, lc net.Listener) error {
 	s.contentSrv = &http.Server{Handler: s.contentHandler(), ReadHeaderTimeout: 15 * time.Second, IdleTimeout: 120 * time.Second}
 	// HTTPS (when enabled) is offered on the same ports as HTTP.
 	s.nw.ctx = ctx
+	if s.cfg.CaptivePort > 0 && s.cfg.ShareOnLAN {
+		lp, err := net.Listen("tcp", net.JoinHostPort("", strconv.Itoa(s.cfg.CaptivePort)))
+		if err != nil {
+			s.log.Warn("captive portal unavailable", "port", s.cfg.CaptivePort, "err", err)
+		} else {
+			cs := &http.Server{Handler: s.captiveHandler(), ReadHeaderTimeout: 10 * time.Second, IdleTimeout: 30 * time.Second}
+			go cs.Serve(lp)
+			go func() { <-ctx.Done(); cs.Close() }()
+			s.log.Info("captive portal", "port", s.cfg.CaptivePort)
+		}
+	}
 	_ = s.applyTLS()
 	la = tlsutil.NewSniffer(la, s.tlsConfig)
 	lc = tlsutil.NewSniffer(lc, s.tlsConfig)

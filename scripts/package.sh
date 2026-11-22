@@ -12,7 +12,7 @@
 # Usage: scripts/package.sh [version] [platform ...]
 set -eu
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
-VERSION=${1:-0.4.0-dev}
+VERSION=${1:-0.5.0-dev}
 [ "$#" -gt 0 ] && shift
 PLATFORMS=${*:-"windows-amd64 linux-amd64 linux-arm64 darwin-arm64 darwin-amd64"}
 COMMIT=$(git -C "$ROOT" rev-parse --short HEAD 2>/dev/null || echo unknown)
@@ -47,6 +47,11 @@ fi
 cp "$ROOT/packaging/arcana.sh" "$OUT/arcana.sh"
 chmod 755 "$OUT/arcana.sh"
 cp "$ROOT/packaging/README-FIRST.txt" "$OUT/README-FIRST.txt"
+# Raspberry Pi / Linux appliance installer (systemd service, access point,
+# captive portal). See docs/appliance.md.
+mkdir -p "$OUT/appliance"
+cp "$ROOT/packaging/appliance/"* "$OUT/appliance/"
+chmod 755 "$OUT/appliance/install.sh"
 cp "$ROOT/LICENSE" "$OUT/licenses/ARCANA-LICENSE.txt"
 cp "$ROOT/THIRD_PARTY_NOTICES.md" "$OUT/licenses/THIRD_PARTY_NOTICES.md"
 

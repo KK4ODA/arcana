@@ -1,0 +1,19 @@
+# Forwards plain HTTP (port 80) arriving on the Arcana access point to
+# Arcana's captive-portal port, so phones' connectivity checks open the
+# library. The only privileged part of the appliance; Arcana itself runs
+# unprivileged.
+[Unit]
+Description=Arcana captive portal forwarding
+Documentation=https://github.com/KK4ODA/arcana/blob/main/docs/appliance.md
+After=network.target
+Before=arcana.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStartPre=-/usr/sbin/nft delete table inet arcana_captive
+ExecStart=/usr/sbin/nft -f /etc/arcana/captive.nft
+ExecStop=/usr/sbin/nft delete table inet arcana_captive
+
+[Install]
+WantedBy=multi-user.target

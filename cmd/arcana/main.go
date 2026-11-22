@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"net/http"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -23,6 +24,7 @@ import (
 	"github.com/KK4ODA/arcana/internal/buildinfo"
 	"github.com/KK4ODA/arcana/internal/hotspot"
 	"github.com/KK4ODA/arcana/internal/library"
+	"github.com/KK4ODA/arcana/internal/sdnotify"
 	"github.com/KK4ODA/arcana/internal/server"
 	"github.com/KK4ODA/arcana/internal/storage"
 	"github.com/KK4ODA/arcana/internal/store"
@@ -60,6 +62,8 @@ Common flags:
   --no-browser    Do not open a browser window
   --read-only     Open the library without modifying it
   --kiwix PATH    Path to kiwix-serve
+  --captive-port N  Appliance: redirect every request on port N to the library
+                  (used with an access point whose port 80 is forwarded to N)
 `
 
 func main() {
@@ -116,6 +120,8 @@ type commonFlags struct {
 	readOnly bool
 	kiwix    string
 	verbose  bool
+	// captivePort serves the appliance's captive portal.
+	captivePort int
 }
 
 func parseFlags(name string, args []string, extra func(*flag.FlagSet)) (*commonFlags, *flag.FlagSet, error) {
@@ -126,6 +132,7 @@ func parseFlags(name string, args []string, extra func(*flag.FlagSet)) (*commonF
 	fs.IntVar(&c.port, "port", 0, "")
 	fs.BoolVar(&c.lan, "lan", false, "")
 	fs.BoolVar(&c.noOpen, "no-browser", false, "")
+	fs.IntVar(&c.captivePort, "captive-port", 0, "")
 	fs.BoolVar(&c.readOnly, "read-only", false, "")
 	fs.StringVar(&c.kiwix, "kiwix", "", "")
 	fs.BoolVar(&c.verbose, "verbose", false, "")
@@ -218,7 +225,7 @@ func cmdServe(args []string) error {
 		port = 8470
 	}
 	srv := server.New(a, server.Config{
-		Port: port, ShareOnLAN: lan, Log: log,
+		Port: port, ShareOnLAN: lan, Log: log, CaptivePort: c.captivePort,
 		OpenLibrary:        openApp,
 		DefaultLibraryPath: suggestLibraryPath(c.library),
 	})
@@ -260,7 +267,25 @@ func cmdServe(args []string) error {
 			}
 		}()
 	}
+	// Under systemd (the appliance), report readiness and keep the watchdog
+	// fed while the web server answers.
+	if ok, _ := sdnotify.Notify(fmt.Sprintf("READY=1\nSTATUS=Serving on port %d", srv.AppPort())); ok {
+		health := fmt.Sprintf("http://127.0.0.1:%d/api/session", srv.AppPort())
+		go sdnotify.Watchdog(ctx, func(hctx context.Context) error {
+			req, _ := http.NewRequestWithContext(hctx, http.MethodGet, health, nil)
+			resp, err := http.DefaultClient.Do(req)
+			if err != nil {
+				return err
+			}
+			resp.Body.Close()
+			if resp.StatusCode != http.StatusOK {
+				return fmt.Errorf("status %d", resp.StatusCode)
+			}
+			return nil
+		})
+	}
 	err = srv.Serve(ctx, la, lc)
+	_, _ = sdnotify.Notify("STOPPING=1")
 	log.Info("shutting down")
 	if cur := srv.App(); cur != nil {
 		cur.Close()

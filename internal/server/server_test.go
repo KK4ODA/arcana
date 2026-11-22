@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"io/fs"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -533,5 +534,30 @@ func TestNetworkFeatures(t *testing.T) {
 	}
 	if e.srv.mdnsHost() != "field-kit.local" || !e.srv.policy.hostAllowed("field-kit.local:18470") {
 		t.Fatalf("mdns host %q not allowed", e.srv.mdnsHost())
+	}
+}
+
+func TestCaptivePortal(t *testing.T) {
+	e := newEnv(t)
+	h := e.srv.captiveHandler()
+	for _, probe := range []string{"http://connectivitycheck.gstatic.com/generate_204", "http://captive.apple.com/hotspot-detect.html",
+		"http://www.msftconnecttest.com/connecttest.txt", "http://example.org/anything?x=<script>"} {
+		req := httptest.NewRequest("GET", probe, nil)
+		ctx := context.WithValue(req.Context(), http.LocalAddrContextKey, &net.TCPAddr{IP: net.IPv4(10, 42, 0, 1), Port: 8480})
+		rec := httptest.NewRecorder()
+		h.ServeHTTP(rec, req.WithContext(ctx))
+		if rec.Code != 302 || rec.Header().Get("Location") != "http://10.42.0.1:18470/" {
+			t.Fatalf("%s: %d %s", probe, rec.Code, rec.Header().Get("Location"))
+		}
+		if strings.Contains(rec.Body.String(), "<script>") {
+			t.Fatal("reflected input")
+		}
+	}
+	// The captive handler never exposes the API.
+	req := httptest.NewRequest("GET", "http://evil.example/api/session", nil)
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	if rec.Code != 302 || strings.Contains(rec.Body.String(), "token") {
+		t.Fatal("API reachable through the captive port")
 	}
 }

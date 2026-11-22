@@ -1,0 +1,56 @@
+# Arcana offline library — appliance service.
+# Installed by install.sh as /etc/systemd/system/arcana.service.
+[Unit]
+Description=Arcana offline library
+Documentation=https://github.com/KK4ODA/arcana/blob/main/docs/appliance.md
+After=network-online.target local-fs.target
+Wants=network-online.target
+RequiresMountsFor=/srv/arcana
+
+[Service]
+Type=notify
+NotifyAccess=main
+User=arcana
+Group=arcana
+SupplementaryGroups=dialout
+Environment=ARCANA_LIBRARY=/srv/arcana/library
+EnvironmentFile=-/etc/default/arcana
+ExecStart=/opt/arcana/arcana serve --library ${ARCANA_LIBRARY} --lan --no-browser --port 8470 --captive-port 8480
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=180
+WatchdogSec=60
+UMask=0022
+LimitNOFILE=65536
+
+# Hardening. Arcana needs no privileges: the access point, DNS and port-80
+# forwarding are configured by the system (see arcana-captive.service).
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+ProtectSystem=strict
+ReadWritePaths=/srv/arcana
+ProtectHome=yes
+PrivateTmp=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+SystemCallArchitectures=native
+# Serial GPS receivers (/dev/ttyUSB*, /dev/ttyACM*) need device access.
+PrivateDevices=no
+DevicePolicy=closed
+DeviceAllow=char-ttyUSB rw
+DeviceAllow=char-ttyACM rw
+DeviceAllow=char-ttyAMA rw
+DeviceAllow=/dev/serial0 rw
+
+[Install]
+WantedBy=multi-user.target

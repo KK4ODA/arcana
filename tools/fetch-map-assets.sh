@@ -42,6 +42,7 @@ fetch_font() {
 # Latin, Greek, Cyrillic, Armenian, Hebrew, Arabic, Thaana, Thai, Georgian,
 # Ethiopic, Latin/Greek extended, punctuation and symbols.
 REGULAR="0 256 512 768 1024 1280 1536 1792 3584 4096 4608 7680 7936 8192 8448 8704 8960 9216 9472 9728 9984 64256 65024 65280"
+# shellcheck disable=SC2086 # one argument per range start
 fetch_font "Noto Sans Regular" $REGULAR
 fetch_font "Noto Sans Medium" 0 256 512 768 1024 7680 7936 8192
 fetch_font "Noto Sans Italic" 0 256 512 768 1024 7680 7936 8192

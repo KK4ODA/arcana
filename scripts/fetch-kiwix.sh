@@ -45,6 +45,7 @@ sha256() {
 
 fetch() {
 	plat="$1"
+	# shellcheck disable=SC2046 # archive_for prints "url sha256"; split on purpose
 	set -- $(archive_for "$plat") || { echo "unsupported platform: $plat" >&2; exit 2; }
 	file="$1"; want="$2"
 	dest="$DEST_ROOT/$plat/kiwix"

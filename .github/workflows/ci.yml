@@ -69,6 +69,26 @@ jobs:
       - name: Offline acceptance test
         run: go test -tags acceptance -count=1 -v ./test/acceptance
 
+  appliance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install checkers
+        run: sudo apt-get update && sudo apt-get install -y shellcheck nftables
+      - name: Shell scripts
+        run: |
+          sh -n packaging/appliance/install.sh
+          shellcheck -s sh packaging/appliance/install.sh packaging/arcana.sh scripts/*.sh tools/*.sh
+      - name: Installer dry run
+        run: packaging/appliance/install.sh --dry-run --ap --country DE --ssid "CI test" --wifi-password "ci-password-1"
+      - name: systemd units
+        run: |
+          mkdir -p /tmp/units && cp packaging/appliance/*.service /tmp/units/
+          sed -i 's#/opt/arcana/arcana#/bin/true#' /tmp/units/arcana.service
+          systemd-analyze verify --man=no /tmp/units/arcana.service /tmp/units/arcana-captive.service
+      - name: nftables rules
+        run: sed 's/@IFACE@/wlan0/' packaging/appliance/captive.nft > /tmp/captive.nft && sudo nft -c -f /tmp/captive.nft
+
   build:
     runs-on: ubuntu-latest
     needs: [test]

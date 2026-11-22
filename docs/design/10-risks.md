@@ -58,6 +58,8 @@ the maintainers.
 | S9 | Administrator password sniffed on an open network | 2 | 3 | 6 | Remote administration is off by default; sign-in dialog warns on HTTP; optional HTTPS on the same port; sessions end on restart or password change | Mitigated (user choice) |
 | S10 | Password guessing from the network | 2 | 3 | 6 | Argon2id, 5 failures per address and 30 overall per 15 minutes, fixed delay, events logged | Mitigated |
 | S11 | Users accept a forged self-signed certificate | 1 | 2 | 2 | Fingerprint shown in the Server view to compare on first visit | Accepted |
+| S12 | Appliance access point without a password exposes the library to anyone in range | 2 | 1 | 2 | Installer warns; read-only for visitors; remote administration off by default | Accepted |
+| X6 | Appliance never run on Raspberry Pi hardware; captive-portal behaviour varies by phone OS version | 3 | 2 | 6 | Static checks and simulations in CI; hardware test plan in docs/appliance.md; plain `http://` address and printed connection card as fallback | Open |
 | S7 | kiwix-serve vulnerability exposed on LAN | 2 | 2 | 4 | kiwix-serve binds loopback only; reached only through Arcana's read-only proxy; pinned and updated with releases | Mitigated |
 
 ## Performance

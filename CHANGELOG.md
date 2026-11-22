@@ -3,7 +3,26 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
-## Unreleased — 0.4.0 (Phase 4: network serving)
+## Unreleased — 0.5.0 (Phase 5: appliance)
+
+### Added
+- **Appliance installer** for Raspberry Pi OS (Bookworm) and other systemd
+  Linux: `appliance/install.sh` in the release creates an unprivileged
+  `arcana` service user, installs a confined `arcana.service` that starts
+  at boot, and with `--ap` sets up a Wi-Fi access point (NetworkManager)
+  with a captive portal that leads phones to the library. `--dry-run`
+  previews every step; `--uninstall` removes the service but keeps the
+  library.
+- systemd integration: readiness notification and a watchdog that is fed
+  only while the web server answers.
+- `--captive-port`: a port that redirects every request (OS connectivity
+  checks, typed addresses) to the library; it never serves the API.
+- docs/appliance.md: installation, library drives, how phones connect,
+  read-only system, updating, security notes.
+- CI checks the installer (shellcheck, dry run), the units
+  (`systemd-analyze verify`) and the firewall rules (nftables syntax).
+
+## 0.4.0 (Phase 4: network serving)
 
 ### Added
 - **Remote administration** (off by default): the host sets a password in

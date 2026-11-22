@@ -1,6 +1,8 @@
 # ADR-0010: Keep privileged networking out of the portable application
 
-- Status: Accepted
+- Status: Accepted; implemented for the appliance in 0.5.0 (NetworkManager
+  shared-mode access point, `arcana-captive.service` for port-80
+  forwarding, unprivileged `arcana.service`)
 - Date: 2026-11-22
 
 ## Context

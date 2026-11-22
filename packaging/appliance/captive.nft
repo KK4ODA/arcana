@@ -1,0 +1,8 @@
+# Arcana appliance: send HTTP from access-point clients to the captive
+# portal (port 8480). @IFACE@ is replaced by install.sh.
+table inet arcana_captive {
+	chain prerouting {
+		type nat hook prerouting priority dstnat; policy accept;
+		iifname "@IFACE@" tcp dport 80 redirect to :8480
+	}
+}
