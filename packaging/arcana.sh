@@ -29,6 +29,10 @@ if ! "$BIN" version >/dev/null 2>&1; then
 	mkdir -p "$TMP"
 	cp "$BIN" "$TMP/arcana"
 	chmod 755 "$TMP/arcana"
+	# Tells Arcana where its copy came from, so an in-app update can
+	# refresh the copy before restarting.
+	ARCANA_PROGRAM_SOURCE="$BIN"
+	export ARCANA_PROGRAM_SOURCE
 	BIN="$TMP/arcana"
 fi
 exec "$BIN" serve --library "$DIR" "$@"

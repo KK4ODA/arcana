@@ -337,3 +337,10 @@ dialog.signin form > * + * { margin-top: 8px; }
 }
 .scope-list { display: grid; gap: 4px; margin: 6px 0; }
 .scope-list label { display: flex; gap: 6px; align-items: baseline; }
+
+/* ---------------------------------------------------------- update banner */
+.update-banner { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 8px 16px;
+  background: var(--accent-soft); border-bottom: 1px solid var(--border); font-size: 13.5px; }
+.update-banner[hidden] { display: none; }
+.update-banner details { flex-basis: 100%; }
+.update-banner details p { margin: 4px 0 0; white-space: pre-wrap; }

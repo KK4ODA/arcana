@@ -139,6 +139,7 @@ func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request, a *app.App
 		"downloads":    map[string]any{"active": active, "failed": failed, "waiting": waiting},
 		"updates":      map[string]any{"available": len(updates), "highPriority": high, "lastCatalogRefresh": lastCheck},
 		"sharing":      s.sharingInfo(r),
+		"appUpdate":    appUpdateFor(r, a),
 		"gps":          s.gpsSummary(r, a),
 		"maps":         mapSummary(a),
 		"attention":    att,
@@ -257,4 +258,13 @@ func (s *Server) gpsSummary(r *http.Request, a *app.App) map[string]any {
 func mapSummary(a *app.App) map[string]any {
 	ms := a.MapStatus()
 	return map[string]any{"sets": len(ms.Sets), "indexing": ms.Indexing, "maxZoom": ms.MaxZoom}
+}
+
+// appUpdateFor tells the host about new versions of Arcana. Network clients
+// cannot install program updates, so they are not told.
+func appUpdateFor(r *http.Request, a *app.App) any {
+	if !isLocal(r) {
+		return nil
+	}
+	return a.UpdateNotice()
 }

@@ -109,27 +109,45 @@ func Verify(manifest, sig []byte, keys []ed25519.PublicKey) (Manifest, error) {
 	if m.Format != "arcana-release" || m.FormatVersion != 1 {
 		return Manifest{}, errors.New("unsupported release manifest")
 	}
+	// Files outside the program areas are skipped, not fatal: a later
+	// release may add folders this version does not know, and must still
+	// be installable. Unsafe paths and library data areas reject the
+	// whole manifest.
+	kept := m.Files[:0]
 	for _, f := range m.Files {
-		if err := validPath(f.Path); err != nil || len(f.SHA256) != 64 || f.Size < 0 {
+		ok, err := programPath(f.Path)
+		if err != nil || len(f.SHA256) != 64 || f.Size < 0 {
 			return Manifest{}, fmt.Errorf("release manifest lists an invalid file %q", f.Path)
 		}
+		if ok {
+			kept = append(kept, f)
+		}
 	}
+	m.Files = kept
 	return m, nil
 }
 
-// validPath allows only program locations: the top-level launchers and
-// files under bin/. A manifest can never write into content/, user/ or
-// anywhere else.
-func validPath(p string) error {
+// programPath reports whether p is a program location an update may write:
+// the top-level launchers and readme, and files under bin/, licenses/ and
+// appliance/. A path that escapes the library, or points into its data
+// (content/, user/, state/, staging/, index/, catalog/, manifest/, logs/),
+// is an error. Anything else is ignored.
+func programPath(p string) (bool, error) {
+	if _, err := fsutil.SafeJoin("/x", p); err != nil || p == "" {
+		return false, errors.New("unsafe path")
+	}
 	switch p {
 	case "Arcana.exe", "arcana.sh", "README-FIRST.txt":
-		return nil
+		return true, nil
 	}
-	if !strings.HasPrefix(p, "bin/") && !strings.HasPrefix(p, "licenses/") {
-		return errors.New("not a program path")
+	top, _, _ := strings.Cut(p, "/")
+	switch top {
+	case "bin", "licenses", "appliance":
+		return true, nil
+	case "content", "user", "state", "staging", "index", "catalog", "manifest", "logs", library.MarkerFile:
+		return false, errors.New("library data path")
 	}
-	_, err := fsutil.SafeJoin("/x", p)
-	return err
+	return false, nil
 }
 
 // Sign signs manifest bytes (used by tools/release-sign and tests).

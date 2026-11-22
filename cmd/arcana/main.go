@@ -15,7 +15,9 @@ import (
 	"os/signal"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
+	"sync/atomic"
 	"syscall"
 	"text/tabwriter"
 	"time"
@@ -193,13 +195,21 @@ func cmdServe(args []string) error {
 	defer closeLog()
 	slog.SetDefault(log)
 
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	sigCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
+	// An installed update asks for a restart by ending the serve context.
+	ctx, endServe := context.WithCancel(sigCtx)
+	defer endServe()
+	var restart atomic.Pointer[app.SelfUpdate]
 
 	openApp := func(r string) (*app.App, error) {
 		a, err := app.Open(r, app.Options{KiwixBinary: c.kiwix, ForceReadOnly: c.readOnly, Log: log})
 		if err != nil {
 			return nil, err
+		}
+		a.RequestRestart = func(su app.SelfUpdate) {
+			restart.Store(&su)
+			endServe()
 		}
 		if err := a.Start(ctx); err != nil {
 			a.Close()
@@ -290,7 +300,35 @@ func cmdServe(args []string) error {
 	if cur := srv.App(); cur != nil {
 		cur.Close()
 	}
+	// The restart plan was made before the update was installed: asking
+	// again now would see the renamed old program, not the new one.
+	if su := restart.Load(); su != nil && su.Possible && sigCtx.Err() == nil {
+		return restartUpdated(*su, srv.AppPort(), log)
+	}
 	return err
+}
+
+// restartUpdated starts the newly installed program on the same port, so
+// the open browser page can reload into it.
+func restartUpdated(su app.SelfUpdate, port int, log *slog.Logger) error {
+	if su.Copy {
+		// The launcher runs a temporary copy (the drive does not allow
+		// running programs): refresh it from the updated library copy.
+		data, err := os.ReadFile(su.Program)
+		if err != nil {
+			return fmt.Errorf("restart after update: %w", err)
+		}
+		tmp := su.Exe + ".new"
+		if err := os.WriteFile(tmp, data, 0o755); err != nil {
+			return fmt.Errorf("restart after update: %w", err)
+		}
+		if err := os.Rename(tmp, su.Exe); err != nil {
+			return fmt.Errorf("restart after update: %w", err)
+		}
+	}
+	args := append(append([]string(nil), os.Args[1:]...), "--no-browser", "--port", strconv.Itoa(port))
+	log.Info("restarting into the new version", "program", su.Exe)
+	return relaunch(su.Exe, args)
 }
 
 // suggestLibraryPath proposes where to create a library: the folder the

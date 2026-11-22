@@ -1,7 +1,7 @@
 # ADR-0012: License Arcana under GPL-3.0-or-later
 
-- Status: Accepted. **The repository owner should confirm this before the
-  first public release.**
+- Status: Accepted; confirmed by the repository owner on 2026-11-22, before
+  the first public release (0.6.0).
 - Date: 2026-11-22
 
 ## Context

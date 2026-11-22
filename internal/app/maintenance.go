@@ -154,10 +154,13 @@ func (a *App) AppUpdateInfo() UpdateInfo {
 		Status: a.Updater.LoadStatus()}
 }
 
-// CheckAppUpdate fetches and verifies the published release manifest. It is
-// only called when the user asks.
-func (a *App) CheckAppUpdate(ctx context.Context) (UpdateInfo, error) {
-	info := a.AppUpdateInfo()
+var archiveNameRe = regexp.MustCompile(`^[A-Za-z0-9._-]+$`)
+
+// CheckAppUpdate fetches and verifies the published release manifest, when
+// the user asks or (if enabled) once a day. The result is remembered.
+func (a *App) CheckAppUpdate(ctx context.Context) (info UpdateInfo, err error) {
+	info = a.AppUpdateInfo()
+	defer func() { a.recordCheck(info, err) }()
 	base := strings.TrimRight(a.Lib.Settings.Get().Updates.URL, "/")
 	info.CheckedURL = base
 	if len(a.Updater.Keys) == 0 {
@@ -187,27 +190,8 @@ func (a *App) CheckAppUpdate(ctx context.Context) (UpdateInfo, error) {
 // StartAppUpdateDownload downloads and stages the verified release archive.
 func (a *App) StartAppUpdateDownload() (tasks.Task, error) {
 	return a.Tasks.Start("appupdate", "Download application update", true, func(ctx context.Context, p tasks.Progress) (any, error) {
-		info, err := a.CheckAppUpdate(ctx)
+		m, err := a.downloadAndStage(ctx, p)
 		if err != nil {
-			return nil, err
-		}
-		if info.Available == nil || info.Available.Archive == nil {
-			return nil, errors.New("no newer release with a downloadable archive")
-		}
-		m := *info.Available
-		if !regexp.MustCompile(`^[A-Za-z0-9._-]+$`).MatchString(m.Archive.Path) {
-			return nil, errors.New("invalid archive name in release manifest")
-		}
-		dir := filepath.Join(a.Lib.Staging(), "appupdate-download")
-		if err := os.MkdirAll(dir, 0o755); err != nil {
-			return nil, err
-		}
-		dst := filepath.Join(dir, m.Archive.Path)
-		if err := downloadFile(ctx, a.Lib.Settings.Get().Updates.URL+"/"+m.Archive.Path, dst, m.Archive.Size, p); err != nil {
-			return nil, err
-		}
-		defer os.Remove(dst)
-		if err := a.Updater.StageFromArchive(ctx, m, dst); err != nil {
 			return nil, err
 		}
 		return "Version " + m.Version + " is ready to install.", nil

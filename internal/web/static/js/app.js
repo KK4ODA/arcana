@@ -1,5 +1,6 @@
 import { loadSession, getSession, api } from './api.js';
 import { h, clear } from './util.js';
+import { renderUpdateBanner } from './updatebanner.js';
 import { libraryView } from './views/library.js';
 import { discoverView } from './views/discover.js';
 import { mapsView } from './views/maps.js';
@@ -111,6 +112,7 @@ async function refreshStatus() {
   const r = parseRoute();
   renderTabs(r.name);
   renderPills();
+  renderUpdateBanner(status);
   return status;
 }
 
@@ -166,6 +168,7 @@ async function start() {
   document.getElementById('library-label').textContent = s.libraryLabel || '';
   if (!s.setup) await refreshStatus();
   window.addEventListener('hashchange', route);
+  window.addEventListener('arcana-status', () => refreshStatus());
   await route();
   setInterval(() => { if (!getSession().setup && !document.hidden) refreshStatus(); }, 10000);
 }

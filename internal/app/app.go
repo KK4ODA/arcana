@@ -64,7 +64,14 @@ type App struct {
 	// Integrations holds tokens of programs using the integration API.
 	Integrations *integration.Store
 	events       eventHub
-	runCtx       context.Context
+	selfupd      updateState
+	// RequestRestart, set by the program's main function, stops Arcana and
+	// starts the newly installed version as described by the SelfUpdate
+	// taken before installing.
+	RequestRestart func(SelfUpdate)
+	// executable replaces os.Executable in tests.
+	executable func() (string, error)
+	runCtx     context.Context
 
 	opts         Options
 	refreshMu    sync.Mutex
@@ -188,6 +195,7 @@ func (a *App) Start(ctx context.Context) error {
 	a.ApplyGPSSettings()
 	go a.reindexLoop(ctx)
 	go a.autoRefreshLoop(ctx)
+	go a.appUpdateLoop(ctx, 2*time.Minute)
 	a.RequestReindex()
 	return nil
 }

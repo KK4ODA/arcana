@@ -118,6 +118,9 @@ type CatalogSettings struct {
 type UpdateSettings struct {
 	// URL is where release.json and its signature are published.
 	URL string `json:"url"`
+	// AutoCheck looks for a new version once a day while Arcana runs and
+	// the computer is online (only the update address is contacted).
+	AutoCheck bool `json:"autoCheck"`
 }
 
 // FeedSource is a user-added Arcana JSON catalog feed.
@@ -141,7 +144,7 @@ func DefaultSettings() Settings {
 			KiwixURL:        "https://library.kiwix.org",
 			GutenbergMirror: "https://gutenberg.pglaf.org",
 		},
-		Updates: UpdateSettings{URL: "https://github.com/KK4ODA/arcana/releases/latest/download"},
+		Updates: UpdateSettings{URL: "https://github.com/KK4ODA/arcana/releases/latest/download", AutoCheck: true},
 		Maps:    MapSettings{Enabled: true},
 		GPS:     GPSSettings{BaudRate: 4800, UDPPort: 10110, SimulatorSpeed: 1},
 	}

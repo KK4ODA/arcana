@@ -13,7 +13,7 @@
 | [0009](0009-verified-checkpointed-downloads.md) | Verified, checkpointed downloads with atomic publication | Accepted |
 | [0010](0010-privileged-networking-outside-portable-app.md) | Keep privileged networking out of the portable app | Accepted |
 | [0011](0011-signed-optional-application-updates.md) | Signed application updates, never mandatory | Accepted, implemented |
-| [0012](0012-license-gpl-3.0-or-later.md) | License: GPL-3.0-or-later | Accepted, owner to confirm |
+| [0012](0012-license-gpl-3.0-or-later.md) | License: GPL-3.0-or-later | Accepted (confirmed) |
 | [0013](0013-separate-origins-for-app-and-content.md) | Separate browser origins for app and content | Accepted |
 | [0014](0014-web-ui-without-framework-or-build-step.md) | Web UI without framework or build step | Accepted |
 | [0015](0015-tile-overzoom-micro-codec.md) | Derive missing tiles from ancestors with a small MVT codec | Accepted |

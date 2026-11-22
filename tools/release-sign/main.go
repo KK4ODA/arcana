@@ -33,7 +33,7 @@ import (
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Fprintln(os.Stderr, "usage: release-sign keygen|manifest|sign ...")
+		fmt.Fprintln(os.Stderr, "usage: release-sign keygen|manifest|sign|verify ...")
 		os.Exit(2)
 	}
 	var err error
@@ -44,6 +44,8 @@ func main() {
 		err = manifest(os.Args[2:])
 	case "sign":
 		err = sign(os.Args[2:])
+	case "verify":
+		err = verify(os.Args[2:])
 	default:
 		err = fmt.Errorf("unknown command %q", os.Args[1])
 	}
@@ -158,4 +160,36 @@ func sign(args []string) error {
 		return err
 	}
 	return os.WriteFile(*in+".sig", appupdate.Sign(data, ed25519.PrivateKey(key)), 0o644)
+}
+
+// verify checks release.json.sig against the keys this build of Arcana
+// trusts (or -pub), so a release is never published with a signature the
+// programs would reject.
+func verify(args []string) error {
+	fs := flag.NewFlagSet("verify", flag.ExitOnError)
+	in := fs.String("in", "", "release.json to check")
+	pub := fs.String("pub", "", "base64 public key (default: the keys compiled into Arcana)")
+	fs.Parse(args)
+	keys := appupdate.TrustedKeys()
+	if *pub != "" {
+		k, err := base64.StdEncoding.DecodeString(strings.TrimSpace(*pub))
+		if err != nil || len(k) != ed25519.PublicKeySize {
+			return fmt.Errorf("invalid public key")
+		}
+		keys = []ed25519.PublicKey{k}
+	}
+	data, err := os.ReadFile(*in)
+	if err != nil {
+		return err
+	}
+	sig, err := os.ReadFile(*in + ".sig")
+	if err != nil {
+		return fmt.Errorf("no signature: %w", err)
+	}
+	m, err := appupdate.Verify(data, sig, keys)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%s: valid signature for version %s\n", *in, m.Version)
+	return nil
 }

@@ -282,41 +282,54 @@ function integrityPanel(tp) {
 
 async function updatesPanel(s, ro, updateURL, tp) {
   let info;
-  try { info = await api.get('/api/app/update'); } catch (_) { return h('div'); }
+  let status;
+  try { [info, status] = await Promise.all([api.get('/api/app/update'), api.get('/api/status')]); } catch (_) { return h('div'); }
+  const n = status.appUpdate || {};
   const out = h('div', { class: 'small', style: 'margin-top:8px' });
-  const folder = h('input', { type: 'text', placeholder: 'Folder containing release.json (e.g. an unzipped release on another drive)', style: 'width:min(520px,100%)' });
   const st = info.status || {};
-  const render = (msg, available) => fill(out, msg ? h('p', null, msg) : null,
-    available ? h('div', null, h('p', null, h('b', null, `Version ${available.version}`), ` · released ${fmtDate(available.released)}`),
-      available.notes ? h('p', { class: 'note-text' }, available.notes) : null,
-      h('button', { class: 'primary', disabled: ro, onclick: async () => {
-        try { await api.post('/api/app/update/download'); toast('Downloading the update; see Background tasks.'); tp.refresh(); } catch (e) { toast(e.message); }
-      } }, 'Download and verify')) : null);
+  const auto = h('input', { type: 'checkbox', checked: !!n.autoCheck, disabled: ro || !info.keysTrusted });
+  auto.addEventListener('change', async () => {
+    try { await api.put('/api/settings', { autoUpdateCheck: auto.checked }); toast(auto.checked ? 'Arcana will look for new versions once a day.' : 'Automatic checks are off.'); } catch (e) { toast(e.message); auto.checked = !auto.checked; }
+  });
+  const available = (v) => fill(out,
+    h('p', null, h('b', null, `Version ${v.version}`), v.released ? ` · released ${fmtDate(v.released)}` : ''),
+    v.notes ? h('p', { class: 'note-text' }, v.notes) : null,
+    n.selfUpdate && n.selfUpdate.possible
+      ? h('p', null, 'Use ', h('b', null, 'Update now'), ' in the bar at the top of the page; Arcana restarts by itself.')
+      : h('p', null, (n.selfUpdate && n.selfUpdate.reason) || ''));
+  const folder = h('input', { type: 'text', placeholder: 'Folder containing release.json (e.g. an unzipped release on another drive)', style: 'width:min(520px,100%)' });
+  if (n.available) available({ version: n.available, released: n.released, notes: n.notes });
+  else if (n.installed) fill(out, h('p', null, h('b', null, `Version ${n.installed} is installed.`), ' Close Arcana and start it again to use it.'));
   return h('section', { class: 'panel' },
     h('header', null, h('h2', null, 'Application updates')),
     h('div', { class: 'body' },
       h('dl', { class: 'meta' },
         h('dt', null, 'This version'), h('dd', { class: 'mono small' }, `${info.version} (${info.platform})`),
-        h('dt', null, 'Signature keys'), h('dd', null, info.keysTrusted ? `${info.keysTrusted} trusted key(s): updates are verified before installation` : 'None in this build: signed updates cannot be verified, so this build installs no updates. Download new releases manually.'),
-        st.staged ? [h('dt', null, 'Ready to install'), h('dd', null, `Version ${st.staged.version}`)] : null,
+        h('dt', null, 'Last check'), h('dd', null, n.checkedAt ? fmtDate(n.checkedAt) : 'never'),
         st.appliedVersion ? [h('dt', null, 'Last installed'), h('dd', null, `${st.appliedVersion} on ${fmtDate(st.appliedAt)}${st.rolledBack ? ' (rolled back)' : ''}`)] : null),
-      h('p', { class: 'small muted' }, 'Arcana never updates itself automatically and never requires updates. Content updates are separate (see Updates). The previous version is kept so an update can be rolled back.'),
-      h('div', { class: 'field', style: 'padding-left:0;padding-right:0' }, h('label', null, 'Update address'), h('div', null, updateURL, h('div', { class: 'help' }, 'Where release.json and its signature are published. Saved with the settings above.'))),
+      info.keysTrusted ? null : h('p', { class: 'small' }, 'This build has no release key, so it cannot verify updates. Download new versions manually.'),
+      h('label', { class: 'inline' }, auto, 'Look for new versions automatically (once a day, only while online)'),
+      h('p', { class: 'small muted' }, 'Only the update address below is contacted. Every update is checked against Arcana’s release signature before anything is installed; the previous version is kept so it can be rolled back. Content updates are separate (see Updates).'),
       h('div', { class: 'row' },
         h('button', { disabled: !info.keysTrusted, onclick: async () => {
-          try { const r = await api.post('/api/app/update/check'); render(r.checkMessage, r.available); } catch (e) { render(e.message); }
-        } }, 'Check online'),
-        folder,
-        h('button', { disabled: ro || !info.keysTrusted, onclick: async () => {
-          try { const m = await api.post('/api/app/update/stage', { source: folder.value.trim() }); render(`Verified the signature and files of version ${m.version}. Install it below.`); } catch (e) { render(e.message); }
-        } }, 'Verify folder'),
-        h('button', { class: 'primary', disabled: ro || !st.staged, onclick: async () => {
-          if (!confirm('Install the staged version? Close and restart Arcana afterwards.')) return;
-          try { const r = await api.post('/api/app/update/apply'); render(r.message); } catch (e) { render(e.message); }
-        } }, 'Install staged update'),
+          try {
+            const r = await api.post('/api/app/update/check');
+            if (r.available) { available(r.available); window.dispatchEvent(new Event('arcana-status')); } else fill(out, h('p', null, r.checkMessage || 'You have the latest version.'));
+          } catch (e) { fill(out, h('p', null, e.message)); }
+        } }, 'Check now'),
         h('button', { disabled: ro || !st.appliedVersion || st.rolledBack, onclick: async () => {
-          if (!confirm('Restore the previous version of the program files?')) return;
-          try { const r = await api.post('/api/app/update/rollback'); render(r.message); } catch (e) { render(e.message); }
+          if (!confirm('Restore the previous version of the program files? Restart Arcana afterwards.')) return;
+          try { const r = await api.post('/api/app/update/rollback'); fill(out, h('p', null, r.message)); } catch (e) { fill(out, h('p', null, e.message)); }
         } }, 'Roll back')),
-      out));
+      out,
+      h('details', { style: 'margin-top:8px' }, h('summary', { class: 'small' }, 'Advanced: install from a folder, update address'),
+        h('div', { class: 'field', style: 'padding-left:0;padding-right:0' }, h('label', null, 'Update address'), h('div', null, updateURL, h('div', { class: 'help' }, 'Where release.json and its signature are published. Saved with the settings above.'))),
+        h('div', { class: 'row' }, folder,
+          h('button', { disabled: ro || !info.keysTrusted, onclick: async () => {
+            try { const m = await api.post('/api/app/update/stage', { source: folder.value.trim() }); fill(out, h('p', null, `Verified the signature and files of version ${m.version}.`)); } catch (e) { fill(out, h('p', null, e.message)); }
+          } }, 'Verify folder'),
+          h('button', { disabled: ro || !st.staged, onclick: async () => {
+            if (!confirm('Install the verified version? Restart Arcana afterwards.')) return;
+            try { const r = await api.post('/api/app/update/apply'); fill(out, h('p', null, r.message)); } catch (e) { fill(out, h('p', null, e.message)); }
+          } }, 'Install verified version')))));
 }

@@ -49,6 +49,7 @@ func (s *Server) registerPhase2(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/app/update", localOnly(s.withApp(s.handleUpdateInfo)))
 	mux.HandleFunc("POST /api/app/update/check", s.withApp(s.handleUpdateCheck))
 	mux.HandleFunc("POST /api/app/update/download", s.withApp(s.handleUpdateDownload))
+	mux.HandleFunc("POST /api/app/update/install", s.withApp(s.handleUpdateInstall))
 	mux.HandleFunc("POST /api/app/update/stage", s.withApp(s.handleUpdateStage))
 	mux.HandleFunc("POST /api/app/update/apply", s.withApp(s.handleUpdateApply))
 	mux.HandleFunc("POST /api/app/update/rollback", s.withApp(s.handleUpdateRollback))
@@ -372,6 +373,17 @@ func (s *Server) handleUpdateCheck(w http.ResponseWriter, r *http.Request, a *ap
 
 func (s *Server) handleUpdateDownload(w http.ResponseWriter, r *http.Request, a *app.App) {
 	t, err := a.StartAppUpdateDownload()
+	if err != nil {
+		writeError(w, 409, err.Error())
+		return
+	}
+	writeJSON(w, 200, t)
+}
+
+// handleUpdateInstall downloads, verifies and installs the newest version
+// in one step, then restarts Arcana (when this copy can restart itself).
+func (s *Server) handleUpdateInstall(w http.ResponseWriter, r *http.Request, a *app.App) {
+	t, err := a.StartAppUpdateInstall()
 	if err != nil {
 		writeError(w, 409, err.Error())
 		return

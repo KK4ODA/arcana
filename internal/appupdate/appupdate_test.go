@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/KK4ODA/arcana/internal/library"
@@ -170,5 +171,40 @@ func TestStageFromArchive(t *testing.T) {
 	}
 	if read(t, filepath.Join(root, "bin", "linux-amd64", "arcana")) != "zipped linux" {
 		t.Fatal("archive update not applied")
+	}
+}
+
+func TestManifestPaths(t *testing.T) {
+	pub, priv, _ := ed25519.GenerateKey(rand.Reader)
+	keys := []ed25519.PublicKey{pub}
+	sum := strings.Repeat("a", 64)
+	build := func(paths ...string) ([]byte, []byte) {
+		m := Manifest{Format: "arcana-release", FormatVersion: 1, Version: "9.9.9"}
+		for _, p := range paths {
+			m.Files = append(m.Files, File{Path: p, Size: 1, SHA256: sum})
+		}
+		data, _ := json.Marshal(m)
+		return data, Sign(data, priv)
+	}
+	// Program areas are kept; unknown folders a later release adds are
+	// skipped rather than making the update uninstallable.
+	data, sig := build("Arcana.exe", "bin/linux-arm64/arcana", "appliance/install.sh", "licenses/SOURCES.txt", "docs/new-guide.md")
+	m, err := Verify(data, sig, keys)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got []string
+	for _, f := range m.Files {
+		got = append(got, f.Path)
+	}
+	if strings.Join(got, ",") != "Arcana.exe,bin/linux-arm64/arcana,appliance/install.sh,licenses/SOURCES.txt" {
+		t.Fatalf("kept %v", got)
+	}
+	// Escapes and library data are refused outright.
+	for _, bad := range []string{"../outside", "/etc/passwd", "content/x/1/file.zim", "user/settings.json", "arcana-library.json", "state/arcana.db", ""} {
+		data, sig := build("bin/linux-amd64/arcana", bad)
+		if _, err := Verify(data, sig, keys); err == nil {
+			t.Errorf("accepted %q", bad)
+		}
 	}
 }

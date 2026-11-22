@@ -8,12 +8,14 @@ name: Release
 #   3. the release files are built, checked and given build provenance;
 #   4. the GitHub release is created with notes from CHANGELOG.md.
 #
-# Update signing (docs/adr/0011): if the repository variable
-# ARCANA_UPDATE_PUBKEY is set, the programs trust that key. With the secret
-# ARCANA_SIGNING_KEY the manifest is signed here and the release published;
-# without it the release stays a draft until a maintainer signs
-# release.json offline and uploads release.json.sig. With neither, in-app
-# updates are off and the release is published unsigned (the notes say so).
+# Update signing (docs/adr/0011): the programs trust the project's release
+# key (internal/buildinfo). The secret ARCANA_SIGNING_KEY holds its private
+# half; the manifests are signed here and checked against the compiled-in
+# key, so a wrong secret fails the build. Without the secret the release is
+# left as a draft until a maintainer signs release.json offline and uploads
+# release.json.sig: an unsigned release must never reach users, because
+# their in-app updater would reject it. The optional variable
+# ARCANA_UPDATE_PUBKEY replaces the compiled-in key list (key rotation).
 
 on:
   push:
@@ -55,6 +57,7 @@ jobs:
       attestations: write
     env:
       VERSION: ${{ needs.prepare.outputs.version }}
+      HAS_SIGNING_KEY: ${{ secrets.ARCANA_SIGNING_KEY != '' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -79,6 +82,11 @@ jobs:
           test -f "$tmp/Arcana/licenses/SOURCES.txt"
           tar -tf "arcana-$VERSION-kiwix-sources.tar" > "$tmp/sources.txt"
           grep -q kiwix-tools-3.8.2.tar.xz "$tmp/sources.txt"
+      - name: Check the update signatures
+        if: ${{ env.HAS_SIGNING_KEY == 'true' }}
+        run: |
+          go run ./tools/release-sign verify -in dist/release.json
+          go run ./tools/release-sign verify -in dist/Arcana/release.json
       - name: Build provenance
         if: ${{ !github.event.repository.private }}
         uses: actions/attest-build-provenance@v2
@@ -105,7 +113,6 @@ jobs:
     env:
       VERSION: ${{ needs.prepare.outputs.version }}
       GH_TOKEN: ${{ github.token }}
-      UPDATE_PUBKEY: ${{ vars.ARCANA_UPDATE_PUBKEY }}
       PRIVATE_REPO: ${{ github.event.repository.private }}
     steps:
       - uses: actions/checkout@v4
@@ -122,11 +129,11 @@ jobs:
           scripts/release-notes.sh "$VERSION" "$signed" "$attested" > notes.md
           flags=""
           case "$VERSION" in *-*) flags="--prerelease" ;; esac
-          if [ -n "$UPDATE_PUBKEY" ] && [ "$signed" = unsigned ]; then
-            # These programs trust an update key, so release.json must be
+          if [ "$signed" = unsigned ]; then
+            # The programs trust the release key, so release.json must be
             # signed before anyone can download it (ADR-0011).
             flags="$flags --draft"
-            echo "::warning::Draft release: sign dist/release.json offline and upload release.json.sig, then publish."
+            echo "::warning::Draft release: the ARCANA_SIGNING_KEY secret is missing. Sign release.json offline (release-sign sign) and upload release.json.sig, then publish."
           fi
           files=""
           for f in dist/arcana-* dist/SHA256SUMS dist/release.json dist/release.json.sig; do

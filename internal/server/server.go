@@ -775,6 +775,7 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *ap
 		GutenbergEnabled             *bool                 `json:"gutenbergEnabled"`
 		AutoRefreshHours             *int                  `json:"autoRefreshHours"`
 		UpdateURL                    *string               `json:"updateUrl"`
+		AutoUpdateCheck              *bool                 `json:"autoUpdateCheck"`
 		Feeds                        *[]library.FeedSource `json:"feeds"`
 		MapsEnabled                  *bool                 `json:"mapsEnabled"`
 		MDNS                         *bool                 `json:"mdns"`
@@ -828,6 +829,9 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *ap
 				return errors.New("the update address must start with https://")
 			}
 			st.Updates.URL = u
+		}
+		if req.AutoUpdateCheck != nil {
+			st.Updates.AutoCheck = *req.AutoUpdateCheck
 		}
 		if req.Feeds != nil {
 			seen := map[string]bool{"arcana": true, "kiwix": true, "gutenberg": true, "maps": true, "local": true}

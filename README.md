@@ -103,7 +103,7 @@ See [docs/development.md](docs/development.md).
 | **Implemented (Phase 6)** | Integration API for other programs (RadioPost, Aether HF) with scoped, approved tokens and citations ([docs/integration-api.md](docs/integration-api.md)); copying between Arcana libraries on a LAN; signed community catalogs |
 | **Design only** | Optional local question answering over installed sources ([docs/design/15-local-ai.md](docs/design/15-local-ai.md)) |
 | **Planned** | Ready-made Raspberry Pi SD image; hardware and power-loss tests. Map routing, terrain and measuring tools; scheduled peer sync |
-| **Needs a decision** | License confirmation (GPL-3.0-or-later proposed); code-signing certificates; GPL source bundle for kiwix-serve in releases |
+| **Not yet** | Code-signed programs (0.6.0 ships unsigned; Windows and macOS warn on first start) |
 
 The full design package is in [docs/](docs/README.md).
 
