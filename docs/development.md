@@ -123,6 +123,26 @@ The content origin (port + 1) serves `/kiwix/*` (proxied kiwix-serve, with
 `/files/{id}/{name}` (installed documents) and `/userdocs/{name}` (the
 user's documents, host only).
 
+## Making a release
+
+1. Move the changes under a finished heading in `CHANGELOG.md`:
+   `## X.Y.Z — YYYY-MM-DD` (the release notes are taken from it; a section
+   still marked *Unreleased* is refused).
+2. Tag and push: `git tag -a vX.Y.Z -m "Arcana X.Y.Z" && git push origin vX.Y.Z`.
+   A tag with a suffix (`v0.7.0-rc.1`) makes a pre-release.
+3. `.github/workflows/release.yml` then runs every CI check (Linux,
+   Windows, macOS, offline acceptance test, appliance checks), builds the
+   files with `scripts/package.sh`, verifies them, adds build provenance
+   (public repositories), and creates the GitHub release with notes from
+   `scripts/release-notes.sh`.
+
+Release files: one archive per platform, the all-platform portable zip (also
+the in-app update archive), `arcana-X.Y.Z-kiwix-sources.tar` (source of the
+GPL components of kiwix-serve, required because the binaries ship beside
+Arcana), `release.json` and `SHA256SUMS`. Build them locally with
+`scripts/package.sh X.Y.Z` (needs `zip`; downloads kiwix-serve binaries and
+sources, all checked against pinned SHA-256 values).
+
 ## Release signing
 
 ```
@@ -134,7 +154,11 @@ ARCANA_UPDATE_PUBKEY=<public key> ARCANA_SIGNING_KEY=$(cat arcana-release.key) s
 folder) and `dist/release.json` (online updates of the zip), and signs both
 when `ARCANA_SIGNING_KEY` is set. The release workflow reads the key from the
 `ARCANA_SIGNING_KEY` secret and the public key from the `ARCANA_UPDATE_PUBKEY`
-variable.
+variable. If the variable is set but the secret is not (the key is kept
+offline), the workflow creates a draft: sign `release.json` offline
+(`go run ./tools/release-sign sign -in release.json`), upload
+`release.json.sig` to the draft, then publish it. Without either, in-app
+updates stay off and the release says so.
 
 ## Dependency review
 

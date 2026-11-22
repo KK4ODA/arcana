@@ -10,7 +10,7 @@
 /Arcana/
 /tmp/
 
-# Kiwix binaries fetched by scripts/fetch-kiwix.sh
+# Kiwix binaries and sources fetched by scripts/fetch-kiwix*.sh
 /third_party/kiwix/
 
 # Editors and OS
@@ -26,3 +26,4 @@ Thumbs.db
 /test-results/
 node_modules/
 /map-regions
+/third_party/kiwix-src/

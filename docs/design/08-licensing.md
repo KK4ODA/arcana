@@ -29,9 +29,18 @@ All direct Go dependencies are BSD-3-Clause or MIT, which are compatible.
   - include a written offer, valid for three years; **or**
   - point to the source on a network server under §6(d) while ensuring it
     stays available.
-- **Plan.** `scripts/package.sh` will add `licenses/kiwix-tools-<ver>.tar.xz`
-  and a `SOURCES.txt` listing the exact upstream tags. Until then, binary
-  releases are drafts.
+- **Implemented (0.6.0).** `scripts/fetch-kiwix-sources.sh` downloads, with
+  pinned SHA-256 values, the source of every GPL component inside the
+  shipped binaries in the exact versions they report: kiwix-tools 3.8.2 and
+  3.8.1, libkiwix 14.2.0 and 14.1.1, libzim 9.5.0 and 9.4.0, and Xapian
+  1.4.23. `scripts/package.sh` puts the matching kiwix-tools source and
+  `licenses/SOURCES.txt` in every archive and publishes all of them as
+  `arcana-<version>-kiwix-sources.tar` next to the binaries on the release
+  page (§6(d): same place, clear directions). `SOURCES.txt` points to
+  kiwix-build for build recipes and patches and lists the other (non-GPL)
+  static libraries. **Maintainer review:** whether the non-GPL static
+  libraries (libmicrohttpd is LGPL-2.1) and kiwix-build's patches also have
+  to be shipped rather than referenced.
 - **Notices.** `bin/<platform>/kiwix/NOTICE.txt` and
   `THIRD_PARTY_NOTICES.md` identify the program, its license and its
   source.
@@ -100,8 +109,8 @@ in the export manifest.
 
 1. Run `go list -deps` and refresh `THIRD_PARTY_NOTICES.md`. Copy every
    license text into `licenses/` in the bundle.
-2. Include the kiwix-tools source tarball and `SOURCES.txt`, or a written
-   offer.
+2. Include the kiwix sources and `SOURCES.txt` (automated by
+   `scripts/package.sh`; update the pins when kiwix-tools changes).
 3. Confirm the bundled catalog's license records against the publishers'
    current pages, and update `lastVerified`.
 4. Make sure no restricted content ships inside the bundle. Today only the

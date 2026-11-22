@@ -3,9 +3,33 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
-## Unreleased — 0.6.0 (Phase 6: integration and peer sync)
+## 0.6.0 — 2026-11-22
 
-### Added
+The first public release. It includes everything from the development
+milestones 0.1.0 to 0.5.0 (see CHANGELOG.md), which were not released
+separately.
+
+### Highlights
+- **Portable library** on any drive (exFAT recommended): one program per
+  platform, nothing to install, works without internet once filled.
+- **Choose and download** from the Kiwix catalog (3,600+ archives),
+  Project Gutenberg's practical shelves, a curated catalog and signed
+  community catalogs; capacity planning before anything is downloaded;
+  resumable downloads verified against the publisher's checksums.
+- **Read and search** offline: ZIM archives (through kiwix-serve), PDFs,
+  EPUBs and your own documents; bookmarks, notes and history.
+- **Offline maps** of 541 regions plus custom areas, with place search;
+  **GPS** from USB/serial receivers, gpsd, NMEA over UDP/TCP or a
+  simulator; waypoints, tracks and GPX.
+- **Share on the local network**, read-only for visitors, found as
+  `arcana.local` or by QR code; optional HTTPS and password-protected
+  remote administration.
+- **Raspberry Pi / Linux appliance** installer with its own Wi-Fi network
+  and captive portal.
+- **Integration API** for programs such as RadioPost and Aether HF, and
+  copying between Arcana libraries on a network.
+
+### Added in this milestone (Phase 6: integration and peer sync)
 - **Integration API v1** (`/api/integration/v1/`) for programs such as
   RadioPost and Aether HF: search with citations, article text and bounded
   excerpts with an attribution footer, current position, coordinates with
@@ -30,7 +54,20 @@ the library format version is tracked separately (docs/design/09-storage-and-dat
   network administrators. The integration API never accepts the UI's
   session tokens, and the UI API never accepts integration tokens.
 
-## 0.5.0 (Phase 5: appliance)
+### Known limitations
+- Tested automatically on Linux; the Windows and macOS programs pass the
+  test suite on GitHub's runners but have not been tried on real machines
+  by the developers. Nothing has been run on Raspberry Pi hardware or with
+  a physical GPS receiver yet.
+- The programs are not code-signed: Windows SmartScreen and macOS
+  Gatekeeper warn on first start (README-FIRST.txt explains how to proceed).
+- In-app updates are not active in this release: no release signing key is
+  configured yet, so new versions are installed by downloading them.
+- Map regions are extracted from Protomaps planet builds on demand; they
+  have no publisher checksum and are labelled unverified.
+- On Windows and macOS, Arcana cannot create a Wi-Fi hotspot itself.
+
+## 0.5.0 — development milestone (Phase 5: appliance)
 
 ### Added
 - **Appliance installer** for Raspberry Pi OS (Bookworm) and other systemd
@@ -49,7 +86,7 @@ the library format version is tracked separately (docs/design/09-storage-and-dat
 - CI checks the installer (shellcheck, dry run), the units
   (`systemd-analyze verify`) and the firewall rules (nftables syntax).
 
-## 0.4.0 (Phase 4: network serving)
+## 0.4.0 — development milestone (Phase 4: network serving)
 
 ### Added
 - **Remote administration** (off by default): the host sets a password in
@@ -73,7 +110,7 @@ the library format version is tracked separately (docs/design/09-storage-and-dat
 - Opening a map from the Library goes to the Maps view, centred on it.
 - Leaving the Maps view while updates are arriving no longer raises errors.
 
-## 0.3.0 (Phase 3: offline maps and GPS)
+## 0.3.0 — development milestone (Phase 3: offline maps and GPS)
 
 ### Added
 - **Maps** view with offline vector maps rendered in the browser by
@@ -113,7 +150,7 @@ the library format version is tracked separately (docs/design/09-storage-and-dat
   host turns on "Share position" (off by default). Planning a map area,
   which contacts the map source, is a host-only action.
 
-## 0.2.0 (Phase 2: content management and updates)
+## 0.2.0 — development milestone (Phase 2: content management and updates)
 
 ### Added
 - User data in `user/` as plain, human-readable files: bookmarks, favorites,
@@ -145,7 +182,7 @@ the library format version is tracked separately (docs/design/09-storage-and-dat
   update downloads.
 - Acceptance test step: offline transfer to a second drive and full check.
 
-## 0.1.0 (Phase 1 vertical slice)
+## 0.1.0 — development milestone (Phase 1 vertical slice)
 
 ### Added
 - Portable launch on Windows (Arcana.exe), Linux and macOS (arcana.sh) from a

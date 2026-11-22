@@ -24,6 +24,8 @@ update must never break a working library or be required to keep using it.
   a network.
 
 ## Consequences
-Release engineering needs key management and a signing step (CI produces
-drafts; a maintainer signs offline). Application and content updates are
-independent.
+Release engineering needs key management and a signing step. The release
+workflow (0.6.0) signs in CI when the key is provided as a secret; when the
+programs trust a key but CI does not hold it, it creates a draft for a
+maintainer to sign offline; with no key configured, releases are published
+with in-app updates off. Application and content updates are independent.

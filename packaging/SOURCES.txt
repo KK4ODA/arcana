@@ -1,0 +1,54 @@
+Source code of programs distributed with Arcana
+===============================================
+
+Arcana itself
+-------------
+Arcana is free software under the GNU General Public License, version 3
+or later. Its complete source code is in the GitHub release this archive
+came from ("Source code" downloads) and at https://github.com/KK4ODA/arcana
+under the same version tag.
+
+kiwix-serve
+-----------
+The bin/<platform>/kiwix/ folders contain kiwix-serve, an unmodified
+official build published by the Kiwix project (https://kiwix.org), licensed
+under the GNU General Public License, version 3 or later. Arcana starts it
+as a separate program and does not link to it.
+
+Kiwix builds kiwix-serve statically. The source code of its GPL components,
+in the exact versions shipped, is published next to these binaries on the
+same release page, as "arcana-<version>-kiwix-sources.tar":
+
+  Linux and macOS: kiwix-serve from kiwix-tools 3.8.2
+    kiwix-tools-3.8.2.tar.xz   (GPL-3.0-or-later)
+    libkiwix-14.2.0.tar.xz     (GPL-3.0-or-later)
+    libzim-9.5.0.tar.xz        (GPL-2.0-or-later)
+    xapian-core-1.4.23.tar.xz  (GPL-2.0-or-later)
+
+  Windows: kiwix-serve from kiwix-tools 3.8.1
+    kiwix-tools-3.8.1.tar.xz   (GPL-3.0-or-later)
+    libkiwix-14.1.1.tar.xz     (GPL-3.0-or-later)
+    libzim-9.4.0.tar.xz        (GPL-2.0-or-later)
+    xapian-core-1.4.23.tar.xz  (GPL-2.0-or-later)
+
+The kiwix-tools source of the build for each platform is also included in
+this archive's licenses/ folder.
+
+The binaries also contain these libraries, under their own licenses:
+  libcurl 8.4.0 (curl license), libmicrohttpd 0.9.76 (LGPL-2.1-or-later),
+  zlib 1.3.1 (zlib license), ICU 73.2 (Linux, macOS) / 74 (Windows, as
+  separate DLLs) (Unicode license), pugixml 1.15 (MIT), zstd 1.5.7 / 1.5.5
+  (BSD-3-Clause), xz/liblzma 5.2.6 / 5.2.11 (public domain / 0BSD),
+  Mustache (Boost), and others listed by "kiwix-serve --version".
+
+How Kiwix builds these binaries, including the exact dependency versions
+and any patches, is recorded in kiwix-build:
+  https://github.com/kiwix/kiwix-build
+The upstream source releases are at:
+  https://download.kiwix.org/release/kiwix-tools/
+  https://download.kiwix.org/release/libkiwix/
+  https://download.openzim.org/release/libzim/
+  https://xapian.org/download
+
+If any source code for the programs distributed here cannot be obtained
+from these places, open an issue at https://github.com/KK4ODA/arcana/issues.

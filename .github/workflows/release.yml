@@ -1,30 +1,138 @@
 name: Release
 
+# Pushing a tag vX.Y.Z (or vX.Y.Z-suffix for a pre-release) builds and
+# publishes a release:
+#   1. the tag must match a finished CHANGELOG.md section;
+#   2. every CI check runs (lint, tests on Linux, Windows and macOS, the
+#      offline acceptance test, appliance checks);
+#   3. the release files are built, checked and given build provenance;
+#   4. the GitHub release is created with notes from CHANGELOG.md.
+#
+# Update signing (docs/adr/0011): if the repository variable
+# ARCANA_UPDATE_PUBKEY is set, the programs trust that key. With the secret
+# ARCANA_SIGNING_KEY the manifest is signed here and the release published;
+# without it the release stays a draft until a maintainer signs
+# release.json offline and uploads release.json.sig. With neither, in-app
+# updates are off and the release is published unsigned (the notes say so).
+
 on:
   push:
-    tags: ['v*']
+    tags: ['v[0-9]+.[0-9]+.[0-9]+*']
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  release:
+  prepare:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the tag against CHANGELOG.md
+        id: v
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          scripts/release-notes.sh "$v" > /dev/null
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+
+  ci:
+    needs: prepare
+    uses: ./.github/workflows/ci.yml
+    with:
+      package: false
+
+  build:
+    needs: [prepare, ci]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - name: Test
-        run: scripts/fetch-kiwix.sh && go test -count=1 ./...
-      - name: Package (signed when the signing secret is configured)
+      - name: Build release files
         env:
           ARCANA_UPDATE_PUBKEY: ${{ vars.ARCANA_UPDATE_PUBKEY }}
           ARCANA_SIGNING_KEY: ${{ secrets.ARCANA_SIGNING_KEY }}
-        run: scripts/package.sh "${GITHUB_REF_NAME#v}"
-      - name: Publish release (draft)
-        env:
-          GH_TOKEN: ${{ github.token }}
-        # Drafts are reviewed and the release manifest signed offline by a
-        # maintainer before publication (docs/adr/0011).
-        run: gh release create "$GITHUB_REF_NAME" dist/*.zip dist/*.sha256 dist/release.json* --draft --title "Arcana $GITHUB_REF_NAME" --notes-file CHANGELOG.md
+        run: scripts/package.sh "$VERSION"
+      - name: Check the release files
+        run: |
+          cd dist
+          sha256sum -c SHA256SUMS
+          tmp=$(mktemp -d)
+          tar -xzf "arcana-$VERSION-linux-amd64.tar.gz" -C "$tmp"
+          "$tmp/Arcana/bin/linux-amd64/arcana" version | tee /dev/stderr | grep -q "^arcana $VERSION "
+          test -f "$tmp/Arcana/licenses/SOURCES.txt"
+          tar -tf "arcana-$VERSION-kiwix-sources.tar" | grep -q kiwix-tools-3.8.2.tar.xz
+      - name: Build provenance
+        if: ${{ !github.event.repository.private }}
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            dist/arcana-*
+            dist/release.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-files
+          path: |
+            dist/arcana-*
+            dist/SHA256SUMS
+            dist/release.json
+            dist/release.json.sig
+          if-no-files-found: error
+          retention-days: 30
+
+  publish:
+    needs: [prepare, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
+      GH_TOKEN: ${{ github.token }}
+      UPDATE_PUBKEY: ${{ vars.ARCANA_UPDATE_PUBKEY }}
+      PRIVATE_REPO: ${{ github.event.repository.private }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-files
+          path: dist
+      - name: Create the release
+        run: |
+          signed=unsigned
+          [ -f dist/release.json.sig ] && signed=signed
+          attested=attested
+          [ "$PRIVATE_REPO" = true ] && attested=
+          scripts/release-notes.sh "$VERSION" "$signed" "$attested" > notes.md
+          flags=""
+          case "$VERSION" in *-*) flags="--prerelease" ;; esac
+          if [ -n "$UPDATE_PUBKEY" ] && [ "$signed" = unsigned ]; then
+            # These programs trust an update key, so release.json must be
+            # signed before anyone can download it (ADR-0011).
+            flags="$flags --draft"
+            echo "::warning::Draft release: sign dist/release.json offline and upload release.json.sig, then publish."
+          fi
+          files=""
+          for f in dist/arcana-* dist/SHA256SUMS dist/release.json dist/release.json.sig; do
+            if [ -f "$f" ]; then files="$files $f"; fi
+          done
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            # Re-run of the same tag: refresh the files, keep the notes.
+            # shellcheck disable=SC2086
+            gh release upload "$GITHUB_REF_NAME" $files --clobber
+          else
+            # shellcheck disable=SC2086
+            gh release create "$GITHUB_REF_NAME" $files --verify-tag --title "Arcana $VERSION" --notes-file notes.md $flags
+          fi
+          gh release view "$GITHUB_REF_NAME" --json url,isDraft,isPrerelease,assets --jq '{url, isDraft, isPrerelease, assets: [.assets[].name]}'

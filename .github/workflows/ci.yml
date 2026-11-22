@@ -2,11 +2,22 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: ['**']
   pull_request:
+  # The release workflow runs the same checks before it builds anything.
+  workflow_call:
+    inputs:
+      package:
+        description: Also build the release files (the release workflow builds its own)
+        type: boolean
+        default: true
 
 permissions:
   contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_call' && !startsWith(github.ref, 'refs/tags/') }}
 
 jobs:
   lint:
@@ -90,6 +101,7 @@ jobs:
         run: sed 's/@IFACE@/wlan0/' packaging/appliance/captive.nft > /tmp/captive.nft && sudo nft -c -f /tmp/captive.nft
 
   build:
+    if: ${{ inputs.package != false }}
     runs-on: ubuntu-latest
     needs: [test]
     steps:
@@ -97,12 +109,12 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - name: Package portable release (all platforms)
+      - name: Package release files (all platforms)
         run: scripts/package.sh "0.0.0-ci.${GITHUB_RUN_NUMBER}"
       - uses: actions/upload-artifact@v4
         with:
-          name: arcana-portable
+          name: arcana-ci-build
           path: |
-            dist/*.zip
-            dist/*.sha256
+            dist/arcana-*
+            dist/SHA256SUMS
           retention-days: 14
