@@ -3,7 +3,12 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
-## 0.6.1 — Unreleased
+## 0.6.1 — 2026-11-22
+
+Reading ZIM archives now works on Windows computers that do not have the
+Microsoft Visual C++ Redistributable installed. Arcana 0.6.0 offers this
+version by itself within a day of being online: choose *Update now* in the
+banner at the top of the page.
 
 ### Added
 - **The Windows build includes the Microsoft Visual C++ runtime**
