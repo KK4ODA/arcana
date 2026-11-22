@@ -50,6 +50,8 @@ separately.
   LAN address inside the offline namespace.
 
 ### Security
+- Built with Go 1.26.11, which includes the standard-library security
+  fixes released since Go 1.26.0 (found by govulncheck in CI).
 - Token, pairing and peer management stay host-only even for signed-in
   network administrators. The integration API never accepts the UI's
   session tokens, and the UI API never accepts integration tokens.
