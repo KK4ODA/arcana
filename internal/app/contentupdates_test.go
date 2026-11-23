@@ -98,7 +98,21 @@ func TestScheduledContentUpdates(t *testing.T) {
 	if r := a.EnqueueByID(ctx, []string{"test.doc"}); r["test.doc"] != "queued" {
 		t.Fatalf("enqueue: %v", r)
 	}
-	waitFor(t, func() bool { _, err := a.Store.GetInstalled(ctx, "test.doc"); return err == nil })
+	// A document is recorded as installed a moment before its download is
+	// marked completed, so wait for the queue to be empty as well.
+	idle := func() bool {
+		jobs, err := a.Store.ListJobs(ctx)
+		if err != nil {
+			return false
+		}
+		for _, j := range jobs {
+			if j.Active() {
+				return false
+			}
+		}
+		return true
+	}
+	waitFor(t, func() bool { _, err := a.Store.GetInstalled(ctx, "test.doc"); return err == nil && idle() })
 
 	version.Store(2)
 	clock := time.Date(2026, 11, 23, 12, 0, 0, 0, time.Local)
@@ -136,7 +150,10 @@ func TestScheduledContentUpdates(t *testing.T) {
 		t.Fatalf("not resumed: %s", s)
 	}
 	release <- struct{}{}
-	waitFor(t, func() bool { in, err := a.Store.GetInstalled(ctx, "test.doc"); return err == nil && in.Version == "2" })
+	waitFor(t, func() bool {
+		in, err := a.Store.GetInstalled(ctx, "test.doc")
+		return err == nil && in.Version == "2" && idle()
+	})
 	a.contentUpdateTick(ctx, false)
 	if st := a.ContentUpdateStatus(); len(st.State.Jobs) != 0 || st.Active || len(st.State.Log) != 1 {
 		t.Fatalf("after install: %+v", st)
