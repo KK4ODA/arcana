@@ -3,6 +3,21 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
+## Unreleased
+
+### Added
+- **Units.** Choose kilometres and metres or miles and feet, in the map's
+  Tools panel or under Settings → Appearance. The map scale bar, GPS speed
+  and altitude, track lengths and measurements follow the choice. It is
+  stored per browser, so each person on the network can pick their own;
+  the default follows the browser's language (miles for the US, the UK,
+  Liberia and Myanmar).
+- **Measuring on the map.** *Measure distance* adds up straight-line
+  (great-circle) distances between points you click and shows the bearing
+  of the last leg; *Measure area* shows the area and perimeter of the shape
+  you outline. Double-click or press *Done* to finish, *Undo point* (or
+  Backspace) to take back a point, Escape to stop. Works offline.
+
 ## 0.6.2 — 2026-11-22
 
 Downloads are much faster, and full-text search works again for common

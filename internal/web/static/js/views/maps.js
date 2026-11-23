@@ -5,6 +5,8 @@
 // explicitly.
 import { api, getSession } from '../api.js';
 import { h, clear, fill, fmtBytes, fmtAgo, toast, debounce } from '../util.js';
+import { getUnits, setUnits, UNIT_SYSTEMS, fmtDistance, fmtSpeed, fmtAltitude, fmtArea } from '../units.js';
+import { distance, pathLength, bearing, compassPoint, area } from '../geo.js';
 
 let libPromise = null;
 
@@ -111,6 +113,9 @@ export async function mapsView(main, params) {
   let waypoints = [];
   const shownTracks = new Map(); // name -> GeoJSON feature
   let areaBox = null;
+  let scale = null;
+  // measure: { mode: 'distance' | 'area', pts: [[lon, lat]], cursor, done }
+  let measure = null;
   const disposers = [];
 
   main.classList.add('main-map');
@@ -129,9 +134,11 @@ export async function mapsView(main, params) {
   const wptBox = h('div');
   const trkBox = h('div');
   const areaBoxEl = h('div');
+  const toolsBox = h('div');
 
   side.append(
     h('section', { class: 'map-sec' }, searchInput, searchResults),
+    h('section', { class: 'map-sec' }, h('h3', null, 'Tools'), toolsBox),
     h('section', { class: 'map-sec' }, h('h3', null, 'Position'), posBox),
     h('section', { class: 'map-sec' }, h('h3', null, 'Installed maps'), setsBox),
     h('section', { class: 'map-sec' }, h('h3', null, 'Waypoints'), wptBox),
@@ -188,14 +195,21 @@ export async function mapsView(main, params) {
         hash: false,
       });
       map.addControl(new ml.NavigationControl({ visualizePitch: false }), 'top-right');
-      map.addControl(new ml.ScaleControl({ unit: 'metric' }), 'bottom-left');
+      scale = new ml.ScaleControl({ unit: getUnits() });
+      map.addControl(scale, 'bottom-left');
       map.on('style.load', addOverlays);
       map.on('moveend', (ev) => {
         const m = ev.target;
         try { sessionStorage.setItem('arcana-map-view', JSON.stringify({ center: m.getCenter().toArray(), zoom: m.getZoom() })); } catch (_) { /* unavailable */ }
       });
       map.on('dragstart', () => { if (follow) { follow = false; renderPosition(); } });
-      map.on('click', (ev) => showPointPopup(ml, ev.lngLat));
+      map.on('click', (ev) => { if (measure) addMeasurePoint(ev.lngLat); else showPointPopup(ml, ev.lngLat); });
+      map.on('dblclick', (ev) => { if (measure && !measure.done) { ev.preventDefault(); finishMeasure(); } });
+      map.on('mousemove', (ev) => {
+        if (!measure || measure.done || !measure.pts.length) return;
+        measure.cursor = [ev.lngLat.lng, ev.lngLat.lat];
+        scheduleMeasureDraw();
+      });
       const onTheme = async () => {
         const style = await buildStyle(flavor(), ms.maxZoom);
         if (map) map.setStyle(style);
@@ -220,7 +234,7 @@ export async function mapsView(main, params) {
     const surface = cssVar('--surface') || '#fff';
     const text = cssVar('--text') || '#111';
     const empty = { type: 'FeatureCollection', features: [] };
-    for (const id of ['arcana-area', 'arcana-tracks', 'arcana-waypoints', 'arcana-position']) {
+    for (const id of ['arcana-area', 'arcana-tracks', 'arcana-waypoints', 'arcana-measure', 'arcana-position']) {
       if (!map.getSource(id)) map.addSource(id, { type: 'geojson', data: empty });
     }
     map.addLayer({ id: 'arcana-area-line', type: 'line', source: 'arcana-area',
@@ -233,6 +247,18 @@ export async function mapsView(main, params) {
     map.addLayer({ id: 'arcana-wpt-label', type: 'symbol', source: 'arcana-waypoints',
       layout: { 'text-field': ['get', 'name'], 'text-font': ['Noto Sans Medium'], 'text-size': 12, 'text-offset': [0, 1.1], 'text-anchor': 'top', 'text-optional': true },
       paint: { 'text-color': text, 'text-halo-color': surface, 'text-halo-width': 1.5 } });
+    const measureColor = cssVar('--accent') || '#1f5a85';
+    map.addLayer({ id: 'arcana-measure-fill', type: 'fill', source: 'arcana-measure', filter: ['==', ['geometry-type'], 'Polygon'],
+      paint: { 'fill-color': measureColor, 'fill-opacity': 0.15 } });
+    map.addLayer({ id: 'arcana-measure-line', type: 'line', source: 'arcana-measure',
+      filter: ['all', ['==', ['geometry-type'], 'LineString'], ['!', ['get', 'preview']]],
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: { 'line-color': measureColor, 'line-width': 2.5 } });
+    map.addLayer({ id: 'arcana-measure-preview', type: 'line', source: 'arcana-measure',
+      filter: ['all', ['==', ['geometry-type'], 'LineString'], ['get', 'preview']],
+      paint: { 'line-color': measureColor, 'line-width': 2, 'line-dasharray': [2, 2] } });
+    map.addLayer({ id: 'arcana-measure-pts', type: 'circle', source: 'arcana-measure', filter: ['==', ['geometry-type'], 'Point'],
+      paint: { 'circle-radius': 4, 'circle-color': surface, 'circle-stroke-width': 2, 'circle-stroke-color': measureColor } });
     map.addLayer({ id: 'arcana-pos-halo', type: 'circle', source: 'arcana-position',
       paint: { 'circle-radius': 15, 'circle-color': ['get', 'color'], 'circle-opacity': 0.18 } });
     map.addLayer({ id: 'arcana-pos-dot', type: 'circle', source: 'arcana-position',
@@ -241,6 +267,7 @@ export async function mapsView(main, params) {
     map.getSource('arcana-waypoints').setData(waypointData());
     map.getSource('arcana-tracks').setData({ type: 'FeatureCollection', features: [...shownTracks.values()] });
     if (areaBox) drawArea(areaBox);
+    drawMeasure();
   }
 
   function setData(id, data) {
@@ -306,8 +333,8 @@ export async function mapsView(main, params) {
       const [a, b, c] = coordLines(f.lat, f.lon);
       rows.push(h('div', { class: 'pos-coords num' }, h('div', null, a), h('div', { class: 'muted small' }, b), h('div', { class: 'muted small' }, c)));
       const facts = [];
-      if (f.alt != null) facts.push(`Altitude ${Math.round(f.alt)} m`);
-      if (f.speed != null) facts.push(`Speed ${(f.speed * 3.6).toFixed(1)} km/h`);
+      if (f.alt != null) facts.push(`Altitude ${fmtAltitude(f.alt)}`);
+      if (f.speed != null) facts.push(`Speed ${fmtSpeed(f.speed)}`);
       if (f.course != null) facts.push(`Course ${Math.round(f.course)}°`);
       if (f.hdop) facts.push(`HDOP ${f.hdop.toFixed(1)}`);
       if (g.state !== 'manual' && g.age != null) facts.push(g.age < 2 ? 'just now' : `${Math.round(g.age)} s ago`);
@@ -420,7 +447,7 @@ export async function mapsView(main, params) {
       cb.addEventListener('change', () => toggleTrack(t, cb.checked));
       return h('li', null,
         h('label', { class: 'track-row' }, cb, h('span', null, t.name.replace(/\.gpx$/, ''))),
-        h('span', { class: 'sub' }, `${(t.length / 1000).toFixed(2)} km · ${t.points} points${t.start ? ` · ${fmtAgo(t.start)}` : ''}`),
+        h('span', { class: 'sub' }, `${fmtDistance(t.length)} · ${t.points} points${t.start ? ` · ${fmtAgo(t.start)}` : ''}`),
         h('span', { class: 'row' },
           h('a', { class: 'small', href: `/api/gps/export?tracks=${encodeURIComponent(t.name)}`, download: t.name }, 'GPX'),
           canChange ? h('button', { class: 'icon danger', title: `Delete ${t.name}`, 'aria-label': `Delete ${t.name}`, onclick: () => deleteTrack(t) }, '×') : null));
@@ -454,6 +481,165 @@ export async function mapsView(main, params) {
       loadTracks();
     } catch (e) { toast(e.message); }
   }
+
+  // ------------------------------------------------------------ measuring
+  // Straight-line (great-circle) distance along clicked points, or the area
+  // they enclose. Everything is computed in the browser; nothing is saved.
+  const measureOut = h('div', { class: 'measure-out', 'aria-live': 'polite' });
+  const unitSel = h('select', { 'aria-label': 'Units' }, UNIT_SYSTEMS.map(([v, t]) => h('option', { value: v, selected: v === getUnits() }, t)));
+  unitSel.addEventListener('change', () => setUnits(unitSel.value));
+  const distBtn = h('button', { onclick: () => startMeasure('distance') }, 'Measure distance');
+  const areaBtn = h('button', { onclick: () => startMeasure('area') }, 'Measure area');
+
+  function renderTools() {
+    distBtn.disabled = !map;
+    areaBtn.disabled = !map;
+    distBtn.setAttribute('aria-pressed', measure && measure.mode === 'distance' ? 'true' : 'false');
+    areaBtn.setAttribute('aria-pressed', measure && measure.mode === 'area' ? 'true' : 'false');
+    unitSel.value = getUnits();
+    fill(toolsBox, h('div', { class: 'row' }, distBtn, areaBtn), measureOut,
+      h('label', { class: 'field-inline small' }, 'Units ', unitSel));
+    renderMeasure();
+  }
+
+  function startMeasure(mode) {
+    if (!map) return;
+    if (measure && measure.mode === mode && !measure.done) { stopMeasure(); return; }
+    measure = { mode, pts: [], cursor: null, done: false };
+    map.doubleClickZoom.disable();
+    map.getCanvas().classList.add('measuring');
+    renderTools();
+    drawMeasure();
+  }
+
+  function stopMeasure() {
+    measure = null;
+    if (map) { map.doubleClickZoom.enable(); map.getCanvas().classList.remove('measuring'); }
+    renderTools();
+    drawMeasure();
+  }
+
+  function finishMeasure() {
+    if (!measure) return;
+    measure.done = true;
+    measure.cursor = null;
+    if (map) { map.doubleClickZoom.enable(); map.getCanvas().classList.remove('measuring'); }
+    renderMeasure();
+    drawMeasure();
+  }
+
+  function addMeasurePoint(ll) {
+    if (measure.done) {
+      // A click after finishing starts a new measurement of the same kind.
+      measure = { mode: measure.mode, pts: [], cursor: null, done: false };
+      map.doubleClickZoom.disable();
+      map.getCanvas().classList.add('measuring');
+    }
+    const p = [ll.lng, ll.lat];
+    // The second click of a double-click lands on the same spot; ignore it.
+    const last = measure.pts[measure.pts.length - 1];
+    if (last && distance(last, p) < 0.01) return;
+    measure.pts.push(p);
+    renderMeasure();
+    drawMeasure();
+  }
+
+  function undoMeasurePoint() {
+    if (!measure || !measure.pts.length) return;
+    measure.pts.pop();
+    measure.done = false;
+    map.doubleClickZoom.disable();
+    map.getCanvas().classList.add('measuring');
+    renderMeasure();
+    drawMeasure();
+  }
+
+  let measureFrame = 0;
+  function scheduleMeasureDraw() {
+    if (measureFrame) return;
+    measureFrame = requestAnimationFrame(() => { measureFrame = 0; drawMeasure(); renderMeasure(); });
+  }
+
+  // Coordinates are unwrapped so a line across the antimeridian is drawn the
+  // short way round.
+  function unwrapped(pts) {
+    const out = [];
+    for (const p of pts) {
+      if (!out.length) { out.push(p); continue; }
+      let lon = p[0];
+      const prev = out[out.length - 1][0];
+      while (lon - prev > 180) lon -= 360;
+      while (lon - prev < -180) lon += 360;
+      out.push([lon, p[1]]);
+    }
+    return out;
+  }
+
+  function drawMeasure() {
+    if (!measure) { setData('arcana-measure', { type: 'FeatureCollection', features: [] }); return; }
+    const pts = unwrapped(measure.pts);
+    const features = pts.map((c) => ({ type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: c } }));
+    if (measure.mode === 'area' && pts.length >= 3) {
+      features.push({ type: 'Feature', properties: {}, geometry: { type: 'Polygon', coordinates: [[...pts, pts[0]]] } });
+    }
+    const line = measure.mode === 'area' && measure.done && pts.length >= 3 ? [...pts, pts[0]] : pts;
+    if (line.length >= 2) features.push({ type: 'Feature', properties: { preview: false }, geometry: { type: 'LineString', coordinates: line } });
+    if (measure.cursor && pts.length && !measure.done) {
+      const [c] = unwrapped([pts[pts.length - 1], measure.cursor]).slice(1);
+      const preview = measure.mode === 'area' && pts.length >= 2 ? [pts[pts.length - 1], c, pts[0]] : [pts[pts.length - 1], c];
+      features.push({ type: 'Feature', properties: { preview: true }, geometry: { type: 'LineString', coordinates: preview } });
+    }
+    setData('arcana-measure', { type: 'FeatureCollection', features });
+  }
+
+  function renderMeasure() {
+    if (!measure) { clear(measureOut); return; }
+    const pts = measure.pts;
+    const withCursor = measure.cursor && !measure.done && pts.length ? [...pts, measure.cursor] : pts;
+    const rows = [];
+    if (measure.mode === 'distance') {
+      const total = pathLength(withCursor);
+      rows.push(h('div', { class: 'measure-total num' }, fmtDistance(total)));
+      rows.push(h('div', { class: 'small muted' }, `Straight line · ${Math.max(0, withCursor.length - 1)} segment${withCursor.length === 2 ? '' : 's'}`));
+      if (withCursor.length >= 2) {
+        const a = withCursor[withCursor.length - 2];
+        const b = withCursor[withCursor.length - 1];
+        const brg = bearing(a, b);
+        rows.push(h('div', { class: 'small muted num' }, `Last segment ${fmtDistance(distance(a, b))}, bearing ${String(Math.round(brg) % 360).padStart(3, '0')}° ${compassPoint(brg)} (true)`));
+      }
+    } else {
+      const ring = withCursor;
+      rows.push(h('div', { class: 'measure-total num' }, ring.length >= 3 ? fmtArea(area(ring)) : '—'));
+      rows.push(h('div', { class: 'small muted' }, ring.length >= 3 ? `Perimeter ${fmtDistance(pathLength([...ring, ring[0]]))} · ${ring.length} corners` : 'Add at least three corners.'));
+    }
+    if (!measure.done) {
+      rows.push(h('p', { class: 'small muted' }, pts.length ? 'Click to add points. Double-click or press Done to finish.' : 'Click the map to place the first point.'));
+    }
+    rows.push(h('div', { class: 'row' },
+      h('button', { disabled: !pts.length, onclick: undoMeasurePoint }, 'Undo point'),
+      measure.done ? null : h('button', { disabled: pts.length < 2, onclick: finishMeasure }, 'Done'),
+      h('button', { onclick: stopMeasure }, 'Clear')));
+    fill(measureOut, rows);
+  }
+
+  const onMeasureKey = (e) => {
+    if (!measure || e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+    if (e.key === 'Escape') { e.preventDefault(); if (measure.done || !measure.pts.length) stopMeasure(); else finishMeasure(); }
+    if (e.key === 'Backspace' || (e.key === 'z' && (e.ctrlKey || e.metaKey))) { e.preventDefault(); undoMeasurePoint(); }
+  };
+  document.addEventListener('keydown', onMeasureKey);
+  disposers.push(() => document.removeEventListener('keydown', onMeasureKey));
+
+  // A change of units (here, in Settings or in another view) redraws every
+  // figure shown in this view.
+  const onUnits = () => {
+    if (scale) scale.setUnit(getUnits());
+    renderTools();
+    renderPosition();
+    if (!gpsPrivate) loadTracks();
+  };
+  window.addEventListener('arcana-units', onUnits);
+  disposers.push(() => window.removeEventListener('arcana-units', onUnits));
 
   // ------------------------------------------------------------ custom area
   function drawArea(b) {
@@ -509,6 +695,7 @@ export async function mapsView(main, params) {
 
   renderPosition();
   renderArea();
+  renderTools();
   if (gpsPrivate) {
     fill(wptBox, h('p', { class: 'small muted' }, 'Not shared by the host.'));
     fill(trkBox, h('p', { class: 'small muted' }, 'Not shared by the host.'));

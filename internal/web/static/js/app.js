@@ -156,6 +156,8 @@ async function route() {
 async function start() {
   applyTheme();
   window.addEventListener('storage', applyTheme);
+  // Units chosen in another tab apply here too.
+  window.addEventListener('storage', (e) => { if (e.key === 'arcana-units') window.dispatchEvent(new Event('arcana-units')); });
   window.addEventListener('arcana-theme', applyTheme);
   try {
     await loadSession();

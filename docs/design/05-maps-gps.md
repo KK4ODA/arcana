@@ -20,7 +20,8 @@ rest of this document is the original design, kept for reference.
 | Waypoints | Implemented, **differs** | Stored in `user/waypoints.json` (not GeoJSON under `user/maps/`). |
 | GPX import/export | Implemented | GPX 1.1 waypoints, routes (imported as tracks) and tracks; coordinates range-checked; 64 MB limit. |
 | Track recording | Implemented | `user/tracks/track-*.gpx`, 5 m minimum spacing, new segment after a 60 s gap, rewritten atomically at most every 30 s. |
-| Distance and bearing tools | Not implemented | Great-circle functions exist (`gps.Distance`, `gps.Bearing`) but there is no measuring tool in the UI yet. |
+| Distance and bearing tools | Implemented | Map view → Tools: *Measure distance* (multi-point great-circle path, bearing of the last leg) and *Measure area* (spherical polygon area and perimeter), computed in the browser (`static/js/geo.js`) and labelled "straight line". |
+| Units | Implemented | Metric or imperial, per browser (`static/js/units.js`); applies to the scale bar, GPS speed and altitude, track lengths and measurements. |
 | Terrain, contours, emergency overlays | Not implemented | |
 | Routing | Not implemented | Valhalla/BRouter evaluation remains Phase 3c. |
 | GPS sources | Implemented, **differs** | Serial (go.bug.st/serial), UDP listener, TCP client, gpsd, simulator, manual. gpsd is read in **NMEA watch mode** so every source shares one parser. The simulator generates real RMC/GGA sentences from a GPX track (or a 1 km loop on the installed map) and labels its fixes "simulated". Not implemented: TCP server mode, baud-rate autodetection, the UDP sender allow-list and rate limit; UDP listens on every interface once chosen (the help text says so). |

@@ -2,6 +2,7 @@ import { api, getSession } from '../api.js';
 import { h, clear, fill, fmtBytes, fmtDate, toast } from '../util.js';
 import { tasksPanel } from './tasks.js';
 import { integrationsPanel, peersPanel } from './integrations.js';
+import { getUnits, setUnits, UNIT_SYSTEMS } from '../units.js';
 
 const GB = 1e9;
 
@@ -28,6 +29,9 @@ export async function settingsView(main) {
     try { localStorage.setItem('arcana-theme', themeSel.value); } catch (_) { /* ignore */ }
     window.dispatchEvent(new Event('arcana-theme'));
   });
+
+  const unitsSel = h('select', null, UNIT_SYSTEMS.map(([v, t]) => h('option', { value: v, selected: v === getUnits() }, t)));
+  unitsSel.addEventListener('change', () => setUnits(unitsSel.value));
 
   const feeds = [...(st.catalog.feeds || [])];
   const feedList = h('div');
@@ -136,7 +140,8 @@ export async function settingsView(main) {
 
   main.appendChild(h('section', { class: 'panel' },
     h('header', null, h('h2', null, 'Appearance')),
-    field('Theme', themeSel, 'Stored in this browser only.')));
+    field('Theme', themeSel, 'Stored in this browser only.'),
+    field('Units', unitsSel, 'For distances, speeds, altitudes and areas on the map. Stored in this browser only.')));
 
   const save = h('button', { class: 'primary', disabled: ro, onclick: async () => {
     const body = {

@@ -306,6 +306,14 @@ button.icon { padding: 0 6px; line-height: 20px; min-width: 24px; }
 .map-empty h2 { font-size: 18px; }
 a.button { display: inline-block; text-decoration: none; color: var(--text); }
 a.button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); font-weight: 600; }
+button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+.map-sec .field-inline { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.map-sec .field-inline select { width: auto; flex: 1; margin: 0; }
+.measure-out:empty { display: none; }
+.measure-out { margin-top: 8px; padding: 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-2); }
+.measure-total { font-size: 20px; font-weight: 600; }
+.measure-out p { margin: 4px 0 0; }
+.maplibregl-canvas.measuring { cursor: crosshair; }
 .map-popup { font-size: 12.5px; }
 .map-popup .row { margin-top: 6px; }
 .maplibregl-popup-content { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
