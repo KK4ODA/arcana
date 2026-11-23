@@ -50,6 +50,18 @@ the library format version is tracked separately (docs/design/09-storage-and-dat
   as you type, and the menu also offers your own documents.
 
 ### Fixed
+- **Archives that cannot be opened now say why.** "Cannot open" in the
+  Library is now a link, and the reader names the cause: the archive
+  reader is still opening the archives, it could not start, or it skipped
+  this archive as damaged (with kiwix-serve's own message and a hint to
+  run a full check). Before, every case was blamed on "the archive reader
+  is not available on this computer".
+- The archive reader now gets more time to start when many or large
+  archives are installed (30 s plus 20 s per archive, at most 15 minutes)
+  instead of a fixed 30 s. Large archives such as iFixit take about a
+  thousand scattered reads each to open, which on a slow external hard
+  disk could run past 30 s and leave archives unopenable. A start that
+  runs out of time is no longer retried from the beginning.
 - In search results, a matching map opened the document viewer instead of
   the map.
 
