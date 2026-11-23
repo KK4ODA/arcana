@@ -38,6 +38,9 @@ func (v *Verifier) Check(p, want string, size int64) error {
 	if err != nil {
 		return err
 	}
+	// The expected content is part of the key: a result only answers
+	// the question that was asked.
+	key += "|" + want + "|" + fmt.Sprint(size)
 	v.mu.Lock()
 	if v.seen == nil {
 		v.seen = map[string]string{}

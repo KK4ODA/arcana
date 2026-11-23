@@ -24,3 +24,4 @@
 | [0020](0020-built-in-offline-routing.md) | Built-in offline routing from OpenStreetMap extracts | Accepted |
 | [0021](0021-question-answering-over-the-library.md) | Question answering from Arcana's own search, with a llamafile sidecar | Accepted |
 | [0022](0022-fda-drug-label-reference.md) | FDA drug label reference built on the user's computer | Accepted |
+| [0023](0023-offline-translation-in-the-browser.md) | Offline translation in the reader's browser (Bergamot WebAssembly) | Accepted |

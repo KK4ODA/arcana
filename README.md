@@ -62,6 +62,10 @@ not yet code-signed (see [Status](#status)).
   model runs on your computer through Mozilla.ai's llamafile (three openly
   licensed models from 0.5 to 2.5 GB in the catalog), or on an Ollama or
   LM Studio server you choose.
+- **Translate pages offline.** Install a language pack (about 50 MB each,
+  55 languages, Mozilla's models as used by Firefox) and the reader
+  translates archive pages to or from English on the device reading them,
+  and between other languages through English.
 - **Medicines reference.** The labels of about 265,000 medicines sold in
   the US, from the FDA's openFDA downloads (public domain): search by name
   or ingredient, find non-prescription medicines by situation (fever,

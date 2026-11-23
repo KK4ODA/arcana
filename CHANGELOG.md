@@ -43,6 +43,17 @@ the library format version is tracked separately (docs/design/09-storage-and-dat
   checks each zip entry's CRC, keeps the parts a reader needs, stores
   identical labels once and builds an indexed reference of about 1 GB on
   your computer. New FDA exports appear in Updates. See ADR-0022.
+- **Translate archive pages offline.** Download a language pack
+  (*Discover → Encyclopedias and reference → Translation: …*, 55 languages,
+  about 50 MB each; the 1.2 MB engine comes with the first one), then
+  choose *Translate to …* in the reader. Pages are translated on the device
+  reading them by Mozilla's Bergamot engine, the one Firefox uses, so it
+  works on phones and on every computer Arcana runs on, without internet.
+  Links and emphasis are kept, letters and codes are left alone, the choice
+  follows you from page to page, and *Original language* restores the
+  text. Between two languages other than English, Arcana goes through
+  English when both packs are installed. Files are checked against
+  Mozilla's published hashes before and after decompression. See ADR-0023.
 - **Automatic content updates** (Updates → Automatic updates; off by
   default). Choose the hours they may run, how often the catalogs are
   checked, whether to take every update or only medical and regulatory

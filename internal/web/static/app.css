@@ -451,3 +451,7 @@ fieldset.situations label.inline { display: inline-flex; margin: 2px 14px 2px 0;
 .compare-picker { margin: 8px 0; max-width: 520px; }
 @media (max-width: 640px) { .compare { grid-template-columns: 1fr; } .compare-head { position: static; } }
 .update-log { margin: 6px 0 0; padding-left: 18px; color: var(--muted); }
+.translate-box { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.translate-box select { max-width: 220px; }
+.translate-status { display: block; padding: 2px 12px; }
+.translate-status:empty { display: none; }

@@ -37,6 +37,7 @@ import (
 	"github.com/KK4ODA/arcana/internal/storage"
 	"github.com/KK4ODA/arcana/internal/store"
 	"github.com/KK4ODA/arcana/internal/tlsutil"
+	"github.com/KK4ODA/arcana/internal/translate"
 	"github.com/KK4ODA/arcana/internal/web"
 )
 
@@ -66,9 +67,11 @@ type Server struct {
 	app *app.App
 
 	sessions *auth.Sessions
-	limiter  *auth.Limiter
-	nw       netState
-	shares   shareStore
+	// translateCheck remembers translation files already verified.
+	translateCheck translate.Verifier
+	limiter        *auth.Limiter
+	nw             netState
+	shares         shareStore
 
 	appSrv     *http.Server
 	contentSrv *http.Server
@@ -238,6 +241,7 @@ func (s *Server) appHandler() http.Handler {
 	s.registerIntegration(mux)
 	s.registerAssistant(mux)
 	s.registerDrugs(mux)
+	s.registerTranslate(mux)
 	mux.HandleFunc("GET /api/", func(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusNotFound, "unknown API endpoint")
 	})
@@ -448,7 +452,8 @@ func (s *Server) installedViews(r *http.Request, a *app.App) ([]installedView, e
 		if b, ok := books[in.ResourceID]; ok {
 			v.OpenPath = b.ContentPath
 			v.Search = res.Capabilities.FullTextSearch
-		} else if res.Format == "gguf" || res.Format == "llamafile" || res.Format == "druglabels" {
+		} else if res.Format == "gguf" || res.Format == "llamafile" || res.Format == "druglabels" ||
+			res.Format == "bergamot" || res.Format == "translation-models" {
 			// Models and the engine are used by the assistant; the drug
 			// reference has its own view.
 		} else if res.Format != "zim" && len(in.Files) > 0 {

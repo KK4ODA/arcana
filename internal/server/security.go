@@ -202,7 +202,9 @@ func appHeaders(contentPort int) func(http.Handler) http.Handler {
 				scheme = "https://"
 			}
 			contentOrigin := scheme + host + ":" + itoa(contentPort)
-			h.Set("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; worker-src 'self'; "+
+			// 'wasm-unsafe-eval' lets the translation worker compile the
+			// Bergamot engine; it does not permit eval() of JavaScript.
+			h.Set("Content-Security-Policy", "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' data: blob:; worker-src 'self'; "+
 				"connect-src 'self'; frame-src "+contentOrigin+"; frame-ancestors 'none'; base-uri 'none'; form-action 'self'; object-src 'none'")
 			h.Set("X-Content-Type-Options", "nosniff")
 			h.Set("Referrer-Policy", "no-referrer")

@@ -48,6 +48,9 @@ export async function readerView(main, id, params) {
     onSubmit: (q) => runSearch(q),
   });
   searchBox.classList.add('reader-search');
+  const translateSel = h('select', { 'aria-label': 'Translate this page', title: 'Translate this page on this device' });
+  const translateStatus = h('span', { class: 'small muted translate-status', role: 'status' });
+  const translateBox = h('span', { class: 'translate-box', hidden: true }, translateSel);
   const reader = h('div', { class: 'reader' },
     h('header', null,
       h('a', { class: 'button', href: '#/library' }, '← Library'),
@@ -55,8 +58,10 @@ export async function readerView(main, id, params) {
         h('span', { class: 'small muted' }, `${r.version} · published ${fmtDate(r.published)} · `, licenseBadge(r.license),
           r.publisher ? ` · ${r.publisher}` : ''), h('div', null, pageTitle)),
       searchBox,
+      translateBox,
       canChange ? bookmarkBtn : null, s.local ? notesBtn : null,
       h('a', { class: 'button', href: src, target: '_blank', rel: 'noopener' }, 'Open in new tab')),
+    translateStatus,
     (r.warnings || []).map((w) => h('div', { class: `notice ${w.kind}`, role: 'note' }, w.text)),
     h('div', { class: 'reader-body' }, iframe, searchPanel, notesPanel));
   document.body.appendChild(reader);
@@ -86,8 +91,10 @@ export async function readerView(main, id, params) {
       api.post('/api/user/recent', { resourceId: id, path: rel, title: current.title }).catch(() => {});
     }
     if (!notesPanel.hidden) renderNotes();
+    tr.pageLoaded();
   };
   window.addEventListener('message', onMessage);
+  const tr = setupTranslation({ iframe, contentOrigin, archiveLang: (r.languages || [])[0], select: translateSel, status: translateStatus, box: translateBox });
 
   async function bookmark() {
     try {
@@ -178,6 +185,134 @@ export async function readerView(main, id, params) {
     reader.remove();
     document.removeEventListener('keydown', onKey);
     window.removeEventListener('message', onMessage);
+    tr.stop();
+  };
+}
+
+// ------------------------------------------------------------ translation
+// Pages are translated on this device by Mozilla's Bergamot engine in a
+// worker, with the language packs installed in the library. The page's
+// paragraphs come from the archive frame (see /_arcana/frame.js) and go
+// back translated; between two languages other than English the engine
+// goes through English.
+
+const TRANSLATE_KEY = 'arcana-translate-to';
+let worker = null;
+let workerSeq = 0;
+const pending = new Map();
+
+function translateBatch(info, from, to, texts) {
+  if (!worker) {
+    worker = new Worker('js/translate-worker.js');
+    worker.onmessage = (e) => {
+      const p = pending.get(e.data.id);
+      if (!p) return;
+      pending.delete(e.data.id);
+      if (e.data.error) p.reject(new Error(e.data.error)); else p.resolve(e.data.results);
+    };
+    worker.onerror = (e) => { for (const p of pending.values()) p.reject(new Error(e.message || 'The translation engine stopped.')); pending.clear(); worker = null; };
+  }
+  const id = ++workerSeq;
+  const files = info.languages.flatMap((l) => l.files);
+  return new Promise((resolve, reject) => {
+    pending.set(id, { resolve, reject });
+    worker.postMessage({ id, engineUrl: info.engineUrl, from, to, files, texts });
+  });
+}
+
+function setupTranslation({ iframe, contentOrigin, archiveLang, select, status, box }) {
+  let info = null;
+  let run = 0;
+  let stopped = false;
+  const names = {};
+  const dirs = new Set();
+  const base = (l) => String(l || '').toLowerCase().split(/[-_]/)[0];
+  const canTranslate = (from, to) => from !== to && (dirs.has(`${from}-${to}`) || (dirs.has(`${from}-en`) && dirs.has(`en-${to}`)));
+  let chosen = '';
+  try { chosen = sessionStorage.getItem(TRANSLATE_KEY) || ''; } catch (_) { /* ignore */ }
+
+  function fillTargets(from) {
+    const targets = new Set();
+    for (const d of dirs) {
+      const [a, b] = d.split('-');
+      for (const t of [a, b]) if (canTranslate(from, t)) targets.add(t);
+    }
+    while (select.firstChild) select.removeChild(select.firstChild);
+    select.appendChild(h('option', { value: '' }, targets.size ? 'Original language' : 'No translation for this language'));
+    for (const t of [...targets].sort((x, y) => (names[x] || x).localeCompare(names[y] || y))) {
+      select.appendChild(h('option', { value: t, selected: t === chosen }, `Translate to ${names[t] || t}`));
+    }
+    select.disabled = !targets.size;
+  }
+
+  api.get('/api/translate').then((r) => {
+    if (stopped || !r.engine || !r.languages.length) return;
+    info = r;
+    names.en = 'English';
+    for (const l of r.languages) {
+      names[l.code] = l.name;
+      for (const d of l.directions) dirs.add(d);
+    }
+    fillTargets(base(archiveLang) === 'mul' || !archiveLang ? 'en' : base(archiveLang));
+    box.hidden = false;
+    if (chosen) start();
+  }).catch(() => {});
+
+  select.addEventListener('change', () => {
+    chosen = select.value;
+    try { if (chosen) sessionStorage.setItem(TRANSLATE_KEY, chosen); else sessionStorage.removeItem(TRANSLATE_KEY); } catch (_) { /* ignore */ }
+    if (chosen) start();
+    else {
+      run++;
+      status.textContent = '';
+      iframe.contentWindow?.postMessage({ type: 'arcana:translate-restore' }, contentOrigin);
+    }
+  });
+
+  function start() {
+    if (!info || !chosen || !iframe.contentWindow) return;
+    const mine = ++run;
+    status.textContent = 'Preparing…';
+    iframe.contentWindow.postMessage({ type: 'arcana:translate-collect', run: mine }, contentOrigin);
+  }
+
+  async function onBlocks(d) {
+    if (d.run !== run || !Array.isArray(d.blocks)) return;
+    const mine = run;
+    let from = base(d.lang) || base(archiveLang) || 'en';
+    if (from === 'mul') from = 'en';
+    fillTargets(from);
+    if (!canTranslate(from, chosen)) {
+      status.textContent = from === chosen ? '' : `No language pack translates ${names[from] || from} to ${names[chosen] || chosen}.`;
+      return;
+    }
+    const blocks = d.blocks.slice(0, 2000);
+    const total = blocks.length;
+    const started = performance.now();
+    try {
+      for (let i = 0; i < total; i += 6) {
+        if (mine !== run || stopped) return;
+        status.textContent = `Translating… ${Math.round((i / Math.max(total, 1)) * 100)}%${i === 0 ? ' (loading the language model)' : ''}`;
+        const texts = blocks.slice(i, i + 6);
+        const out = await translateBatch(info, from, chosen, texts);
+        if (mine !== run || stopped) return;
+        iframe.contentWindow?.postMessage({ type: 'arcana:translate-apply', run: mine, items: out.map((t, k) => [i + k, t]) }, contentOrigin);
+      }
+      status.textContent = `Translated to ${names[chosen] || chosen} on this device in ${((performance.now() - started) / 1000).toFixed(1)} s. Machine translation: check important wording in the original.`;
+    } catch (e) {
+      if (mine === run) status.textContent = `Translation failed: ${e.message}`;
+    }
+  }
+
+  const onMessage = (e) => {
+    if (e.origin !== contentOrigin || e.source !== iframe.contentWindow) return;
+    if (e.data && e.data.type === 'arcana:translate-blocks') onBlocks(e.data);
+  };
+  window.addEventListener('message', onMessage);
+
+  return {
+    pageLoaded() { if (chosen && info) start(); },
+    stop() { stopped = true; run++; window.removeEventListener('message', onMessage); },
   };
 }
 
