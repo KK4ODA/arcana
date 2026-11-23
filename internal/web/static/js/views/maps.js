@@ -7,6 +7,7 @@ import { api, getSession } from '../api.js';
 import { h, clear, fill, fmtBytes, fmtAgo, toast, debounce } from '../util.js';
 import { getUnits, setUnits, UNIT_SYSTEMS, fmtDistance, fmtSpeed, fmtAltitude, fmtArea } from '../units.js';
 import { distance, pathLength, bearing, compassPoint, area } from '../geo.js';
+import { createDirections } from './directions.js';
 
 let libPromise = null;
 
@@ -136,8 +137,22 @@ export async function mapsView(main, params) {
   const areaBoxEl = h('div');
   const toolsBox = h('div');
 
+  const dirs = createDirections({
+    map: () => map,
+    setData: (id, data) => setData(id, data),
+    gps: () => lastGPS,
+    flyTo: (lon, lat, zoom) => flyTo(lon, lat, zoom),
+    fitBounds: (b) => { if (map) map.fitBounds(b, { padding: 60, maxZoom: 17, duration: 600 }); },
+    cssVar,
+    follow: (on) => { follow = on; renderPosition(); },
+    showMap: () => mapEl.scrollIntoView({ block: 'start', behavior: 'smooth' }),
+  });
+  disposers.push(() => dirs.dispose());
+  mapEl.appendChild(dirs.navEl);
+
   side.append(
     h('section', { class: 'map-sec' }, searchInput, searchResults),
+    h('section', { class: 'map-sec' }, h('h3', null, 'Directions'), dirs.el),
     h('section', { class: 'map-sec' }, h('h3', null, 'Tools'), toolsBox),
     h('section', { class: 'map-sec' }, h('h3', null, 'Position'), posBox),
     h('section', { class: 'map-sec' }, h('h3', null, 'Installed maps'), setsBox),
@@ -203,7 +218,10 @@ export async function mapsView(main, params) {
         try { sessionStorage.setItem('arcana-map-view', JSON.stringify({ center: m.getCenter().toArray(), zoom: m.getZoom() })); } catch (_) { /* unavailable */ }
       });
       map.on('dragstart', () => { if (follow) { follow = false; renderPosition(); } });
-      map.on('click', (ev) => { if (measure) addMeasurePoint(ev.lngLat); else showPointPopup(ml, ev.lngLat); });
+      map.on('click', (ev) => {
+        if (dirs.onMapClick(ev.lngLat)) return;
+        if (measure) addMeasurePoint(ev.lngLat); else showPointPopup(ml, ev.lngLat);
+      });
       map.on('dblclick', (ev) => { if (measure && !measure.done) { ev.preventDefault(); finishMeasure(); } });
       map.on('mousemove', (ev) => {
         if (!measure || measure.done || !measure.pts.length) return;
@@ -259,6 +277,7 @@ export async function mapsView(main, params) {
       paint: { 'line-color': measureColor, 'line-width': 2, 'line-dasharray': [2, 2] } });
     map.addLayer({ id: 'arcana-measure-pts', type: 'circle', source: 'arcana-measure', filter: ['==', ['geometry-type'], 'Point'],
       paint: { 'circle-radius': 4, 'circle-color': surface, 'circle-stroke-width': 2, 'circle-stroke-color': measureColor } });
+    dirs.addLayers(map);
     map.addLayer({ id: 'arcana-pos-halo', type: 'circle', source: 'arcana-position',
       paint: { 'circle-radius': 15, 'circle-color': ['get', 'color'], 'circle-opacity': 0.18 } });
     map.addLayer({ id: 'arcana-pos-dot', type: 'circle', source: 'arcana-position',
@@ -283,7 +302,10 @@ export async function mapsView(main, params) {
       lines.map((l) => h('div', { class: 'num' }, l)),
       h('div', { class: 'row' },
         h('button', { onclick: () => { navigator.clipboard?.writeText(lines[0]).then(() => toast('Copied'), () => toast(lines[0])); } }, 'Copy'),
-        canChange ? h('button', { onclick: () => { popup.remove(); addWaypointAt(lat, lon); } }, 'Save as waypoint') : null));
+        canChange ? h('button', { onclick: () => { popup.remove(); addWaypointAt(lat, lon); } }, 'Save as waypoint') : null),
+      dirs.hasNetworks() ? h('div', { class: 'row' },
+        h('button', { onclick: () => { popup.remove(); dirs.setFrom(lat, lon); } }, 'Directions from here'),
+        h('button', { onclick: () => { popup.remove(); dirs.setTo(lat, lon); } }, 'Directions to here')) : null);
     const popup = new ml.Popup({ closeButton: true, maxWidth: '280px' }).setLngLat(ll).setDOMContent(content).addTo(map);
   }
 
@@ -356,9 +378,12 @@ export async function mapsView(main, params) {
     fill(posBox, rows);
   }
 
+  let hadFix = false;
   function onGPS(g) {
     lastGPS = g;
     renderPosition();
+    dirs.onGPS(g);
+    if (!!(g && g.fix) !== hadFix) { hadFix = !!(g && g.fix); dirs.gpsChanged(); }
     setData('arcana-position', positionData());
     if (follow && g.fix && map) map.easeTo({ center: [g.fix.lon, g.fix.lat], duration: 400 });
   }

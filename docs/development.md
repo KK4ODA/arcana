@@ -42,6 +42,7 @@ internal/storage/      volume detection (per OS) and capacity planning
 internal/store/        SQLite index
 internal/fsutil/       atomic writes, safe paths, OS locks
 internal/maps/         PMTiles reader/writer, region extraction, overzoom, gazetteer, maps provider
+internal/routing/      OSM PBF reader, road network builder and format, routing, turn-by-turn guidance, road network provider
 internal/gps/          NMEA tracker, position sources, simulator, tracks, waypoints, GPX
 internal/auth/         remote-administration password (Argon2id), sessions, sign-in throttling
 internal/mdns/         mDNS responder and DNS-SD advertisement
@@ -80,6 +81,8 @@ docs/design/14-radio-and-integrations.md.
 | `GET /api/search?q=` | Search everything installed: `titles` (articles whose titles match, best first), `groups` (each archive's first five full-text matches and its total), `titleOnly` (archives without a full-text index), `documents`, and `resources`. `results`/`total` flatten the groups. |
 | `GET /api/search?q=&resource=ID&start=N&limit=N` | One source, a page at a time: an archive (`results`, `total`, `titles`, `notSearchable`), a book or document resource, or `@user` for your own documents (`documents`, `documentTotal`) |
 | `GET /api/suggest?q=[&resource=ID]` | Article titles completing what was typed, in one archive or all of them |
+| `GET /api/roads` | Installed road networks (for directions) |
+| `GET /api/route?points=lat,lon;lat,lon[;…]&mode=car\|bike\|foot` | A route through the points on the smallest installed road network covering them: distance, duration, `[lon, lat]` geometry, steps with instructions, warnings |
 | `GET /api/catalog?q=&category=&lang=&sort=&offset=&limit=` | Catalog query |
 | `GET /api/catalog/facets`, `GET /api/catalog/item/{id}` | Categories, languages, providers; one resource with editions |
 | `POST /api/catalog/refresh` | Refresh enabled providers |

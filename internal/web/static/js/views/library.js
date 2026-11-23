@@ -29,7 +29,7 @@ export async function libraryView(main, params, ctx) {
   const results = h('div');
   const input = h('input', { type: 'search', placeholder: 'Search installed content and documents', 'aria-label': 'Search installed content', value: params.get('q') || '' });
   const archives = lib.resources.filter((r) => r.openPath && r.openPath.startsWith('/kiwix/'));
-  const docSources = lib.resources.filter((r) => r.openPath && r.openPath.startsWith('/files/') && r.format !== 'pmtiles');
+  const docSources = lib.resources.filter((r) => r.openPath && r.openPath.startsWith('/files/') && r.format !== 'pmtiles' && r.format !== 'arcroute');
   const scope = h('select', { 'aria-label': 'Search in' },
     h('option', { value: '' }, 'Everything installed'),
     archives.length ? h('optgroup', { label: 'Archives' }, archives.map((r) => h('option', { value: r.resourceId }, r.title))) : null,
@@ -344,9 +344,10 @@ export function noteEditor(note, onSaved, ref) {
   return h('div', { class: 'note-editor' }, title, text, h('div', { class: 'row' }, save));
 }
 
-// Maps open in the map view; everything else in the reader.
+// Maps and road networks open in the map view; everything else in the reader.
 function openHref(r) {
   if (r.format === 'pmtiles') return `#/maps?set=${encodeURIComponent(r.resourceId)}`;
+  if (r.format === 'arcroute') return '#/maps';
   return `#/read/${encodeURIComponent(r.resourceId)}`;
 }
 

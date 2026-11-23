@@ -27,6 +27,20 @@ the library format version is tracked separately (docs/design/09-storage-and-dat
   Enter, Shift+Enter or the arrows. Opening a document from search results
   marks the words you searched for.
 
+- **Directions and turn-by-turn navigation, offline.** Install a *road
+  network* for your country or state (Discover → Maps and navigation), then
+  use *Directions* in the map view: choose a start (a place, your GPS
+  position, or a point on the map) and a destination, and travel by car,
+  bicycle or on foot. Arcana shows the route, its time and distance, and
+  each turn. *Start navigation* follows your GPS position with the next
+  turn and the distance to it, finds a new route if you leave this one, and
+  can speak the instructions with the browser's voices. Routes can be saved
+  as GPX. Road networks are built on your computer from OpenStreetMap
+  extracts published by Geofabrik, checked against their checksum
+  (ADR-0020). A route must stay inside one installed road network, and very
+  large countries (such as Germany or France as a whole) are not offered
+  yet because building them needs too much memory.
+
 ### Changed
 - **Library search, reworked.** Results now start with articles whose
   titles match (an exact title first), then show each source separately

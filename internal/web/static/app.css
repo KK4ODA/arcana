@@ -342,6 +342,38 @@ button[aria-pressed="true"] { background: var(--accent); border-color: var(--acc
 .measure-total { font-size: 20px; font-weight: 600; }
 .measure-out p { margin: 4px 0 0; }
 .maplibregl-canvas.measuring { cursor: crosshair; }
+
+/* Directions */
+.directions .seg { display: flex; margin-bottom: 8px; }
+.seg button { flex: 1; border-radius: 0; margin-left: -1px; }
+.seg button:first-child { border-radius: 6px 0 0 6px; margin-left: 0; }
+.seg button:last-child { border-radius: 0 6px 6px 0; }
+.seg button.on { background: var(--accent); border-color: var(--accent); color: var(--accent-text); position: relative; }
+.end-row { display: flex; gap: 4px; align-items: center; margin-bottom: 4px; }
+.map-sec .end-row input[type="search"] { flex: 1; min-width: 0; margin: 0; }
+.end-badge { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; font-size: 11px; font-weight: 700; color: #fff; background: #1b7f3b; flex: none; }
+.end-row + .end-results + .end-row .end-badge { background: #b3261e; }
+.end-results { margin-bottom: 4px; }
+.end-results:empty { display: none; }
+.route-out:empty { display: none; }
+.route-out { margin-top: 8px; }
+.route-summary { display: flex; gap: 10px; align-items: baseline; }
+.route-time { font-size: 20px; font-weight: 600; }
+.route-warn { color: var(--warn); margin-top: 2px; }
+ol.steps { list-style: none; margin: 8px 0 0; padding: 0; border-top: 1px solid var(--border); }
+ol.steps .step { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 6px; padding: 6px 2px; border-bottom: 1px solid var(--border); cursor: pointer; font-size: 13px; }
+ol.steps .step:hover { background: var(--surface-2); }
+.step-arrow { font-size: 16px; line-height: 1.1; text-align: center; color: var(--accent); }
+.step-dist { color: var(--muted); font-size: 12px; white-space: nowrap; }
+.nav-banner { position: absolute; top: 10px; left: 10px; z-index: 5; width: min(380px, calc(100% - 70px)); background: var(--surface); color: var(--text);
+  border: 1px solid var(--border-strong); border-radius: 10px; box-shadow: 0 6px 20px rgba(0, 0, 0, .25); padding: 10px 12px; }
+.nav-main { display: flex; gap: 12px; align-items: center; }
+.nav-arrow { font-size: 40px; line-height: 1; width: 44px; text-align: center; color: var(--accent); }
+.nav-dist { font-size: 24px; font-weight: 700; }
+.nav-text { font-size: 15px; font-weight: 500; }
+.nav-then { margin-top: 6px; color: var(--muted); }
+.nav-foot { display: flex; gap: 8px; align-items: center; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); font-size: 13px; }
+.nav-foot > span { flex: 1; }
 .map-popup { font-size: 12.5px; }
 .map-popup .row { margin-top: 6px; }
 .maplibregl-popup-content { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
