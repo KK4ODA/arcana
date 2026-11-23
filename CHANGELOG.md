@@ -28,6 +28,31 @@ the library format version is tracked separately (docs/design/09-storage-and-dat
   Devices on the network can ask only if you allow it; they never see your
   own documents. Optional instructions ("Use metric units") and a
   strictness setting tune the answers. See ADR-0021.
+- **Medicines.** An FDA drug label reference (*Discover → Medicine and
+  public health → FDA drug labels*, after refreshing the catalog): the
+  labels of about 265,000 US medicines from openFDA, public domain. A new
+  *Medicines* view searches by brand, generic name or ingredient, grouping
+  products that share active ingredients; *By situation* lists
+  non-prescription medicines whose labels cover one or several of 34
+  everyday problems (medicines covering all of them first); a label page
+  shows uses, directions, warnings, interactions, overdose and side
+  effects; *Compare warnings* puts two labels' warnings side by side (it
+  does not check interactions, and says so). The view asks you to
+  acknowledge that it is label text, not medical advice, once per browser.
+  Arcana downloads the 14 parts openFDA publishes (1.8 GB, resumable),
+  checks each zip entry's CRC, keeps the parts a reader needs, stores
+  identical labels once and builds an indexed reference of about 1 GB on
+  your computer. New FDA exports appear in Updates. See ADR-0022.
+- **Automatic content updates** (Updates → Automatic updates; off by
+  default). Choose the hours they may run, how often the catalogs are
+  checked, whether to take every update or only medical and regulatory
+  references, and a bandwidth cap. Inside the window Arcana refreshes the
+  catalogs, queues the updates that fit above your reserved free space
+  (most important and smallest first), and pauses those downloads when the
+  window closes, continuing in the next one. Without internet it tries
+  again later. *Check and queue now* runs a check at once. As with every
+  update, the installed edition is replaced only once the new one is
+  verified.
 - **`arcana ask`** answers a question in the terminal; `arcana ask --eval
   FILE [--with-model]` scores retrieval (and answers) against a set of
   questions with known sources.

@@ -228,6 +228,7 @@ export async function libraryView(main, params, ctx) {
           h('td', { class: 'hide-sm' }, licenseBadge(r.license)),
           h('td', { class: 'right' }, h('div', { class: 'row actions' },
             r.format === 'gguf' || r.format === 'llamafile' ? h('a', { class: 'button', href: '#/ask', title: 'Used by the assistant to answer questions' }, 'Ask') :
+            r.format === 'druglabels' ? h('a', { class: 'button', href: '#/medicines' }, 'Open') :
             r.openPath ? h('a', { class: 'button', href: openHref(r) }, 'Open') :
               h('a', { class: 'small', href: `#/read/${encodeURIComponent(r.resourceId)}`, title: r.openError || 'The archive reader is not available.' }, 'Cannot open — why?'),
             canChange ? h('button', { class: 'danger', onclick: () => remove(r) }, 'Remove') : null)),

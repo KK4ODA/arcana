@@ -463,6 +463,69 @@
         }
       ],
       "popularity": 4
+    },
+    {
+      "id": "arcana.translation-engine",
+      "provider": "arcana",
+      "title": "Translation engine (Bergamot)",
+      "description": "Mozilla's Bergamot translation engine, the WebAssembly build Firefox uses for its own offline translations. It runs inside the reader's browser, so pages are translated on the device reading them, with nothing sent anywhere. Needed by the translation language packs.",
+      "category": "reference",
+      "subcategory": "translation",
+      "tags": [
+        "translation",
+        "engine"
+      ],
+      "family": "arcana.translation-engine",
+      "variant": "standard",
+      "publisher": "Mozilla",
+      "sourceUrl": "https://github.com/mozilla/translations",
+      "version": "4.0",
+      "published": "2025-10-14",
+      "lastVerified": "2026-11-23T00:00:00Z",
+      "languages": [
+        "mul"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "bergamot",
+      "files": [
+        {
+          "name": "bergamot-translator-4.0.wasm.zst",
+          "size": 1211955,
+          "hashes": {
+            "sha256": "327fcfc7b7e9d95f6fa0844ebf899cfc05469872ef02d3aef5783182839a6255"
+          },
+          "mirrors": [
+            {
+              "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-wasm-v2/a76f9efe-b185-4a7f-9c3b-5f5d216d12e6.zst"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 1211955,
+      "installedSize": 1211955,
+      "license": {
+        "id": "MPL-2.0",
+        "name": "Mozilla Public License 2.0",
+        "url": "https://www.mozilla.org/MPL/2.0/",
+        "redistribution": "permitted",
+        "verified": true
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": false,
+        "videos": false
+      },
+      "updateStrategy": "snapshot-replace",
+      "providerRef": {
+        "decompressedHash": "f38ef807636a7c994afedaab7ff8ffe0d590d21897f05139f747b80fd7bbe926",
+        "decompressedSize": "4960506"
+      },
+      "popularity": 9
     }
   ]
 }

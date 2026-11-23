@@ -433,3 +433,21 @@ blockquote.passage { margin: 6px 0 0; padding: 0 0 0 10px; border-left: 2px soli
 .ask-history summary { cursor: pointer; font-weight: 600; }
 .answer > h3 { text-transform: none; letter-spacing: 0; color: var(--text); font-size: 16px; }
 .passage-more { margin-top: 4px; }
+
+/* Medicines */
+.subtabs { display: flex; gap: 4px; flex-wrap: wrap; }
+.subtabs a { padding: 3px 10px; border: 1px solid var(--border); border-radius: var(--radius); text-decoration: none; font-size: 13px; }
+.subtabs a[aria-selected="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--text); }
+fieldset.situations { border: 1px solid var(--border); border-radius: var(--radius); margin: 0 0 8px; padding: 6px 10px; }
+fieldset.situations legend { font-size: 12px; color: var(--muted); padding: 0 4px; }
+fieldset.situations label.inline { display: inline-flex; margin: 2px 14px 2px 0; }
+.label-sec { margin: 12px 0; max-width: 80ch; }
+.label-sec h3 { font-size: 14px; margin: 0 0 4px; }
+.label-sec.boxed { border: 2px solid var(--err); padding: 6px 10px; border-radius: var(--radius); }
+.label-text p { margin: 0 0 6px; line-height: 1.5; overflow-wrap: anywhere; }
+.compare { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; }
+.compare .compare-title { grid-column: 1 / -1; font-size: 14px; margin: 10px 0 0; border-top: 1px solid var(--border); padding-top: 8px; }
+.compare-head { position: sticky; top: 0; background: var(--surface); padding: 4px 0; }
+.compare-picker { margin: 8px 0; max-width: 520px; }
+@media (max-width: 640px) { .compare { grid-template-columns: 1fr; } .compare-head { position: static; } }
+.update-log { margin: 6px 0 0; padding-left: 18px; color: var(--muted); }

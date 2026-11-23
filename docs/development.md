@@ -53,6 +53,7 @@ packaging/             launcher and first-run readme for release bundles
 packaging/appliance/   appliance installer, systemd units, captive-portal rules (docs/appliance.md)
 internal/sdnotify/     systemd readiness and watchdog notifications
 internal/integration/  integration API tokens, scopes and pairing
+internal/drugs/        FDA drug label reference: openFDA provider, download and build, queries, situations
 internal/assistant/    question answering: retrieval, prompts, citation checks, llamafile engine, evaluation
 scripts/               fetch-kiwix.sh, package.sh
 test/acceptance/       offline acceptance test and UI tripwire
@@ -121,6 +122,12 @@ docs/design/14-radio-and-integrations.md.
 | `GET /api/assistant` | Assistant status: enabled, backend, readiness, engine state, installed models, `canAsk` for this client |
 | `GET /api/assistant/ask?q=&retrieval=0\|1` | Server-sent events while a question is answered: `status`, `passages`, `token`, `done` (`{result}`), `error`. Host and administrators; network clients only when allowed in settings |
 | `POST /api/assistant/test` `{url, apiKey}`, `POST /api/assistant/stop` | List an OpenAI-compatible server's models; stop the local engine |
+| `GET /api/drugs` | Drug label reference: installed, statistics, situations, citation |
+| `GET /api/drugs/search?q=&kind=otc\|rx&homeopathic=1&limit=&offset=` | Products grouped by active ingredients, best match first |
+| `GET /api/drugs/group?key=&kind=` | Products of one group |
+| `GET /api/drugs/label/{id}` | One label: product and sections in display order |
+| `GET /api/drugs/situations?s=slug,slug&kind=otc\|all` | Groups whose labels cover all the situations, then each one |
+| `GET /api/updates/schedule`, `POST /api/updates/schedule/run` | Automatic content updates: settings, state, window; check and queue now |
 | `GET /api/gps`, `GET /api/gps/stream` | Position status; server-sent events (host only unless sharing is on) |
 | `GET /api/gps/ports` | Serial ports (host only) |
 | `GET/POST /api/gps/waypoints`, `DELETE /api/gps/waypoints/{id}` | Waypoints |

@@ -23,3 +23,4 @@
 | [0019](0019-parallel-multi-mirror-downloads.md) | Download large files in pieces from several mirrors at once | Accepted |
 | [0020](0020-built-in-offline-routing.md) | Built-in offline routing from OpenStreetMap extracts | Accepted |
 | [0021](0021-question-answering-over-the-library.md) | Question answering from Arcana's own search, with a llamafile sidecar | Accepted |
+| [0022](0022-fda-drug-label-reference.md) | FDA drug label reference built on the user's computer | Accepted |

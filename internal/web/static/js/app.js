@@ -3,6 +3,7 @@ import { h, clear } from './util.js';
 import { renderUpdateBanner } from './updatebanner.js';
 import { libraryView } from './views/library.js';
 import { askView } from './views/ask.js';
+import { medicinesView } from './views/medicines.js';
 import { discoverView } from './views/discover.js';
 import { mapsView } from './views/maps.js';
 import { downloadsView } from './views/downloads.js';
@@ -15,6 +16,7 @@ import { readerView, documentView } from './views/reader.js';
 const views = {
   library: { title: 'Library', render: libraryView },
   ask: { title: 'Ask', render: askView, when: (st) => st?.assistant?.canAsk },
+  medicines: { title: 'Medicines', render: medicinesView, when: (st) => st?.drugs?.installed },
   discover: { title: 'Discover', render: discoverView },
   maps: { title: 'Maps', render: mapsView },
   downloads: { title: 'Downloads', render: downloadsView },
@@ -150,7 +152,7 @@ async function route() {
   renderTabs(r.name in views ? r.name : 'library');
   document.title = `${v.title} — Arcana`;
   try {
-    cleanup = await v.render(main, r.params, { refreshStatus });
+    cleanup = await v.render(main, r.params, { refreshStatus }, r.args);
   } catch (e) {
     main.appendChild(h('div', { class: 'banner err' }, e.message));
   }

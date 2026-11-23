@@ -185,6 +185,10 @@ var knownFormats = map[string]bool{
 	"archive": true, "arcroute": true,
 	// The assistant's engine (a portable llamafile executable) and models.
 	"llamafile": true, "gguf": true,
+	// The FDA drug label reference Arcana builds (an SQLite database).
+	"druglabels": true,
+	// Translation: the Bergamot engine and language packs.
+	"bergamot": true, "translation-models": true,
 }
 
 var hashLengths = map[string]int{"sha256": 64, "sha512": 128, "sha1": 40, "md5": 32}

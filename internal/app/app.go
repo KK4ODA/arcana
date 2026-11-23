@@ -21,6 +21,7 @@ import (
 	"github.com/KK4ODA/arcana/internal/content"
 	"github.com/KK4ODA/arcana/internal/docs"
 	"github.com/KK4ODA/arcana/internal/download"
+	"github.com/KK4ODA/arcana/internal/drugs"
 	"github.com/KK4ODA/arcana/internal/fsutil"
 	"github.com/KK4ODA/arcana/internal/gps"
 	"github.com/KK4ODA/arcana/internal/integration"
@@ -69,8 +70,11 @@ type App struct {
 	// Assistant answers questions from the library.
 	Assistant *assistant.Service
 	engine    *assistant.Engine
-	events    eventHub
-	selfupd   updateState
+	drugs     drugState
+	// contentUpd runs scheduled content updates.
+	contentUpd contentUpdater
+	events     eventHub
+	selfupd    updateState
 	// RequestRestart, set by the program's main function, stops Arcana and
 	// starts the newly installed version as described by the SelfUpdate
 	// taken before installing.
@@ -119,6 +123,7 @@ func Open(root string, opts Options) (*App, error) {
 		a.reloadKiwix()
 		a.reloadMaps()
 		a.reloadRoads()
+		a.reloadDrugs()
 		a.RequestReindex()
 		a.publish(Event{Type: "library"})
 	}
@@ -167,11 +172,12 @@ func Open(root string, opts Options) (*App, error) {
 		Store:       a.Store,
 		Layout:      lib.Layout,
 		Content:     a.Content,
-		Settings:    lib.Settings.Get,
+		Settings:    a.downloadSettings,
 		ResolverFor: func(p string) catalog.Resolver { return a.resolvers()[p] },
 		Fetcher:     a.Fetcher,
 		Client:      client,
-		Extractors:  map[string]download.Extractor{maps.MethodExtract: a.mapExtractor, routing.MethodBuild: a.roadExtractor},
+		Extractors: map[string]download.Extractor{maps.MethodExtract: a.mapExtractor, routing.MethodBuild: a.roadExtractor,
+			drugs.MethodBuild: a.drugExtractor},
 		RequestHook: a.peerRequestHook,
 		Log:         log,
 		ReadOnly:    lib.ReadOnly,
@@ -201,10 +207,12 @@ func (a *App) Start(ctx context.Context) error {
 	a.reloadKiwix()
 	a.reloadMaps()
 	a.reloadRoads()
+	a.reloadDrugs()
 	go a.placesLoop(ctx)
 	a.ApplyGPSSettings()
 	go a.reindexLoop(ctx)
 	go a.autoRefreshLoop(ctx)
+	go a.contentUpdateLoop(ctx)
 	go a.appUpdateLoop(ctx, 2*time.Minute)
 	a.RequestReindex()
 	return nil
@@ -223,6 +231,7 @@ func (a *App) Close() {
 		a.GPS.Stop()
 	}
 	a.closeAssistant()
+	a.closeDrugs()
 	if a.Kiwix != nil {
 		a.Kiwix.Stop()
 	}
@@ -296,6 +305,12 @@ func (a *App) Providers() []catalog.Provider {
 	}
 	if rp := a.RoadProvider(); rp != nil {
 		ps = append(ps, rp)
+	}
+	if dp := a.DrugProvider(); dp != nil {
+		ps = append(ps, dp)
+	}
+	if tp := a.TranslateProvider(); tp != nil {
+		ps = append(ps, tp)
 	}
 	for _, f := range s.Catalog.Feeds {
 		if f.Enabled {

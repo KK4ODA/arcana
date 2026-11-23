@@ -62,6 +62,12 @@ not yet code-signed (see [Status](#status)).
   model runs on your computer through Mozilla.ai's llamafile (three openly
   licensed models from 0.5 to 2.5 GB in the catalog), or on an Ollama or
   LM Studio server you choose.
+- **Medicines reference.** The labels of about 265,000 medicines sold in
+  the US, from the FDA's openFDA downloads (public domain): search by name
+  or ingredient, find non-prescription medicines by situation (fever,
+  burns, diarrhea…), read a label's directions and warnings, and put two
+  labels' warnings side by side. Arcana builds it on your computer from
+  1.8 GB of downloads into about 1 GB.
 - **Your own material.** Bookmarks, favorites, notes and reading history.
   Add your own PDF, EPUB, HTML, Markdown and text files; they are indexed
   and searched with everything else.
@@ -80,6 +86,11 @@ not yet code-signed (see [Status](#status)).
   HTTPS and password-protected remote administration are optional.
 - **Integrity tools.** Quick and full checks find missing or corrupted
   files. If the metadata index is lost, it is rebuilt from the drive.
+- **Scheduled content updates** (optional, off by default). Choose hours
+  (for example 01:00–06:00) and an interval; Arcana refreshes the catalogs,
+  downloads newer editions that fit the drive (medical and regulatory
+  first) under a bandwidth cap, and pauses those downloads outside the
+  window.
 - **Updates in one click.** Once a day, while online, Arcana looks for a
   new version. A banner offers *Update now*: the new version is
   verified against the project's signature, installed, and Arcana

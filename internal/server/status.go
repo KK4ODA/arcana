@@ -143,6 +143,7 @@ func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request, a *app.App
 		"gps":          s.gpsSummary(r, a),
 		"maps":         mapSummary(a),
 		"assistant":    s.assistantSummary(r, a),
+		"drugs":        map[string]any{"installed": a.Drugs() != nil},
 		"attention":    att,
 		"serverUptime": int64(time.Since(s.startedAt).Seconds()),
 	})

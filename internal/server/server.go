@@ -221,6 +221,8 @@ func (s *Server) appHandler() http.Handler {
 	mux.HandleFunc("POST /api/downloads/{id}/{action}", s.withApp(s.handleJobAction))
 	mux.HandleFunc("DELETE /api/downloads/{id}", s.withApp(s.handleJobRemove))
 	mux.HandleFunc("GET /api/updates", s.withApp(s.handleUpdates))
+	mux.HandleFunc("GET /api/updates/schedule", s.adminOnly(s.withApp(s.handleUpdateSchedule)))
+	mux.HandleFunc("POST /api/updates/schedule/run", s.withApp(s.handleUpdateScheduleRun))
 	mux.HandleFunc("GET /api/check", s.adminOnly(s.withApp(s.handleCheck)))
 	mux.HandleFunc("GET /api/settings", s.adminOnly(s.withApp(s.handleGetSettings)))
 	mux.HandleFunc("PUT /api/settings", s.withApp(s.handlePutSettings))
@@ -235,6 +237,7 @@ func (s *Server) appHandler() http.Handler {
 	s.registerNetwork(mux)
 	s.registerIntegration(mux)
 	s.registerAssistant(mux)
+	s.registerDrugs(mux)
 	mux.HandleFunc("GET /api/", func(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusNotFound, "unknown API endpoint")
 	})
@@ -445,8 +448,9 @@ func (s *Server) installedViews(r *http.Request, a *app.App) ([]installedView, e
 		if b, ok := books[in.ResourceID]; ok {
 			v.OpenPath = b.ContentPath
 			v.Search = res.Capabilities.FullTextSearch
-		} else if res.Format == "gguf" || res.Format == "llamafile" {
-			// Models and the engine are used by the assistant, not opened.
+		} else if res.Format == "gguf" || res.Format == "llamafile" || res.Format == "druglabels" {
+			// Models and the engine are used by the assistant; the drug
+			// reference has its own view.
 		} else if res.Format != "zim" && len(in.Files) > 0 {
 			v.OpenPath = "/files/" + in.ResourceID + "/" + path.Base(in.Files[0].Path)
 		} else if res.Format == "zim" {
@@ -888,22 +892,24 @@ func (s *Server) handleGetSettings(w http.ResponseWriter, r *http.Request, a *ap
 
 func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *app.App) {
 	var req struct {
-		ReserveBytes                 *int64                     `json:"reserveBytes"`
-		MaxConcurrentDownloads       *int                       `json:"maxConcurrentDownloads"`
-		BandwidthLimit               *int64                     `json:"bandwidthLimit"`
-		AllowPrivateNetworkDownloads *bool                      `json:"allowPrivateNetworkDownloads"`
-		ShareOnLAN                   *bool                      `json:"shareOnLan"`
-		KiwixEnabled                 *bool                      `json:"kiwixEnabled"`
-		GutenbergEnabled             *bool                      `json:"gutenbergEnabled"`
-		AutoRefreshHours             *int                       `json:"autoRefreshHours"`
-		UpdateURL                    *string                    `json:"updateUrl"`
-		AutoUpdateCheck              *bool                      `json:"autoUpdateCheck"`
-		Feeds                        *[]library.FeedSource      `json:"feeds"`
-		MapsEnabled                  *bool                      `json:"mapsEnabled"`
-		MDNS                         *bool                      `json:"mdns"`
-		MDNSName                     *string                    `json:"mdnsName"`
-		GPS                          *library.GPSSettings       `json:"gps"`
-		Assistant                    *library.AssistantSettings `json:"assistant"`
+		ReserveBytes                 *int64                         `json:"reserveBytes"`
+		MaxConcurrentDownloads       *int                           `json:"maxConcurrentDownloads"`
+		BandwidthLimit               *int64                         `json:"bandwidthLimit"`
+		AllowPrivateNetworkDownloads *bool                          `json:"allowPrivateNetworkDownloads"`
+		ShareOnLAN                   *bool                          `json:"shareOnLan"`
+		KiwixEnabled                 *bool                          `json:"kiwixEnabled"`
+		GutenbergEnabled             *bool                          `json:"gutenbergEnabled"`
+		OpenFDAEnabled               *bool                          `json:"openfdaEnabled"`
+		AutoRefreshHours             *int                           `json:"autoRefreshHours"`
+		UpdateURL                    *string                        `json:"updateUrl"`
+		AutoUpdateCheck              *bool                          `json:"autoUpdateCheck"`
+		Feeds                        *[]library.FeedSource          `json:"feeds"`
+		MapsEnabled                  *bool                          `json:"mapsEnabled"`
+		MDNS                         *bool                          `json:"mdns"`
+		MDNSName                     *string                        `json:"mdnsName"`
+		GPS                          *library.GPSSettings           `json:"gps"`
+		Assistant                    *library.AssistantSettings     `json:"assistant"`
+		ContentUpdates               *library.ContentUpdateSettings `json:"contentUpdates"`
 	}
 	if err := readJSON(r, &req); err != nil {
 		writeError(w, 400, err.Error())
@@ -940,6 +946,9 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *ap
 		if req.GutenbergEnabled != nil {
 			st.Catalog.GutenbergEnabled = *req.GutenbergEnabled
 		}
+		if req.OpenFDAEnabled != nil {
+			st.Catalog.OpenFDAEnabled = *req.OpenFDAEnabled
+		}
 		if req.AutoRefreshHours != nil {
 			if *req.AutoRefreshHours < 0 || *req.AutoRefreshHours > 24*90 {
 				return errors.New("automatic refresh interval must be between 0 (off) and 2160 hours")
@@ -957,7 +966,7 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *ap
 			st.Updates.AutoCheck = *req.AutoUpdateCheck
 		}
 		if req.Feeds != nil {
-			seen := map[string]bool{"arcana": true, "kiwix": true, "gutenberg": true, "maps": true, "local": true}
+			seen := map[string]bool{"arcana": true, "kiwix": true, "gutenberg": true, "maps": true, "local": true, "roads": true, "openfda": true}
 			for _, f := range *req.Feeds {
 				probe := catalog.Resource{ID: f.ID + ".x", Provider: f.ID, Title: "x", Version: "1", Format: "pdf",
 					Files: []catalog.File{{Name: "x.pdf", Mirrors: []catalog.Mirror{{URL: f.URL}}}}}
@@ -1005,6 +1014,22 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *ap
 			}
 			st.GPS = g
 		}
+		if req.ContentUpdates != nil {
+			cu := *req.ContentUpdates
+			if cu.WindowStart < 0 || cu.WindowStart > 23 || cu.WindowEnd < 0 || cu.WindowEnd > 23 {
+				return errors.New("update hours must be between 0 and 23")
+			}
+			if cu.EveryDays < 1 || cu.EveryDays > 90 {
+				return errors.New("check interval must be between 1 and 90 days")
+			}
+			if cu.BandwidthLimit < 0 {
+				return errors.New("bandwidth limit cannot be negative")
+			}
+			if cu.Only != "all" && cu.Only != "important" {
+				return errors.New(`updates to install must be "all" or "important"`)
+			}
+			st.ContentUpdates = cu
+		}
 		if req.Assistant != nil {
 			as := *req.Assistant
 			as.URL = strings.TrimSpace(as.URL)
@@ -1026,6 +1051,11 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *ap
 		return
 	}
 	a.Downloads.ApplySettings()
+	if req.ContentUpdates != nil {
+		// Applies the window at once (pausing or resuming scheduled
+		// downloads) without waiting for the next minute.
+		go a.ApplyContentUpdateSettings()
+	}
 	if req.GPS != nil {
 		a.ApplyGPSSettings()
 	}
@@ -1116,3 +1146,20 @@ func (s *Server) SetApp(a *app.App) {
 
 // App returns the open library, if any.
 func (s *Server) App() *app.App { return s.current() }
+
+func (s *Server) handleUpdateSchedule(w http.ResponseWriter, r *http.Request, a *app.App) {
+	writeJSON(w, http.StatusOK, a.ContentUpdateStatus())
+}
+
+// handleUpdateScheduleRun checks for content updates now and queues what
+// fits, whatever the window.
+func (s *Server) handleUpdateScheduleRun(w http.ResponseWriter, r *http.Request, a *app.App) {
+	if a.Lib.ReadOnly {
+		writeError(w, http.StatusConflict, "The library is read-only.")
+		return
+	}
+	ctx, cancel := context.WithTimeout(r.Context(), 12*time.Minute)
+	defer cancel()
+	ev := a.RunContentUpdatesNow(ctx)
+	writeJSON(w, http.StatusOK, map[string]any{"result": ev, "status": a.ContentUpdateStatus()})
+}

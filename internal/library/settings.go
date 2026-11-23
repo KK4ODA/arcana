@@ -24,13 +24,14 @@ type Settings struct {
 	// LAN, loopback or link-local addresses. Off by default so a remote
 	// catalog cannot make Arcana send requests to devices on the local
 	// network.
-	AllowPrivateNetworkDownloads bool              `json:"allowPrivateNetworkDownloads"`
-	Server                       ServerSettings    `json:"server"`
-	Catalog                      CatalogSettings   `json:"catalog"`
-	Updates                      UpdateSettings    `json:"updates"`
-	Maps                         MapSettings       `json:"maps"`
-	GPS                          GPSSettings       `json:"gps"`
-	Assistant                    AssistantSettings `json:"assistant"`
+	AllowPrivateNetworkDownloads bool                  `json:"allowPrivateNetworkDownloads"`
+	Server                       ServerSettings        `json:"server"`
+	Catalog                      CatalogSettings       `json:"catalog"`
+	Updates                      UpdateSettings        `json:"updates"`
+	Maps                         MapSettings           `json:"maps"`
+	GPS                          GPSSettings           `json:"gps"`
+	Assistant                    AssistantSettings     `json:"assistant"`
+	ContentUpdates               ContentUpdateSettings `json:"contentUpdates"`
 	// Peers are other Arcana libraries on the network to copy from.
 	Peers []PeerSource `json:"peers,omitempty"`
 }
@@ -57,6 +58,24 @@ type MapSettings struct {
 	// RoadsURL is the index of OSM extracts road networks are built from.
 	// Empty means Geofabrik's.
 	RoadsURL string `json:"roadsUrl,omitempty"`
+}
+
+// ContentUpdateSettings schedule automatic updates of installed content.
+// Off by default: Arcana makes no network requests unless asked.
+type ContentUpdateSettings struct {
+	Enabled bool `json:"enabled"`
+	// WindowStart and WindowEnd are hours (0–23, local time) between which
+	// scheduled checks and downloads run; the window may wrap past
+	// midnight, and equal hours mean all day.
+	WindowStart int `json:"windowStart"`
+	WindowEnd   int `json:"windowEnd"`
+	// EveryDays is how often the catalogs are checked (1, 7 or 30).
+	EveryDays int `json:"everyDays"`
+	// BandwidthLimit caps downloads (bytes per second) while scheduled
+	// updates run; 0 uses the general limit.
+	BandwidthLimit int64 `json:"bandwidthLimit"`
+	// Only is "all" or "important" (medical and regulatory material).
+	Only string `json:"only"`
 }
 
 // AssistantSettings control question answering over the library. It is
@@ -145,9 +164,15 @@ type CatalogSettings struct {
 	KiwixEnabled bool   `json:"kiwixEnabled"`
 	KiwixURL     string `json:"kiwixUrl"`
 	// GutenbergEnabled imports Project Gutenberg's practical bookshelves.
-	GutenbergEnabled bool         `json:"gutenbergEnabled"`
-	GutenbergMirror  string       `json:"gutenbergMirror"`
-	Feeds            []FeedSource `json:"feeds"`
+	GutenbergEnabled bool   `json:"gutenbergEnabled"`
+	GutenbergMirror  string `json:"gutenbergMirror"`
+	// OpenFDAEnabled offers the FDA drug label reference (built from
+	// openFDA's downloads).
+	OpenFDAEnabled bool `json:"openfdaEnabled"`
+	// TranslationsEnabled offers translation language packs (Mozilla\'s
+	// models, as used by Firefox).
+	TranslationsEnabled bool         `json:"translationsEnabled"`
+	Feeds               []FeedSource `json:"feeds"`
 	// AutoRefreshHours, when positive, refreshes catalogs in the background
 	// while Arcana is running. Off by default: Arcana makes no network
 	// requests unless asked.
@@ -180,13 +205,16 @@ func DefaultSettings() Settings {
 		MaxConcurrentDownloads: 2,
 		Server:                 ServerSettings{Port: 8470, MDNS: true, Name: "arcana"},
 		Catalog: CatalogSettings{
-			KiwixEnabled:    true,
-			KiwixURL:        "https://library.kiwix.org",
-			GutenbergMirror: "https://gutenberg.pglaf.org",
+			KiwixEnabled:        true,
+			KiwixURL:            "https://library.kiwix.org",
+			GutenbergMirror:     "https://gutenberg.pglaf.org",
+			OpenFDAEnabled:      true,
+			TranslationsEnabled: true,
 		},
-		Updates: UpdateSettings{URL: "https://github.com/KK4ODA/arcana/releases/latest/download", AutoCheck: true},
-		Maps:    MapSettings{Enabled: true},
-		GPS:     GPSSettings{BaudRate: 4800, UDPPort: 10110, SimulatorSpeed: 1},
+		Updates:        UpdateSettings{URL: "https://github.com/KK4ODA/arcana/releases/latest/download", AutoCheck: true},
+		Maps:           MapSettings{Enabled: true},
+		GPS:            GPSSettings{BaudRate: 4800, UDPPort: 10110, SimulatorSpeed: 1},
+		ContentUpdates: ContentUpdateSettings{WindowStart: 1, WindowEnd: 6, EveryDays: 7, Only: "all"},
 		Assistant: AssistantSettings{Backend: "local", RelevanceFloor: 0.5, Passages: 5, ContextSize: 4096,
 			URL: "http://127.0.0.1:11434/v1"},
 	}
