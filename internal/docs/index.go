@@ -170,9 +170,15 @@ func (ix *Index) Search(ctx context.Context, query string, limit int) ([]Hit, in
 // person's own documents.
 const UserDocuments = "@user"
 
+// SharedDocuments, passed to SearchIn as a resource ID, limits a search to
+// installed resources' documents, leaving out the person's own: what may
+// be shown to devices on the network.
+const SharedDocuments = "@shared"
+
 // SearchIn runs a full-text query limited to one installed resource's
-// documents (UserDocuments for the person's own, or every document when
-// resourceID is empty), returning results from offset on.
+// documents (UserDocuments for the person's own, SharedDocuments for every
+// resource's, or every document when resourceID is empty), returning
+// results from offset on.
 func (ix *Index) SearchIn(ctx context.Context, query, resourceID string, offset, limit int) ([]Hit, int, error) {
 	q := ftsQuery(query)
 	if q == "" {
@@ -188,15 +194,15 @@ func (ix *Index) SearchIn(ctx context.Context, query, resourceID string, offset,
 	defer ix.mu.Unlock()
 	var total int
 	if err := ix.db.QueryRowContext(ctx, `SELECT count(*) FROM docs_fts f JOIN docs d ON d.key = f.key
-		WHERE docs_fts MATCH ? AND (? = '' OR (? = '@user' AND d.source = 'user') OR (d.source = 'resource' AND d.resource_id = ?))`,
-		q, resourceID, resourceID, resourceID).Scan(&total); err != nil {
+		WHERE docs_fts MATCH ? AND (? = '' OR (? = '@user' AND d.source = 'user') OR (? = '@shared' AND d.source = 'resource') OR (d.source = 'resource' AND d.resource_id = ?))`,
+		q, resourceID, resourceID, resourceID, resourceID).Scan(&total); err != nil {
 		return nil, 0, err
 	}
 	rows, err := ix.db.QueryContext(ctx, `SELECT d.key, d.source, d.resource_id, d.name, d.url, d.title,
 		snippet(docs_fts, 2, char(1), char(2), '…', 14)
 		FROM docs_fts f JOIN docs d ON d.key = f.key
-		WHERE docs_fts MATCH ? AND (? = '' OR (? = '@user' AND d.source = 'user') OR (d.source = 'resource' AND d.resource_id = ?))
-		ORDER BY bm25(docs_fts, 0, 8.0, 1.0) LIMIT ? OFFSET ?`, q, resourceID, resourceID, resourceID, limit, offset)
+		WHERE docs_fts MATCH ? AND (? = '' OR (? = '@user' AND d.source = 'user') OR (? = '@shared' AND d.source = 'resource') OR (d.source = 'resource' AND d.resource_id = ?))
+		ORDER BY bm25(docs_fts, 0, 8.0, 1.0) LIMIT ? OFFSET ?`, q, resourceID, resourceID, resourceID, resourceID, limit, offset)
 	if err != nil {
 		return nil, 0, err
 	}

@@ -1,0 +1,21 @@
+{
+  "name": "Arcana sample library",
+  "questions": [
+    {"question": "What does QTH mean in radio?", "answerable": true,
+     "expect": [{"resourceId": "arcana.sample", "path": "q_codes"}], "mustContain": ["location"]},
+    {"question": "How long is a dash in Morse code compared to a dot?", "answerable": true,
+     "expect": [{"resourceId": "arcana.sample", "path": "morse_code"}], "mustContain": ["three"]},
+    {"question": "How do I convert decimal degrees to minutes?", "answerable": true,
+     "expect": [{"resourceId": "arcana.sample", "path": "coordinate_formats"}], "mustContain": ["60"]},
+    {"question": "How many kilometres are in a nautical mile?", "answerable": true,
+     "expect": [{"resourceId": "arcana.sample", "path": "unit_conversions"}, {"resourceId": "arcana.sample", "path": "coordinate_formats"}],
+     "mustContain": ["1.852"]},
+    {"question": "Which code word stands for the letter W in the spelling alphabet?", "answerable": true,
+     "expect": [{"resourceId": "arcana.sample", "path": "phonetic_alphabet"}], "mustContain": ["whiskey"]},
+    {"question": "How is the distress signal SOS sent in Morse code?", "answerable": true,
+     "expect": [{"resourceId": "arcana.sample", "path": "morse_code"}]},
+    {"question": "How do I treat a snake bite?", "answerable": false},
+    {"question": "What is the boiling point of water at high altitude?", "answerable": false},
+    {"question": "Who won the 1966 football World Cup?", "answerable": false}
+  ]
+}

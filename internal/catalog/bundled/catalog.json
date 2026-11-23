@@ -183,6 +183,560 @@
           "text": "Jurisdiction: United States. This is the edition revised as of 1 October 2025; rules may have been amended since. The electronic CFR (ecfr.gov) has the current text."
         }
       ]
+    },
+    {
+      "id": "arcana.llamafile",
+      "provider": "arcana",
+      "title": "llamafile model engine",
+      "description": "Mozilla.ai's llamafile 0.10.6: one portable program that runs language models on Windows, macOS and Linux (x86-64 and ARM64), on the processor or a supported graphics card. Arcana starts it only while answering questions, on this computer only, and stops it when idle. Needed by the local question-answering models.",
+      "category": "assistant",
+      "subcategory": "engine",
+      "tags": [
+        "ai",
+        "assistant",
+        "engine"
+      ],
+      "family": "arcana.llamafile",
+      "variant": "standard",
+      "publisher": "Mozilla.ai",
+      "sourceUrl": "https://github.com/mozilla-ai/llamafile",
+      "version": "0.10.6",
+      "published": "2026-09-15",
+      "lastVerified": "2026-11-23T00:00:00Z",
+      "languages": [
+        "mul"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "llamafile",
+      "files": [
+        {
+          "name": "llamafile-0.10.6.exe",
+          "size": 368094430,
+          "hashes": {
+            "sha256": "d579f61dcd3a306f518e6d90e599d77793ed5f09543023d09c96ad35fcfa63f0"
+          },
+          "mirrors": [
+            {
+              "url": "https://huggingface.co/mozilla-ai/llamafile_0.10/resolve/8c9e234f2068fa6a6f3ed171926b367e65cef160/llamafile-0.10.6"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 368094430,
+      "installedSize": 368094430,
+      "license": {
+        "id": "Apache-2.0",
+        "name": "Apache License 2.0",
+        "url": "https://www.apache.org/licenses/LICENSE-2.0",
+        "redistribution": "permitted",
+        "verified": true,
+        "notes": "llamafile is Apache-2.0; it bundles llama.cpp (MIT) and Cosmopolitan Libc (ISC)."
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": false,
+        "videos": false
+      },
+      "updateStrategy": "snapshot-replace",
+      "warnings": [
+        {
+          "kind": "content",
+          "text": "Some antivirus programs flag llamafile's portable executable format (when checked on 23 November 2026, 1 of 76 VirusTotal engines did). Arcana verifies the file against Mozilla.ai's published SHA-256 before using it."
+        }
+      ],
+      "popularity": 10
+    },
+    {
+      "id": "arcana.assistant-qwen2.5-0.5b",
+      "provider": "arcana",
+      "title": "Qwen2.5 0.5B Instruct (tiny model)",
+      "description": "The smallest model: answers in seconds even on a Raspberry Pi 5 or an old laptop (about 1 GB of memory), but misreads passages more often. Good for trying the assistant.",
+      "category": "assistant",
+      "subcategory": "model",
+      "tags": [
+        "ai",
+        "assistant",
+        "gguf"
+      ],
+      "family": "arcana.assistant-model",
+      "variant": "tiny",
+      "variantLabel": "Tiny: fastest, least reliable",
+      "publisher": "Qwen team, Alibaba Cloud",
+      "sourceUrl": "https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF",
+      "version": "q4km-2024-09",
+      "published": "2024-09-20",
+      "lastVerified": "2026-11-23T00:00:00Z",
+      "languages": [
+        "mul"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "gguf",
+      "files": [
+        {
+          "name": "qwen2.5-0.5b-instruct-q4_k_m.gguf",
+          "size": 491400032,
+          "hashes": {
+            "sha256": "74a4da8c9fdbcd15bd1f6d01d621410d31c6fc00986f5eb687824e7b93d7a9db"
+          },
+          "mirrors": [
+            {
+              "url": "https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/9217f5db79a29953eb74d5343926648285ec7e67/qwen2.5-0.5b-instruct-q4_k_m.gguf"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 491400032,
+      "installedSize": 491400032,
+      "license": {
+        "id": "Apache-2.0",
+        "name": "Apache License 2.0",
+        "url": "https://www.apache.org/licenses/LICENSE-2.0",
+        "redistribution": "permitted",
+        "verified": true,
+        "notes": "Model weights released by the Qwen team under Apache-2.0."
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": false,
+        "videos": false
+      },
+      "dependencies": [
+        "arcana.llamafile"
+      ],
+      "updateStrategy": "snapshot-replace",
+      "warnings": [
+        {
+          "kind": "content",
+          "text": "Answers come from a small language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
+        }
+      ],
+      "popularity": 3
+    },
+    {
+      "id": "arcana.assistant-granite-3.3-2b",
+      "provider": "arcana",
+      "title": "Granite 3.3 2B Instruct (balanced model)",
+      "description": "IBM's small model trained for answering from supplied documents with citations. Needs about 3 GB of memory; a good default for most laptops.",
+      "category": "assistant",
+      "subcategory": "model",
+      "tags": [
+        "ai",
+        "assistant",
+        "gguf"
+      ],
+      "family": "arcana.assistant-model",
+      "variant": "balanced",
+      "variantLabel": "Balanced: recommended",
+      "publisher": "IBM",
+      "sourceUrl": "https://huggingface.co/ibm-granite/granite-3.3-2b-instruct-GGUF",
+      "version": "q4km-2025-04",
+      "published": "2025-04-16",
+      "lastVerified": "2026-11-23T00:00:00Z",
+      "languages": [
+        "mul"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "gguf",
+      "files": [
+        {
+          "name": "granite-3.3-2b-instruct-Q4_K_M.gguf",
+          "size": 1545303328,
+          "hashes": {
+            "sha256": "ac71e9e32c0bea919b409c5918f69ca74339854b0319c5065e4e9fb6d95c4852"
+          },
+          "mirrors": [
+            {
+              "url": "https://huggingface.co/ibm-granite/granite-3.3-2b-instruct-GGUF/resolve/7cdf86ccd1f1bb3491c9b7017b033f2e51367397/granite-3.3-2b-instruct-Q4_K_M.gguf"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 1545303328,
+      "installedSize": 1545303328,
+      "license": {
+        "id": "Apache-2.0",
+        "name": "Apache License 2.0",
+        "url": "https://www.apache.org/licenses/LICENSE-2.0",
+        "redistribution": "permitted",
+        "verified": true,
+        "notes": "Model weights released by IBM under Apache-2.0."
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": false,
+        "videos": false
+      },
+      "dependencies": [
+        "arcana.llamafile"
+      ],
+      "updateStrategy": "snapshot-replace",
+      "warnings": [
+        {
+          "kind": "content",
+          "text": "Answers come from a small language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
+        }
+      ],
+      "popularity": 5
+    },
+    {
+      "id": "arcana.assistant-qwen3-4b",
+      "provider": "arcana",
+      "title": "Qwen3 4B (larger model)",
+      "description": "Better answers and more languages, for computers with 8 GB of memory or more. Slower on the processor alone.",
+      "category": "assistant",
+      "subcategory": "model",
+      "tags": [
+        "ai",
+        "assistant",
+        "gguf"
+      ],
+      "family": "arcana.assistant-model",
+      "variant": "large",
+      "variantLabel": "Larger: better answers, needs 8 GB",
+      "publisher": "Qwen team, Alibaba Cloud",
+      "sourceUrl": "https://huggingface.co/Qwen/Qwen3-4B-GGUF",
+      "version": "q4km-2025-05",
+      "published": "2025-05-21",
+      "lastVerified": "2026-11-23T00:00:00Z",
+      "languages": [
+        "mul"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "gguf",
+      "files": [
+        {
+          "name": "Qwen3-4B-Q4_K_M.gguf",
+          "size": 2497280256,
+          "hashes": {
+            "sha256": "7485fe6f11af29433bc51cab58009521f205840f5b4ae3a32fa7f92e8534fdf5"
+          },
+          "mirrors": [
+            {
+              "url": "https://huggingface.co/Qwen/Qwen3-4B-GGUF/resolve/bc640142c66e1fdd12af0bd68f40445458f3869b/Qwen3-4B-Q4_K_M.gguf"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 2497280256,
+      "installedSize": 2497280256,
+      "license": {
+        "id": "Apache-2.0",
+        "name": "Apache License 2.0",
+        "url": "https://www.apache.org/licenses/LICENSE-2.0",
+        "redistribution": "permitted",
+        "verified": true,
+        "notes": "Model weights released by the Qwen team under Apache-2.0."
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": false,
+        "videos": false
+      },
+      "dependencies": [
+        "arcana.llamafile"
+      ],
+      "updateStrategy": "snapshot-replace",
+      "warnings": [
+        {
+          "kind": "content",
+          "text": "Answers come from a small language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
+        }
+      ],
+      "popularity": 4
+    },
+    {
+      "id": "arcana.translation-engine",
+      "provider": "arcana",
+      "title": "Translation engine (Bergamot)",
+      "description": "Mozilla's Bergamot translation engine, the WebAssembly build Firefox uses for its own offline translations. It runs inside the reader's browser, so pages are translated on the device reading them, with nothing sent anywhere. Needed by the translation language packs.",
+      "category": "reference",
+      "subcategory": "translation",
+      "tags": [
+        "translation",
+        "engine"
+      ],
+      "family": "arcana.translation-engine",
+      "variant": "standard",
+      "publisher": "Mozilla",
+      "sourceUrl": "https://github.com/mozilla/translations",
+      "version": "4.0",
+      "published": "2025-10-14",
+      "lastVerified": "2026-11-23T00:00:00Z",
+      "languages": [
+        "mul"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "bergamot",
+      "files": [
+        {
+          "name": "bergamot-translator-4.0.wasm.zst",
+          "size": 1211955,
+          "hashes": {
+            "sha256": "327fcfc7b7e9d95f6fa0844ebf899cfc05469872ef02d3aef5783182839a6255"
+          },
+          "mirrors": [
+            {
+              "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-wasm-v2/a76f9efe-b185-4a7f-9c3b-5f5d216d12e6.zst"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 1211955,
+      "installedSize": 1211955,
+      "license": {
+        "id": "MPL-2.0",
+        "name": "Mozilla Public License 2.0",
+        "url": "https://www.mozilla.org/MPL/2.0/",
+        "redistribution": "permitted",
+        "verified": true
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": false,
+        "videos": false
+      },
+      "updateStrategy": "snapshot-replace",
+      "providerRef": {
+        "decompressedHash": "f38ef807636a7c994afedaab7ff8ffe0d590d21897f05139f747b80fd7bbe926",
+        "decompressedSize": "4960506"
+      },
+      "popularity": 9
+    },
+    {
+      "id": "arcana.us-army-fm-4-25-11",
+      "provider": "arcana",
+      "title": "FM 4-25.11 First Aid (U.S. Army)",
+      "description": "The Army's first aid manual for people who are not medics: evaluating a casualty, restoring breathing, controlling bleeding, preventing shock, wounds, burns, fractures, heat and cold injuries, bites and stings, and moving a casualty. With Change 1 (2004).",
+      "category": "first-aid",
+      "subcategory": "manuals",
+      "tags": [
+        "first aid",
+        "military",
+        "manual"
+      ],
+      "family": "arcana.us-army-fm-4-25-11",
+      "variant": "standard",
+      "publisher": "Headquarters, Department of the Army (United States)",
+      "sourceUrl": "https://archive.org/details/fm-4-25-11-first-aid-c-1-2004",
+      "version": "2004-07",
+      "published": "2004-07-01",
+      "lastVerified": "2026-11-23T00:00:00Z",
+      "languages": [
+        "en"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "pdf",
+      "files": [
+        {
+          "name": "fm-4-25-11-first-aid.pdf",
+          "size": 2600639,
+          "hashes": {
+            "sha256": "62010e9dcc9204badd5940154d8b580260776405dba7bd5d99544722fdeb4ce3"
+          },
+          "mirrors": [
+            {
+              "url": "https://archive.org/download/fm-4-25-11-first-aid-c-1-2004/FM%204-25-11%20First%20Aid%20%28C1%29%20%282004%29.pdf"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 2600639,
+      "installedSize": 2600639,
+      "license": {
+        "id": "LicenseRef-PD-USGov",
+        "name": "US federal government work (public domain in the US)",
+        "redistribution": "permitted",
+        "verified": true,
+        "notes": "Works of the US federal government are not subject to US copyright (17 U.S.C. 105). The manual states: approved for public release; distribution is unlimited."
+      },
+      "capabilities": {
+        "fullTextSearch": true,
+        "titleSearch": true
+      },
+      "media": {
+        "pictures": true,
+        "videos": false,
+        "detail": "full"
+      },
+      "updateStrategy": "snapshot-replace",
+      "warnings": [
+        {
+          "kind": "medical",
+          "text": "Military first aid from 2002–2004, not current medical advice. Some practices have changed since (the Army replaced this manual with TC 4-02.1 in 2016). In an emergency, contact emergency services or a qualified clinician whenever possible."
+        },
+        {
+          "kind": "outdated",
+          "text": "Superseded edition, kept because it is public domain and widely used for training."
+        }
+      ],
+      "popularity": 3
+    },
+    {
+      "id": "arcana.us-army-atp-3-50-21",
+      "provider": "arcana",
+      "title": "ATP 3-50.21 Survival (U.S. Army)",
+      "description": "The Army's current survival manual (September 2018): survival planning and kits, medicine in the field, shelter, water, food, fire, navigation, signaling, and survival in cold, desert, tropical and maritime environments.",
+      "category": "preparedness",
+      "subcategory": "manuals",
+      "tags": [
+        "survival",
+        "military",
+        "manual"
+      ],
+      "family": "arcana.us-army-atp-3-50-21",
+      "variant": "standard",
+      "publisher": "Headquarters, Department of the Army (United States)",
+      "sourceUrl": "https://archive.org/details/survival-atp-3-50-21",
+      "version": "2018-09",
+      "published": "2018-09-01",
+      "lastVerified": "2026-11-23T00:00:00Z",
+      "languages": [
+        "en"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "pdf",
+      "files": [
+        {
+          "name": "atp-3-50-21-survival.pdf",
+          "size": 23749774,
+          "hashes": {
+            "sha256": "817746b13262e9e26e8ac7d25bf879790df369c2aa0a2600f69158ec4090461c"
+          },
+          "mirrors": [
+            {
+              "url": "https://archive.org/download/survival-atp-3-50-21/Survival%20%28ATP%203-50-21%29.pdf"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 23749774,
+      "installedSize": 23749774,
+      "license": {
+        "id": "LicenseRef-PD-USGov",
+        "name": "US federal government work (public domain in the US)",
+        "redistribution": "permitted",
+        "verified": true,
+        "notes": "Works of the US federal government are not subject to US copyright (17 U.S.C. 105). The manual states: approved for public release; distribution is unlimited."
+      },
+      "capabilities": {
+        "fullTextSearch": true,
+        "titleSearch": true
+      },
+      "media": {
+        "pictures": true,
+        "videos": false,
+        "detail": "full"
+      },
+      "updateStrategy": "snapshot-replace",
+      "warnings": [
+        {
+          "kind": "medical",
+          "text": "The medical chapter is field guidance for isolated personnel, not current medical advice. Get qualified help whenever you can."
+        },
+        {
+          "kind": "content",
+          "text": "Written for military personnel; some sections concern evading capture."
+        }
+      ],
+      "popularity": 4
+    },
+    {
+      "id": "arcana.us-army-fm-3-25-26",
+      "provider": "arcana",
+      "title": "FM 3-25.26 Map Reading and Land Navigation (U.S. Army)",
+      "description": "Reading topographic maps, grid coordinates, scale and distance, direction and the compass, elevation and relief, terrain association, and navigating on foot and in vehicles, by day and by night (July 2001).",
+      "category": "maps-navigation",
+      "subcategory": "manuals",
+      "tags": [
+        "navigation",
+        "compass",
+        "map reading",
+        "military",
+        "manual"
+      ],
+      "family": "arcana.us-army-fm-3-25-26",
+      "variant": "standard",
+      "publisher": "Headquarters, Department of the Army (United States)",
+      "sourceUrl": "https://archive.org/details/FM3-25x26",
+      "version": "2001-07",
+      "published": "2001-07-20",
+      "lastVerified": "2026-11-23T00:00:00Z",
+      "languages": [
+        "en"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "pdf",
+      "files": [
+        {
+          "name": "fm-3-25-26-map-reading.pdf",
+          "size": 8167056,
+          "hashes": {
+            "sha256": "bf92a942048931c59f2b48b366acd9b5f8f40120b0866d702dec799a4e8be24c"
+          },
+          "mirrors": [
+            {
+              "url": "https://archive.org/download/FM3-25x26/FM3-25x26.pdf"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 8167056,
+      "installedSize": 8167056,
+      "license": {
+        "id": "LicenseRef-PD-USGov",
+        "name": "US federal government work (public domain in the US)",
+        "redistribution": "permitted",
+        "verified": true,
+        "notes": "Works of the US federal government are not subject to US copyright (17 U.S.C. 105). The manual states: approved for public release; distribution is unlimited."
+      },
+      "capabilities": {
+        "fullTextSearch": true,
+        "titleSearch": true
+      },
+      "media": {
+        "pictures": true,
+        "videos": false,
+        "detail": "full"
+      },
+      "updateStrategy": "snapshot-replace",
+      "warnings": [
+        {
+          "kind": "outdated",
+          "text": "Edition of 2001: map, compass and terrain skills are unchanged, but the sections on GPS and electronic equipment are dated."
+        }
+      ],
+      "popularity": 3
     }
   ]
 }

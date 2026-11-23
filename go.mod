@@ -6,6 +6,7 @@ toolchain go1.26.11
 
 require (
 	github.com/adrianmo/go-nmea v1.11.0
+	github.com/klauspost/compress v1.20.3
 	github.com/ledongthuc/pdf v0.0.0-20261020125853-5e46805f718e
 	go.bug.st/serial v1.8.0
 	golang.org/x/crypto v0.59.0

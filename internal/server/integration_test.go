@@ -3,7 +3,9 @@ package server
 import (
 	"context"
 	"encoding/json"
+	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -150,5 +152,47 @@ func TestIntegrationAPI(t *testing.T) {
 	}
 	if code, _ := get("/api/integration/v1/search?q=distress", tok, lanClient); code != 401 {
 		t.Fatalf("revoked: %d", code)
+	}
+}
+
+// TestOpenAPIMatchesRoutes keeps the OpenAPI document in step with the
+// integration routes: every route is documented and every documented path
+// exists.
+func TestOpenAPIMatchesRoutes(t *testing.T) {
+	var spec struct {
+		OpenAPI string                    `json:"openapi"`
+		Paths   map[string]map[string]any `json:"paths"`
+	}
+	if err := json.Unmarshal(integrationOpenAPI, &spec); err != nil || spec.OpenAPI != "3.1.0" {
+		t.Fatalf("spec: %v %q", err, spec.OpenAPI)
+	}
+	src, err := os.ReadFile("integration.go")
+	if err != nil {
+		t.Fatal(err)
+	}
+	re := regexp.MustCompile(`mux\.HandleFunc\("(GET|POST) "\+p\+"(/[^"]*)"`)
+	routes := map[string]bool{}
+	for _, m := range re.FindAllStringSubmatch(string(src), -1) {
+		path := strings.TrimSuffix(m[2], "{$}")
+		if path == "/" && m[1] == "GET" && strings.HasSuffix(m[2], "/") && !strings.HasSuffix(m[2], "{$}") {
+			continue // the catch-all 404
+		}
+		key := strings.ToLower(m[1]) + " " + path
+		routes[key] = true
+		if spec.Paths[path] == nil || spec.Paths[path][strings.ToLower(m[1])] == nil {
+			t.Errorf("route %s is not in openapi/integration-v1.json", key)
+		}
+	}
+	for path, ops := range spec.Paths {
+		for method := range ops {
+			if !routes[method+" "+path] {
+				t.Errorf("documented %s %s is not a route", method, path)
+			}
+		}
+	}
+	e := newEnv(t)
+	rec := e.do(e.appH, "GET", "/api/integration/v1/openapi.json", lanClient, "127.0.0.1:18470", nil, nil)
+	if rec.Code != 200 || !strings.Contains(rec.Body.String(), `"openapi"`) {
+		t.Fatalf("served spec: %d", rec.Code)
 	}
 }

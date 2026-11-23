@@ -2,6 +2,9 @@ import { loadSession, getSession, api } from './api.js';
 import { h, clear } from './util.js';
 import { renderUpdateBanner } from './updatebanner.js';
 import { libraryView } from './views/library.js';
+import { askView } from './views/ask.js';
+import { medicinesView } from './views/medicines.js';
+import { welcomeView } from './views/welcome.js';
 import { discoverView } from './views/discover.js';
 import { mapsView } from './views/maps.js';
 import { downloadsView } from './views/downloads.js';
@@ -13,6 +16,8 @@ import { readerView, documentView } from './views/reader.js';
 
 const views = {
   library: { title: 'Library', render: libraryView },
+  ask: { title: 'Ask', render: askView, when: (st) => st?.assistant?.canAsk },
+  medicines: { title: 'Medicines', render: medicinesView, when: (st) => st?.drugs?.installed },
   discover: { title: 'Discover', render: discoverView },
   maps: { title: 'Maps', render: mapsView },
   downloads: { title: 'Downloads', render: downloadsView },
@@ -43,6 +48,7 @@ function renderTabs(active) {
   const s = getSession();
   for (const [name, v] of Object.entries(views)) {
     if (v.admin && !s.admin) continue;
+    if (v.when && !v.when(status) && active !== name) continue;
     let count = null;
     if (status && name === 'downloads' && status.downloads.active) count = status.downloads.active;
     if (status && name === 'updates' && status.updates.available) count = status.updates.available;
@@ -133,6 +139,12 @@ async function route() {
     cleanup = await readerView(main, r.args[0], r.params);
     return;
   }
+  if (r.name === 'welcome') {
+    renderTabs('library');
+    document.title = 'Getting started — Arcana';
+    cleanup = await welcomeView(main);
+    return;
+  }
   if (r.name === 'connect') {
     renderTabs('server');
     cleanup = await connectView(main);
@@ -147,7 +159,7 @@ async function route() {
   renderTabs(r.name in views ? r.name : 'library');
   document.title = `${v.title} — Arcana`;
   try {
-    cleanup = await v.render(main, r.params, { refreshStatus });
+    cleanup = await v.render(main, r.params, { refreshStatus }, r.args);
   } catch (e) {
     main.appendChild(h('div', { class: 'banner err' }, e.message));
   }

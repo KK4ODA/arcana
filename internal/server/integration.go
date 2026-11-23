@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"crypto/rand"
+	_ "embed"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -20,6 +21,7 @@ import (
 	"github.com/KK4ODA/arcana/internal/app"
 	"github.com/KK4ODA/arcana/internal/buildinfo"
 	"github.com/KK4ODA/arcana/internal/catalog"
+	"github.com/KK4ODA/arcana/internal/docs"
 	"github.com/KK4ODA/arcana/internal/integration"
 	"github.com/KK4ODA/arcana/internal/library"
 	"github.com/KK4ODA/arcana/internal/maps"
@@ -39,6 +41,11 @@ const clientKey ctxKey = 0
 func (s *Server) registerIntegration(mux *http.ServeMux) {
 	p := integrationPrefix
 	mux.HandleFunc("GET "+p+"/{$}", s.withApp(s.handleIntegrationInfo))
+	mux.HandleFunc("GET "+p+"/openapi.json", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.Header().Set("Cache-Control", "no-cache")
+		w.Write(integrationOpenAPI)
+	})
 	mux.HandleFunc("POST "+p+"/pair", s.withApp(s.handlePairRequest))
 	mux.HandleFunc("GET "+p+"/pair/{id}", s.withApp(s.handlePairPoll))
 	mux.HandleFunc("GET "+p+"/search", s.withApp(s.scoped(integration.ScopeSearch, s.handleIntSearch)))
@@ -49,6 +56,7 @@ func (s *Server) registerIntegration(mux *http.ServeMux) {
 	mux.HandleFunc("GET "+p+"/maps/reference", s.withApp(s.scoped(integration.ScopeMaps, s.handleIntReference)))
 	mux.HandleFunc("GET "+p+"/events", s.withApp(s.handleIntEvents))
 	mux.HandleFunc("GET "+p+"/library", s.withApp(s.scoped(integration.ScopeLibrary, s.handleIntLibrary)))
+	mux.HandleFunc("GET "+p+"/ask", s.withApp(s.scoped(integration.ScopeAsk, s.handleIntAsk)))
 	mux.HandleFunc("GET "+p+"/files/{id}/{name}", s.withApp(s.scoped(integration.ScopeLibrary, s.handleIntFile)))
 	mux.HandleFunc("GET "+p+"/", func(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusNotFound, "unknown integration endpoint")
@@ -67,6 +75,12 @@ func (s *Server) registerIntegration(mux *http.ServeMux) {
 	// Short links created by programs with documents:share.
 	mux.HandleFunc("GET /s/{code}", s.handleShareLink)
 }
+
+// integrationOpenAPI describes API v1 (OpenAPI 3.1). A test keeps it in
+// step with the routes registered above.
+//
+//go:embed openapi/integration-v1.json
+var integrationOpenAPI []byte
 
 func buildVersion() string { return buildinfo.Version }
 
@@ -197,7 +211,7 @@ func (s *Server) handleIntSearch(w http.ResponseWriter, r *http.Request, a *app.
 			}
 		}
 	}
-	if hits, _, err := a.Docs.Search(r.Context(), q, limit); err == nil {
+	if hits, _, err := a.Docs.SearchIn(r.Context(), q, docs.SharedDocuments, 0, limit); err == nil {
 		for _, h := range hits {
 			// The host user's own documents are private.
 			c, ok := cits[h.ResourceID]

@@ -128,6 +128,16 @@
           "family": "arcana.us-cfr47-part95",
           "priority": 3,
           "reason": "Rules for family radios (FRS/GMRS) in the US."
+        },
+        {
+          "family": "arcana.us-army-fm-4-25-11",
+          "priority": 2,
+          "reason": "Plain-language first aid (U.S. Army, public domain)."
+        },
+        {
+          "family": "arcana.us-army-atp-3-50-21",
+          "priority": 2,
+          "reason": "Survival skills: water, shelter, fire, signaling."
         }
       ]
     },
@@ -311,6 +321,21 @@
           ],
           "priority": 3,
           "reason": "General encyclopedia."
+        },
+        {
+          "family": "arcana.us-army-atp-3-50-21",
+          "priority": 2,
+          "reason": "Survival in cold, desert, tropical and maritime settings."
+        },
+        {
+          "family": "arcana.us-army-fm-3-25-26",
+          "priority": 2,
+          "reason": "Map and compass navigation."
+        },
+        {
+          "family": "arcana.us-army-fm-4-25-11",
+          "priority": 3,
+          "reason": "First aid in the field."
         }
       ]
     },

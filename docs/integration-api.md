@@ -52,12 +52,14 @@ can be revoked at any time.
 | `maps:read` | `GET /maps/reference` |
 | `location:read` | `GET /location`; location events |
 | `library:read` | `GET /library`, `GET /files/{id}/{name}` (another Arcana copying); library events |
+| `assistant:ask` | `GET /ask` (uses the host's processor; works only while the owner has the assistant turned on) |
 
 ## Endpoints
 
 | Method and path | Result |
 |---|---|
 | `GET /` | `{api, version, server, authenticated, scopes, granted?, library?}` — no token needed |
+| `GET /openapi.json` | This API as an OpenAPI 3.1 document — no token needed |
 | `POST /pair`, `GET /pair/{id}?secret=` | Pairing, above |
 | `GET /search?q=&limit=` | `{query, results:[{resourceId, title, snippet, path, citation}]}`; snippets are plain text; the host's private documents are never included |
 | `GET /documents/{resource}/text?path=&max=` | `{article:{title, path, text, truncated}, citation}`; `path` as returned by search (archives) or a file name (documents); `max` bytes, default 20 000, at most 2 MiB |
@@ -68,6 +70,7 @@ can be revoked at any time.
 | `GET /events` | Server-sent events: `hello`, `location` (at most once a second), `library` (installed content changed); keep-alive comments every 30 s |
 | `GET /library` | `{library:{id,label}, resources:[{resource, version, files:[{name,size,sha256}], verification, unverified}]}` |
 | `GET /files/{id}/{name}` | The installed file, with `Range` support, `ETag` and `X-Arcana-SHA256` |
+| `GET /ask?q=` | `{question, answer, notFound, unsupported, cited:[n], passages:[{n, resourceId, path, kind, title, text, score, source, citation}], truncated}`: an answer written from the library's passages, citing them as `[n]`; `notFound` when the library does not cover the question (no model runs then). Can take a minute on a small computer; 429 when several questions are already being answered, 503 when the assistant is off |
 
 Errors are JSON `{"error": "..."}` with 400 (bad input), 401 (no or
 invalid token), 403 (scope missing), 404 (not found or no position).

@@ -1,0 +1,1016 @@
+{
+ "openapi": "3.1.0",
+ "info": {
+  "title": "Arcana integration API",
+  "version": "1",
+  "description": "Lets other programs on this computer or the local network use an Arcana library: search with citations, article text, short links, position, map references, library events, copying resources between libraries, and questions answered from the library. Every call except discovery and pairing needs a bearer token the library's operator approved, with the scopes it lists. Nothing in v1 changes the library. Field names are stable within v1; fields are only added. See docs/integration-api.md.",
+  "license": {
+   "name": "GPL-3.0-or-later",
+   "identifier": "GPL-3.0-or-later"
+  }
+ },
+ "servers": [
+  {
+   "url": "/api/integration/v1",
+   "description": "This Arcana (application port, default 8470)"
+  }
+ ],
+ "tags": [
+  {
+   "name": "pairing"
+  },
+  {
+   "name": "content"
+  },
+  {
+   "name": "location"
+  },
+  {
+   "name": "library"
+  },
+  {
+   "name": "assistant"
+  }
+ ],
+ "components": {
+  "securitySchemes": {
+   "token": {
+    "type": "http",
+    "scheme": "bearer",
+    "description": "Token from pairing (POST /pair). Scopes: search:read, documents:read, documents:share, maps:read, location:read, library:read, assistant:ask."
+   }
+  },
+  "responses": {
+   "Unauthorized": {
+    "description": "No or invalid token",
+    "content": {
+     "application/json": {
+      "schema": {
+       "$ref": "#/components/schemas/Error"
+      }
+     }
+    }
+   },
+   "Forbidden": {
+    "description": "The token lacks the scope",
+    "content": {
+     "application/json": {
+      "schema": {
+       "$ref": "#/components/schemas/Error"
+      }
+     }
+    }
+   }
+  },
+  "schemas": {
+   "Error": {
+    "type": "object",
+    "properties": {
+     "error": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "error"
+    ]
+   },
+   "Warning": {
+    "type": "object",
+    "properties": {
+     "kind": {
+      "type": "string",
+      "enum": [
+       "medical",
+       "regulatory",
+       "license",
+       "outdated",
+       "content"
+      ]
+     },
+     "text": {
+      "type": "string"
+     }
+    }
+   },
+   "Citation": {
+    "type": "object",
+    "description": "Where text came from; travels with every excerpt.",
+    "properties": {
+     "resourceId": {
+      "type": "string"
+     },
+     "title": {
+      "type": "string"
+     },
+     "publisher": {
+      "type": "string"
+     },
+     "edition": {
+      "type": "string"
+     },
+     "published": {
+      "type": "string"
+     },
+     "sourceUrl": {
+      "type": "string"
+     },
+     "license": {
+      "type": "object",
+      "properties": {
+       "id": {
+        "type": "string"
+       },
+       "name": {
+        "type": "string"
+       },
+       "url": {
+        "type": "string"
+       },
+       "attribution": {
+        "type": "string"
+       }
+      }
+     },
+     "warnings": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/Warning"
+      }
+     }
+    }
+   },
+   "SearchResult": {
+    "type": "object",
+    "properties": {
+     "resourceId": {
+      "type": "string"
+     },
+     "title": {
+      "type": "string"
+     },
+     "snippet": {
+      "type": "string"
+     },
+     "path": {
+      "type": "string"
+     },
+     "citation": {
+      "$ref": "#/components/schemas/Citation"
+     }
+    }
+   },
+   "Article": {
+    "type": "object",
+    "properties": {
+     "title": {
+      "type": "string"
+     },
+     "path": {
+      "type": "string"
+     },
+     "text": {
+      "type": "string"
+     },
+     "truncated": {
+      "type": "boolean"
+     }
+    }
+   },
+   "Passage": {
+    "type": "object",
+    "properties": {
+     "n": {
+      "type": "integer"
+     },
+     "resourceId": {
+      "type": "string"
+     },
+     "path": {
+      "type": "string"
+     },
+     "kind": {
+      "type": "string"
+     },
+     "title": {
+      "type": "string"
+     },
+     "text": {
+      "type": "string"
+     },
+     "score": {
+      "type": "number"
+     },
+     "citation": {
+      "$ref": "#/components/schemas/Citation"
+     }
+    }
+   }
+  }
+ },
+ "paths": {
+  "/": {
+   "get": {
+    "summary": "Discover the API and check a token",
+    "tags": [
+     "pairing"
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "api": {
+           "type": "string"
+          },
+          "version": {
+           "type": "integer"
+          },
+          "server": {
+           "type": "string"
+          },
+          "authenticated": {
+           "type": "boolean"
+          },
+          "scopes": {
+           "type": "array"
+          },
+          "granted": {
+           "type": "array"
+          },
+          "library": {
+           "type": "object"
+          }
+         }
+        }
+       }
+      }
+     }
+    },
+    "description": "No token needed; with a valid token, also the client, granted scopes and library.",
+    "security": []
+   }
+  },
+  "/pair": {
+   "post": {
+    "summary": "Request a token (the operator approves it in Settings → Integrations)",
+    "tags": [
+     "pairing"
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "id": {
+           "type": "string"
+          },
+          "code": {
+           "type": "string"
+          },
+          "secret": {
+           "type": "string"
+          },
+          "expires": {
+           "type": "string"
+          }
+         }
+        }
+       }
+      }
+     }
+    },
+    "security": [],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "required": [
+         "name",
+         "scopes"
+        ],
+        "properties": {
+         "name": {
+          "type": "string"
+         },
+         "scopes": {
+          "type": "array",
+          "items": {
+           "type": "string"
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/pair/{id}": {
+   "get": {
+    "summary": "Poll a pairing request",
+    "tags": [
+     "pairing"
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "status": {
+           "type": "string",
+           "enum": [
+            "pending",
+            "approved",
+            "denied",
+            "expired",
+            "unknown"
+           ]
+          },
+          "token": {
+           "type": "string"
+          }
+         }
+        }
+       }
+      }
+     }
+    },
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "description": "Pairing ID",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "secret",
+      "in": "query",
+      "required": true,
+      "description": "Secret returned by POST /pair",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "security": []
+   }
+  },
+  "/search": {
+   "get": {
+    "summary": "Search installed archives and documents",
+    "tags": [
+     "content"
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "query": {
+           "type": "string"
+          },
+          "results": {
+           "type": "array",
+           "items": {
+            "$ref": "#/components/schemas/SearchResult"
+           }
+          },
+          "error": {
+           "type": "string"
+          }
+         }
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "description": "Snippets are plain text; the host's private documents are never included.",
+    "parameters": [
+     {
+      "name": "q",
+      "in": "query",
+      "required": true,
+      "description": "Words to search for (at most 200 characters)",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "description": "Results (1–50, default 10)",
+      "schema": {
+       "type": "integer"
+      }
+     }
+    ],
+    "security": [
+     {
+      "token": [
+       "search:read"
+      ]
+     }
+    ]
+   }
+  },
+  "/documents/{resource}/text": {
+   "get": {
+    "summary": "Read an article or document as text",
+    "tags": [
+     "content"
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "article": {
+           "$ref": "#/components/schemas/Article"
+          },
+          "citation": {
+           "$ref": "#/components/schemas/Citation"
+          }
+         }
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "parameters": [
+     {
+      "name": "resource",
+      "in": "path",
+      "required": true,
+      "description": "Resource ID",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "path",
+      "in": "query",
+      "required": false,
+      "description": "Path from search (archives) or a file name (documents)",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "max",
+      "in": "query",
+      "required": false,
+      "description": "Bytes (default 20 000, at most 2 MiB)",
+      "schema": {
+       "type": "integer"
+      }
+     }
+    ],
+    "security": [
+     {
+      "token": [
+       "documents:read"
+      ]
+     }
+    ]
+   }
+  },
+  "/documents/{resource}/excerpt": {
+   "get": {
+    "summary": "An excerpt with a one-line attribution",
+    "tags": [
+     "content"
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "title": {
+           "type": "string"
+          },
+          "path": {
+           "type": "string"
+          },
+          "excerpt": {
+           "type": "string"
+          },
+          "truncated": {
+           "type": "boolean"
+          },
+          "footer": {
+           "type": "string"
+          },
+          "citation": {
+           "$ref": "#/components/schemas/Citation"
+          }
+         }
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "parameters": [
+     {
+      "name": "resource",
+      "in": "path",
+      "required": true,
+      "description": "Resource ID",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "path",
+      "in": "query",
+      "required": false,
+      "description": "As for text",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "max",
+      "in": "query",
+      "required": false,
+      "description": "Bytes (default 1 200, at most 4 000)",
+      "schema": {
+       "type": "integer"
+      }
+     }
+    ],
+    "security": [
+     {
+      "token": [
+       "documents:read"
+      ]
+     }
+    ]
+   }
+  },
+  "/share/excerpt": {
+   "post": {
+    "summary": "Create a 24-hour link to an article for people on this network",
+    "tags": [
+     "content"
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "code": {
+           "type": "string"
+          },
+          "path": {
+           "type": "string"
+          },
+          "urls": {
+           "type": "array",
+           "items": {
+            "type": "string"
+           }
+          },
+          "expires": {
+           "type": "string"
+          }
+         }
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "security": [
+     {
+      "token": [
+       "documents:share"
+      ]
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "required": [
+         "resource",
+         "path"
+        ],
+        "properties": {
+         "resource": {
+          "type": "string"
+         },
+         "path": {
+          "type": "string"
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/location": {
+   "get": {
+    "summary": "Current GPS position",
+    "tags": [
+     "location"
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "state": {
+           "type": "string"
+          },
+          "stale": {
+           "type": "boolean"
+          },
+          "age": {
+           "type": "number"
+          },
+          "source": {
+           "type": "string"
+          },
+          "fix": {
+           "type": "object"
+          },
+          "maidenhead": {
+           "type": "string"
+          }
+         }
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "description": "404 with {state} when there is no position.",
+    "security": [
+     {
+      "token": [
+       "location:read"
+      ]
+     }
+    ]
+   }
+  },
+  "/maps/reference": {
+   "get": {
+    "summary": "Coordinates in several formats, grid locator and nearby places",
+    "tags": [
+     "location"
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "decimal": {
+           "type": "string"
+          },
+          "dms": {
+           "type": "string"
+          },
+          "ddm": {
+           "type": "string"
+          },
+          "maidenhead": {
+           "type": "string"
+          },
+          "nearby": {
+           "type": "array",
+           "items": {
+            "type": "object"
+           }
+          }
+         }
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "parameters": [
+     {
+      "name": "lat",
+      "in": "query",
+      "required": true,
+      "description": "Latitude",
+      "schema": {
+       "type": "number"
+      }
+     },
+     {
+      "name": "lon",
+      "in": "query",
+      "required": true,
+      "description": "Longitude",
+      "schema": {
+       "type": "number"
+      }
+     }
+    ],
+    "security": [
+     {
+      "token": [
+       "maps:read"
+      ]
+     }
+    ]
+   }
+  },
+  "/events": {
+   "get": {
+    "summary": "Server-sent events: hello, location (location:read), library (documents:read or library:read)",
+    "tags": [
+     "location"
+    ],
+    "security": [
+     {
+      "token": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "text/event-stream; keep-alive comments every 30 s",
+      "content": {
+       "text/event-stream": {
+        "schema": {
+         "type": "string"
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     }
+    }
+   }
+  },
+  "/library": {
+   "get": {
+    "summary": "Installed resources with file hashes (another Arcana copying)",
+    "tags": [
+     "library"
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "library": {
+           "type": "object"
+          },
+          "resources": {
+           "type": "array",
+           "items": {
+            "type": "object"
+           }
+          }
+         }
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "security": [
+     {
+      "token": [
+       "library:read"
+      ]
+     }
+    ]
+   }
+  },
+  "/files/{id}/{name}": {
+   "get": {
+    "summary": "An installed file (Range, ETag and X-Arcana-SHA256 supported)",
+    "tags": [
+     "library"
+    ],
+    "security": [
+     {
+      "token": [
+       "library:read"
+      ]
+     }
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "description": "Resource ID",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "name",
+      "in": "path",
+      "required": true,
+      "description": "File name",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "The file",
+      "content": {
+       "application/octet-stream": {
+        "schema": {
+         "type": "string",
+         "format": "binary"
+        }
+       }
+      }
+     },
+     "206": {
+      "description": "Part of the file"
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    }
+   }
+  },
+  "/ask": {
+   "get": {
+    "summary": "Answer a question from the library, with the passages it cites",
+    "tags": [
+     "assistant"
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "question": {
+           "type": "string"
+          },
+          "answer": {
+           "type": "string"
+          },
+          "notFound": {
+           "type": "boolean"
+          },
+          "unsupported": {
+           "type": "boolean"
+          },
+          "cited": {
+           "type": "array",
+           "items": {
+            "type": "integer"
+           }
+          },
+          "passages": {
+           "type": "array",
+           "items": {
+            "$ref": "#/components/schemas/Passage"
+           }
+          },
+          "truncated": {
+           "type": "boolean"
+          }
+         }
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthorized"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     }
+    },
+    "description": "Uses this computer's processor; may take a minute. notFound means the library does not cover the question (no model runs). 429 when several questions are being answered; 503 when the assistant is off.",
+    "parameters": [
+     {
+      "name": "q",
+      "in": "query",
+      "required": true,
+      "description": "The question (at most 1000 characters)",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "security": [
+     {
+      "token": [
+       "assistant:ask"
+      ]
+     }
+    ]
+   }
+  },
+  "/openapi.json": {
+   "get": {
+    "summary": "This document",
+    "tags": [
+     "pairing"
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      }
+     }
+    },
+    "security": []
+   }
+  }
+ }
+}

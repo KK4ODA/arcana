@@ -53,6 +53,11 @@ packaging/             launcher and first-run readme for release bundles
 packaging/appliance/   appliance installer, systemd units, captive-portal rules (docs/appliance.md)
 internal/sdnotify/     systemd readiness and watchdog notifications
 internal/integration/  integration API tokens, scopes and pairing
+internal/kolibri/      Kolibri server client: status, course search, links
+internal/mesh/         Meshtastic radio (listen only): stream framing, protobuf decoding, node table
+internal/translate/    translation language packs (Mozilla's model registry), decompression and verification
+internal/drugs/        FDA drug label reference: openFDA provider, download and build, queries, situations
+internal/assistant/    question answering: retrieval, prompts, citation checks, llamafile engine, evaluation
 scripts/               fetch-kiwix.sh, package.sh
 test/acceptance/       offline acceptance test and UI tripwire
 testdata/sample/       CC0 sample ZIM
@@ -78,8 +83,8 @@ docs/design/14-radio-and-integrations.md.
 | `GET /api/session` | Version, setup mode, admin flag, content port, token (local only) |
 | `GET /api/status` | Dashboard: installed, storage plan, offline readiness, updates, sharing, GPS, attention |
 | `GET /api/library`, `DELETE /api/library/{id}` | Installed resources; remove |
-| `GET /api/search?q=` | Search everything installed: `titles` (articles whose titles match, best first), `groups` (each archive's first five full-text matches and its total), `titleOnly` (archives without a full-text index), `documents`, and `resources`. `results`/`total` flatten the groups. |
-| `GET /api/search?q=&resource=ID&start=N&limit=N` | One source, a page at a time: an archive (`results`, `total`, `titles`, `notSearchable`), a book or document resource, or `@user` for your own documents (`documents`, `documentTotal`) |
+| `GET /api/search?q=` | Search everything installed: `titles` (articles whose titles match, best first), `groups` (each archive's first five full-text matches and its total), `titleOnly` (archives without a full-text index), `documents` (your own documents only on the host), and `resources`. `results`/`total` flatten the groups. |
+| `GET /api/search?q=&resource=ID&start=N&limit=N` | One source, a page at a time: an archive (`results`, `total`, `titles`, `notSearchable`), a book or document resource, or `@user` for your own documents (`documents`, `documentTotal`; host only, 403 for network clients) |
 | `GET /api/suggest?q=[&resource=ID]` | Article titles completing what was typed, in one archive or all of them |
 | `GET /api/roads` | Installed road networks (for directions) |
 | `GET /api/route?points=lat,lon;lat,lon[;…]&mode=car\|bike\|foot` | A route through the points on the smallest installed road network covering them: distance, duration, `[lon, lat]` geometry, steps with instructions, warnings |
@@ -88,6 +93,7 @@ docs/design/14-radio-and-integrations.md.
 | `POST /api/catalog/refresh` | Refresh enabled providers |
 | `GET /api/presets`, `POST /api/recommend` | Collections and explained recommendations |
 | `POST /api/storage/plan` | Capacity plan for a selection |
+| `POST /api/welcome/plan` `{presets, language, tier, extras}` | Getting started: a download plan across collections within a size tier (`essential`, `standard`, `comprehensive`), extras and their dependencies first |
 | `GET/POST /api/downloads`, `POST /api/downloads/{id}/{pause,resume,cancel}`, `DELETE /api/downloads/{id}` | Queue |
 | `GET /api/updates` | Installed vs. latest known editions |
 | `GET /api/check?full=1` | Integrity check |
@@ -117,6 +123,19 @@ docs/design/14-radio-and-integrations.md.
 | `GET/POST /api/integrations`, `DELETE /api/integrations/{id}`, `POST /api/integrations/pair/{id}/{approve,deny}` | Integration tokens and pairing requests (host only) |
 | `GET/POST /api/peers`, `DELETE /api/peers/{id}`, `GET /api/peers/{id}/library`, `POST /api/peers/{id}/pull` | Other Arcana libraries to copy from (host only) |
 | `/api/integration/v1/*` | Versioned API for other programs: see [integration-api.md](integration-api.md) |
+| `GET /api/assistant` | Assistant status: enabled, backend, readiness, engine state, installed models, `canAsk` for this client |
+| `GET /api/assistant/ask?q=&retrieval=0\|1` | Server-sent events while a question is answered: `status`, `passages`, `token`, `done` (`{result}`), `error`. Host and administrators; network clients only when allowed in settings |
+| `POST /api/assistant/test` `{url, apiKey}`, `POST /api/assistant/stop` | List an OpenAI-compatible server's models; stop the local engine |
+| `GET /api/drugs` | Drug label reference: installed, statistics, situations, citation |
+| `GET /api/drugs/search?q=&kind=otc\|rx&homeopathic=1&limit=&offset=` | Products grouped by active ingredients, best match first |
+| `GET /api/drugs/group?key=&kind=` | Products of one group |
+| `GET /api/drugs/label/{id}` | One label: product and sections in display order |
+| `GET /api/drugs/situations?s=slug,slug&kind=otc\|all` | Groups whose labels cover all the situations, then each one |
+| `GET /api/translate` | Translation engine and installed language packs (files with their URLs, directions) |
+| `GET /translate/engine.wasm`, `GET /translate/model/{resource}/{file}` | Engine and model files, decompressed and checked against Mozilla's hash (ETag = decompressed SHA-256) |
+| `GET /api/updates/schedule`, `POST /api/updates/schedule/run` | Automatic content updates: settings, state, window; check and queue now |
+| `GET /api/kolibri`, `GET /api/kolibri/search?q=`, `POST /api/kolibri/test` `{url}` | Kolibri server status; its courses matching a search; check an address |
+| `GET /api/mesh` | Meshtastic radio: state, nodes (positions, last heard, hops, SNR) and text messages; host and administrators, or everyone when shared |
 | `GET /api/gps`, `GET /api/gps/stream` | Position status; server-sent events (host only unless sharing is on) |
 | `GET /api/gps/ports` | Serial ports (host only) |
 | `GET/POST /api/gps/waypoints`, `DELETE /api/gps/waypoints/{id}` | Waypoints |

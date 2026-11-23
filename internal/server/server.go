@@ -17,6 +17,7 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"net/url"
 	"path"
 	"path/filepath"
 	"strconv"
@@ -25,17 +26,21 @@ import (
 	"time"
 
 	"github.com/KK4ODA/arcana/internal/app"
+	"github.com/KK4ODA/arcana/internal/assistant"
 	"github.com/KK4ODA/arcana/internal/auth"
 	"github.com/KK4ODA/arcana/internal/buildinfo"
 	"github.com/KK4ODA/arcana/internal/catalog"
 	"github.com/KK4ODA/arcana/internal/content"
+	"github.com/KK4ODA/arcana/internal/docs"
 	"github.com/KK4ODA/arcana/internal/hotspot"
 	"github.com/KK4ODA/arcana/internal/kiwix"
+	"github.com/KK4ODA/arcana/internal/kolibri"
 	"github.com/KK4ODA/arcana/internal/library"
 	"github.com/KK4ODA/arcana/internal/mdns"
 	"github.com/KK4ODA/arcana/internal/storage"
 	"github.com/KK4ODA/arcana/internal/store"
 	"github.com/KK4ODA/arcana/internal/tlsutil"
+	"github.com/KK4ODA/arcana/internal/translate"
 	"github.com/KK4ODA/arcana/internal/web"
 )
 
@@ -65,9 +70,11 @@ type Server struct {
 	app *app.App
 
 	sessions *auth.Sessions
-	limiter  *auth.Limiter
-	nw       netState
-	shares   shareStore
+	// translateCheck remembers translation files already verified.
+	translateCheck translate.Verifier
+	limiter        *auth.Limiter
+	nw             netState
+	shares         shareStore
 
 	appSrv     *http.Server
 	contentSrv *http.Server
@@ -214,12 +221,15 @@ func (s *Server) appHandler() http.Handler {
 	mux.HandleFunc("POST /api/catalog/refresh", s.withApp(s.handleRefresh))
 	mux.HandleFunc("GET /api/presets", s.withApp(s.handlePresets))
 	mux.HandleFunc("POST /api/recommend", s.withApp(s.handleRecommend))
+	mux.HandleFunc("POST /api/welcome/plan", s.withApp(s.handleWelcomePlan))
 	mux.HandleFunc("POST /api/storage/plan", s.withApp(s.handlePlan))
 	mux.HandleFunc("GET /api/downloads", s.withApp(s.handleDownloads))
 	mux.HandleFunc("POST /api/downloads", s.withApp(s.handleEnqueue))
 	mux.HandleFunc("POST /api/downloads/{id}/{action}", s.withApp(s.handleJobAction))
 	mux.HandleFunc("DELETE /api/downloads/{id}", s.withApp(s.handleJobRemove))
 	mux.HandleFunc("GET /api/updates", s.withApp(s.handleUpdates))
+	mux.HandleFunc("GET /api/updates/schedule", s.adminOnly(s.withApp(s.handleUpdateSchedule)))
+	mux.HandleFunc("POST /api/updates/schedule/run", s.withApp(s.handleUpdateScheduleRun))
 	mux.HandleFunc("GET /api/check", s.adminOnly(s.withApp(s.handleCheck)))
 	mux.HandleFunc("GET /api/settings", s.adminOnly(s.withApp(s.handleGetSettings)))
 	mux.HandleFunc("PUT /api/settings", s.withApp(s.handlePutSettings))
@@ -233,6 +243,13 @@ func (s *Server) appHandler() http.Handler {
 	s.registerAuth(mux)
 	s.registerNetwork(mux)
 	s.registerIntegration(mux)
+	s.registerAssistant(mux)
+	s.registerDrugs(mux)
+	s.registerTranslate(mux)
+	mux.HandleFunc("GET /api/mesh", s.withApp(s.handleMesh))
+	mux.HandleFunc("GET /api/kolibri", s.withApp(s.handleKolibri))
+	mux.HandleFunc("GET /api/kolibri/search", s.withApp(s.handleKolibriSearch))
+	mux.HandleFunc("POST /api/kolibri/test", s.withApp(s.handleKolibriTest))
 	mux.HandleFunc("GET /api/", func(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusNotFound, "unknown API endpoint")
 	})
@@ -443,6 +460,10 @@ func (s *Server) installedViews(r *http.Request, a *app.App) ([]installedView, e
 		if b, ok := books[in.ResourceID]; ok {
 			v.OpenPath = b.ContentPath
 			v.Search = res.Capabilities.FullTextSearch
+		} else if res.Format == "gguf" || res.Format == "llamafile" || res.Format == "druglabels" ||
+			res.Format == "bergamot" || res.Format == "translation-models" {
+			// Models and the engine are used by the assistant; the drug
+			// reference has its own view.
 		} else if res.Format != "zim" && len(in.Files) > 0 {
 			v.OpenPath = "/files/" + in.ResourceID + "/" + path.Base(in.Files[0].Path)
 		} else if res.Format == "zim" {
@@ -487,6 +508,14 @@ func (s *Server) handleSearch(w http.ResponseWriter, r *http.Request, a *app.App
 		return
 	}
 	resource := qv.Get("resource")
+	// The host user's own documents are private to the computer running
+	// Arcana (like their files and previews); network clients, signed-in
+	// administrators included, search only installed resources.
+	private := isLocal(r)
+	if resource == docs.UserDocuments && !private {
+		writeError(w, http.StatusForbidden, "Your documents are only available on the computer running Arcana.")
+		return
+	}
 	start := clampInt(qv.Get("start"), 0, 0, 10000)
 	limit := clampInt(qv.Get("limit"), 25, 1, 100)
 	resp := map[string]any{"query": q, "results": []kiwix.Result{}, "total": 0}
@@ -559,7 +588,11 @@ func (s *Server) handleSearch(w http.ResponseWriter, r *http.Request, a *app.App
 		resp["results"], resp["total"] = nonNil(results), total
 	}
 	// Documents (PDF, EPUB, user files) from Arcana's own index.
-	if hits, n, err := a.Docs.Search(r.Context(), q, 25); err == nil {
+	scope := ""
+	if !private {
+		scope = docs.SharedDocuments
+	}
+	if hits, n, err := a.Docs.SearchIn(r.Context(), q, scope, 0, 25); err == nil {
 		resp["documents"], resp["documentTotal"] = nonNil(hits), n
 	}
 	// Titles of installed resources also match, so documents without a
@@ -863,8 +896,15 @@ func (s *Server) handleCheck(w http.ResponseWriter, r *http.Request, a *app.App)
 	writeJSON(w, 200, rep)
 }
 
+// keptSecret stands in for a saved secret in settings sent to the
+// browser; sending it back leaves the secret unchanged.
+const keptSecret = "(saved)"
+
 func (s *Server) handleGetSettings(w http.ResponseWriter, r *http.Request, a *app.App) {
 	set := a.Lib.Settings.Get()
+	if set.Assistant.APIKey != "" {
+		set.Assistant.APIKey = keptSecret
+	}
 	vol, _ := storage.Stat(a.Lib.Root)
 	writeJSON(w, 200, map[string]any{
 		"settings":       set,
@@ -877,21 +917,28 @@ func (s *Server) handleGetSettings(w http.ResponseWriter, r *http.Request, a *ap
 
 func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *app.App) {
 	var req struct {
-		ReserveBytes                 *int64                `json:"reserveBytes"`
-		MaxConcurrentDownloads       *int                  `json:"maxConcurrentDownloads"`
-		BandwidthLimit               *int64                `json:"bandwidthLimit"`
-		AllowPrivateNetworkDownloads *bool                 `json:"allowPrivateNetworkDownloads"`
-		ShareOnLAN                   *bool                 `json:"shareOnLan"`
-		KiwixEnabled                 *bool                 `json:"kiwixEnabled"`
-		GutenbergEnabled             *bool                 `json:"gutenbergEnabled"`
-		AutoRefreshHours             *int                  `json:"autoRefreshHours"`
-		UpdateURL                    *string               `json:"updateUrl"`
-		AutoUpdateCheck              *bool                 `json:"autoUpdateCheck"`
-		Feeds                        *[]library.FeedSource `json:"feeds"`
-		MapsEnabled                  *bool                 `json:"mapsEnabled"`
-		MDNS                         *bool                 `json:"mdns"`
-		MDNSName                     *string               `json:"mdnsName"`
-		GPS                          *library.GPSSettings  `json:"gps"`
+		ReserveBytes                 *int64                         `json:"reserveBytes"`
+		MaxConcurrentDownloads       *int                           `json:"maxConcurrentDownloads"`
+		BandwidthLimit               *int64                         `json:"bandwidthLimit"`
+		AllowPrivateNetworkDownloads *bool                          `json:"allowPrivateNetworkDownloads"`
+		ShareOnLAN                   *bool                          `json:"shareOnLan"`
+		KiwixEnabled                 *bool                          `json:"kiwixEnabled"`
+		GutenbergEnabled             *bool                          `json:"gutenbergEnabled"`
+		OpenFDAEnabled               *bool                          `json:"openfdaEnabled"`
+		AutoRefreshHours             *int                           `json:"autoRefreshHours"`
+		UpdateURL                    *string                        `json:"updateUrl"`
+		AutoUpdateCheck              *bool                          `json:"autoUpdateCheck"`
+		Feeds                        *[]library.FeedSource          `json:"feeds"`
+		MapsEnabled                  *bool                          `json:"mapsEnabled"`
+		MDNS                         *bool                          `json:"mdns"`
+		MDNSName                     *string                        `json:"mdnsName"`
+		GPS                          *library.GPSSettings           `json:"gps"`
+		Assistant                    *library.AssistantSettings     `json:"assistant"`
+		ContentUpdates               *library.ContentUpdateSettings `json:"contentUpdates"`
+		WelcomeDone                  *bool                          `json:"welcomeDone"`
+		Mesh                         *library.MeshSettings          `json:"mesh"`
+		Links                        *[]library.LinkTile            `json:"links"`
+		Kolibri                      *library.KolibriSettings       `json:"kolibri"`
 	}
 	if err := readJSON(r, &req); err != nil {
 		writeError(w, 400, err.Error())
@@ -928,6 +975,9 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *ap
 		if req.GutenbergEnabled != nil {
 			st.Catalog.GutenbergEnabled = *req.GutenbergEnabled
 		}
+		if req.OpenFDAEnabled != nil {
+			st.Catalog.OpenFDAEnabled = *req.OpenFDAEnabled
+		}
 		if req.AutoRefreshHours != nil {
 			if *req.AutoRefreshHours < 0 || *req.AutoRefreshHours > 24*90 {
 				return errors.New("automatic refresh interval must be between 0 (off) and 2160 hours")
@@ -945,7 +995,7 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *ap
 			st.Updates.AutoCheck = *req.AutoUpdateCheck
 		}
 		if req.Feeds != nil {
-			seen := map[string]bool{"arcana": true, "kiwix": true, "gutenberg": true, "maps": true, "local": true}
+			seen := map[string]bool{"arcana": true, "kiwix": true, "gutenberg": true, "maps": true, "local": true, "roads": true, "openfda": true}
 			for _, f := range *req.Feeds {
 				probe := catalog.Resource{ID: f.ID + ".x", Provider: f.ID, Title: "x", Version: "1", Format: "pdf",
 					Files: []catalog.File{{Name: "x.pdf", Mirrors: []catalog.Mirror{{URL: f.URL}}}}}
@@ -993,6 +1043,83 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *ap
 			}
 			st.GPS = g
 		}
+		if req.Kolibri != nil {
+			u := strings.TrimSpace(req.Kolibri.URL)
+			if u != "" {
+				var err error
+				if u, err = kolibri.Normalize(u); err != nil {
+					return err
+				}
+			}
+			st.Kolibri.URL = u
+		}
+		if req.Links != nil {
+			links := *req.Links
+			if len(links) > 24 {
+				return errors.New("at most 24 links")
+			}
+			for i := range links {
+				l := &links[i]
+				l.Title, l.URL, l.Description = strings.TrimSpace(l.Title), strings.TrimSpace(l.URL), strings.TrimSpace(l.Description)
+				u, err := url.Parse(l.URL)
+				if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" || u.User != nil {
+					return fmt.Errorf("link %q: use an http:// or https:// address", l.Title)
+				}
+				if l.Title == "" || len(l.Title) > 60 || len(l.Description) > 200 || len(l.URL) > 500 {
+					return errors.New("each link needs a title (at most 60 characters) and a short description")
+				}
+			}
+			st.Links = links
+		}
+		if req.Mesh != nil {
+			ms := *req.Mesh
+			switch ms.Source {
+			case "", "tcp", "serial":
+			default:
+				return fmt.Errorf("unknown radio connection %q", ms.Source)
+			}
+			if len(ms.Address) > 200 || len(ms.SerialPort) > 200 || ms.BaudRate < 0 || ms.BaudRate > 921600 {
+				return errors.New("invalid radio settings")
+			}
+			if ms.Source == "tcp" && strings.TrimSpace(ms.Address) == "" {
+				return errors.New("enter the radio's address, for example 192.168.1.40")
+			}
+			ms.Address = strings.TrimSpace(ms.Address)
+			st.Mesh = ms
+		}
+		if req.WelcomeDone != nil {
+			st.WelcomeDone = *req.WelcomeDone
+		}
+		if req.ContentUpdates != nil {
+			cu := *req.ContentUpdates
+			if cu.WindowStart < 0 || cu.WindowStart > 23 || cu.WindowEnd < 0 || cu.WindowEnd > 23 {
+				return errors.New("update hours must be between 0 and 23")
+			}
+			if cu.EveryDays < 1 || cu.EveryDays > 90 {
+				return errors.New("check interval must be between 1 and 90 days")
+			}
+			if cu.BandwidthLimit < 0 {
+				return errors.New("bandwidth limit cannot be negative")
+			}
+			if cu.Only != "all" && cu.Only != "important" {
+				return errors.New(`updates to install must be "all" or "important"`)
+			}
+			st.ContentUpdates = cu
+		}
+		if req.Assistant != nil {
+			as := *req.Assistant
+			as.URL = strings.TrimSpace(as.URL)
+			if as.APIKey == keptSecret {
+				as.APIKey = st.Assistant.APIKey
+			}
+			if err := app.AssistantSettingsValid(as); err != nil {
+				return err
+			}
+			if as.Backend == "external" {
+				as.URL, _ = assistant.NormalizeBaseURL(as.URL)
+			}
+			st.Assistant = as
+		}
 		return nil
 	})
 	if err != nil {
@@ -1000,8 +1127,22 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *ap
 		return
 	}
 	a.Downloads.ApplySettings()
+	if req.ContentUpdates != nil {
+		// Applies the window at once (pausing or resuming scheduled
+		// downloads) without waiting for the next minute.
+		go a.ApplyContentUpdateSettings()
+	}
 	if req.GPS != nil {
 		a.ApplyGPSSettings()
+	}
+	if req.Mesh != nil {
+		go a.ApplyMeshSettings()
+	}
+	if req.Assistant != nil {
+		a.ApplyAssistantSettings()
+	}
+	if next.Assistant.APIKey != "" {
+		next.Assistant.APIKey = keptSecret
 	}
 	if req.MDNS != nil || req.MDNSName != nil {
 		s.applyMDNS()
@@ -1084,3 +1225,113 @@ func (s *Server) SetApp(a *app.App) {
 
 // App returns the open library, if any.
 func (s *Server) App() *app.App { return s.current() }
+
+func (s *Server) handleUpdateSchedule(w http.ResponseWriter, r *http.Request, a *app.App) {
+	writeJSON(w, http.StatusOK, a.ContentUpdateStatus())
+}
+
+// handleUpdateScheduleRun checks for content updates now and queues what
+// fits, whatever the window.
+func (s *Server) handleUpdateScheduleRun(w http.ResponseWriter, r *http.Request, a *app.App) {
+	if a.Lib.ReadOnly {
+		writeError(w, http.StatusConflict, "The library is read-only.")
+		return
+	}
+	ctx, cancel := context.WithTimeout(r.Context(), 12*time.Minute)
+	defer cancel()
+	ev := a.RunContentUpdatesNow(ctx)
+	writeJSON(w, http.StatusOK, map[string]any{"result": ev, "status": a.ContentUpdateStatus()})
+}
+
+// handleWelcomePlan turns the Getting started choices into a download plan.
+func (s *Server) handleWelcomePlan(w http.ResponseWriter, r *http.Request, a *app.App) {
+	var req app.WelcomeRequest
+	if err := readJSON(r, &req); err != nil {
+		writeError(w, 400, err.Error())
+		return
+	}
+	plan, err := a.PlanWelcome(r.Context(), req)
+	if err != nil {
+		writeError(w, 400, err.Error())
+		return
+	}
+	writeJSON(w, 200, plan)
+}
+
+// handleMesh reports the Meshtastic radio's nodes and messages: to the
+// host and administrators, and to network clients only when shared.
+func (s *Server) handleMesh(w http.ResponseWriter, r *http.Request, a *app.App) {
+	set := a.Lib.Settings.Get().Mesh
+	if !s.isAdmin(r) && !set.ShareWithClients {
+		writeJSON(w, http.StatusOK, map[string]any{"state": "hidden", "nodes": []any{}, "messages": []any{}, "shared": false})
+		return
+	}
+	st := a.Mesh.Status()
+	writeJSON(w, http.StatusOK, map[string]any{"state": st.State, "error": st.Error, "source": st.Source, "myNode": st.MyNode,
+		"nodes": st.Nodes, "messages": st.Messages, "since": st.Since, "shared": set.ShareWithClients})
+}
+
+// Kolibri: courses from a Kolibri server appear in library search. The
+// server is contacted by Arcana (the browser's policy allows no other
+// origins), only at the address the owner entered.
+
+func (s *Server) handleKolibri(w http.ResponseWriter, r *http.Request, a *app.App) {
+	u := a.Lib.Settings.Get().Kolibri.URL
+	resp := map[string]any{"configured": u != "", "url": u}
+	if u != "" {
+		ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+		defer cancel()
+		info, err := (&kolibri.Client{BaseURL: u}).Info(ctx)
+		resp["reachable"] = err == nil
+		if err != nil {
+			resp["error"] = err.Error()
+		} else {
+			resp["version"], resp["deviceName"] = info.Version, info.DeviceName
+		}
+	}
+	writeJSON(w, http.StatusOK, resp)
+}
+
+func (s *Server) handleKolibriSearch(w http.ResponseWriter, r *http.Request, a *app.App) {
+	u := a.Lib.Settings.Get().Kolibri.URL
+	q := strings.TrimSpace(r.URL.Query().Get("q"))
+	if u == "" {
+		writeError(w, http.StatusNotFound, "No Kolibri server is set up.")
+		return
+	}
+	if q == "" || len(q) > 200 {
+		writeError(w, http.StatusBadRequest, "enter a search term")
+		return
+	}
+	ctx, cancel := context.WithTimeout(r.Context(), 8*time.Second)
+	defer cancel()
+	items, err := (&kolibri.Client{BaseURL: u}).Search(ctx, q, clampInt(r.URL.Query().Get("limit"), 8, 1, 30))
+	if err != nil {
+		writeJSON(w, http.StatusOK, map[string]any{"items": []kolibri.Item{}, "error": err.Error(), "url": u})
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"items": items, "url": u})
+}
+
+func (s *Server) handleKolibriTest(w http.ResponseWriter, r *http.Request, a *app.App) {
+	var req struct {
+		URL string `json:"url"`
+	}
+	if err := readJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid request")
+		return
+	}
+	u, err := kolibri.Normalize(req.URL)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	ctx, cancel := context.WithTimeout(r.Context(), 8*time.Second)
+	defer cancel()
+	info, err := (&kolibri.Client{BaseURL: u}).Info(ctx)
+	if err != nil {
+		writeError(w, http.StatusBadGateway, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, info)
+}

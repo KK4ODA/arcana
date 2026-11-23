@@ -3,6 +3,128 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
+## Unreleased
+
+### Added
+- **Ask your library.** A new *Ask* view (and an *Ask* button beside the
+  library search) answers questions in plain words from your installed
+  archives and documents. Arcana searches the library, picks the passages
+  that cover the question, and a language model writes a short answer that
+  cites them; each passage is listed with its resource, edition, date,
+  license and warnings, and links to the page it came from. When nothing in
+  the library covers the question closely enough, Arcana says so and no
+  model runs. Answers appear as they are written; an answer that cites
+  nothing is flagged, and medical sources bring the medical notice with
+  them. Off until you turn it on in *Settings → Assistant*, where you choose
+  where the model runs:
+  - **On this computer:** download a model from *Discover → Question
+    answering* (Qwen2.5 0.5B, 0.5 GB, for small computers; Granite 3.3 2B,
+    1.5 GB, recommended; Qwen3 4B, 2.5 GB, for 8 GB of memory or more). The
+    llamafile engine (370 MB) is queued with the first model. It runs only
+    while answering, only on this computer, and stops when idle.
+  - **On a model server:** Ollama, LM Studio or another OpenAI-compatible
+    server, on this computer or another (*Test connection* lists its
+    models).
+  Devices on the network can ask only if you allow it; they never see your
+  own documents. Optional instructions ("Use metric units") and a
+  strictness setting tune the answers. See ADR-0021.
+- **Medicines.** An FDA drug label reference (*Discover → Medicine and
+  public health → FDA drug labels*, after refreshing the catalog): the
+  labels of about 265,000 US medicines from openFDA, public domain. A new
+  *Medicines* view searches by brand, generic name or ingredient, grouping
+  products that share active ingredients; *By situation* lists
+  non-prescription medicines whose labels cover one or several of 34
+  everyday problems (medicines covering all of them first); a label page
+  shows uses, directions, warnings, interactions, overdose and side
+  effects; *Compare warnings* puts two labels' warnings side by side (it
+  does not check interactions, and says so). The view asks you to
+  acknowledge that it is label text, not medical advice, once per browser.
+  Arcana downloads the 14 parts openFDA publishes (1.8 GB, resumable),
+  checks each zip entry's CRC, keeps the parts a reader needs, stores
+  identical labels once and builds an indexed reference of about 1 GB on
+  your computer. New FDA exports appear in Updates. See ADR-0022.
+- **Translate archive pages offline.** Download a language pack
+  (*Discover → Encyclopedias and reference → Translation: …*, 55 languages,
+  about 50 MB each; the 1.2 MB engine comes with the first one), then
+  choose *Translate to …* in the reader. Pages are translated on the device
+  reading them by Mozilla's Bergamot engine, the one Firefox uses, so it
+  works on phones and on every computer Arcana runs on, without internet.
+  Links and emphasis are kept, letters and codes are left alone, the choice
+  follows you from page to page, and *Original language* restores the
+  text. Between two languages other than English, Arcana goes through
+  English when both packs are installed. Files are checked against
+  Mozilla's published hashes before and after decompression. See ADR-0023.
+- **Meshtastic on the map.** Connect a Meshtastic radio (*Settings → Maps
+  and position → Meshtastic radio*: a radio on Wi-Fi or Ethernet, or on
+  USB) and the map shows every node it hears that reports a position, with
+  its name, when it was last heard, hops, signal and altitude; nodes
+  without a position and the text messages on the radio's channels are
+  listed beside the map. Arcana only listens: it asks the radio for its
+  node list and keeps the connection alive, and never transmits on the
+  mesh. Network clients see the mesh only if you allow it.
+- **Kolibri courses in search.** If you run a Kolibri server (Khan Academy
+  and other courses, with progress for each learner), enter its address in
+  *Settings → Kolibri (courses)*: its courses appear in library search
+  after the library's own results, and the Library page links to it.
+  Kolibri stays a separate program; see docs/kolibri.md.
+- **U.S. Army field manuals.** Three public-domain manuals cleared for
+  public release join the catalog as searchable PDFs: *FM 4-25.11 First
+  Aid*, *ATP 3-50.21 Survival* (2018) and *FM 3-25.26 Map Reading and Land
+  Navigation*. They are offered in the Family Emergency Preparedness and
+  Remote Expedition collections, with notes on what has changed since they
+  were written. (The 2013 TC 3-25.26 was left out: its distribution is
+  restricted to government agencies.)
+- **Links on the Library page.** Add shortcuts to other services on your
+  network (a Kolibri server, a radio's web page, a file share) in
+  *Settings → Links on the Library page*; everyone sees them on the Library
+  page.
+- **OpenAPI description of the integration API** at
+  `/api/integration/v1/openapi.json` (OpenAPI 3.1), for client generators
+  and API tools. A test keeps it in step with the routes.
+- **Getting started.** A new library opens a short guided setup (and the
+  Library view offers it until you finish or skip it): choose topics (the
+  nine collections) and tools (maps of your area, directions, the medicines
+  reference, question answering, translation), your language and region,
+  and how much of the drive to use (Essential, about 8 GB; Standard, about
+  40 GB; Comprehensive, everything above the reserve). Arcana's recommender
+  fits editions to that budget across all chosen topics, adds what models
+  need (the engine), shows the plan on the storage bar with each item's
+  reason, and queues it in one click.
+- **Automatic content updates** (Updates → Automatic updates; off by
+  default). Choose the hours they may run, how often the catalogs are
+  checked, whether to take every update or only medical and regulatory
+  references, and a bandwidth cap. Inside the window Arcana refreshes the
+  catalogs, queues the updates that fit above your reserved free space
+  (most important and smallest first), and pauses those downloads when the
+  window closes, continuing in the next one. Without internet it tries
+  again later. *Check and queue now* runs a check at once. As with every
+  update, the installed edition is replaced only once the new one is
+  verified.
+- **`arcana ask`** answers a question in the terminal; `arcana ask --eval
+  FILE [--with-model]` scores retrieval (and answers) against a set of
+  questions with known sources.
+- **Integration API:** `GET /api/integration/v1/ask` with the new scope
+  `assistant:ask` lets paired programs ask questions and receive the answer
+  with its passages and citations.
+- **Dependencies.** Queueing a resource also queues the resources it needs
+  (a model queues the engine that runs it).
+
+### Fixed
+- **Your own documents no longer appear in searches from other devices.**
+  Library search returned the names and text snippets of the documents you
+  added (*Your documents*) to every device on the network, although the
+  files themselves could only be opened on the computer running Arcana.
+  Now devices on the network, signed-in administrators included, search
+  only installed resources, and searching *Your documents* from them is
+  refused; the computer running Arcana still finds everything. The
+  integration API and the assistant already left your documents out for
+  other devices; they now also stop them from taking up result slots.
+
+### Changed
+- Text extracted from web pages keeps the cells of a table row on one line
+  ("QTH | Location of the station"), so document search snippets and the
+  assistant read tables correctly.
+
 ## 0.7.0 — 2026-11-23
 
 Directions and turn-by-turn navigation without internet, search inside the

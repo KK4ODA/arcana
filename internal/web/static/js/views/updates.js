@@ -16,6 +16,8 @@ export async function updatesView(main) {
         ...remote.filter((p) => p.lastError).map((p) => h('span', { class: 'badge warn', title: p.lastError, style: 'margin-left:6px' }, `${p.name}: last attempt failed`))),
       h('p', { class: 'small muted' }, 'An update downloads the new edition next to the current one and verifies it. The current edition stays usable until the new one is verified; only then is it replaced. Your notes and documents are stored separately and are never touched.'))));
 
+  if (canChange) main.appendChild(await schedulePanel());
+
   const ups = r.updates;
   const checks = new Map();
   const total = h('span', { class: 'muted small' });
@@ -55,4 +57,63 @@ export async function updatesView(main) {
     } catch (e) { toast(e.message); }
   }
   return null;
+}
+
+// schedulePanel sets up automatic content updates: a time window, an
+// interval, which updates to take and a bandwidth cap.
+async function schedulePanel() {
+  let st;
+  try { st = await api.get('/api/updates/schedule'); } catch (_) { return h('div'); }
+  const c = st.settings;
+  const hours = (sel) => h('select', null, Array.from({ length: 24 }, (_, i) => h('option', { value: i, selected: i === sel }, `${String(i).padStart(2, '0')}:00`)));
+  const on = h('input', { type: 'checkbox', checked: c.enabled });
+  const from = hours(c.windowStart);
+  const to = hours(c.windowEnd);
+  const every = h('select', null, [[1, 'every day'], [7, 'every week'], [30, 'every month']].map(([v, t]) => h('option', { value: v, selected: v === c.everyDays }, t)));
+  const only = h('select', null, [['all', 'all updates that fit'], ['important', 'only medical and regulatory references']].map(([v, t]) => h('option', { value: v, selected: v === c.only }, t)));
+  const cap = h('input', { type: 'number', min: 0, step: 0.1, value: c.bandwidthLimit ? (c.bandwidthLimit / 1e6).toFixed(1) : '', placeholder: 'no extra limit', style: 'width:120px' });
+  const statusEl = h('div', { class: 'small muted' });
+  const logEl = h('ul', { class: 'small update-log' });
+  const render = (x) => {
+    const s = x.state;
+    statusEl.textContent = !x.settings.enabled ? 'Off. Updates are only downloaded when you choose them below.'
+      : `${x.inWindow ? 'The update window is open now.' : `Next window opens ${new Date(x.nextWindow).toLocaleString()}.`} `
+        + `Last check: ${fmtAgo(s.lastCheck && !s.lastCheck.startsWith('0001') ? s.lastCheck : '')}. Next check: ${new Date(x.nextCheck).toLocaleString()}.`
+        + (s.jobs.length ? ` ${s.jobs.length} scheduled download${s.jobs.length === 1 ? '' : 's'} in progress${x.inWindow ? '' : ' (paused until the window opens)'}.` : '');
+    clear(logEl);
+    for (const ev of s.log.slice(0, 5)) {
+      logEl.appendChild(h('li', null, `${new Date(ev.time).toLocaleString()}: ${ev.message}`,
+        ev.queued?.length ? ` (${ev.queued.join(', ')})` : '', ev.skipped?.length ? h('span', { class: 'faint' }, ` Skipped: ${ev.skipped.join(', ')}.`) : null));
+    }
+  };
+  render(st);
+  const body = () => ({ enabled: on.checked, windowStart: parseInt(from.value, 10), windowEnd: parseInt(to.value, 10), everyDays: parseInt(every.value, 10),
+    only: only.value, bandwidthLimit: cap.value === '' ? 0 : Math.round(parseFloat(cap.value) * 1e6) });
+  const save = h('button', { class: 'primary', onclick: async () => {
+    try {
+      await api.put('/api/settings', { contentUpdates: body() });
+      toast('Saved.');
+      setTimeout(async () => { try { render(await api.get('/api/updates/schedule')); } catch (_) { /* ignore */ } }, 800);
+    } catch (e) { toast(e.message); }
+  } }, 'Save');
+  const now = h('button', { onclick: async () => {
+    now.disabled = true;
+    now.textContent = 'Checking…';
+    try {
+      const res = await api.post('/api/updates/schedule/run');
+      render(res.status);
+      toast(res.result.message || 'Done.');
+    } catch (e) { toast(e.message); }
+    now.disabled = false;
+    now.textContent = 'Check and queue now';
+  } }, 'Check and queue now');
+  return h('section', { class: 'panel' },
+    h('header', null, h('h2', null, 'Automatic updates')),
+    h('div', { class: 'body' },
+      h('p', null, h('label', { class: 'inline' }, on, 'Keep installed content up to date automatically')),
+      h('p', { class: 'row' }, 'Between ', from, ' and ', to, ', check the catalogs ', every, ' and download ', only, '.'),
+      h('p', { class: 'row' }, 'While scheduled updates download, limit all downloads to ', cap, ' MB/s.'),
+      h('p', { class: 'small muted' }, 'Off by default: Arcana makes no network requests unless you ask or turn this on. Outside the hours you choose, scheduled downloads pause and continue in the next window. Without internet, Arcana simply tries again later. Updates that would eat into your reserved free space are skipped, and medical and regulatory references go first.'),
+      h('div', { class: 'row' }, save, now),
+      statusEl, logEl));
 }

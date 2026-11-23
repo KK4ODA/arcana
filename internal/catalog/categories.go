@@ -20,6 +20,7 @@ const (
 	CategoryScience      = "science-technical"
 	CategoryHistory      = "history-culture"
 	CategoryPersonal     = "personal-community"
+	CategoryAssistant    = "assistant"
 )
 
 // CategoryInfo describes a category for the UI.
@@ -46,6 +47,7 @@ var Categories = []CategoryInfo{
 	{CategoryScience, "Scientific and technical reference"},
 	{CategoryHistory, "History, culture and literature"},
 	{CategoryPersonal, "Personal and community documents"},
+	{CategoryAssistant, "Question answering (local AI models)"},
 }
 
 var categorySet = func() map[string]bool {

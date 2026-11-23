@@ -3,7 +3,9 @@
 Reviewed 2026-11-22. Facts were checked against each project's repository,
 license files, release pages and documentation; Kiwix behavior was also
 verified by running kiwix-serve 3.8.2 locally. Items that could not be
-verified are marked *unverified*.
+verified are marked *unverified*. Project NOMAD was re-reviewed on
+2026-11-23 against its source (commit `f633b36`, 17 Nov 2026, after
+v1.35.1).
 
 ## Summary
 
@@ -23,6 +25,12 @@ layer and mostly unsolved at the **library-management** layer.
 - **Maps** are converging on PMTiles + MapLibre (IIAB, PrepperPi and
   N.O.M.A.D. all use them). Routing and geocoding offline remain heavy (Java
   or PostgreSQL stacks) with no portable solution.
+- **Project NOMAD** is the most active and most visible of the appliances.
+  Its lead is breadth: local AI over the library, an FDA drug reference,
+  offline article translation, Kolibri courses and a Docker app catalog.
+  Its gaps are the ones above: x86-64 Debian only, size-only download
+  checks, no authentication, and maps without place search, GPS or
+  routing.
 
 Arcana's opportunity is the layer in between: a portable, storage-aware,
 integrity-checked library manager and server that uses Kiwix for reading and
@@ -33,21 +41,25 @@ Raspberry Pi.
 
 | | Kiwix (tools, libs, readers) | Internet-in-a-Box | PrepperPi | Kolibri | Prepper Disk | Project N.O.M.A.D. |
 |---|---|---|---|---|---|---|
-| **What it is** | ZIM format, reader apps, kiwix-serve, OPDS catalog | Ansible-built Linux "learning hotspot" bundling ~20 apps | Pi appliance: AP, captive portal, Kiwix, maps, admin UI | Offline learning platform with curricula and progress sync | Commercial Pi appliance with preloaded 512 GB card | Docker bundle: Kiwix, Kolibri, maps, local LLM |
+| **What it is** | ZIM format, reader apps, kiwix-serve, OPDS catalog | Ansible-built Linux "learning hotspot" bundling ~20 apps | Pi appliance: AP, captive portal, Kiwix, maps, admin UI | Offline learning platform with curricula and progress sync | Commercial Pi appliance with preloaded 512 GB card | Docker-orchestrated server ("Command Center", TypeScript/AdonisJS, MySQL, Redis): Kiwix, Kolibri, maps, local LLM + RAG, app catalog |
 | **License** | libzim GPL-2.0-or-later; libkiwix, kiwix-tools, desktop, JS GPL-3.0-or-later | GPL-2.0 (GPL-2.0-or-later encouraged) | MIT-0 | MIT | Proprietary (runs Kiwix) | Apache-2.0 |
 | **Latest release** | kiwix-tools 3.8.2 (2026-03-02); libzim 9.8.2 (2026-08-12); desktop 2.5.1 (2026-01-04) | release-8.2 (2024-12-31) + daily images (2026-11-20) | v1.1.0 (2026-09-16) | v0.19.5 (2026-07-13) | n/a | v1.35.1 (2026-10-05) |
 | **Activity** | Very active; commits Nov 2026 | Active (418 commits since Aug 2026) | One main author | Active, funded org | Commercial | Active |
 | **Fully offline** | Yes | Yes (after install) | Yes | Yes | Yes | Yes (after install) |
-| **Windows** | Readers yes; kiwix-serve 3.8.1 (no 3.8.2 build) | No | No | Yes | No | No |
+| **Windows** | Readers yes; kiwix-serve 3.8.1 (no 3.8.2 build) | No | No | Yes | No | WSL2 only (community-supported) |
 | **macOS** | Yes | No | No | Yes | No | No |
-| **Linux / Pi** | Yes, incl. ARM | Yes (Pi Zero 2 W–5, x86) | Pi 4/5 only | Yes | Pi 4 | Debian/Ubuntu |
-| **Runs from removable media** | Desktop "portable" mode; kiwix-serve tarballs are self-contained | No (installs into OS) | No (SD image) | Partially (`KOLIBRI_HOME`) | Card is the system | No |
-| **Programmatic API** | OPDS v2, `/search`, `/raw` (public); `/content`, `/suggest` (private) | Per-app only | FastAPI admin | REST, "subject to change" | None public | Per-app |
-| **Content catalog** | 3,682 ZIMs, metalinks with SHA-256 | Pulls Kiwix, Kolibri, maps | Kiwix + regional maps | Kolibri Studio channels | Fixed curated set | Kiwix + presets |
-| **Storage planning** | No | No | Partial (bundle sizes) | No | n/a (fixed card) | No |
-| **Integrity verification** | meta4 hashes published; readers do not verify | Not systematic | Signed SD images | Channel checksums | Unknown | Unknown |
-| **Maps** | `maps_*` ZIMs only | PMTiles + MapLibre, Nominatim, terrain | PMTiles + tileserver-gl-light | No | NA/EU/Oceania street maps | ProtoMaps |
+| **Linux / Pi** | Yes, incl. ARM | Yes (Pi Zero 2 W–5, x86) | Pi 4/5 only | Yes | Pi 4 | Debian/Ubuntu x86-64; ARM only via community forks |
+| **Runs from removable media** | Desktop "portable" mode; kiwix-serve tarballs are self-contained | No (installs into OS) | No (SD image) | Partially (`KOLIBRI_HOME`) | Card is the system | No (data path is a host-level Docker mount) |
+| **Programmatic API** | OPDS v2, `/search`, `/raw` (public); `/content`, `/suggest` (private) | Per-app only | FastAPI admin | REST, "subject to change" | None public | Full REST API with generated OpenAPI 3.1; **no authentication** |
+| **Content catalog** | 3,682 ZIMs, metalinks with SHA-256 | Pulls Kiwix, Kolibri, maps | Kiwix + regional maps | Kolibri Studio channels | Fixed curated set | Full Kiwix catalog + curated categories in Essential/Standard/Comprehensive tiers, US-region map packs, openFDA |
+| **Storage planning** | No | No | Partial (bundle sizes) | No | n/a (fixed card) | Partial (projected usage bar; 2 GiB headroom check) |
+| **Integrity verification** | meta4 hashes published; readers do not verify | Not systematic | Signed SD images | Channel checksums | Unknown | Size only: strips `.meta4`, compares byte count; no hash check |
+| **Maps** | `maps_*` ZIMs only | PMTiles + MapLibre, Nominatim, terrain | PMTiles + tileserver-gl-light | No | NA/EU/Oceania street maps | Protomaps viewer, markers with notes; coordinate jump only (no place search, no routing) |
 | **GPS** | No | No | No | No | No | No |
+| **Local AI over the library** | No | *unverified* | *unverified* | No | *unverified* | Yes: Ollama or OpenAI-compatible, Qdrant vectors of ZIMs and uploads, citations |
+| **Offline translation** | No | *unverified* | *unverified* | No | *unverified* | Yes: Bergamot app, x86-64 only |
+| **Drug reference** | WikiMed and medicine ZIMs | Via Kiwix ZIMs | Via Kiwix ZIMs | No | Via Kiwix ZIMs | openFDA labels: by drug, by situation, compare warnings |
+| **Authentication / LAN safety** | None (read-only server) | *unverified* | *unverified* | User accounts | *unverified* | None; anyone on the LAN can install or delete |
 | **Suitability as a dependency** | High: stable formats, public API, long-lived project | Patterns only | Patterns only (permissive) | Optional sidecar for courses | Benchmark only | Patterns only |
 
 ## Per-project notes
@@ -111,6 +123,63 @@ Raspberry Pi.
 - Several of those sources are **non-commercial** (iFixit and Khan Academy
   are CC BY-NC-SA; TED is CC BY-NC-ND with a restrictive usage policy).
   Arcana's catalog therefore records redistribution status per resource.
+
+### Project NOMAD
+Reviewed against source on 2026-11-23 (Apache-2.0; v1.35.1, 5 Oct 2026,
+plus unreleased fixes). Crosstalk Solutions' YouTube audience gives it the
+largest community of the projects here.
+- **Shape:** a web "Command Center" that installs and supervises Docker
+  containers on a Debian/Ubuntu x86-64 host. Base install about 5 GB;
+  about 25 GB with the AI assistant. Root install; external drives are
+  left to the host's Docker mounts.
+- **Strengths worth matching:**
+  - *AI assistant:* chat over Ollama (or any OpenAI-compatible server,
+    possibly on another host) with retrieval from uploaded documents and
+    every ZIM, embedded into Qdrant with `nomic-embed-text`. v1.35 added
+    citations (source and date), a relevance floor that lets retrieval
+    decline, per-chat retrieval, a lightweight model for titles and query
+    rewriting, vision attachments, a `nomad.md` instructions file and a
+    frozen-corpus evaluation harness. Embedding a large ZIM "can take
+    several hours"; the UI asks for confirmation when the vectors would
+    use more than 10% of free disk.
+  - *Drug Reference:* openFDA drug labels (about 1.7 GB download, 8–10 GB
+    indexed in MySQL); search grouped by active ingredient, "by situation"
+    lookup from a curated condition list, side-by-side label warnings, a
+    disclaimer the reader must acknowledge.
+  - *Translated Library:* Bergamot (Firefox Translations) in a container
+    that rewrites Kiwix pages; 50 languages, 45–140 MB each, CPU only.
+    x86-64 only (intgemm), no AVX means no translation.
+  - *Automatic updates:* opt-in, per kind (core, apps, content), inside a
+    time window, after a cool-off, never across a major version; content
+    has its own overnight window and a bandwidth cap.
+  - *Easy Setup:* capabilities → map regions → curated category tiers
+    (Essential / Standard / Comprehensive) → review.
+  - *Supply Depot:* one-click Docker apps (Kolibri, CyberChef, FlatNotes,
+    Calibre-Web, Stirling PDF, Meshtastic Web, MeshCore Web, Vaultwarden,
+    Jellyfin, …) and user-added link tiles for unmanaged services.
+- **Constraints:**
+  - Downloads are checked for size only (`download_integrity.ts`): the
+    metalink is discarded, so a corrupted file of the right size is
+    accepted.
+  - No authentication at all; the README recommends network-level
+    controls. The REST API that can install, delete and run containers is
+    open to the LAN.
+  - Maps: viewer, markers and coordinate entry. No place search, GPS,
+    tracks or routing. Map packs are US census divisions plus a country
+    picker.
+  - Meshtastic Web is served over plain HTTP, so browsers refuse its USB
+    and Bluetooth connections; only radios on Wi-Fi work.
+  - No transfer between installations other than uploading one ZIM
+    through the browser, unchecked against the catalog.
+  - The hardware benchmark submits results to a public leaderboard
+    (opt-in, HMAC-signed).
+- **Adopted into Arcana's plan (2026-11-23):** local question answering
+  built on Arcana's existing search rather than a vector store
+  (15-local-ai.md), an openFDA drug reference, scheduled content updates,
+  offline translation, a first-run wizard, Meshtastic on the map, link
+  tiles, an OpenAPI document for the integration API, and optional
+  Kolibri. Not adopted: the Docker app catalog, the benchmark
+  leaderboard and bundled general-purpose apps.
 
 ### Others
 - **Kiwix Hotspot / offspot** (GPL-3.0; base image 1.5.0, 2026-11-09):

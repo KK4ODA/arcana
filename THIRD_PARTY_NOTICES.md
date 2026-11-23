@@ -24,6 +24,7 @@ review"); the list here matches `go.mod` at the time of writing.
 | go.bug.st/serial (serial ports) | v1.8.0 | BSD-3-Clause |
 | golang.org/x/crypto (Argon2id) | v0.59.0 | BSD-3-Clause |
 | rsc.io/qr (QR codes) | v0.2.0 | BSD-3-Clause |
+| github.com/klauspost/compress (zstd decoder, for translation models) | v1.20.3 | BSD-3-Clause (zstd package) |
 | Go standard library | 1.26 | BSD-3-Clause |
 
 The full license texts are in each module's source, available from
@@ -38,7 +39,9 @@ The full license texts are in each module's source, available from
 | Noto Sans glyphs (Regular, Medium, Italic; PBF ranges) | basemaps-assets | SIL Open Font License 1.1 (`static/maps/fonts/OFL.txt`) | https://github.com/protomaps/basemaps-assets |
 | Map sprites (icons), derived from tangrams/icons | basemaps-assets v4 | MIT (`static/maps/sprites/LICENSE.txt`) | https://github.com/protomaps/basemaps-assets |
 
-`tools/fetch-map-assets.sh` reproduces these files from their sources.
+| Bergamot loader (`static/vendor/bergamot/bergamot-translator.js`, v0.6.0+eea6e5a8, from Firefox's release branch) | v0.6.0 | MPL-2.0 (`static/vendor/bergamot/LICENSE.txt`); unmodified | https://github.com/mozilla/translations |
+
+`tools/fetch-map-assets.sh` reproduces the map files from their sources.
 
 ## Programs distributed alongside Arcana (not linked)
 
@@ -66,6 +69,10 @@ file and the build it belongs to.
 | Arcana sample library (`testdata/sample/`) | CC0-1.0 — written for this project |
 | 47 CFR Parts 95 and 97 (bundled catalog entries; downloaded, not shipped) | US federal government work, public domain in the US |
 | Map region boundaries used to build `internal/maps/regions.json` (bounding boxes only) | Natural Earth, public domain |
+| llamafile 0.10.6 model engine (bundled catalog entry; downloaded on request, not shipped) | Apache-2.0 (Mozilla.ai); bundles llama.cpp (MIT) and Cosmopolitan Libc (ISC) |
+| Question-answering models: Qwen2.5 0.5B Instruct, Granite 3.3 2B Instruct, Qwen3 4B (bundled catalog entries; downloaded on request, not shipped) | Apache-2.0 (Qwen team, Alibaba Cloud; IBM) |
+| Bergamot translation engine (WebAssembly) and Mozilla's translation models (downloaded on request, not shipped) | MPL-2.0 (Mozilla) |
+| FDA drug labels (openFDA downloads; built into a reference on request, not shipped) | Public domain, CC0 1.0 (U.S. Food and Drug Administration); label text written by the manufacturers |
 | Map data downloaded through the maps provider (not shipped) | © OpenStreetMap contributors, ODbL 1.0; basemap by Protomaps; includes Natural Earth (public domain) and ESA WorldCover land cover (CC BY 4.0). The place-name index Arcana builds from it is a derivative database under the ODbL. |
 
 Reference content downloaded through the catalog is licensed by its

@@ -24,12 +24,23 @@ type Settings struct {
 	// LAN, loopback or link-local addresses. Off by default so a remote
 	// catalog cannot make Arcana send requests to devices on the local
 	// network.
-	AllowPrivateNetworkDownloads bool            `json:"allowPrivateNetworkDownloads"`
-	Server                       ServerSettings  `json:"server"`
-	Catalog                      CatalogSettings `json:"catalog"`
-	Updates                      UpdateSettings  `json:"updates"`
-	Maps                         MapSettings     `json:"maps"`
-	GPS                          GPSSettings     `json:"gps"`
+	AllowPrivateNetworkDownloads bool                  `json:"allowPrivateNetworkDownloads"`
+	Server                       ServerSettings        `json:"server"`
+	Catalog                      CatalogSettings       `json:"catalog"`
+	Updates                      UpdateSettings        `json:"updates"`
+	Maps                         MapSettings           `json:"maps"`
+	GPS                          GPSSettings           `json:"gps"`
+	Assistant                    AssistantSettings     `json:"assistant"`
+	ContentUpdates               ContentUpdateSettings `json:"contentUpdates"`
+	Mesh                         MeshSettings          `json:"mesh"`
+	// Kolibri is a Kolibri server whose courses appear in library search.
+	Kolibri KolibriSettings `json:"kolibri"`
+	// Links are shortcuts on the Library page to other services on the
+	// network (a Kolibri server, a radio's web page, a file share).
+	Links []LinkTile `json:"links,omitempty"`
+	// WelcomeDone is set once the person finished or skipped Getting
+	// started, so it is not offered again.
+	WelcomeDone bool `json:"welcomeDone"`
 	// Peers are other Arcana libraries on the network to copy from.
 	Peers []PeerSource `json:"peers,omitempty"`
 }
@@ -56,6 +67,88 @@ type MapSettings struct {
 	// RoadsURL is the index of OSM extracts road networks are built from.
 	// Empty means Geofabrik's.
 	RoadsURL string `json:"roadsUrl,omitempty"`
+}
+
+// ContentUpdateSettings schedule automatic updates of installed content.
+// Off by default: Arcana makes no network requests unless asked.
+type ContentUpdateSettings struct {
+	Enabled bool `json:"enabled"`
+	// WindowStart and WindowEnd are hours (0–23, local time) between which
+	// scheduled checks and downloads run; the window may wrap past
+	// midnight, and equal hours mean all day.
+	WindowStart int `json:"windowStart"`
+	WindowEnd   int `json:"windowEnd"`
+	// EveryDays is how often the catalogs are checked (1, 7 or 30).
+	EveryDays int `json:"everyDays"`
+	// BandwidthLimit caps downloads (bytes per second) while scheduled
+	// updates run; 0 uses the general limit.
+	BandwidthLimit int64 `json:"bandwidthLimit"`
+	// Only is "all" or "important" (medical and regulatory material).
+	Only string `json:"only"`
+}
+
+// AssistantSettings control question answering over the library. It is
+// off until the owner turns it on, and never downloads a model by itself.
+type AssistantSettings struct {
+	Enabled bool `json:"enabled"`
+	// Backend is "local" (a model from the library, run by the llamafile
+	// engine on this computer) or "external" (an OpenAI-compatible server
+	// such as Ollama or LM Studio, possibly on another computer).
+	Backend string `json:"backend"`
+	// Model is the installed model resource used by the local backend;
+	// empty picks the largest installed model.
+	Model string `json:"model,omitempty"`
+	// URL, ExternalModel and APIKey configure the external backend. The
+	// key is stored in clear text because Arcana must send it.
+	URL           string `json:"url,omitempty"`
+	ExternalModel string `json:"externalModel,omitempty"`
+	APIKey        string `json:"apiKey,omitempty"`
+	// Instructions are added to the model's instructions (for example
+	// "Use metric units" or "Answer in Spanish").
+	Instructions string `json:"instructions,omitempty"`
+	// RelevanceFloor (0.1–1) is how much of a question the best passage
+	// must cover before the model is asked; higher is stricter.
+	RelevanceFloor float64 `json:"relevanceFloor"`
+	// Passages is the most passages given to the model (1–12).
+	Passages int `json:"passages"`
+	// ContextSize is the local model's context window in tokens.
+	ContextSize int `json:"contextSize"`
+	// Threads used by the local engine; 0 lets it choose.
+	Threads int `json:"threads,omitempty"`
+	// IdleMinutes stops the local engine after this long unused, giving
+	// its memory back (0 means 10 minutes).
+	IdleMinutes int `json:"idleMinutes,omitempty"`
+	// NetworkClients lets devices on the network ask questions. Off by
+	// default: answers use this computer's processor and memory.
+	NetworkClients bool `json:"networkClients"`
+}
+
+// KolibriSettings name a Kolibri server (Learning Equality's offline
+// courses, such as Khan Academy). Empty URL: not used.
+type KolibriSettings struct {
+	URL string `json:"url,omitempty"`
+}
+
+// LinkTile is a shortcut to another service.
+type LinkTile struct {
+	Title       string `json:"title"`
+	URL         string `json:"url"`
+	Description string `json:"description,omitempty"`
+}
+
+// MeshSettings connect to a Meshtastic radio. Arcana only listens: it
+// shows the mesh's nodes on the map and its text messages, and never
+// transmits.
+type MeshSettings struct {
+	// Source is "" (off), "tcp" (a radio on Wi-Fi or Ethernet) or
+	// "serial" (USB).
+	Source     string `json:"source"`
+	Address    string `json:"address,omitempty"`
+	SerialPort string `json:"serialPort,omitempty"`
+	BaudRate   int    `json:"baudRate,omitempty"`
+	// ShareWithClients shows nodes and messages to network clients. Off
+	// by default: positions of people on the mesh are personal data.
+	ShareWithClients bool `json:"shareWithClients"`
 }
 
 // GPSSettings select a position source. Arcana only reads positions; it
@@ -108,9 +201,15 @@ type CatalogSettings struct {
 	KiwixEnabled bool   `json:"kiwixEnabled"`
 	KiwixURL     string `json:"kiwixUrl"`
 	// GutenbergEnabled imports Project Gutenberg's practical bookshelves.
-	GutenbergEnabled bool         `json:"gutenbergEnabled"`
-	GutenbergMirror  string       `json:"gutenbergMirror"`
-	Feeds            []FeedSource `json:"feeds"`
+	GutenbergEnabled bool   `json:"gutenbergEnabled"`
+	GutenbergMirror  string `json:"gutenbergMirror"`
+	// OpenFDAEnabled offers the FDA drug label reference (built from
+	// openFDA's downloads).
+	OpenFDAEnabled bool `json:"openfdaEnabled"`
+	// TranslationsEnabled offers translation language packs (Mozilla\'s
+	// models, as used by Firefox).
+	TranslationsEnabled bool         `json:"translationsEnabled"`
+	Feeds               []FeedSource `json:"feeds"`
 	// AutoRefreshHours, when positive, refreshes catalogs in the background
 	// while Arcana is running. Off by default: Arcana makes no network
 	// requests unless asked.
@@ -143,13 +242,18 @@ func DefaultSettings() Settings {
 		MaxConcurrentDownloads: 2,
 		Server:                 ServerSettings{Port: 8470, MDNS: true, Name: "arcana"},
 		Catalog: CatalogSettings{
-			KiwixEnabled:    true,
-			KiwixURL:        "https://library.kiwix.org",
-			GutenbergMirror: "https://gutenberg.pglaf.org",
+			KiwixEnabled:        true,
+			KiwixURL:            "https://library.kiwix.org",
+			GutenbergMirror:     "https://gutenberg.pglaf.org",
+			OpenFDAEnabled:      true,
+			TranslationsEnabled: true,
 		},
-		Updates: UpdateSettings{URL: "https://github.com/KK4ODA/arcana/releases/latest/download", AutoCheck: true},
-		Maps:    MapSettings{Enabled: true},
-		GPS:     GPSSettings{BaudRate: 4800, UDPPort: 10110, SimulatorSpeed: 1},
+		Updates:        UpdateSettings{URL: "https://github.com/KK4ODA/arcana/releases/latest/download", AutoCheck: true},
+		Maps:           MapSettings{Enabled: true},
+		GPS:            GPSSettings{BaudRate: 4800, UDPPort: 10110, SimulatorSpeed: 1},
+		ContentUpdates: ContentUpdateSettings{WindowStart: 1, WindowEnd: 6, EveryDays: 7, Only: "all"},
+		Assistant: AssistantSettings{Backend: "local", RelevanceFloor: 0.5, Passages: 5, ContextSize: 4096,
+			URL: "http://127.0.0.1:11434/v1"},
 	}
 }
 
@@ -215,6 +319,7 @@ func (s *SettingsStore) Get() Settings {
 	c := s.current
 	c.Catalog.Feeds = append([]FeedSource(nil), s.current.Catalog.Feeds...)
 	c.Peers = append([]PeerSource(nil), s.current.Peers...)
+	c.Links = append([]LinkTile(nil), s.current.Links...)
 	return c
 }
 

@@ -38,7 +38,8 @@ not yet code-signed (see [Status](#status)).
 - **Storage-aware selection.** Pick resources or start from nine
   collections ("Family Emergency Preparedness", "Amateur Radio Operator",
   …). Arcana recommends editions that fit your drive and explains each
-  choice.
+  choice. A new library starts with *Getting started*: topics, tools,
+  your area and a size tier become one download plan.
 - **Downloads you can trust.**
   - Large files download in pieces from several mirrors at once, with
     most of the work going to whichever mirror is fastest for you.
@@ -54,6 +55,24 @@ not yet code-signed (see [Status](#status)).
   source's best matches with its own count. The reader searches the open
   archive (titles complete as you type), and documents have a find bar.
   Provenance and warnings are shown above every page.
+- **Ask questions of your library** (optional, off until you turn it on).
+  Type a question in plain words; Arcana finds passages in your archives
+  and documents and a language model writes a short answer from them,
+  citing each passage with its edition, date and warnings. When nothing in
+  the library covers the question it says so instead of guessing. The
+  model runs on your computer through Mozilla.ai's llamafile (three openly
+  licensed models from 0.5 to 2.5 GB in the catalog), or on an Ollama or
+  LM Studio server you choose.
+- **Translate pages offline.** Install a language pack (about 50 MB each,
+  55 languages, Mozilla's models as used by Firefox) and the reader
+  translates archive pages to or from English on the device reading them,
+  and between other languages through English.
+- **Medicines reference.** The labels of about 265,000 medicines sold in
+  the US, from the FDA's openFDA downloads (public domain): search by name
+  or ingredient, find non-prescription medicines by situation (fever,
+  burns, diarrhea…), read a label's directions and warnings, and put two
+  labels' warnings side by side. Arcana builds it on your computer from
+  1.8 GB of downloads into about 1 GB.
 - **Your own material.** Bookmarks, favorites, notes and reading history.
   Add your own PDF, EPUB, HTML, Markdown and text files; they are indexed
   and searched with everything else.
@@ -66,12 +85,19 @@ not yet code-signed (see [Status](#status)).
   1 GB of data). Position
   from a USB or serial GPS receiver, gpsd, NMEA over UDP/TCP, a simulator
   or a fixed point; waypoints, track recording and GPX import and export.
+  A Meshtastic radio (Wi-Fi or USB) puts the mesh's nodes on the map and
+  lists its messages; Arcana only listens.
 - **Share on the local network** (`--lan`). Phones and other computers can
   browse and search; only the host computer can make changes. Other
   devices find the library as `arcana.local` or by scanning a QR code.
   HTTPS and password-protected remote administration are optional.
 - **Integrity tools.** Quick and full checks find missing or corrupted
   files. If the metadata index is lost, it is rebuilt from the drive.
+- **Scheduled content updates** (optional, off by default). Choose hours
+  (for example 01:00–06:00) and an interval; Arcana refreshes the catalogs,
+  downloads newer editions that fit the drive (medical and regulatory
+  first) under a bandwidth cap, and pauses those downloads outside the
+  window.
 - **Updates in one click.** Once a day, while online, Arcana looks for a
   new version. A banner offers *Update now*: the new version is
   verified against the project's signature, installed, and Arcana
@@ -85,6 +111,8 @@ not yet code-signed (see [Status](#status)).
 - **Raspberry Pi / Linux appliance.** An installer sets Arcana up as a
   service with its own Wi-Fi network and captive portal
   ([docs/appliance.md](docs/appliance.md); not yet run on hardware).
+- **Kolibri courses** (optional): point Arcana at a Kolibri server and
+  its courses appear in library search ([docs/kolibri.md](docs/kolibri.md)).
 - **Integration API** for other programs, such as RadioPost and Aether HF:
   search with citations, article excerpts and position, with scoped tokens
   the operator approves ([docs/integration-api.md](docs/integration-api.md)).
@@ -168,6 +196,7 @@ arcana export --to DIR [ID...|--all] [--user-documents]
 arcana manifest
 arcana update stage DIR | apply | rollback | status
 arcana hotspot start --ssid NAME --password PW [--device wlan0] | stop | status
+arcana ask [--no-library] QUESTION | ask --eval FILE [--with-model]
 ```
 
 `arcana --help` describes each command.
@@ -197,7 +226,7 @@ See [docs/development.md](docs/development.md).
 | **Implemented (Phase 4)** | `arcana.local` on the network (built-in mDNS), QR codes and a printable connection card, optional HTTPS on the same port, password-protected remote administration (off by default), Wi-Fi hotspot control on Linux |
 | **Implemented (Phase 5), not yet run on hardware** | Raspberry Pi / Linux appliance: installer, confined systemd service with watchdog, Wi-Fi access point with captive portal ([docs/appliance.md](docs/appliance.md)) |
 | **Implemented (Phase 6)** | Integration API for other programs (RadioPost, Aether HF) with scoped, approved tokens and citations ([docs/integration-api.md](docs/integration-api.md)); copying between Arcana libraries on a LAN; signed community catalogs |
-| **Design only** | Optional local question answering over installed sources ([docs/design/15-local-ai.md](docs/design/15-local-ai.md)) |
+| **Implemented (unreleased)** | Question answering over installed sources with citations, a relevance floor and an evaluation set; llamafile sidecar or an OpenAI-compatible server ([ADR-0021](docs/adr/0021-question-answering-over-the-library.md)). Not yet measured on a Raspberry Pi or with a real model in CI |
 | **Planned** | Ready-made Raspberry Pi SD image; hardware and power-loss tests. Terrain and contours; road networks for the largest countries; scheduled peer sync |
 | **Not yet** | Code-signed programs (releases are not code-signed yet; Windows and macOS warn on first start) |
 

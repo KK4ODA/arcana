@@ -21,7 +21,20 @@ export async function libraryView(main, params, ctx) {
   if (status?.library.readOnly) {
     main.appendChild(h('div', { class: 'banner warn' }, `Read-only: ${status.library.readOnlyReason}. You can browse and search; downloads and changes are disabled.`));
   }
+  if (status?.welcome?.pending && canChange) {
+    main.appendChild(h('div', { class: 'banner info' }, h('b', null, 'Getting started: '),
+      'choose what this drive should hold, and Arcana suggests editions that fit. ',
+      h('a', { class: 'button primary', href: '#/welcome' }, 'Start')));
+  }
   main.appendChild(dashboard(status));
+  const tiles = [...(status?.links || [])];
+  if (status?.kolibri?.configured) tiles.unshift({ title: 'Kolibri courses', url: status.kolibri.url, description: 'Khan Academy and other courses, with progress for each learner.' });
+  if (tiles.length) {
+    main.appendChild(h('section', { class: 'panel' }, h('header', null, h('h2', null, 'On this network')),
+      h('div', { class: 'body link-tiles' }, tiles.map((l) => h('a', { class: 'link-tile', href: l.url, target: '_blank', rel: 'noopener noreferrer' },
+        h('b', null, l.title), l.description ? h('span', { class: 'small muted' }, l.description) : null,
+        h('span', { class: 'small faint mono' }, l.url.replace(/^https?:\/\//, '')))))));
+  }
 
   // Search: titles that match, the best full-text matches from each
   // archive (with a count per source), and documents. Choosing a source
@@ -47,8 +60,12 @@ export async function libraryView(main, params, ctx) {
     onPick: (t) => { location.hash = articleHref(t); },
     onSubmit: () => runSearch(),
   });
+  // When question answering is available, a question typed here can be
+  // sent to the assistant instead.
+  const askBtn = status?.assistant?.canAsk ? h('button', { type: 'button', title: 'Ask the assistant: an answer written from passages of your library, with sources',
+    onclick: () => { location.hash = `#/ask?q=${encodeURIComponent(input.value.trim())}`; } }, 'Ask') : null;
   const form = h('form', { class: 'toolbar', role: 'search', onsubmit: (e) => { e.preventDefault(); runSearch(); } },
-    h('div', { class: 'grow' }, box), scope, h('button', { type: 'submit', class: 'primary' }, 'Search'));
+    h('div', { class: 'grow' }, box), scope, h('button', { type: 'submit', class: 'primary' }, 'Search'), askBtn);
   main.appendChild(h('section', { class: 'panel' }, form, results));
 
   const articleHref = (it) => `#/read/${encodeURIComponent(it.resourceId)}?path=${encodeURIComponent(it.path)}`;
@@ -61,6 +78,25 @@ export async function libraryView(main, params, ctx) {
     snippet(d.snippet));
   const titleList = (list, q, withBook) => h('ul', { class: 'title-hits' }, list.map((t) => h('li', null,
     h('a', { href: articleHref(t) }, highlight(t.title, q)), withBook ? h('span', { class: 'src' }, ` · ${t.book}`) : null)));
+
+  // Courses from the Kolibri server, if one is set up, after the library's
+  // own results. Kolibri can be slow or switched off; the section says so.
+  async function kolibriResults(q) {
+    const mine = searchSeq;
+    const sec = h('section', { class: 'search-sec' }, h('div', { class: 'search-group-head' }, h('h3', null, 'Courses in Kolibri'),
+      h('span', { class: 'small muted' }, 'Searching…')));
+    results.appendChild(sec);
+    try {
+      const r = await api.get(`/api/kolibri/search?q=${encodeURIComponent(q)}`);
+      if (mine !== searchSeq) return;
+      const open = h('a', { href: r.url, target: '_blank', rel: 'noopener noreferrer', class: 'small' }, 'Open Kolibri');
+      fill(sec, h('div', { class: 'search-group-head' }, h('h3', null, 'Courses in Kolibri'),
+        h('span', { class: 'small muted' }, r.error ? r.error : `${r.items.length} match${r.items.length === 1 ? '' : 'es'}`), open),
+        r.items.length ? h('ul', { class: 'results' }, r.items.map((it) => h('li', null,
+          h('a', { href: it.url, target: '_blank', rel: 'noopener noreferrer' }, it.title),
+          h('div', { class: 'src' }, it.kind === 'topic' ? 'Topic' : it.kind), it.description ? h('div', { class: 'snippet' }, it.description) : null))) : null);
+    } catch (e) { if (mine === searchSeq) sec.remove(); }
+  }
 
   let searchSeq = 0;
   async function runSearch() {
@@ -102,6 +138,7 @@ export async function libraryView(main, params, ctx) {
         g.total > g.results.length ? h('button', { class: 'linkish small', onclick: () => { scope.value = g.resourceId; runSearch(); } }, `Show all in ${g.book || 'this source'}`) : null);
       results.appendChild(h('section', { class: 'search-sec' }, head, h('ul', { class: 'results' }, g.results.map(resultItem))));
     }
+    if (status?.kolibri?.configured) kolibriResults(q);
     if (docs.length) {
       results.appendChild(h('section', { class: 'search-sec' },
         h('div', { class: 'search-group-head' }, h('h3', null, 'Documents'), h('span', { class: 'small muted' }, `${n(r.documentTotal)} match${r.documentTotal === 1 ? '' : 'es'}`)),
@@ -223,6 +260,8 @@ export async function libraryView(main, params, ctx) {
           h('td', { class: 'right num' }, fmtBytes(r.size)),
           h('td', { class: 'hide-sm' }, licenseBadge(r.license)),
           h('td', { class: 'right' }, h('div', { class: 'row actions' },
+            r.format === 'gguf' || r.format === 'llamafile' ? h('a', { class: 'button', href: '#/ask', title: 'Used by the assistant to answer questions' }, 'Ask') :
+            r.format === 'druglabels' ? h('a', { class: 'button', href: '#/medicines' }, 'Open') :
             r.openPath ? h('a', { class: 'button', href: openHref(r) }, 'Open') :
               h('a', { class: 'small', href: `#/read/${encodeURIComponent(r.resourceId)}`, title: r.openError || 'The archive reader is not available.' }, 'Cannot open — why?'),
             canChange ? h('button', { class: 'danger', onclick: () => remove(r) }, 'Remove') : null)),

@@ -38,7 +38,7 @@ export async function setupView(main) {
     try {
       await api.post('/api/setup/init', { path: path.value.trim(), label: label.value.trim() });
       toast('Library ready.');
-      location.hash = '#/library';
+      location.hash = '#/welcome';
       location.reload();
     } catch (e) { toast(e.message); }
   }

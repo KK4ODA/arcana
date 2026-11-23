@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/KK4ODA/arcana/internal/app"
+	"github.com/KK4ODA/arcana/internal/assistant"
 	"github.com/KK4ODA/arcana/internal/buildinfo"
 	"github.com/KK4ODA/arcana/internal/hotspot"
 	"github.com/KK4ODA/arcana/internal/library"
@@ -54,6 +55,10 @@ Usage:
                                 Install a signed application update (offline)
   arcana hotspot start --ssid NAME --password PW [--device wlan0] | stop | status
                                 Wi-Fi hotspot for phones (Linux with NetworkManager)
+  arcana ask [--no-library] QUESTION
+                                Answer a question from the library (Settings → Assistant)
+  arcana ask --eval FILE [--with-model]
+                                Score retrieval (and answers) against a question set
   arcana volumes                List drives and their file systems
   arcana version                Print version information
 
@@ -96,6 +101,8 @@ func main() {
 		err = cmdManifest(args)
 	case "update":
 		err = cmdUpdate(args)
+	case "ask":
+		err = cmdAsk(args)
 	case "volumes":
 		err = cmdVolumes()
 	case "hotspot":
@@ -370,7 +377,8 @@ func cmdInit(args []string) error {
 }
 
 var boolFlags = map[string]bool{"full": true, "lan": true, "read-only": true, "no-browser": true,
-	"allow-unverified": true, "online": true, "verbose": true, "all": true, "user-documents": true}
+	"allow-unverified": true, "online": true, "verbose": true, "all": true, "user-documents": true,
+	"no-library": true, "with-model": true}
 
 // reorder moves flags before positional arguments so "init DIR --label X"
 // works as users expect.
@@ -871,4 +879,89 @@ func cmdHotspot(args []string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown hotspot action %q", args[0])
+}
+
+func cmdAsk(args []string) error {
+	var noLibrary, withModel bool
+	var evalFile string
+	c, fs, err := parseFlags("ask", reorder(args), func(fs *flag.FlagSet) {
+		fs.BoolVar(&noLibrary, "no-library", false, "")
+		fs.BoolVar(&withModel, "with-model", false, "")
+		fs.StringVar(&evalFile, "eval", "", "")
+	})
+	if err != nil {
+		return err
+	}
+	question := strings.TrimSpace(strings.Join(fs.Args(), " "))
+	if question == "" && evalFile == "" {
+		return errors.New("usage: arcana ask QUESTION   or   arcana ask --eval FILE [--with-model]")
+	}
+	root, err := requireLibrary(c)
+	if err != nil {
+		return err
+	}
+	log := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelWarn}))
+	a, err := app.Open(root, app.Options{KiwixBinary: c.kiwix, ForceReadOnly: c.readOnly, Log: log})
+	if err != nil {
+		return err
+	}
+	defer a.Close()
+	a.StartReader()
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	if evalFile != "" {
+		gs, err := assistant.LoadGoldenSet(evalFile)
+		if err != nil {
+			return err
+		}
+		if withModel && !a.Lib.Settings.Get().Assistant.Enabled {
+			return errors.New("turn the assistant on first (Settings → Assistant)")
+		}
+		rep := a.Assistant.Evaluate(ctx, gs, withModel)
+		rep.Print(os.Stdout)
+		return nil
+	}
+	if st := a.AssistantStatus(ctx); !st.Ready {
+		return errors.New(st.Problem)
+	}
+	res, err := a.Assistant.Ask(ctx, assistant.Request{Question: question, Retrieval: !noLibrary, IncludePrivate: true},
+		func(e assistant.Event) {
+			switch e.Type {
+			case "status":
+				fmt.Fprintln(os.Stderr, e.Message)
+			case "token":
+				fmt.Print(e.Token)
+			}
+		})
+	if err != nil {
+		return err
+	}
+	if res.Skipped {
+		fmt.Print(res.Answer)
+	}
+	fmt.Println()
+	if !res.FromLibrary {
+		fmt.Println("\n(General answer: your library was not searched.)")
+	}
+	if res.Check.Unsupported {
+		fmt.Println("\nThis answer cites no passage from the library; treat it with caution.")
+	}
+	if len(res.Passages) > 0 {
+		label := "Sources:"
+		if res.Skipped {
+			label = "Closest passages (not relevant enough to answer from):"
+		}
+		fmt.Println("\n" + label)
+		for _, p := range res.Passages {
+			fmt.Printf("  [%d] %s — %s", p.N, p.Title, p.Source.ResourceTitle)
+			if p.Source.Edition != "" {
+				fmt.Printf(" (%s)", p.Source.Edition)
+			}
+			fmt.Println()
+			for _, w := range p.Source.Warnings {
+				fmt.Printf("      %s: %s\n", w.Kind, w.Text)
+			}
+		}
+	}
+	return nil
 }

@@ -15,17 +15,20 @@ import (
 	"time"
 
 	"github.com/KK4ODA/arcana/internal/appupdate"
+	"github.com/KK4ODA/arcana/internal/assistant"
 	"github.com/KK4ODA/arcana/internal/auth"
 	"github.com/KK4ODA/arcana/internal/catalog"
 	"github.com/KK4ODA/arcana/internal/content"
 	"github.com/KK4ODA/arcana/internal/docs"
 	"github.com/KK4ODA/arcana/internal/download"
+	"github.com/KK4ODA/arcana/internal/drugs"
 	"github.com/KK4ODA/arcana/internal/fsutil"
 	"github.com/KK4ODA/arcana/internal/gps"
 	"github.com/KK4ODA/arcana/internal/integration"
 	"github.com/KK4ODA/arcana/internal/kiwix"
 	"github.com/KK4ODA/arcana/internal/library"
 	"github.com/KK4ODA/arcana/internal/maps"
+	"github.com/KK4ODA/arcana/internal/mesh"
 	"github.com/KK4ODA/arcana/internal/routing"
 	"github.com/KK4ODA/arcana/internal/storage"
 	"github.com/KK4ODA/arcana/internal/store"
@@ -65,8 +68,16 @@ type App struct {
 	Admin *auth.Store
 	// Integrations holds tokens of programs using the integration API.
 	Integrations *integration.Store
-	events       eventHub
-	selfupd      updateState
+	// Assistant answers questions from the library.
+	Assistant *assistant.Service
+	engine    *assistant.Engine
+	drugs     drugState
+	// Mesh reads a Meshtastic radio.
+	Mesh *mesh.Manager
+	// contentUpd runs scheduled content updates.
+	contentUpd contentUpdater
+	events     eventHub
+	selfupd    updateState
 	// RequestRestart, set by the program's main function, stops Arcana and
 	// starts the newly installed version as described by the SelfUpdate
 	// taken before installing.
@@ -115,6 +126,7 @@ func Open(root string, opts Options) (*App, error) {
 		a.reloadKiwix()
 		a.reloadMaps()
 		a.reloadRoads()
+		a.reloadDrugs()
 		a.RequestReindex()
 		a.publish(Event{Type: "library"})
 	}
@@ -135,6 +147,8 @@ func Open(root string, opts Options) (*App, error) {
 	}
 	a.roads = routing.NewService()
 	a.openGPS()
+	a.Mesh = mesh.New(a.Log)
+	a.openAssistant()
 	a.Admin = auth.NewStore(lib.User())
 	if a.Integrations, err = integration.Open(lib.User(), lib.ReadOnly); err != nil {
 		a.Close()
@@ -162,11 +176,12 @@ func Open(root string, opts Options) (*App, error) {
 		Store:       a.Store,
 		Layout:      lib.Layout,
 		Content:     a.Content,
-		Settings:    lib.Settings.Get,
+		Settings:    a.downloadSettings,
 		ResolverFor: func(p string) catalog.Resolver { return a.resolvers()[p] },
 		Fetcher:     a.Fetcher,
 		Client:      client,
-		Extractors:  map[string]download.Extractor{maps.MethodExtract: a.mapExtractor, routing.MethodBuild: a.roadExtractor},
+		Extractors: map[string]download.Extractor{maps.MethodExtract: a.mapExtractor, routing.MethodBuild: a.roadExtractor,
+			drugs.MethodBuild: a.drugExtractor},
 		RequestHook: a.peerRequestHook,
 		Log:         log,
 		ReadOnly:    lib.ReadOnly,
@@ -196,10 +211,13 @@ func (a *App) Start(ctx context.Context) error {
 	a.reloadKiwix()
 	a.reloadMaps()
 	a.reloadRoads()
+	a.reloadDrugs()
 	go a.placesLoop(ctx)
 	a.ApplyGPSSettings()
+	a.ApplyMeshSettings()
 	go a.reindexLoop(ctx)
 	go a.autoRefreshLoop(ctx)
+	go a.contentUpdateLoop(ctx)
 	go a.appUpdateLoop(ctx, 2*time.Minute)
 	a.RequestReindex()
 	return nil
@@ -217,6 +235,11 @@ func (a *App) Close() {
 	if a.GPS != nil {
 		a.GPS.Stop()
 	}
+	if a.Mesh != nil {
+		a.Mesh.Stop()
+	}
+	a.closeAssistant()
+	a.closeDrugs()
 	if a.Kiwix != nil {
 		a.Kiwix.Stop()
 	}
@@ -290,6 +313,12 @@ func (a *App) Providers() []catalog.Provider {
 	}
 	if rp := a.RoadProvider(); rp != nil {
 		ps = append(ps, rp)
+	}
+	if dp := a.DrugProvider(); dp != nil {
+		ps = append(ps, dp)
+	}
+	if tp := a.TranslateProvider(); tp != nil {
+		ps = append(ps, tp)
 	}
 	for _, f := range s.Catalog.Feeds {
 		if f.Enabled {
@@ -535,26 +564,63 @@ func (a *App) Updates(ctx context.Context) ([]Update, error) {
 	return out, nil
 }
 
-// EnqueueByID queues catalog resources for download.
+// EnqueueByID queues catalog resources for download, with any resources
+// they depend on (a model needs the engine that runs it) that are neither
+// installed nor already queued.
 func (a *App) EnqueueByID(ctx context.Context, ids []string) map[string]string {
 	out := map[string]string{}
-	for _, id := range ids {
+	present := map[string]bool{}
+	if installed, err := a.Store.ListInstalled(ctx); err == nil {
+		for _, in := range installed {
+			present[in.ResourceID] = true
+		}
+	}
+	if jobs, err := a.Store.ListJobs(ctx); err == nil {
+		for _, j := range jobs {
+			if j.Active() {
+				present[j.ResourceID] = true
+			}
+		}
+	}
+	var enqueue func(id string, depth int)
+	enqueue = func(id string, depth int) {
+		if _, done := out[id]; done {
+			return
+		}
 		r, err := a.Store.GetResource(ctx, id)
 		if err != nil {
 			out[id] = "not in catalog"
-			continue
+			return
 		}
 		if _, err := a.Downloads.Enqueue(ctx, r); err != nil {
 			out[id] = err.Error()
-			continue
+			return
 		}
 		out[id] = "queued"
+		present[id] = true
+		if depth > 3 {
+			return
+		}
+		for _, dep := range r.Dependencies {
+			if !present[dep] {
+				enqueue(dep, depth+1)
+			}
+		}
+	}
+	for _, id := range ids {
+		enqueue(id, 0)
 	}
 	return out
 }
 
 // Recommend runs the preset recommender against current storage.
 func (a *App) Recommend(ctx context.Context, presetID, lang string) (catalog.Recommendation, error) {
+	return a.recommendWithin(ctx, presetID, lang, -1, nil)
+}
+
+// recommendWithin runs the recommender with a budget (negative: the
+// drive's headroom) and extra resources to treat as already present.
+func (a *App) recommendWithin(ctx context.Context, presetID, lang string, budget int64, chosen map[string]bool) (catalog.Recommendation, error) {
 	presets, err := a.Presets()
 	if err != nil {
 		return catalog.Recommendation{}, err
@@ -591,8 +657,14 @@ func (a *App) Recommend(ctx context.Context, presetID, lang string) (catalog.Rec
 			present[j.ResourceID] = true
 		}
 	}
+	for id := range chosen {
+		present[id] = true
+	}
+	if budget < 0 {
+		budget = rep.Plan.Headroom
+	}
 	return catalog.Recommend(catalog.RecommendInput{
-		Preset: *preset, Language: lang, Budget: rep.Plan.Headroom, Families: fam, Present: present,
+		Preset: *preset, Language: lang, Budget: budget, Families: fam, Present: present,
 	}), nil
 }
 

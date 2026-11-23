@@ -8,7 +8,7 @@ const GB = 1e9;
 
 export async function settingsView(main) {
   const s = getSession();
-  const [r, lib] = await Promise.all([api.get('/api/settings'), api.get('/api/library')]);
+  const [r, lib, asst] = await Promise.all([api.get('/api/settings'), api.get('/api/library'), api.get('/api/assistant').catch(() => null)]);
   const st = r.settings;
   const ro = r.readOnly;
 
@@ -127,6 +127,33 @@ export async function settingsView(main) {
   });
   let gpsInitial = JSON.stringify(gpsBody());
 
+  // Meshtastic radio (listen only).
+  const mc = { source: '', address: '', serialPort: '', baudRate: 115200, shareWithClients: false, ...(st.mesh || {}) };
+  const meshSource = h('select', { disabled: ro }, [['', 'Off'], ['tcp', 'Radio on the network (Wi-Fi or Ethernet)'], ['serial', 'Radio on USB']]
+    .map(([v, t]) => h('option', { value: v, selected: v === (mc.source || '') }, t)));
+  const meshAddr = h('input', { type: 'text', value: mc.address || '', placeholder: 'radio address, e.g. 192.168.1.40 or meshtastic.local', style: 'width:min(320px,100%)', disabled: ro });
+  const meshPort = h('select', { disabled: ro, style: 'min-width:200px' });
+  const fillMeshPorts = async () => {
+    let ports = [];
+    try { ports = (await api.get('/api/gps/ports')).ports || []; } catch (_) { /* unavailable */ }
+    if (mc.serialPort && !ports.includes(mc.serialPort)) ports.unshift(mc.serialPort);
+    fill(meshPort, ports.length ? ports.map((p) => h('option', { value: p, selected: p === mc.serialPort }, p)) : h('option', { value: '' }, 'No serial ports found'));
+  };
+  const meshShare = h('input', { type: 'checkbox', checked: !!mc.shareWithClients, disabled: ro });
+  const meshFields = h('div');
+  const renderMesh = () => {
+    fill(meshFields,
+      meshSource.value === 'tcp' ? field('Radio address', meshAddr, 'The radio must have Wi-Fi or Ethernet turned on in its network settings. Arcana connects to port 4403.') : null,
+      meshSource.value === 'serial' ? field('Port', h('span', { class: 'row' }, meshPort, h('button', { onclick: fillMeshPorts }, 'Rescan')),
+        'Close the Meshtastic app or web client first: only one program can use the radio\u2019s USB port at a time.') : null);
+    if (meshSource.value === 'serial') fillMeshPorts();
+  };
+  meshSource.addEventListener('change', renderMesh);
+  renderMesh();
+  const meshBody = () => ({ source: meshSource.value, address: meshAddr.value.trim(),
+    serialPort: (meshSource.value === 'serial' && meshPort.value) || mc.serialPort || '', baudRate: mc.baudRate || 115200, shareWithClients: meshShare.checked });
+  let meshInitial = JSON.stringify(meshBody());
+
   main.appendChild(h('section', { class: 'panel' },
     h('header', null, h('h2', null, 'Maps and position')),
     field('Map regions', h('label', { class: 'inline' }, mapsOn, 'Offer OpenStreetMap regions in Discover'),
@@ -136,7 +163,49 @@ export async function settingsView(main) {
     field('Track recording', h('label', { class: 'inline' }, record, 'Record a track while a position is available'),
       'Tracks are saved as GPX files in user/tracks on the drive.'),
     field('Share position', h('label', { class: 'inline' }, shareGPS, 'Show the position, waypoints and tracks to network clients'),
-      'Off by default. Applies only when network sharing is on.')));
+      'Off by default. Applies only when network sharing is on.'),
+    field('Meshtastic radio', meshSource, 'Show the nodes a Meshtastic radio hears on the map, with their positions and the text messages on its channels. Arcana only listens; it never transmits.'),
+    meshFields,
+    field('Share the mesh', h('label', { class: 'inline' }, meshShare, 'Show mesh nodes and messages to network clients'),
+      'Off by default: the positions of people on the mesh are personal.')));
+
+  // Links on the Library page.
+  const links = [...(st.links || [])];
+  const linksInitial = JSON.stringify(links);
+  const linkList = h('div');
+  const renderLinks = () => fill(linkList, links.map((l) => h('div', { class: 'row', style: 'margin-bottom:4px' },
+    h('b', null, l.title), h('span', { class: 'mono small muted' }, l.url), l.description ? h('span', { class: 'small' }, l.description) : null,
+    h('button', { disabled: ro, onclick: () => { links.splice(links.indexOf(l), 1); renderLinks(); } }, 'Remove'))));
+  renderLinks();
+  const lTitle = h('input', { type: 'text', placeholder: 'Title, e.g. Kolibri courses', style: 'width:200px', maxlength: 60, disabled: ro });
+  const lURL = h('input', { type: 'url', placeholder: 'http://raspberrypi.local:8080', style: 'width:260px', disabled: ro });
+  const lDesc = h('input', { type: 'text', placeholder: 'Short description (optional)', style: 'width:260px', maxlength: 200, disabled: ro });
+  main.appendChild(h('section', { class: 'panel' },
+    h('header', null, h('h2', null, 'Links on the Library page')),
+    field('Other services', h('div', null, linkList, h('div', { class: 'row' }, lTitle, lURL, lDesc, h('button', { disabled: ro, onclick: () => {
+      if (!lTitle.value.trim() || !/^https?:\/\//.test(lURL.value.trim())) { toast('Enter a title and an http:// or https:// address.'); return; }
+      links.push({ title: lTitle.value.trim(), url: lURL.value.trim(), description: lDesc.value.trim() });
+      lTitle.value = lURL.value = lDesc.value = '';
+      renderLinks();
+    } }, 'Add'))), 'Shortcuts shown to everyone on the Library page, for other things on this network: a Kolibri server, a radio\u2019s web page, a file share. Arcana does not check or manage them.')));
+
+  // Kolibri.
+  const kUrl = h('input', { type: 'url', value: st.kolibri?.url || '', placeholder: 'http://192.168.1.20:8080', style: 'width:min(320px,100%)', disabled: ro });
+  const kMsg = h('span', { class: 'small muted' });
+  const kTest = h('button', { disabled: ro, onclick: async () => {
+    kMsg.textContent = 'Connecting…';
+    try {
+      const r = await api.post('/api/kolibri/test', { url: kUrl.value.trim() });
+      kMsg.textContent = `Connected: Kolibri ${r.version || ''}${r.deviceName ? ` on ${r.deviceName}` : ''}.`;
+    } catch (e) { kMsg.textContent = e.message; }
+  } }, 'Test');
+  main.appendChild(h('section', { class: 'panel' },
+    h('header', null, h('h2', null, 'Kolibri (courses)')),
+    field('Kolibri server', h('span', null, h('span', { class: 'row' }, kUrl, kTest), kMsg),
+      'Kolibri, from Learning Equality, hosts Khan Academy and other courses with progress tracking for each learner. It is a separate program (see docs/kolibri.md). With its address here, its courses appear in library search and on the Library page. Leave empty to turn this off. Khan Academy material is licensed for non-commercial use only.')));
+
+  const ap = assistantPanel(st, asst, ro, field);
+  main.appendChild(ap.el);
 
   main.appendChild(h('section', { class: 'panel' },
     h('header', null, h('h2', null, 'Appearance')),
@@ -159,11 +228,20 @@ export async function settingsView(main) {
     };
     const gb = gpsBody();
     if (JSON.stringify(gb) !== gpsInitial || !st.gps) body.gps = gb;
+    const mb = meshBody();
+    if (JSON.stringify(mb) !== meshInitial) body.mesh = mb;
+    if (JSON.stringify(links) !== linksInitial) body.links = links;
+    if (kUrl.value.trim() !== (st.kolibri?.url || '')) body.kolibri = { url: kUrl.value.trim() };
+    const ab = ap.body();
+    if (JSON.stringify(ab) !== ap.initial) body.assistant = ab;
     try {
       const res = await api.put('/api/settings', body);
       toast(lan.checked !== st.server.shareOnLan ? 'Saved. Restart Arcana to change network sharing.' : 'Settings saved to the drive.');
       Object.assign(st, res.settings);
       gpsInitial = JSON.stringify(gpsBody());
+      meshInitial = JSON.stringify(meshBody());
+      ap.initial = JSON.stringify(ap.body());
+      window.dispatchEvent(new Event('arcana-status'));
     } catch (e) { toast(e.message); }
   } }, 'Save settings');
   main.appendChild(h('div', { class: 'row', style: 'margin-bottom:14px' }, save,
@@ -337,4 +415,85 @@ async function updatesPanel(s, ro, updateURL, tp) {
             if (!confirm('Install the verified version? Restart Arcana afterwards.')) return;
             try { const r = await api.post('/api/app/update/apply'); fill(out, h('p', null, r.message)); } catch (e) { fill(out, h('p', null, e.message)); }
           } }, 'Install verified version')))));
+}
+
+// assistantPanel configures question answering. Its values are saved with
+// the other settings.
+export function assistantPanel(st, info, ro, field) {
+  const a = { backend: 'local', relevanceFloor: 0.5, passages: 5, contextSize: 4096, url: 'http://127.0.0.1:11434/v1', ...(st.assistant || {}) };
+  const status = info?.status || {};
+  const enabled = h('input', { type: 'checkbox', checked: !!a.enabled, disabled: ro });
+  const backend = h('select', { disabled: ro }, [['local', 'This computer: a model downloaded into the library'],
+    ['external', 'A model server: Ollama, LM Studio or another OpenAI-compatible program']]
+    .map(([v, t]) => h('option', { value: v, selected: v === a.backend }, t)));
+  const models = status.models || [];
+  const model = h('select', { disabled: ro }, h('option', { value: '' }, 'Largest installed model'),
+    models.map((m) => h('option', { value: m.resourceId, selected: m.resourceId === a.model }, `${m.title} (${fmtBytes(m.size)})`)));
+  const ctx = h('select', { disabled: ro }, [[2048, '2,048 tokens (least memory)'], [4096, '4,096 tokens (default)'], [8192, '8,192 tokens'], [16384, '16,384 tokens']]
+    .map(([v, t]) => h('option', { value: v, selected: v === a.contextSize }, t)));
+  const threads = h('input', { type: 'number', min: 0, max: 256, value: a.threads || '', placeholder: 'automatic', style: 'width:110px', disabled: ro });
+  const idle = h('select', { disabled: ro }, [[5, '5 minutes'], [10, '10 minutes'], [30, '30 minutes'], [120, '2 hours']]
+    .map(([v, t]) => h('option', { value: v, selected: v === (a.idleMinutes || 10) }, t)));
+  const url = h('input', { type: 'url', value: a.url || '', placeholder: 'http://127.0.0.1:11434/v1', style: 'width:min(360px,100%)', disabled: ro });
+  const key = h('input', { type: 'password', value: a.apiKey || '', placeholder: 'not needed for Ollama or LM Studio', autocomplete: 'off', style: 'width:min(300px,100%)', disabled: ro });
+  const extModel = h('input', { type: 'text', value: a.externalModel || '', placeholder: 'e.g. llama3.2:3b', list: 'assistant-models', style: 'width:min(260px,100%)', disabled: ro });
+  const modelList = h('datalist', { id: 'assistant-models' });
+  const testMsg = h('span', { class: 'small muted' });
+  const testBtn = h('button', { type: 'button', disabled: ro, onclick: async () => {
+    testMsg.textContent = 'Connecting…';
+    try {
+      const r = await api.post('/api/assistant/test', { url: url.value.trim(), apiKey: key.value === '(saved)' ? '' : key.value });
+      fill(modelList, r.models.map((m) => h('option', { value: m })));
+      if (!extModel.value && r.models.length) extModel.value = r.models[0];
+      testMsg.textContent = r.models.length ? `Connected. ${r.models.length} model${r.models.length === 1 ? '' : 's'}: ${r.models.slice(0, 6).join(', ')}` : 'Connected, but the server lists no models.';
+    } catch (e) { testMsg.textContent = e.message; }
+  } }, 'Test connection');
+  const floor = h('select', { disabled: ro }, [[0.35, 'Lenient: answer from loosely related passages'], [0.5, 'Normal'], [0.7, 'Strict: only from closely matching passages']]
+    .map(([v, t]) => h('option', { value: v, selected: Math.abs(v - a.relevanceFloor) < 0.01 }, t)));
+  const passages = h('select', { disabled: ro }, [3, 5, 8].map((n) => h('option', { value: n, selected: n === a.passages }, `${n} passages`)));
+  const instr = h('textarea', { rows: 3, maxlength: 4000, style: 'width:min(560px,100%)', placeholder: 'Optional, for example: "Use metric units." or "Answer in Spanish."', disabled: ro });
+  instr.value = a.instructions || '';
+  const net = h('input', { type: 'checkbox', checked: !!a.networkClients, disabled: ro });
+
+  const engineState = { stopped: 'stopped (starts with the next question)', starting: 'starting', ready: 'running', failed: 'failed' }[status.engine?.state] || 'stopped';
+  const stopBtn = h('button', { type: 'button', disabled: ro || status.engine?.state !== 'ready', onclick: async () => {
+    try { await api.post('/api/assistant/stop'); stopBtn.disabled = true; toast('The model engine was stopped; its memory is free.'); } catch (e) { toast(e.message); }
+  } }, 'Stop now');
+
+  const localFields = h('div', null,
+    field('Model', models.length ? model : h('span', null, 'No model installed. ', h('a', { href: '#/discover?category=assistant' }, 'Download one in Discover'), '.'),
+      'Larger models answer better but need more memory and time. The tiny model suits a Raspberry Pi; the balanced model most laptops.'),
+    field('Engine', h('span', null, status.engineInstalled ? `llamafile, ${engineState}. ` : 'Not installed (downloaded with the first model). ', status.engineInstalled ? stopBtn : null,
+      status.engine?.error ? h('div', { class: 'banner err' }, status.engine.error) : null),
+      'Runs only on this computer, only while answering, and stops after the idle time below.'),
+    field('Context window', ctx, 'How much text the model reads at once. Larger windows need more memory.'),
+    field('Processor threads', threads, 'Leave empty to let the engine choose.'),
+    field('Stop when idle after', idle, 'Frees the model’s memory when no questions are asked.'));
+  const extFields = h('div', null,
+    field('Server address', h('span', { class: 'row' }, url, testBtn), h('span', null, testMsg, h('br'),
+      'Ollama listens on port 11434 (http://127.0.0.1:11434/v1 — start it with OLLAMA_HOST=0.0.0.0 to reach it from another computer), LM Studio on port 1234 (http://127.0.0.1:1234/v1). ',
+      'Questions and passages from your library are sent to this server.')),
+    field('Model name', h('span', null, extModel, modelList), 'As the server names it. Test the connection to list its models.'),
+    field('API key', key, 'Only if the server requires one. Stored on the drive in clear text, like other connection settings.'));
+  const showBackend = () => { localFields.hidden = backend.value !== 'local'; extFields.hidden = backend.value !== 'external'; };
+  backend.addEventListener('change', showBackend);
+  showBackend();
+
+  const body = () => ({
+    enabled: enabled.checked, backend: backend.value, model: model.value, url: url.value.trim(), externalModel: extModel.value.trim(),
+    apiKey: key.value, instructions: instr.value, relevanceFloor: parseFloat(floor.value), passages: parseInt(passages.value, 10),
+    contextSize: parseInt(ctx.value, 10), threads: parseInt(threads.value, 10) || 0, idleMinutes: parseInt(idle.value, 10),
+    networkClients: net.checked,
+  });
+  const el = h('section', { class: 'panel', id: 'assistant' },
+    h('header', null, h('h2', null, 'Assistant (question answering)')),
+    field('Question answering', h('label', { class: 'inline' }, enabled, 'Answer questions from the library'),
+      'Answers are written by a language model from passages Arcana finds in your library, and list those passages. Nothing is downloaded until you choose a model.'),
+    field('Where the model runs', backend), localFields, extFields,
+    field('Strictness', floor, 'How closely a passage must match the question before the model is asked. When nothing matches, Arcana says so instead of guessing.'),
+    field('Passages per answer', passages, 'More passages give the model more to work with but take longer to read.'),
+    field('Instructions', instr, 'Added to the model’s instructions for every answer. The rule to answer only from the library always applies.'),
+    field('Network devices', h('label', { class: 'inline' }, net, 'Let devices on the network ask questions'),
+      'Off by default: answers use this computer’s processor and memory. Devices never see your own documents.'));
+  return { el, body, initial: JSON.stringify(body()) };
 }

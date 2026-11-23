@@ -38,6 +38,9 @@ const (
 	ScopeLocation = "location:read"
 	// ScopeLibrary lets another Arcana copy installed resources (peer sync).
 	ScopeLibrary = "library:read"
+	// ScopeAsk lets a program ask the assistant questions (it uses this
+	// computer's processor and memory).
+	ScopeAsk = "assistant:ask"
 )
 
 // Scope describes one permission for the operator.
@@ -54,6 +57,7 @@ var AllScopes = []Scope{
 	{ScopeMaps, "Look up coordinates, grid locators and nearby place names"},
 	{ScopeLocation, "Read the current GPS position"},
 	{ScopeLibrary, "List and copy installed resources (another Arcana syncing from this one)"},
+	{ScopeAsk, "Ask questions answered from the library, with citations (uses this computer's processor)"},
 }
 
 func validScope(s string) bool {

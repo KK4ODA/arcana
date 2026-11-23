@@ -133,15 +133,22 @@ func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request, a *app.App
 			"id": a.Lib.Identity.LibraryID, "label": a.Lib.Identity.Label, "root": rootFor(r, a),
 			"readOnly": a.Lib.ReadOnly, "readOnlyReason": a.Lib.ReadOnlyReason,
 		},
-		"installed":    map[string]any{"count": len(installed), "bytes": installedBytes},
-		"storage":      storageRep,
-		"offline":      map[string]any{"ready": offlineReady, "reader": ks},
-		"downloads":    map[string]any{"active": active, "failed": failed, "waiting": waiting},
-		"updates":      map[string]any{"available": len(updates), "highPriority": high, "lastCatalogRefresh": lastCheck},
-		"sharing":      s.sharingInfo(r),
-		"appUpdate":    appUpdateFor(r, a),
-		"gps":          s.gpsSummary(r, a),
-		"maps":         mapSummary(a),
+		"installed": map[string]any{"count": len(installed), "bytes": installedBytes},
+		"storage":   storageRep,
+		"offline":   map[string]any{"ready": offlineReady, "reader": ks},
+		"downloads": map[string]any{"active": active, "failed": failed, "waiting": waiting},
+		"updates":   map[string]any{"available": len(updates), "highPriority": high, "lastCatalogRefresh": lastCheck},
+		"sharing":   s.sharingInfo(r),
+		"appUpdate": appUpdateFor(r, a),
+		"gps":       s.gpsSummary(r, a),
+		"maps":      mapSummary(a),
+		"assistant": s.assistantSummary(r, a),
+		"drugs":     map[string]any{"installed": a.Drugs() != nil},
+		"links":     nonNil(a.Lib.Settings.Get().Links),
+		"kolibri":   map[string]any{"configured": a.Lib.Settings.Get().Kolibri.URL != "", "url": a.Lib.Settings.Get().Kolibri.URL},
+		// Getting started is offered until finished or skipped, while
+		// nothing but the sample is installed.
+		"welcome":      map[string]any{"pending": !a.Lib.Settings.Get().WelcomeDone && onlySample(installed) && !a.Lib.ReadOnly},
 		"attention":    att,
 		"serverUptime": int64(time.Since(s.startedAt).Seconds()),
 	})
@@ -267,4 +274,19 @@ func appUpdateFor(r *http.Request, a *app.App) any {
 		return nil
 	}
 	return a.UpdateNotice()
+}
+
+// assistantSummary tells the interface whether to offer the Ask view.
+func (s *Server) assistantSummary(r *http.Request, a *app.App) map[string]any {
+	ok, _ := s.canAsk(r, a)
+	return map[string]any{"enabled": a.Lib.Settings.Get().Assistant.Enabled, "canAsk": ok}
+}
+
+func onlySample(installed []store.Installed) bool {
+	for _, in := range installed {
+		if in.ResourceID != "arcana.sample" {
+			return false
+		}
+	}
+	return true
 }
