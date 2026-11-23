@@ -6,7 +6,7 @@ import "runtime"
 
 var (
 	// Version is the release version, or "dev" for local builds.
-	Version = "0.7.0-dev"
+	Version = "0.8.0-dev"
 	// Commit is the source revision.
 	Commit = "unknown"
 	// Date is the build date (UTC, RFC 3339).

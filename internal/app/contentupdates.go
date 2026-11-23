@@ -250,10 +250,12 @@ func (a *App) contentUpdateTick(ctx context.Context, force bool) ContentUpdateEv
 		return cands[i].DownloadSize < cands[j].DownloadSize
 	})
 	var chosen []string
+	noSpace := 0
 	for _, u := range cands {
 		rep, err := a.Storage(ctx, append(append([]string(nil), chosen...), u.ResourceID))
 		if err != nil || rep.Plan.Headroom < 0 {
 			ev.Skipped = append(ev.Skipped, u.Title+" (not enough space)")
+			noSpace++
 			continue
 		}
 		res, err := a.Store.GetResource(ctx, u.ResourceID)
@@ -274,8 +276,10 @@ func (a *App) contentUpdateTick(ctx context.Context, force bool) ContentUpdateEv
 		ev.Message = fmt.Sprintf("Queued %d update(s).", len(ev.Queued))
 	case len(cands) == 0:
 		ev.Message = "Everything installed is up to date."
-	default:
+	case noSpace == len(ev.Skipped):
 		ev.Message = "Updates are available but none fit in the free space above your reserve."
+	default:
+		ev.Message = "Updates are available but none could be queued."
 	}
 	if len(failed) > 0 {
 		ev.Message += " Some catalogs could not be reached: " + strings.Join(failed, ", ") + "."

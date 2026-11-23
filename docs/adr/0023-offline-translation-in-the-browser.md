@@ -1,6 +1,6 @@
 # ADR-0023: Offline translation in the reader's browser
 
-- Status: Accepted (unreleased)
+- Status: Accepted (0.8.0)
 - Date: 2026-11-23
 
 ## Context

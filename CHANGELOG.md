@@ -3,7 +3,18 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
-## Unreleased
+## 0.8.0 — 2026-11-23
+
+Ask questions of your library and get answers that cite their sources, a
+medicines reference built from the FDA's drug labels, offline translation of
+archive pages, a guided Getting started, automatic content updates on a
+schedule you choose, a Meshtastic mesh on the map, and optional Kolibri
+courses in search. All of it is off or optional until you choose it. This
+release also stops library search from showing your own documents to other
+devices on the network. Arcana 0.6.0 to 0.7.0 offer this version by
+themselves within a day of being online: choose *Update now* in the banner at
+the top of the page. Rolling back to 0.7.0 is safe: what 0.8.0 installed stays
+on the drive untouched, and works again after updating.
 
 ### Added
 - **Ask your library.** A new *Ask* view (and an *Ask* button beside the
@@ -109,6 +120,11 @@ the library format version is tracked separately (docs/design/09-storage-and-dat
 - **Dependencies.** Queueing a resource also queues the resources it needs
   (a model queues the engine that runs it).
 
+### Changed
+- Text extracted from web pages keeps the cells of a table row on one line
+  ("QTH | Location of the station"), so document search snippets and the
+  assistant read tables correctly.
+
 ### Fixed
 - **Your own documents no longer appear in searches from other devices.**
   Library search returned the names and text snippets of the documents you
@@ -119,11 +135,6 @@ the library format version is tracked separately (docs/design/09-storage-and-dat
   refused; the computer running Arcana still finds everything. The
   integration API and the assistant already left your documents out for
   other devices; they now also stop them from taking up result slots.
-
-### Changed
-- Text extracted from web pages keeps the cells of a table row on one line
-  ("QTH | Location of the station"), so document search snippets and the
-  assistant read tables correctly.
 
 ## 0.7.0 — 2026-11-23
 
