@@ -206,7 +206,7 @@ func (a *App) IndexableDocuments(ctx context.Context) ([]docs.Doc, error) {
 		return nil, err
 	}
 	for _, in := range installed {
-		if in.Resource.Format == "zim" || in.Resource.Format == "pmtiles" || in.Resource.Format == "mbtiles" {
+		if in.Resource.Format == "zim" || in.Resource.Format == "pmtiles" || in.Resource.Format == "mbtiles" || in.Resource.Format == "arcroute" {
 			continue
 		}
 		for _, f := range in.Files {

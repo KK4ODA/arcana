@@ -53,6 +53,9 @@ type MapSettings struct {
 	// Protomaps defaults.
 	BuildsURL string `json:"buildsUrl,omitempty"`
 	BaseURL   string `json:"baseUrl,omitempty"`
+	// RoadsURL is the index of OSM extracts road networks are built from.
+	// Empty means Geofabrik's.
+	RoadsURL string `json:"roadsUrl,omitempty"`
 }
 
 // GPSSettings select a position source. Arcana only reads positions; it

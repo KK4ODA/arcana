@@ -257,6 +257,13 @@ func (m *Manager) install(ctx context.Context, j *store.Job, persist func()) err
 			}
 			continue
 		}
+		if ref := j.Resource.ProviderRef; ref["method"] != "" && ref["sourceHash"] != "" {
+			// The extractor refuses source data that does not match the
+			// publisher's checksum, so reaching here means it matched.
+			verification = "built by Arcana from " + hostOf(f.Mirrors[0].URL) + " data whose " + ref["sourceHash"] +
+				" matched the value published there (weak hash); SHA-256 of the result recorded for future integrity checks"
+			continue
+		}
 		if j.Resource.ProviderRef["method"] != "" {
 			unverified = true
 			verification = "built by Arcana from a single version of the source (" + hostOf(f.Mirrors[0].URL) +

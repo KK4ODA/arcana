@@ -26,6 +26,7 @@ import (
 	"github.com/KK4ODA/arcana/internal/kiwix"
 	"github.com/KK4ODA/arcana/internal/library"
 	"github.com/KK4ODA/arcana/internal/maps"
+	"github.com/KK4ODA/arcana/internal/routing"
 	"github.com/KK4ODA/arcana/internal/storage"
 	"github.com/KK4ODA/arcana/internal/store"
 	"github.com/KK4ODA/arcana/internal/tasks"
@@ -58,6 +59,7 @@ type App struct {
 	Updater   *appupdate.Updater
 	reindex   chan struct{}
 	maps      *mapState
+	roads     *routing.Service
 	GPS       *gps.Manager
 	// Admin holds the optional remote-administration password.
 	Admin *auth.Store
@@ -112,6 +114,7 @@ func Open(root string, opts Options) (*App, error) {
 	a.Content.OnChange = func() {
 		a.reloadKiwix()
 		a.reloadMaps()
+		a.reloadRoads()
 		a.RequestReindex()
 		a.publish(Event{Type: "library"})
 	}
@@ -130,6 +133,7 @@ func Open(root string, opts Options) (*App, error) {
 		a.Close()
 		return nil, err
 	}
+	a.roads = routing.NewService()
 	a.openGPS()
 	a.Admin = auth.NewStore(lib.User())
 	if a.Integrations, err = integration.Open(lib.User(), lib.ReadOnly); err != nil {
@@ -162,7 +166,7 @@ func Open(root string, opts Options) (*App, error) {
 		ResolverFor: func(p string) catalog.Resolver { return a.resolvers()[p] },
 		Fetcher:     a.Fetcher,
 		Client:      client,
-		Extractors:  map[string]download.Extractor{maps.MethodExtract: a.mapExtractor},
+		Extractors:  map[string]download.Extractor{maps.MethodExtract: a.mapExtractor, routing.MethodBuild: a.roadExtractor},
 		RequestHook: a.peerRequestHook,
 		Log:         log,
 		ReadOnly:    lib.ReadOnly,
@@ -191,6 +195,7 @@ func (a *App) Start(ctx context.Context) error {
 	a.Tasks = tasks.New(ctx)
 	a.reloadKiwix()
 	a.reloadMaps()
+	a.reloadRoads()
 	go a.placesLoop(ctx)
 	a.ApplyGPSSettings()
 	go a.reindexLoop(ctx)
@@ -282,6 +287,9 @@ func (a *App) Providers() []catalog.Provider {
 	}
 	if mp := a.MapProvider(); mp != nil {
 		ps = append(ps, mp)
+	}
+	if rp := a.RoadProvider(); rp != nil {
+		ps = append(ps, rp)
 	}
 	for _, f := range s.Catalog.Feeds {
 		if f.Enabled {

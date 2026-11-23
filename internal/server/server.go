@@ -228,6 +228,7 @@ func (s *Server) appHandler() http.Handler {
 	mux.HandleFunc("POST /api/setup/init", s.handleInit)
 	s.registerPhase2(mux)
 	s.registerMaps(mux)
+	s.registerRouting(mux)
 	s.registerGPS(mux)
 	s.registerAuth(mux)
 	s.registerNetwork(mux)

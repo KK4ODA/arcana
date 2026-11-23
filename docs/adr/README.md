@@ -21,3 +21,4 @@
 | [0017](0017-network-serving-features.md) | Remote administration, HTTPS on the same port, built-in mDNS | Accepted |
 | [0018](0018-integration-api-and-peer-sync.md) | Versioned integration API with scoped tokens; peer sync over it | Accepted |
 | [0019](0019-parallel-multi-mirror-downloads.md) | Download large files in pieces from several mirrors at once | Accepted |
+| [0020](0020-built-in-offline-routing.md) | Built-in offline routing from OpenStreetMap extracts | Accepted |
