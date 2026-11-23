@@ -3,6 +3,42 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
+## Unreleased
+
+### Added
+- **More for radio operators.** The *Amateur Radio Operator* collection
+  now suggests three more archives, as space allows:
+  - **Engineering LibreTexts:** open textbooks on antennas, transmission
+    lines, Smith charts and RF design, including both volumes of
+    Ellingson's *Electromagnetics*. It is searched by title only, because
+    the archive has no full-text index.
+  - **Signal Processing Q&A:** for software-defined radio and digital
+    modes.
+  - **Wikibooks:** optional.
+- **Scanned PDFs are pointed out.** A PDF whose pages have no text, such
+  as scanned images, is marked in *Your documents* and in the document
+  view, which also says how to make it searchable (text recognition, for
+  example with OCRmyPDF). Before, such a file was added without comment
+  and never matched a search.
+
+### Changed
+- **Better text from PDFs, so search finds more.**
+  - Words drawn as separate pieces were run together ("97.15Station").
+    Lines ran into each other, and words hyphenated at the end of a line
+    were indexed as two halves ("op-" and "erator"). Arcana now rebuilds
+    each page's text from where the characters are placed, and rejoins
+    hyphenated words. Real compounds such as "high-frequency" keep their
+    hyphen.
+  - On public-domain radio manuals, the share of words found, measured
+    against Poppler's `pdftotext`, rose from 93–97 % to 98–100 %. For
+    example, 47 CFR Part 97 went from 92.7 % to 99.2 %, and ATP 6-02.53
+    from 94.6 % to 99.4 %.
+  - PDFs whose fonts do not give character widths are read as before.
+  - Documents already in the search index are read again once, in the
+    background, after updating.
+- Large PDFs get more time to be read: 60 s plus a quarter of a second
+  per page, instead of a fixed 60 s.
+
 ## 0.7.0 — 2026-11-23
 
 Directions and turn-by-turn navigation without internet, search inside the

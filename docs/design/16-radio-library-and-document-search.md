@@ -1,8 +1,9 @@
 # P. Growing the amateur radio library, and searching manuals by page (design)
 
-Status: **design and research, not implemented.** Sources and licenses
-were checked on 2026-11-23; recheck each one when its catalog entry is
-written. Builds on [14-radio-and-integrations.md](14-radio-and-integrations.md)
+Status: **mostly design and research.** Two parts are implemented: the
+Kiwix additions (section 1), and the PDF text fixes with scanned-PDF
+detection (section 4). Sources and licenses were checked on 2026-11-23;
+recheck each one when its catalog entry is written. Builds on [14-radio-and-integrations.md](14-radio-and-integrations.md)
 (radio content decisions) and [15-local-ai.md](15-local-ai.md) (question
 answering).
 
@@ -46,30 +47,42 @@ brings](#sources-the-operator-brings).
 
 ## 1. Archives Kiwix already publishes
 
-Checked against the live Kiwix OPDS catalog on 2026-11-23 (3,682
-entries). Arcana's Kiwix provider already offers each of these, so adding
-them to the *Amateur Radio Operator* collection only changes
-`internal/catalog/bundled/presets.json`.
+**Status: done.** Checked against the live Kiwix OPDS catalog on
+2026-11-23 (3,682 entries). Arcana's Kiwix provider already offers each
+of these, so changing the *Amateur Radio Operator* collection only meant
+editing `internal/catalog/bundled/presets.json`.
 
-| Archive | Size | Why | Suggested priority |
+**How the contents were checked.**
+- Kiwix's browse server shows an access-confirmation page to automated
+  requests, so the archives' directories were read with HTTP range
+  requests instead. A ZIM file's header gives the offsets of its entry
+  list, which lists every path and title.
+- That took about 6 MB of reads per archive instead of the whole file.
+- `TestPresetsAgainstRealKiwixCatalog` (opt-in, `ARCANA_KIWIX_CATALOG`)
+  now checks every preset family against a downloaded catalog.
+
+| Archive | Size | Finding | Decision |
 |---|---|---|---|
-| `libretexts.org_en_eng` (Engineering LibreTexts, 2025-01) | 678 MB | Open engineering textbooks: circuits, electronics, electromagnetics | 2 |
-| `dsp.stackexchange.com_en_all` (Signal Processing Q&A) | 379 MB | SDR, filtering, modulation | 3 |
-| `physics.stackexchange.com_en_all` | 1.8 GB | Electromagnetism and propagation questions | 3 |
-| `engineering.stackexchange.com_en_all` | 258 MB | Towers, masts, mechanical questions | 3 |
-| `wikibooks_en_all` (`nopic` 3.5 GB, `maxi` 4.7 GB) | 3.5–4.7 GB | Open textbooks, including electronics and communication systems | 3 |
-| `armypubs_en_all` (Army Publishing Directorate, 2024-12) | 8.2 GB | US Army publications: signal and radio-operation doctrine | 3 (large) |
-| `solar.lowtechmagazine.com_mul_all` | 700 MB | Off-grid power for stations | 3 |
+| `libretexts.org_en_eng` (Engineering LibreTexts, 2025-01) | 678 MB | Contains *Electromagnetics I/II (Ellingson)*: dipole radiation, antennas, transmission lines. Also Steer's *Microwave and RF Design: Radio Systems*, Smith-chart matching and an SDR introduction. **No full-text index** (`_ftindex:no`), so it is searched by title. Its section titles are detailed, for example "Far-Field Radiation from a Half-Wave Dipole" | **Added**, priority 2 |
+| `dsp.stackexchange.com_en_all` (Signal Processing Q&A) | 379 MB | SDR, filtering, modulation; full-text index | **Added**, priority 3 |
+| `wikibooks_en_all` (`nopic` 3.5 GB, `maxi` 4.7 GB) | 3.5–4.7 GB | General open textbooks; the radio books are thin (section 2b) | **Added**, priority 3, preferring `maxi` for the diagrams |
+| `armypubs_en_all` (Army Publishing Directorate, 2024-12; a web crawl) | 8.2 GB | 5,768 PDFs, of which **13** are signal publications (ATP 6-02.x, TC 6-02.x). Its ATP 6-02.53 is the 2020 edition | **Not added.** 8.2 GB for 13 relevant documents; curate the 2025 ATP 6-02.53 (6 MB) instead (section 2a) |
+| `physics.stackexchange.com_en_all`, `engineering.stackexchange.com_en_all`, `solar.lowtechmagazine.com_mul_all` | 0.3–1.8 GB | Only occasionally about radio | Not added; other collections can include them |
+
+On an 8 GiB drive, the collection now selects:
+- Amateur Radio Q&A;
+- Electronics Q&A;
+- Engineering LibreTexts;
+- Signal Processing, Raspberry Pi and Arduino Q&A;
+- Parts 95 and 97.
+
+Wikipedia and Wikibooks are skipped. From 32 GiB, Wikipedia (`mini`) and
+Wikibooks (`maxi`) are added as well.
 
 Not found: Kiwix has **no** archive of ham radio video, forums other than
 Stack Exchange, or ham radio PDF collections. The `zimgit-*` prepper
 collections cover medicine, water, food, knots and post-disaster topics,
 not radio.
-
-Which radio topics `armypubs_en_all` and `libretexts.org_en_eng` actually
-contain could not be checked from here: Kiwix's browse server shows an
-access-confirmation page to automated requests. Check by opening them in
-Arcana before adding them to the collection.
 
 ## 2. Radio documents to curate
 
@@ -473,35 +486,63 @@ Findings:
     can go straight to the matching page.
   - The text view gets page markers and scrolls to the page, with the
     search words marked.
-- **Fix word joining.** A prototype run against the same PDFs (not
-  committed) made two changes:
-  - **Spacing.** Rebuild each page from glyph positions
-    (`Page.Content()`). Insert a space when the gap to the next glyph is
-    wider than 0.15 × the font size, and a line break when the baseline
-    moves by more than half the font size.
-  - **Dehyphenation.** Rejoin `letter-⏎lowercase`. Part 97 is set in
-    narrow columns, so "control op-⏎erator" was indexed as `op` and
-    `erator`.
+- **Fix word joining. Done** (`internal/docs/pdf.go`, ExtractorVersion 2).
+  - **Spacing.** Each page is rebuilt from glyph positions
+    (`Page.Content()`):
+    - a vertical move larger than half the font size starts a line, and
+      a move larger than two font sizes leaves a blank line;
+    - a gap wider than 0.15 × the font size separates words;
+    - moving left by more than one font size on the same line also
+      separates words (another column, or text drawn twice).
+  - **Letter-spaced headings.** In a heading set with wide character
+    spacing, most gaps on the line are similar and wider than a word gap.
+    Only gaps clearly wider than the typical one then separate words.
+  - **Line feeds after TJ arrays.** The library emits a line feed after
+    every TJ array; these are ignored, and position decides lines.
+  - **Fonts without widths.** The library reads widths only from simple
+    fonts' `/Widths`, so for other fonts every width is 0 and gaps cannot
+    be measured. A page where most glyphs lack a width keeps the old
+    content-stream text (`GetPlainText`), so no page can get worse.
+  - **Dehyphenation.** `letter-⏎lowercase` is rejoined, and the document
+    decides between "operator" and "high-frequency":
+    - the hyphen is kept only when both halves occur elsewhere in the
+      document and the joined word does not;
+    - the halves at the breaks themselves do not count.
+  - **Ligatures** (ﬁ, ﬂ, …) are spelled out.
 
-  Results, as term hits relative to `pdftotext`:
+  Results, measured by `go test` against `pdftotext` over all words.
+  Recall is the share of the reference's words found; precision is the
+  share of extracted words that the reference also has.
 
-  | PDF | Today | + spacing | + spacing and dehyphenation |
-  |---|---|---|---|
-  | 47 CFR Part 97 | 87.5 % | 90.0 % | **99.7 %** |
-  | Army IS1143 (1986) | 97.6 % | 100 % | 100 % |
-  | TM 11-666 (OCR copy) | 96.9 % | 96.9 % | 96.9 % |
+  | PDF | Fonts | Before: recall / precision | After: recall / precision | Time, before → after |
+  |---|---|---|---|---|
+  | 47 CFR Part 97 (govinfo) | Type 1 | 92.7 % / 91.1 % | **99.2 % / 95.9 %** | 45 ms → 193 ms |
+  | ATP 6-02.53 (2025, 206 pp) | 211 CID, 22 TrueType | 94.6 % / 97.1 % | **99.4 % / 98.2 %** | 0.8 s → 1.9 s |
+  | Army IS1143 (1986, 177 pp) | CID, TrueType | 97.4 % / 96.2 % | **99.9 % / 97.3 %** | 0.17 s → 5.9 s |
+  | NCVEC Technician pool 2026–2030 (Word) and its diagrams | TrueType, CID | 100 % / 100 % | 100 % / 100 % | ≈ same |
+  | TM 11-666 (archive.org OCR) | OCR text layer | 98.4 % / 96.7 % | 98.4 % / 96.8 % | 1.0 s → 3.0 s |
+  | TM 11-666 (image-only scan) | none | no text | no text, **reported as scanned** | ≈ same |
 
-  - **Cost.** Per-glyph extraction is slower: 4.3 s instead of 0.13 s for
-    the 177-page manual. That is acceptable for background indexing, but
-    the 60 s extraction limit should scale with the page count.
+  - **Cost.** Per-glyph extraction is slower: at worst 33 ms a page here,
+    because the library re-reads a font's encoding at every font change.
+    The time allowed per document is therefore 60 s plus 250 ms per page
+    (at most 5,000 pages), instead of a fixed 60 s. Extraction stops
+    between pages once that time has run out.
+  - **Existing indexes.** The index records the extractor version per
+    document. Rows from older versions, including indexes made before the
+    column existed, are extracted again once.
   - **Not adopted.** A WebAssembly build of PDFium (for example
     `klippa-app/go-pdfium` on wazero) would keep Arcana free of cgo with
-    better text extraction, but it is a larger dependency. Evaluate it only
-    if the prototype's approach falls short on real manuals.
-- **Detect scanned PDFs.**
-  - A PDF averaging fewer than about 50 characters per page is marked
-    *scanned: text search cannot see inside this document* in *My
-    documents* and the library, with what to do about it.
+    better text extraction, but it is a larger dependency. Reconsider it
+    if manuals with fonts that have no widths turn out to be common.
+- **Detect scanned PDFs. Done.**
+  - A page with fewer than 10 visible characters counts as having no
+    text. When at least half of a PDF's pages have no text, the document
+    gets a *problem*. It says the pages are probably scanned images, how
+    many, and to run OCR (for example OCRmyPDF).
+  - The problem is stored in the index's `error` column, which nothing
+    showed before. It is now shown in *Your documents* and as a banner in
+    the document view. Extraction errors appear the same way.
 - **Radio synonyms** (optional, cheap).
   - A small curated table expands queries, for example:
     SWR ↔ VSWR; CTCSS ↔ PL tone ↔ tone squelch; offset ↔ shift; CAT ↔
@@ -572,8 +613,8 @@ Design points:
 
 | Step | Size | Depends on |
 |---|---|---|
-| Add Kiwix archives to the *Amateur Radio Operator* collection | Small: `presets.json` | — |
-| Fix PDF word joining; detect scanned PDFs | Small | — |
+| Add Kiwix archives to the *Amateur Radio Operator* collection | **Done** | — |
+| Fix PDF word joining; detect scanned PDFs | **Done** | — |
 | Search by page, open at the page, outline headings | Medium | — |
 | Add a folder (copy, keep structure, duplicates, preview) | Medium | Subfolders in `user/documents` |
 | Curated government and open documents (catalog or signed radio feed) | Medium, mostly curation | Mirrors for sites that block automated downloads |

@@ -271,6 +271,7 @@ export async function documentView(main, params) {
     findBar,
     resource ? h('div', { class: 'toolbar small muted' }, resource.title, ` · ${resource.version} · published ${fmtDate(resource.published)} · `, licenseBadge(resource.license)) : null,
     resource ? (resource.warnings || []).map((w) => h('div', { class: `banner ${w.kind === 'medical' ? 'err' : 'warn'}`, style: 'margin:8px 12px' }, w.text)) : null,
+    d.problem ? h('div', { class: 'banner warn', style: 'margin:8px 12px' }, d.problem) : null,
     h('div', { class: 'body' },
       h('p', { class: 'small muted' }, 'Text extracted for reading and search. Layout, images and tables appear only in the original.'),
       textEl,

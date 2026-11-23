@@ -24,6 +24,9 @@ type UserDocument struct {
 	Modified time.Time `json:"modified"`
 	URL      string    `json:"url"`
 	Indexed  bool      `json:"indexed"`
+	// Problem says why search cannot see (all of) the document, such as a
+	// scanned PDF without text.
+	Problem string `json:"problem,omitempty"`
 }
 
 // MaxUserDocument bounds one uploaded document (2 GB).
@@ -38,6 +41,10 @@ func (a *App) UserDocuments() ([]UserDocument, error) {
 	if err != nil {
 		return nil, err
 	}
+	var problems map[string]string
+	if a.Docs != nil {
+		problems, _ = a.Docs.Problems(context.Background())
+	}
 	var out []UserDocument
 	for _, e := range entries {
 		if !e.Type().IsRegular() || fsutil.ValidateFileName(e.Name()) != nil {
@@ -48,7 +55,7 @@ func (a *App) UserDocuments() ([]UserDocument, error) {
 			continue
 		}
 		out = append(out, UserDocument{Name: e.Name(), Size: info.Size(), Modified: info.ModTime().UTC(),
-			URL: docs.UserDocURL(e.Name()), Indexed: docs.Supported(e.Name())})
+			URL: docs.UserDocURL(e.Name()), Indexed: docs.Supported(e.Name()), Problem: problems["user:"+e.Name()]})
 	}
 	sort.Slice(out, func(i, j int) bool { return strings.ToLower(out[i].Name) < strings.ToLower(out[j].Name) })
 	return out, nil

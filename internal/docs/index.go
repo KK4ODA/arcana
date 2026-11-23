@@ -58,12 +58,25 @@ func OpenIndex(path string) (*Index, error) {
 	}
 	db.SetMaxOpenConns(1)
 	ix := &Index{db: db}
+	// error holds why a document cannot be searched (fully): an extraction
+	// error, or an Extracted.Problem such as a scanned PDF. ver is the
+	// ExtractorVersion that produced the row.
 	_, err = db.Exec(`
 CREATE TABLE IF NOT EXISTS docs (key TEXT PRIMARY KEY, source TEXT NOT NULL, resource_id TEXT NOT NULL,
 	name TEXT NOT NULL, url TEXT NOT NULL, title TEXT NOT NULL, size INTEGER NOT NULL, mtime INTEGER NOT NULL,
-	error TEXT NOT NULL DEFAULT '');
+	error TEXT NOT NULL DEFAULT '', ver INTEGER NOT NULL DEFAULT 0);
 CREATE VIRTUAL TABLE IF NOT EXISTS docs_fts USING fts5(key UNINDEXED, title, body,
 	tokenize = 'unicode61 remove_diacritics 2');`)
+	if err == nil {
+		// Indexes made by earlier versions of Arcana have no ver column;
+		// their rows read as version 0 and are extracted again by the
+		// next sync.
+		var has int
+		err = db.QueryRow(`SELECT count(*) FROM pragma_table_info('docs') WHERE name = 'ver'`).Scan(&has)
+		if err == nil && has == 0 {
+			_, err = db.Exec(`ALTER TABLE docs ADD COLUMN ver INTEGER NOT NULL DEFAULT 0`)
+		}
+	}
 	if err != nil {
 		db.Close()
 		// The index is a cache: if it is damaged, the caller deletes it
@@ -84,21 +97,22 @@ type SyncResult struct {
 }
 
 // Sync makes the index match docs: new or changed files (by size and
-// modification time) are extracted and indexed, missing ones removed.
+// modification time) and files indexed by an older ExtractorVersion are
+// extracted and indexed, missing ones removed.
 func (ix *Index) Sync(ctx context.Context, docs []Doc, progress func(done, total int)) (SyncResult, error) {
 	ix.mu.Lock()
 	defer ix.mu.Unlock()
 	var res SyncResult
-	existing := map[string][2]int64{}
-	rows, err := ix.db.QueryContext(ctx, "SELECT key, size, mtime FROM docs")
+	existing := map[string][3]int64{}
+	rows, err := ix.db.QueryContext(ctx, "SELECT key, size, mtime, ver FROM docs")
 	if err != nil {
 		return res, err
 	}
 	for rows.Next() {
 		var k string
-		var s, m int64
-		if err := rows.Scan(&k, &s, &m); err == nil {
-			existing[k] = [2]int64{s, m}
+		var s, m, v int64
+		if err := rows.Scan(&k, &s, &m, &v); err == nil {
+			existing[k] = [3]int64{s, m, v}
 		}
 	}
 	rows.Close()
@@ -111,11 +125,11 @@ func (ix *Index) Sync(ctx context.Context, docs []Doc, progress func(done, total
 			progress(i, len(docs))
 		}
 		want[d.Key] = true
-		if e, ok := existing[d.Key]; ok && e[0] == d.Size && e[1] == d.ModTime {
+		if e, ok := existing[d.Key]; ok && e[0] == d.Size && e[1] == d.ModTime && e[2] >= ExtractorVersion {
 			continue
 		}
 		ex, xerr := Extract(ctx, d.Path)
-		errText := ""
+		errText := ex.Problem
 		if xerr != nil {
 			errText = xerr.Error()
 			res.Failed = append(res.Failed, d.Name+": "+errText)
@@ -149,10 +163,11 @@ func (ix *Index) upsert(ctx context.Context, d Doc, ex Extracted, errText string
 	if _, err := tx.ExecContext(ctx, "DELETE FROM docs_fts WHERE key = ?", d.Key); err != nil {
 		return err
 	}
-	if _, err := tx.ExecContext(ctx, `INSERT INTO docs (key, source, resource_id, name, url, title, size, mtime, error)
-		VALUES (?,?,?,?,?,?,?,?,?) ON CONFLICT(key) DO UPDATE SET source=excluded.source, resource_id=excluded.resource_id,
-		name=excluded.name, url=excluded.url, title=excluded.title, size=excluded.size, mtime=excluded.mtime, error=excluded.error`,
-		d.Key, d.Source, d.ResourceID, d.Name, d.URL, ex.Title, d.Size, d.ModTime, errText); err != nil {
+	if _, err := tx.ExecContext(ctx, `INSERT INTO docs (key, source, resource_id, name, url, title, size, mtime, error, ver)
+		VALUES (?,?,?,?,?,?,?,?,?,?) ON CONFLICT(key) DO UPDATE SET source=excluded.source, resource_id=excluded.resource_id,
+		name=excluded.name, url=excluded.url, title=excluded.title, size=excluded.size, mtime=excluded.mtime, error=excluded.error,
+		ver=excluded.ver`,
+		d.Key, d.Source, d.ResourceID, d.Name, d.URL, ex.Title, d.Size, d.ModTime, errText, ExtractorVersion); err != nil {
 		return err
 	}
 	if _, err := tx.ExecContext(ctx, "INSERT INTO docs_fts (key, title, body) VALUES (?,?,?)", d.Key, ex.Title, ex.Text); err != nil {
@@ -221,6 +236,36 @@ func (ix *Index) Text(ctx context.Context, key string, max int) (title, text, ur
 	err = ix.db.QueryRowContext(ctx, `SELECT f.title, substr(f.body, 1, ?), d.url FROM docs_fts f JOIN docs d ON d.key = f.key WHERE f.key = ?`,
 		max, key).Scan(&title, &text, &url)
 	return
+}
+
+// Problems returns, for each indexed document that cannot be searched
+// fully, why not: an extraction error, or a problem such as a scanned PDF.
+func (ix *Index) Problems(ctx context.Context) (map[string]string, error) {
+	ix.mu.Lock()
+	defer ix.mu.Unlock()
+	rows, err := ix.db.QueryContext(ctx, "SELECT key, error FROM docs WHERE error != ''")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := map[string]string{}
+	for rows.Next() {
+		var k, e string
+		if err := rows.Scan(&k, &e); err != nil {
+			return nil, err
+		}
+		out[k] = e
+	}
+	return out, rows.Err()
+}
+
+// Problem returns why one document cannot be searched fully, or "".
+func (ix *Index) Problem(ctx context.Context, key string) string {
+	ix.mu.Lock()
+	defer ix.mu.Unlock()
+	var e string
+	_ = ix.db.QueryRowContext(ctx, "SELECT error FROM docs WHERE key = ?", key).Scan(&e)
+	return e
 }
 
 // Count returns the number of indexed documents.

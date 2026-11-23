@@ -250,7 +250,8 @@ func (s *Server) handleDocText(w http.ResponseWriter, r *http.Request, a *app.Ap
 		writeError(w, 404, "document not indexed")
 		return
 	}
-	writeJSON(w, 200, map[string]any{"key": key, "title": title, "text": text, "url": u, "truncated": len(text) >= 2<<20})
+	writeJSON(w, 200, map[string]any{"key": key, "title": title, "text": text, "url": u, "truncated": len(text) >= 2<<20,
+		"problem": a.Docs.Problem(r.Context(), key)})
 }
 
 func (s *Server) handleSavePreset(w http.ResponseWriter, r *http.Request, a *app.App) {

@@ -301,7 +301,8 @@ export async function libraryView(main, params, ctx) {
         h('thead', null, h('tr', null, h('th', null, 'Document'), h('th', { class: 'right' }, 'Size'), h('th', { class: 'hide-sm' }, 'Added'), h('th', null, ''))),
         h('tbody', null, documents.map((d) => h('tr', null,
           h('td', null, d.indexed ? h('a', { href: `#/doc?key=${encodeURIComponent('user:' + d.name)}` }, d.name) : d.name,
-            !d.indexed ? h('div', { class: 'small muted' }, 'Not searchable (format not indexed)') : null),
+            !d.indexed ? h('div', { class: 'small muted' }, 'Not searchable (format not indexed)') : null,
+            d.problem ? h('div', { class: 'small doc-problem' }, d.problem) : null),
           h('td', { class: 'right num' }, fmtBytes(d.size)),
           h('td', { class: 'hide-sm small' }, fmtDate(d.modified)),
           h('td', { class: 'right' }, canChange ? h('button', { class: 'danger', onclick: async () => {

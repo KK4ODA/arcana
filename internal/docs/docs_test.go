@@ -12,18 +12,36 @@ import (
 )
 
 // minimalPDF builds a valid one-page PDF containing text, with a correct
-// cross-reference table.
+// cross-reference table. Its font has no widths.
 func minimalPDF(text string) []byte {
+	return pdfDoc(fontNoWidths, fmt.Sprintf("BT /F1 12 Tf 72 720 Td (%s) Tj ET", text))
+}
+
+const fontNoWidths = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>"
+
+// fontWithWidths gives every character from space to tilde a width of half
+// an em, so glyph positions can be measured.
+var fontWithWidths = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /FirstChar 32 /LastChar 126 /Widths [" +
+	strings.TrimSpace(strings.Repeat("500 ", 95)) + "] >>"
+
+// pdfDoc builds a PDF with one page per content stream, all using font as
+// /F1.
+func pdfDoc(font string, streams ...string) []byte {
+	kids := make([]string, len(streams))
+	for i := range streams {
+		kids[i] = fmt.Sprintf("%d 0 R", 5+2*i)
+	}
 	objs := []string{
 		"<< /Type /Catalog /Pages 2 0 R >>",
-		"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
-		"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>",
-		"", // content stream, filled below
-		"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+		fmt.Sprintf("<< /Type /Pages /Kids [%s] /Count %d >>", strings.Join(kids, " "), len(streams)),
+		font,
 		"<< /Title (Field Guide) >>",
 	}
-	stream := fmt.Sprintf("BT /F1 12 Tf 72 720 Td (%s) Tj ET", text)
-	objs[3] = fmt.Sprintf("<< /Length %d >>\nstream\n%s\nendstream", len(stream), stream)
+	for i, s := range streams {
+		objs = append(objs,
+			fmt.Sprintf("<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents %d 0 R /Resources << /Font << /F1 3 0 R >> >> >>", 6+2*i),
+			fmt.Sprintf("<< /Length %d >>\nstream\n%s\nendstream", len(s), s))
+	}
 	var b bytes.Buffer
 	b.WriteString("%PDF-1.4\n")
 	offsets := make([]int, len(objs))
@@ -36,7 +54,7 @@ func minimalPDF(text string) []byte {
 	for _, off := range offsets {
 		fmt.Fprintf(&b, "%010d 00000 n \n", off)
 	}
-	fmt.Fprintf(&b, "trailer\n<< /Size %d /Root 1 0 R /Info 6 0 R >>\nstartxref\n%d\n%%%%EOF\n", len(objs)+1, xref)
+	fmt.Fprintf(&b, "trailer\n<< /Size %d /Root 1 0 R /Info 4 0 R >>\nstartxref\n%d\n%%%%EOF\n", len(objs)+1, xref)
 	return b.Bytes()
 }
 

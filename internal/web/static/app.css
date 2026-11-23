@@ -302,6 +302,7 @@ textarea { font: inherit; font-size: 13px; padding: 6px 8px; border: 1px solid v
 .notes-panel { width: min(380px, 100%); overflow: auto; background: var(--surface); border-left: 1px solid var(--border); padding: 10px 12px; display: grid; gap: 10px; align-content: start; }
 .doc-text { max-width: 46rem; font-size: 15px; line-height: 1.6; }
 .doc-text p { margin: 0 0 .8em; }
+.doc-problem { color: var(--warn); margin-top: 2px; max-width: 46rem; }
 .task { padding: 8px 12px; border-top: 1px solid var(--border); }
 .task:first-child { border-top: 0; }
 .checklist { max-height: 260px; overflow: auto; border: 1px solid var(--border); border-radius: var(--radius); padding: 4px 8px; }
