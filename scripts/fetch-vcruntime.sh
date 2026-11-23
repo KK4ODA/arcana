@@ -52,7 +52,7 @@ fi
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 echo "downloading the Visual C++ runtime $VERSION (VC_redist.x64.exe)"
-curl -fsSL --retry 4 -o "$tmp/VC_redist.x64.exe" "$URL"
+curl -fsSL --retry 5 --retry-delay 30 --retry-max-time 300 -o "$tmp/VC_redist.x64.exe" "$URL"
 got=$(sha256 "$tmp/VC_redist.x64.exe")
 if [ "$got" != "$INSTALLER_SHA256" ]; then
 	echo "VC_redist.x64.exe: SHA-256 $got, expected $INSTALLER_SHA256; refusing to use it" >&2

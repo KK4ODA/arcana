@@ -64,6 +64,18 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      # The pinned kiwix-serve binaries, their sources and the Visual C++
+      # runtime: the same cache the CI build job fills on main (a tag can
+      # restore caches from the default branch), so a release does not
+      # depend on download.kiwix.org answering at that moment. Every file
+      # is still checked against its pinned SHA-256 by the fetch scripts.
+      - uses: actions/cache@v4
+        with:
+          path: |
+            third_party/kiwix
+            third_party/kiwix-src
+            third_party/vcruntime
+          key: kiwix-${{ hashFiles('scripts/fetch-kiwix.sh', 'scripts/fetch-kiwix-sources.sh', 'scripts/fetch-vcruntime.sh') }}
       - name: Install cabextract (unpacks the Visual C++ runtime)
         run: sudo apt-get install -y -q cabextract || (sudo apt-get update -q && sudo apt-get install -y -q cabextract)
       - name: Build release files

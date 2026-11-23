@@ -56,7 +56,10 @@ fetch() {
 	tmp=$(mktemp -d)
 	trap 'rm -rf "$tmp"' EXIT
 	echo "$plat: downloading $file"
-	curl -fsSL --retry 4 -o "$tmp/$file" "$BASE/$file"
+	# download.kiwix.org answers bursts of requests (busy CI runners) with
+	# 429 Too Many Requests: wait 30 s between attempts, or as long as the
+	# server's Retry-After asks.
+	curl -fsSL --retry 5 --retry-delay 30 --retry-max-time 300 -o "$tmp/$file" "$BASE/$file"
 	got=$(sha256 "$tmp/$file")
 	if [ "$got" != "$want" ]; then
 		echo "$plat: SHA-256 mismatch for $file (got $got, expected $want); refusing to install" >&2

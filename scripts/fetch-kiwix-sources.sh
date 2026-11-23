@@ -33,7 +33,7 @@ get() {
 	fi
 	for url in "$@"; do
 		echo "downloading $file"
-		if curl -fsSL --retry 4 -o "$DEST/$file.tmp" "$url" && [ "$(sha256 "$DEST/$file.tmp")" = "$want" ]; then
+		if curl -fsSL --retry 5 --retry-delay 30 --retry-max-time 300 -o "$DEST/$file.tmp" "$url" && [ "$(sha256 "$DEST/$file.tmp")" = "$want" ]; then
 			mv "$DEST/$file.tmp" "$DEST/$file"
 			return
 		fi

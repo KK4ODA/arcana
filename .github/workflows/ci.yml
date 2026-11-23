@@ -45,6 +45,13 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      # kiwix-serve is pinned by hash in the fetch script: download it once
+      # per change of the pins, not on every run (download.kiwix.org
+      # answers busy CI runners with 429 Too Many Requests).
+      - uses: actions/cache@v4
+        with:
+          path: third_party/kiwix
+          key: kiwix-serve-${{ runner.os }}-${{ hashFiles('scripts/fetch-kiwix.sh') }}
       - name: Fetch kiwix-serve (pinned, hash-verified)
         shell: bash
         run: scripts/fetch-kiwix.sh
@@ -65,6 +72,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      # The same Linux kiwix-serve the Linux test job caches.
+      - uses: actions/cache@v4
+        with:
+          path: third_party/kiwix
+          key: kiwix-serve-${{ runner.os }}-${{ hashFiles('scripts/fetch-kiwix.sh') }}
       - name: Fetch kiwix-serve
         run: scripts/fetch-kiwix.sh
       - name: Install Playwright for the UI tripwire
