@@ -28,6 +28,10 @@
 
 No transmission functionality is in scope.
 
+Plans for growing this content, adding folders of manuals and searching
+them by page are in
+[16-radio-library-and-document-search.md](16-radio-library-and-document-search.md).
+
 ## Local integration API (implemented in 0.6.0)
 
 > **Status:** implemented as designed below, with these differences:

@@ -19,6 +19,8 @@
 | | [12-testing.md](design/12-testing.md) | Test strategy and the offline acceptance test |
 | | [13-requirements.md](design/13-requirements.md) | Functional requirements with status |
 | | [14-radio-and-integrations.md](design/14-radio-and-integrations.md) | Amateur radio content and the local integration API |
+| | [15-local-ai.md](design/15-local-ai.md) | Optional local question answering (design only) |
+| | [16-radio-library-and-document-search.md](design/16-radio-library-and-document-search.md) | Growing the radio library; adding folders; searching manuals by page (design only) |
 
 ## Decisions, specifications and guides
 
