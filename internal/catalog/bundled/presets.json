@@ -157,6 +157,11 @@
           "reason": "Electronics design and troubleshooting."
         },
         {
+          "family": "kiwix.libretexts.org_en_eng",
+          "priority": 2,
+          "reason": "Open engineering textbooks: antennas, transmission lines, Smith charts and RF design. Searched by title only."
+        },
+        {
           "family": "kiwix.wikipedia_{lang}_all",
           "variants": [
             "nopic",
@@ -164,6 +169,11 @@
           ],
           "priority": 2,
           "reason": "Background on radio, propagation and geography."
+        },
+        {
+          "family": "kiwix.dsp.stackexchange.com_en_all",
+          "priority": 3,
+          "reason": "Signal processing questions for software-defined radio and digital modes."
         },
         {
           "family": "kiwix.raspberrypi.stackexchange.com_en_all",
@@ -174,6 +184,15 @@
           "family": "kiwix.arduino.stackexchange.com_en_all",
           "priority": 3,
           "reason": "Microcontrollers for station accessories."
+        },
+        {
+          "family": "kiwix.wikibooks_{lang}_all",
+          "variants": [
+            "maxi",
+            "nopic"
+          ],
+          "priority": 3,
+          "reason": "Open textbooks, including electronics and communication systems. The amateur radio book is unfinished."
         }
       ]
     },
