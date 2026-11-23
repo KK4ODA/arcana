@@ -17,6 +17,7 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"net/url"
 	"path"
 	"path/filepath"
 	"strconv"
@@ -919,6 +920,7 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *ap
 		ContentUpdates               *library.ContentUpdateSettings `json:"contentUpdates"`
 		WelcomeDone                  *bool                          `json:"welcomeDone"`
 		Mesh                         *library.MeshSettings          `json:"mesh"`
+		Links                        *[]library.LinkTile            `json:"links"`
 	}
 	if err := readJSON(r, &req); err != nil {
 		writeError(w, 400, err.Error())
@@ -1022,6 +1024,24 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *ap
 				return errors.New("invalid GPS settings")
 			}
 			st.GPS = g
+		}
+		if req.Links != nil {
+			links := *req.Links
+			if len(links) > 24 {
+				return errors.New("at most 24 links")
+			}
+			for i := range links {
+				l := &links[i]
+				l.Title, l.URL, l.Description = strings.TrimSpace(l.Title), strings.TrimSpace(l.URL), strings.TrimSpace(l.Description)
+				u, err := url.Parse(l.URL)
+				if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" || u.User != nil {
+					return fmt.Errorf("link %q: use an http:// or https:// address", l.Title)
+				}
+				if l.Title == "" || len(l.Title) > 60 || len(l.Description) > 200 || len(l.URL) > 500 {
+					return errors.New("each link needs a title (at most 60 characters) and a short description")
+				}
+			}
+			st.Links = links
 		}
 		if req.Mesh != nil {
 			ms := *req.Mesh

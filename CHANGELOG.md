@@ -62,6 +62,20 @@ the library format version is tracked separately (docs/design/09-storage-and-dat
   listed beside the map. Arcana only listens: it asks the radio for its
   node list and keeps the connection alive, and never transmits on the
   mesh. Network clients see the mesh only if you allow it.
+- **U.S. Army field manuals.** Three public-domain manuals cleared for
+  public release join the catalog as searchable PDFs: *FM 4-25.11 First
+  Aid*, *ATP 3-50.21 Survival* (2018) and *FM 3-25.26 Map Reading and Land
+  Navigation*. They are offered in the Family Emergency Preparedness and
+  Remote Expedition collections, with notes on what has changed since they
+  were written. (The 2013 TC 3-25.26 was left out: its distribution is
+  restricted to government agencies.)
+- **Links on the Library page.** Add shortcuts to other services on your
+  network (a Kolibri server, a radio's web page, a file share) in
+  *Settings → Links on the Library page*; everyone sees them on the Library
+  page.
+- **OpenAPI description of the integration API** at
+  `/api/integration/v1/openapi.json` (OpenAPI 3.1), for client generators
+  and API tools. A test keeps it in step with the routes.
 - **Getting started.** A new library opens a short guided setup (and the
   Library view offers it until you finish or skip it): choose topics (the
   nine collections) and tools (maps of your area, directions, the medicines

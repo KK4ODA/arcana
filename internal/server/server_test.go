@@ -154,6 +154,8 @@ func TestInterfaceMakesNoExternalRequests(t *testing.T) {
 		// enters; the browser never does.
 		"http://127.0.0.1:11434/v1": true,
 		"http://127.0.0.1:1234/v1":  true,
+		// Placeholder in the Library links editor.
+		"http://raspberrypi.local:8080": true,
 		// Map attribution links required by the ODbL; followed only if
 		// the user clicks them.
 		"https://www.openstreetmap.org/copyright": true,

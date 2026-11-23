@@ -169,6 +169,26 @@ export async function settingsView(main) {
     field('Share the mesh', h('label', { class: 'inline' }, meshShare, 'Show mesh nodes and messages to network clients'),
       'Off by default: the positions of people on the mesh are personal.')));
 
+  // Links on the Library page.
+  const links = [...(st.links || [])];
+  const linksInitial = JSON.stringify(links);
+  const linkList = h('div');
+  const renderLinks = () => fill(linkList, links.map((l) => h('div', { class: 'row', style: 'margin-bottom:4px' },
+    h('b', null, l.title), h('span', { class: 'mono small muted' }, l.url), l.description ? h('span', { class: 'small' }, l.description) : null,
+    h('button', { disabled: ro, onclick: () => { links.splice(links.indexOf(l), 1); renderLinks(); } }, 'Remove'))));
+  renderLinks();
+  const lTitle = h('input', { type: 'text', placeholder: 'Title, e.g. Kolibri courses', style: 'width:200px', maxlength: 60, disabled: ro });
+  const lURL = h('input', { type: 'url', placeholder: 'http://raspberrypi.local:8080', style: 'width:260px', disabled: ro });
+  const lDesc = h('input', { type: 'text', placeholder: 'Short description (optional)', style: 'width:260px', maxlength: 200, disabled: ro });
+  main.appendChild(h('section', { class: 'panel' },
+    h('header', null, h('h2', null, 'Links on the Library page')),
+    field('Other services', h('div', null, linkList, h('div', { class: 'row' }, lTitle, lURL, lDesc, h('button', { disabled: ro, onclick: () => {
+      if (!lTitle.value.trim() || !/^https?:\/\//.test(lURL.value.trim())) { toast('Enter a title and an http:// or https:// address.'); return; }
+      links.push({ title: lTitle.value.trim(), url: lURL.value.trim(), description: lDesc.value.trim() });
+      lTitle.value = lURL.value = lDesc.value = '';
+      renderLinks();
+    } }, 'Add'))), 'Shortcuts shown to everyone on the Library page, for other things on this network: a Kolibri server, a radio\u2019s web page, a file share. Arcana does not check or manage them.')));
+
   const ap = assistantPanel(st, asst, ro, field);
   main.appendChild(ap.el);
 
@@ -195,6 +215,7 @@ export async function settingsView(main) {
     if (JSON.stringify(gb) !== gpsInitial || !st.gps) body.gps = gb;
     const mb = meshBody();
     if (JSON.stringify(mb) !== meshInitial) body.mesh = mb;
+    if (JSON.stringify(links) !== linksInitial) body.links = links;
     const ab = ap.body();
     if (JSON.stringify(ab) !== ap.initial) body.assistant = ab;
     try {

@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"crypto/rand"
+	_ "embed"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -39,6 +40,11 @@ const clientKey ctxKey = 0
 func (s *Server) registerIntegration(mux *http.ServeMux) {
 	p := integrationPrefix
 	mux.HandleFunc("GET "+p+"/{$}", s.withApp(s.handleIntegrationInfo))
+	mux.HandleFunc("GET "+p+"/openapi.json", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.Header().Set("Cache-Control", "no-cache")
+		w.Write(integrationOpenAPI)
+	})
 	mux.HandleFunc("POST "+p+"/pair", s.withApp(s.handlePairRequest))
 	mux.HandleFunc("GET "+p+"/pair/{id}", s.withApp(s.handlePairPoll))
 	mux.HandleFunc("GET "+p+"/search", s.withApp(s.scoped(integration.ScopeSearch, s.handleIntSearch)))
@@ -68,6 +74,12 @@ func (s *Server) registerIntegration(mux *http.ServeMux) {
 	// Short links created by programs with documents:share.
 	mux.HandleFunc("GET /s/{code}", s.handleShareLink)
 }
+
+// integrationOpenAPI describes API v1 (OpenAPI 3.1). A test keeps it in
+// step with the routes registered above.
+//
+//go:embed openapi/integration-v1.json
+var integrationOpenAPI []byte
 
 func buildVersion() string { return buildinfo.Version }
 

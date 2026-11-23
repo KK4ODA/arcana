@@ -526,6 +526,217 @@
         "decompressedSize": "4960506"
       },
       "popularity": 9
+    },
+    {
+      "id": "arcana.us-army-fm-4-25-11",
+      "provider": "arcana",
+      "title": "FM 4-25.11 First Aid (U.S. Army)",
+      "description": "The Army's first aid manual for people who are not medics: evaluating a casualty, restoring breathing, controlling bleeding, preventing shock, wounds, burns, fractures, heat and cold injuries, bites and stings, and moving a casualty. With Change 1 (2004).",
+      "category": "first-aid",
+      "subcategory": "manuals",
+      "tags": [
+        "first aid",
+        "military",
+        "manual"
+      ],
+      "family": "arcana.us-army-fm-4-25-11",
+      "variant": "standard",
+      "publisher": "Headquarters, Department of the Army (United States)",
+      "sourceUrl": "https://archive.org/details/fm-4-25-11-first-aid-c-1-2004",
+      "version": "2004-07",
+      "published": "2004-07-01",
+      "lastVerified": "2026-11-23T00:00:00Z",
+      "languages": [
+        "en"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "pdf",
+      "files": [
+        {
+          "name": "fm-4-25-11-first-aid.pdf",
+          "size": 2600639,
+          "hashes": {
+            "sha256": "62010e9dcc9204badd5940154d8b580260776405dba7bd5d99544722fdeb4ce3"
+          },
+          "mirrors": [
+            {
+              "url": "https://archive.org/download/fm-4-25-11-first-aid-c-1-2004/FM%204-25-11%20First%20Aid%20%28C1%29%20%282004%29.pdf"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 2600639,
+      "installedSize": 2600639,
+      "license": {
+        "id": "LicenseRef-PD-USGov",
+        "name": "US federal government work (public domain in the US)",
+        "redistribution": "permitted",
+        "verified": true,
+        "notes": "Works of the US federal government are not subject to US copyright (17 U.S.C. 105). The manual states: approved for public release; distribution is unlimited."
+      },
+      "capabilities": {
+        "fullTextSearch": true,
+        "titleSearch": true
+      },
+      "media": {
+        "pictures": true,
+        "videos": false,
+        "detail": "full"
+      },
+      "updateStrategy": "snapshot-replace",
+      "warnings": [
+        {
+          "kind": "medical",
+          "text": "Military first aid from 2002–2004, not current medical advice. Some practices have changed since (the Army replaced this manual with TC 4-02.1 in 2016). In an emergency, contact emergency services or a qualified clinician whenever possible."
+        },
+        {
+          "kind": "outdated",
+          "text": "Superseded edition, kept because it is public domain and widely used for training."
+        }
+      ],
+      "popularity": 3
+    },
+    {
+      "id": "arcana.us-army-atp-3-50-21",
+      "provider": "arcana",
+      "title": "ATP 3-50.21 Survival (U.S. Army)",
+      "description": "The Army's current survival manual (September 2018): survival planning and kits, medicine in the field, shelter, water, food, fire, navigation, signaling, and survival in cold, desert, tropical and maritime environments.",
+      "category": "preparedness",
+      "subcategory": "manuals",
+      "tags": [
+        "survival",
+        "military",
+        "manual"
+      ],
+      "family": "arcana.us-army-atp-3-50-21",
+      "variant": "standard",
+      "publisher": "Headquarters, Department of the Army (United States)",
+      "sourceUrl": "https://archive.org/details/survival-atp-3-50-21",
+      "version": "2018-09",
+      "published": "2018-09-01",
+      "lastVerified": "2026-11-23T00:00:00Z",
+      "languages": [
+        "en"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "pdf",
+      "files": [
+        {
+          "name": "atp-3-50-21-survival.pdf",
+          "size": 23749774,
+          "hashes": {
+            "sha256": "817746b13262e9e26e8ac7d25bf879790df369c2aa0a2600f69158ec4090461c"
+          },
+          "mirrors": [
+            {
+              "url": "https://archive.org/download/survival-atp-3-50-21/Survival%20%28ATP%203-50-21%29.pdf"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 23749774,
+      "installedSize": 23749774,
+      "license": {
+        "id": "LicenseRef-PD-USGov",
+        "name": "US federal government work (public domain in the US)",
+        "redistribution": "permitted",
+        "verified": true,
+        "notes": "Works of the US federal government are not subject to US copyright (17 U.S.C. 105). The manual states: approved for public release; distribution is unlimited."
+      },
+      "capabilities": {
+        "fullTextSearch": true,
+        "titleSearch": true
+      },
+      "media": {
+        "pictures": true,
+        "videos": false,
+        "detail": "full"
+      },
+      "updateStrategy": "snapshot-replace",
+      "warnings": [
+        {
+          "kind": "medical",
+          "text": "The medical chapter is field guidance for isolated personnel, not current medical advice. Get qualified help whenever you can."
+        },
+        {
+          "kind": "content",
+          "text": "Written for military personnel; some sections concern evading capture."
+        }
+      ],
+      "popularity": 4
+    },
+    {
+      "id": "arcana.us-army-fm-3-25-26",
+      "provider": "arcana",
+      "title": "FM 3-25.26 Map Reading and Land Navigation (U.S. Army)",
+      "description": "Reading topographic maps, grid coordinates, scale and distance, direction and the compass, elevation and relief, terrain association, and navigating on foot and in vehicles, by day and by night (July 2001).",
+      "category": "maps-navigation",
+      "subcategory": "manuals",
+      "tags": [
+        "navigation",
+        "compass",
+        "map reading",
+        "military",
+        "manual"
+      ],
+      "family": "arcana.us-army-fm-3-25-26",
+      "variant": "standard",
+      "publisher": "Headquarters, Department of the Army (United States)",
+      "sourceUrl": "https://archive.org/details/FM3-25x26",
+      "version": "2001-07",
+      "published": "2001-07-20",
+      "lastVerified": "2026-11-23T00:00:00Z",
+      "languages": [
+        "en"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "pdf",
+      "files": [
+        {
+          "name": "fm-3-25-26-map-reading.pdf",
+          "size": 8167056,
+          "hashes": {
+            "sha256": "bf92a942048931c59f2b48b366acd9b5f8f40120b0866d702dec799a4e8be24c"
+          },
+          "mirrors": [
+            {
+              "url": "https://archive.org/download/FM3-25x26/FM3-25x26.pdf"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 8167056,
+      "installedSize": 8167056,
+      "license": {
+        "id": "LicenseRef-PD-USGov",
+        "name": "US federal government work (public domain in the US)",
+        "redistribution": "permitted",
+        "verified": true,
+        "notes": "Works of the US federal government are not subject to US copyright (17 U.S.C. 105). The manual states: approved for public release; distribution is unlimited."
+      },
+      "capabilities": {
+        "fullTextSearch": true,
+        "titleSearch": true
+      },
+      "media": {
+        "pictures": true,
+        "videos": false,
+        "detail": "full"
+      },
+      "updateStrategy": "snapshot-replace",
+      "warnings": [
+        {
+          "kind": "outdated",
+          "text": "Edition of 2001: map, compass and terrain skills are unchanged, but the sections on GPS and electronic equipment are dated."
+        }
+      ],
+      "popularity": 3
     }
   ]
 }

@@ -27,6 +27,12 @@ export async function libraryView(main, params, ctx) {
       h('a', { class: 'button primary', href: '#/welcome' }, 'Start')));
   }
   main.appendChild(dashboard(status));
+  if (status?.links?.length) {
+    main.appendChild(h('section', { class: 'panel' }, h('header', null, h('h2', null, 'On this network')),
+      h('div', { class: 'body link-tiles' }, status.links.map((l) => h('a', { class: 'link-tile', href: l.url, target: '_blank', rel: 'noopener noreferrer' },
+        h('b', null, l.title), l.description ? h('span', { class: 'small muted' }, l.description) : null,
+        h('span', { class: 'small faint mono' }, l.url.replace(/^https?:\/\//, '')))))));
+  }
 
   // Search: titles that match, the best full-text matches from each
   // archive (with a count per source), and documents. Choosing a source

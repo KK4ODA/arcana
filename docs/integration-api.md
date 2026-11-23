@@ -59,6 +59,7 @@ can be revoked at any time.
 | Method and path | Result |
 |---|---|
 | `GET /` | `{api, version, server, authenticated, scopes, granted?, library?}` — no token needed |
+| `GET /openapi.json` | This API as an OpenAPI 3.1 document — no token needed |
 | `POST /pair`, `GET /pair/{id}?secret=` | Pairing, above |
 | `GET /search?q=&limit=` | `{query, results:[{resourceId, title, snippet, path, citation}]}`; snippets are plain text; the host's private documents are never included |
 | `GET /documents/{resource}/text?path=&max=` | `{article:{title, path, text, truncated}, citation}`; `path` as returned by search (archives) or a file name (documents); `max` bytes, default 20 000, at most 2 MiB |

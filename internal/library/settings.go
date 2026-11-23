@@ -33,6 +33,9 @@ type Settings struct {
 	Assistant                    AssistantSettings     `json:"assistant"`
 	ContentUpdates               ContentUpdateSettings `json:"contentUpdates"`
 	Mesh                         MeshSettings          `json:"mesh"`
+	// Links are shortcuts on the Library page to other services on the
+	// network (a Kolibri server, a radio's web page, a file share).
+	Links []LinkTile `json:"links,omitempty"`
 	// WelcomeDone is set once the person finished or skipped Getting
 	// started, so it is not offered again.
 	WelcomeDone bool `json:"welcomeDone"`
@@ -116,6 +119,13 @@ type AssistantSettings struct {
 	// NetworkClients lets devices on the network ask questions. Off by
 	// default: answers use this computer's processor and memory.
 	NetworkClients bool `json:"networkClients"`
+}
+
+// LinkTile is a shortcut to another service.
+type LinkTile struct {
+	Title       string `json:"title"`
+	URL         string `json:"url"`
+	Description string `json:"description,omitempty"`
 }
 
 // MeshSettings connect to a Meshtastic radio. Arcana only listens: it
@@ -301,6 +311,7 @@ func (s *SettingsStore) Get() Settings {
 	c := s.current
 	c.Catalog.Feeds = append([]FeedSource(nil), s.current.Catalog.Feeds...)
 	c.Peers = append([]PeerSource(nil), s.current.Peers...)
+	c.Links = append([]LinkTile(nil), s.current.Links...)
 	return c
 }
 
