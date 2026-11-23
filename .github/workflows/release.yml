@@ -67,8 +67,11 @@ jobs:
       # The pinned kiwix-serve binaries, their sources and the Visual C++
       # runtime: the same cache the CI build job fills on main (a tag can
       # restore caches from the default branch), so a release does not
-      # depend on download.kiwix.org answering at that moment. Every file
-      # is still checked against its pinned SHA-256 by the fetch scripts.
+      # depend on download.kiwix.org answering at that moment. The fetch
+      # scripts check the sources and the Visual C++ runtime against their
+      # pinned SHA-256 again after a restore; the kiwix-serve binaries were
+      # checked against the pinned archive hash when the CI build on main
+      # first downloaded them, and are not re-checked on restore.
       - uses: actions/cache@v4
         with:
           path: |
