@@ -79,7 +79,143 @@ open-source software manuals, each with its license evidence.
 
 ## Sources the operator brings
 
-*Research in progress:* Groups.io, YouTube and forums.
+Material that is copyrighted, or whose terms forbid redistribution, can
+still be useful to the person who has legitimate access to it. Arcana
+fetches or imports it for that person only:
+- It is stored with their documents and available only on the host
+  computer.
+- It is never offered in a catalog or shared on the LAN.
+- It is never copied to another library unless they export their own
+  documents.
+
+### Groups.io: feasible with an API key
+
+Checked 2026-11-23, without logging in.
+
+- **API.** The API is "open to anyone who uses Groups.io", not only to
+  paid groups.
+  - API keys (groups.io/settings/apikeys) have been the recommended method
+    since 2025-09-10.
+  - Keys "bypass two-factor authentication requirements" and need no CSRF
+    token.
+  - Every call is limited by the group's own visibility settings for that
+    member.
+- **Endpoints a member can use:**
+
+  | What | Endpoint | Needs the group to allow |
+  |---|---|---|
+  | Whole archive in one call: a zip containing one mbox file. Limited to one call per person per group every 24 hours | `downloadarchives` | `download_archives`, which the owner can turn off |
+  | Messages, page by page (`getmessage` returns the raw MIME message) | `gettopics`, `getmessages`, `getmessage` | `archives_visible` |
+  | Files section: manuals, mods, software (signed download URLs) | `getfiledirectory`, `getfile` | `files_visible` |
+  | Wiki | `getwikipages`, `getwikipageset` | `wiki_visible` |
+
+- **Terms of Service** (last revised May 2017):
+  - They forbid "data mining, robots, scraping or similar data gathering
+    or extraction methods", without mentioning the API.
+  - Using the official API at a modest rate, only for groups the person
+    belongs to, is the defensible reading, but it is a reading. **Ask
+    Groups.io to confirm before shipping.**
+  - The API is documented as "under active development and subject to
+    change".
+
+**Design.**
+- *Settings → Connected accounts → Groups.io*, on the host computer
+  only.
+- **The person pastes an API key, never a password.**
+  - The key is kept in memory for the sync by default.
+  - "Remember on this drive" is a separate choice. Its warning says that
+    anyone holding the drive could use the key, which bypasses
+    two-factor authentication, and shows how to revoke it.
+- Arcana lists the person's groups and they tick the ones to keep. For
+  each group:
+  1. Use `downloadarchives` when the group allows it. Otherwise page
+     through the messages, backing off on HTTP 429, then fetch only
+     newer messages on each sync.
+  2. Store messages as mbox under
+     `user/documents/Groups.io/<group>/`, indexed by the email import
+     below.
+  3. Download the Files section into the same folder and index it as in
+     *Add a folder*. Radio groups keep their manuals and mods here.
+  4. Save wiki pages as HTML.
+- Every item records the group, the date it was retrieved and "personal
+  copy". Message authors keep their copyright.
+
+### Email archives: a route without credentials
+
+Add `.mbox` and `.eml` to the document formats.
+- Each message is one search record (see section 4), with sender, date,
+  subject and thread.
+- PDF and text attachments become documents of their own.
+
+This one importer covers four sources:
+- the Groups.io archives above;
+- groups the person receives by email (Groups.io's default delivery is
+  one email per message) and exports from their mail program;
+- public mailing-list archives that publish monthly mbox files, such as
+  the Elecraft and Boatanchors lists at `mailman.qth.net/pipermail/`;
+- club mailing lists.
+
+Email gives no history from before the person joined, and no Files or
+wiki, which is why the Groups.io API is still worth doing.
+
+### YouTube: no downloader; request openZIM archives instead
+
+- **Arcana will not download from YouTube.**
+  - YouTube's Terms of Service forbid downloading "except as expressly
+    authorized by the Service".
+  - Its API Developer Policies (updated 2026-11-06) say apps must not
+    "download, … cache, or store copies of YouTube audiovisual content
+    … [or] make content available for offline playback".
+  - YouTube Premium downloads play only inside YouTube's own apps, while
+    signed in to the same account, and need reconnecting every 29 days.
+    They cannot be exported.
+- **The legitimate route is openZIM.** openZIM's `youtube2zim` turns a
+  channel or playlist into a ZIM archive. openZIM builds these on request
+  through `github.com/openzim/zim-requests`, but only with the creator's
+  permission, recorded in a Kiwix ticket. Corey Schafer's programming
+  tutorials (CC BY-NC, with permission) are a live example.
+  - Kiwix's library already has 138 archives made from YouTube; none
+    are about radio.
+  - **Action for the project or a ham club:** ask the makers of
+    educational ham radio channels for permission and file the requests.
+    Antenna building, licence-exam courses and emcomm procedures are the
+    priority.
+  - Once Kiwix publishes such an archive, Arcana's Kiwix provider offers
+    it with no further work. Add it to the *Amateur Radio Operator*
+    collection.
+- **Other video and audio that can be used:**
+  - **FOSDEM** radio and SDR talks, licensed CC BY 2.0 Belgium. These can
+    be curated catalog entries.
+  - **US government training films** on archive.org: the OSS SSTR-1
+    training film (Public Domain Mark), and Signal Corps film TF 1-474,
+    *Creation and Behavior of Radio Waves* (1942). Check each item; some
+    re-uploads carry CC BY-NC-ND.
+  - **Podcasts.** Ham podcasts publish mp3 episodes in their RSS feeds,
+    and downloading them for personal listening is what feeds are for.
+    Examples: QSO Today, Ham Radio Workbench, ICQ Podcast, Amateur Radio
+    Newsline, ARRL Audio News.
+    - A *podcast subscription* would download new episodes on the host
+      computer.
+    - Feeds list only recent episodes, so older ones cannot be fetched
+      this way.
+    - Episodes stay personal copies.
+    - Later, speech-to-text (a whisper.cpp-class sidecar, as in doc 15)
+      could make them searchable.
+  - **The operator's own video files** can come in through *Add a
+    folder*. They are listed and played, but cannot be searched without
+    a transcript.
+
+### Forums
+
+| Source | Finding | Route |
+|---|---|---|
+| Amateur Radio Stack Exchange | Kiwix keeps rebuilding its archive (`ham.stackexchange.com_en_all_2026-10`, 74 MB). Its build schedule is twice a year, with extra builds in between | Already in the collection |
+| QRZ.com forums | The terms forbid robots and automated copying, but allow downloading "one copy of a reasonable number of pages … for your own personal, non-commercial use". Posters keep their copyright | Save the threads you value as PDF or HTML, then *Add a folder* |
+| eHam.net | The terms (2026-11-21) forbid scraping or bulk downloading "by automated means without our written permission" | As for QRZ |
+| Reddit r/amateurradio | The User Agreement forbids scraping without consent. The Data API terms require deleting stored content. New API access has needed approval since 2025-11. There is no sanctioned data dump | Not pursued |
+| Wikibooks *Amateur Radio Manual* | CC BY-SA 4.0 | Included in `wikibooks_en_all` |
+| OARC wiki (wiki.oarc.uk) | CC BY-SA 4.0 | Its licence allows an openZIM request |
+| Signal Identification Wiki, OpenWebRX wiki | No licence stated | Ask the maintainers first |
 
 ## 3. Add a folder
 
@@ -310,6 +446,9 @@ Design points:
 | Add a folder (copy, keep structure, duplicates, preview) | Medium | Subfolders in `user/documents` |
 | Curated government and open documents (catalog or signed radio feed) | Medium, mostly curation | Mirrors for sites that block automated downloads |
 | Email archive import (`.mbox`, `.eml`) | Small to medium | Search by page (one row per message) |
+| Groups.io connector (API key; archive, Files, wiki) | Medium | Email import; *Add a folder*; confirmation from Groups.io |
+| openZIM requests for ham radio channels and the OARC wiki | No code; needs outreach to creators | — |
+| Podcast subscriptions | Small to medium | — |
 | OCR documentation, then optional Tesseract sidecar | Small, then medium | Scanned-PDF detection |
 | Semantic search (stage B) | Large | Search by page; sidecar supervision exists for kiwix-serve |
 | Cited answers (stage C) | Large | Stage B; evaluation set (doc 15) |
