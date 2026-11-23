@@ -71,11 +71,143 @@ contain could not be checked from here: Kiwix's browse server shows an
 access-confirmation page to automated requests. Check by opening them in
 Arcana before adding them to the collection.
 
-## 2. Redistributable radio documents to curate
+## 2. Radio documents to curate
 
-*Research in progress:* public-domain government and military manuals,
-question pools, openly licensed books and specifications, and
-open-source software manuals, each with its license evidence.
+Publish these as a **signed radio feed** (Ed25519, 0.6.0) maintained
+separately from releases:
+- Curation can then follow new editions without an application update.
+- Each entry is hash-pinned and carries its license and its
+  `lastVerified` date.
+
+Several publishers refuse automated downloads: FEMA, Ready.gov, cisa.gov,
+aprs.org, wsjt.sourceforge.io and winlink.org did so during this
+research.
+- For redistributable items, the project can host a mirror, such as a
+  release asset or an archive.org item, next to the publisher's URL.
+- Free-download-only items can only ever be fetched from the publisher.
+
+### 2a. Public-domain government and military documents
+
+Checked 2026-11-23. US federal works are public domain under 17 U.S.C.
+§105. The quoted markings are the documents' own. All are born-digital
+unless noted.
+
+| Document | Edition | Evidence | Size | Notes |
+|---|---|---|---|---|
+| **NIFOG**, National Interoperability Field Operations Guide (CISA) | v2.02, January 2025 | CISA work; no rights statement | 6.7 MB, 192 pp | Interoperability channels, ham bands, tables. One figure (an RJ-45 pinout) is "© 2021 ShowMeCables", so mention it in the entry's notes. The file's URL contains a date folder that changes with each version; landing page cisa.gov/safecom/field-operations-guides |
+| **ATP 6-02.53**, *Techniques for Tactical Radios and Retransmission* (US Army) | 31 Jul 2025, superseding 2020 | "Approved for public release; distribution is unlimited." | 6.3 MB, 206 pp | **Antennas:** App. H "Antenna Selection and Techniques" (field-expedient antennas, field antenna repair) and App. E (HF antennas, improvised vertical half-wave). `armypubs.army.mil` works without `www`. The `armypubs_en_all` archive (2024-12) holds the 2020 edition at best |
+| **NCVEC question pools**: Technician 2026–2030, General 2023–2027, Extra 2024–2028 | Technician in effect from 1 Jul 2026; General and Extra with their Feb 2026 errata | NCVEC's release pages: "hereby releases … into the public domain". The statement is on the web pages, not in the PDFs, so quote it in the entry | 0.5–1 MB each, plus figure files | Each pool has its own figures (PDF, JPG; Extra also SVG). File names change with every erratum, so the feed needs updating. The General pool expires 30 Jun 2027 |
+| **NEETS** Modules 10 (*Wave Propagation, Transmission Lines, and Antennas*), 12 (*Modulation Principles*) and 17 (*Radio-Frequency Communications Principles*) (US Navy) | 1998 editions | "DISTRIBUTION STATEMENT A: Approved for public release; distribution is unlimited." | Mod 10 2.5 MB; Mod 17 5.9 MB | **Use the 1998 editions**: the 2012–2013 revisions (14182A, 14189A) contain copyrighted material restricted to DoD sites. No Navy host survives; archive.org `NEETSModules`. A project mirror is needed |
+| **USCG Radiotelephone Handbook**, CGTTP 6-01.1B | 30 Jul 2018 | "Internet release authorized"; hosted by CISA | 0.7 MB, 54 pp | Voice procedure, prowords and phonetics. **Use it instead of ACP 125**, which it cites |
+| **AUXFOG**, Auxiliary Communications Field Operations Guide (CISA) | v1.1, June 2016 | DHS work | 3.4 MB, 156 pp | No newer version, and no longer on the current SAFECOM page. It gets the automatic *outdated* warning |
+| CISA AUXCOMM Position Task Book; Auxiliary Emergency Communications course units | 2020; 2017 | CISA works | 0.5 MB; 1.2 MB per unit | Skip the COMT Pre-Course Study Guide, whose distribution is restricted |
+| **FEMA ICS forms** 205, 205A, 213, 214 (and 217A) | NIMS v3 / v3.1 | FEMA works | 25–420 KB each; booklet 3 MB | Fillable. Pin the URL after redirection; it contains spaces and commas. **ICS 309 is not a FEMA form**: only local ARES and RACES versions exist |
+| **NTIA Redbook** (*Manual of Regulations and Procedures for Federal Radio Frequency Management*) | January 2023 revisions to the January 2021 edition, the version that 47 CFR 300.1 incorporates | NTIA work | 28.8 MB | redbook.ntia.gov also offers a June 2025 HTML edition without a PDF. Choose the legally referenced PDF and state the edition |
+| **US Frequency Allocations chart** (NTIA) | Sept 2025 | NTIA work | 0.3 MB, one 27 × 39 in page | Its text extracts as garbage (Type 3 fonts), so treat it as a chart, not a searchable document |
+| **TM 11-666**, *Antennas and Radio Propagation* (US Army) | 9 Feb 1953 | Army work; no restriction marking | 21.9 MB (OCR'd text PDF) | Scanned. Use archive.org's OCR derivative, as measured above. Obsolete but still sound on fundamentals, so it gets the automatic *outdated* warning |
+| **SKYWARN Weather Spotter's Field Guide** (NWS) | June 2011 | NOAA repository rights field: "Public Domain" | 27.9 MB, 72 pp | "SKYWARN® is a registered trademark of NOAA". Text layer not yet checked |
+
+**Excluded or unresolved:**
+- **FM 24-18**, *Tactical Single-Channel Radio Communications
+  Techniques* (1987). Marked "Distribution authorized to U.S. Government
+  agencies and their contractors", never shown to be released. Its topic
+  is now covered by ATP 6-02.53.
+- **ACP 125**, radiotelephone procedures. "For official purposes only";
+  no public release. Use CGTTP 6-01.1B instead.
+- **NEC-2 manual** (Burke and Poggio, 1981). DTIC lists it as approved for
+  public release, but Lawrence Livermore wrote it as a contractor, so
+  §105 does not apply automatically. Confirm with DTIC before curating.
+
+**A first radio feed:** NIFOG, ATP 6-02.53, the three NCVEC pools, NEETS
+10/12/17, CGTTP 6-01.1B and the FEMA ICS forms. Together they are about
+25 MB. They cover field reference, antennas, exam study, voice
+procedure, message forms and theory, and every one can be shared on the
+LAN and copied between libraries.
+
+### 2b. Openly licensed books
+
+Checked 2026-11-23 on the publishers' pages. **R** means redistributable;
+**NC** means non-commercial only, which Arcana may offer as
+`redistribution: noncommercial`.
+
+| Work | Edition | License | Size | Radio content |
+|---|---|---|---|---|
+| Ellingson, *Electromagnetics* Vol. 2 (Virginia Tech Publishing, doi:10.21061/electromagnetics-vol-2) | 2020-01 | R: CC BY-SA 4.0 | 5.6 MB | **Antennas** (ch. 10), radiation (ch. 9), transmission lines (ch. 7) |
+| Ellingson, *Electromagnetics* Vol. 1 (doi:10.21061/electromagnetics-vol-1) | 2018-08, with errata | R: CC BY-SA 4.0 | 10.8 MB | Transmission lines, waves, fundamentals |
+| Kuphaldt, *Lessons in Electric Circuits* I–VI (ibiblio.org/kuphaldt/electricCircuits/) | 2023-02-03 | R: CC BY 4.0 (stated in appendix 3) | ≈22 MB for six PDFs | Vol. II ch. 14 covers transmission lines; circuits, semiconductors, test equipment |
+| Kuphaldt, *Modular Electronics Learning* (ModEL) modules | Rolling; RF modules updated 2026 | R: CC BY 4.0 | 0.9–3.5 MB each | Modules on antennas, antenna systems, transmission lines, Smith chart, link budget, modulation, mixers, HF amplifiers, radio. Take individual modules; the full archive is 3.6 GB |
+| Ellingson, *Radio Systems Engineering*, revised 1st ed. (doi:10.21061/radiosystemsengineering-revised1st) | 2023-12 | NC: CC BY-NC 4.0 | 14.8 MB (7.6 MB low resolution) | Antennas, propagation, noise, link analysis |
+| Steer, *Microwave and RF Design* (NC State, five volumes) | 3rd ed., 2019 | NC: CC BY-NC (Vol. 1; check each volume) | — | Vol. 1 ch. 4, "Antennas and the RF link" |
+
+- LibreTexts hosts both Ellingson volumes ("Electromagnetics I/II
+  (Ellingson)", CC BY-SA 4.0), so `libretexts.org_en_eng` probably
+  already contains them. Confirm before adding the PDFs as well.
+- No other plain CC BY or CC BY-SA antenna textbook was found. Most RF
+  texts are non-commercial or all rights reserved.
+- **Wikibooks** is CC BY-SA and is included in `wikibooks_en_all`, but its
+  radio books are thin:
+  - *Amateur Radio Manual*: about 13 of 40 topics written; propagation,
+    feed lines and antennas are empty.
+  - *Communication Systems*: early stage, last edited 2019.
+  - *Electronics*: little on RF.
+- **Project Gutenberg** has US public-domain radio books, mostly from the
+  1910s and 1920s and historical. Each gets the automatic *outdated*
+  warning:
+  - #6935, Collins, *The Radio Amateur's Hand Book* (illustrated)
+  - #63345, Morgan, *Lessons in Wireless Telegraphy*
+  - #64174, Morgan, *Wireless Telegraph Construction for Amateurs*
+  - #66702, Morgan, *Wireless Telegraphy and Telephony Simply Explained*
+  - #38526, Fleming, *Hertzian Wave Wireless Telegraphy*
+  - #30688, Mills, *Letters of a Radio-Engineer to His Son*
+
+  Gutenberg #66 (Joly) is a **copyrighted** eBook and must be excluded.
+
+  The Gutenberg provider imports by bookshelf, and no shelf maps to radio.
+  Add a subject match ("Radio", "Wireless telegraphy") that maps to
+  `radio-communications`.
+
+### 2c. Software manuals and specifications
+
+| Document | Version | License | Size | Notes |
+|---|---|---|---|---|
+| WSJT-X User Guide | 2.7.0 in the repository; check whether a 3.0 guide exists | R: GPLv3; the guide says it may be redistributed under the GPL | — | One HTML or PDF file; AsciiDoc source is in the repository. wsjt.sourceforge.io refuses automated requests |
+| JS8Call User Guide (JS8Call-improved) | Guide v4.0, 2026-09-06 | R: CC BY-SA ("© 2020 Jordan Sherer") | 2.6 MB | Markdown source is in the repository |
+| fldigi help | 4.2.13 (2026-07-29) | R: GPLv3 program; help licensed LGPL v2+ | 14 MB PDF | w1hkj.org/files/fldigi/fldigi_help.pdf |
+| flrig help | 2.0.12 (2026-07-30) | R: GPL | 3.9 MB | w1hkj.org/files/flrig/flrig-help.pdf |
+| flmsg help | 4.0.24 (2025-06-23) | R: GPLv3 | 2.5 MB | Forms for ICS and Radiogram messages |
+| Dire Wolf User Guide | "Version 1.8, October 2025" | R by the repository's GPLv2 (the PDF has no notice of its own) | 2.2 MB | `wb2osz/direwolf/doc/User-Guide.pdf`. Debian strips these PDFs from its source package, which shows the doubt; ask the author to confirm. The separate `direwolf-doc` repository has no licence (F) |
+| Hamlib manuals | 4.7.2 (2026-06-21) | R: LGPL-2.1+ for the library, GPL for the utilities | Multi-page HTML | Man pages are in the repository |
+| APRS Protocol Reference 1.0.1 (TAPR) | 2000-08-29 | NC: "may be copied for non-commercial purposes only", keeping the copyright and trademark statements in full | 3.2 MB | files.tapr.org/…/aprs101/APRS101.pdf. A file of the same name in `wb2osz/aprsspec` is a two-page *obsolete* notice, not the specification. Pin the TAPR copy |
+| APRS 1.2, WB2OSZ compilation | Draft C, Nov 2024 | NC: same notice | 2.2 MB | Unofficial |
+
+### 2d. Free to download, not to redistribute
+
+Arcana can offer these as catalog entries whose only mirror is the
+**publisher's own URL**, with `redistribution: restricted` (ARRL, IARU,
+ITU, TAPR) or `noncommercial` (ISED). This means:
+- the person downloads the file from the publisher, as a browser would;
+- `arcana export` already warns for anything not `permitted`;
+- the Library shows the terms.
+
+When a publisher replaces a file, the hash no longer matches. Arcana
+should then say "the publisher has changed this document" rather than
+"corrupted", and the feed is re-verified.
+
+| Document | Terms found | Notes |
+|---|---|---|
+| ARRL band chart (rev. 1/16/2026), ARES Plan, ARES Task Book, ARES Manual (2015), ARES Field Resources Manual | "Reproduction … without written permission is strictly prohibited"; "Additional permission is required to use this material in any training or product that will be redistributed" | ARRL allows only W1AW bulletins, *ARRL Audio News* and *The ARRL Letter* to be redistributed. Worth asking ARRL whether a publisher-link entry is acceptable to them |
+| IARU Region 1, 2 and 3 band plans | Footer only: "may be subject to copyright"; no licence | Small PDFs (150–200 KB) |
+| ITU Radio Regulations, 2024 edition | "Posted free of charge for personal use"; no reproduction without permission | 69.6 MB zip |
+| AX.25 v2.2 (TAPR, 1998) | Copyright TAPR and ARRL; no permission statement | 928 KB |
+| ISED (Canada): RIC-3, RBR-4, Basic and Advanced question banks | May be reproduced "for non-commercial purposes … without charge or further permission", stating that it is a copy, with the title and source | `noncommercial`; jurisdiction CA |
+| CHIRP documentation, Pat wiki | No licence (CHIRP: "Copyright 2026 CHIRP Software LLC") | Multi-page wikis. A ZIM request would need permission |
+| VARA, Winlink Express | No licence text found | Do not curate. Files hosted on mega.nz cannot be pinned reliably |
+
+This is also where manufacturers' radio manuals belong. Yaesu, Icom and
+Kenwood publish them free, under copyright. A community feed could list
+publisher-link entries for popular radios, but manufacturers' download
+pages change often and some require accepting terms. **Add a folder**
+remains the dependable route for the manuals someone already has.
 
 ## Sources the operator brings
 
