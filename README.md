@@ -15,7 +15,7 @@ it with no internet connection.
   <img alt="The Arcana library: a dashboard with installed content, free space, offline readiness, network sharing and GPS status, above a drive usage bar, a full-text search box and the list of installed resources with their categories, editions, sizes and licenses." src="docs/screenshots/library.png">
 </picture>
 
-Status: **0.7.0** ([changelog](CHANGELOG.md)). It
+Status: **0.8.0** ([changelog](CHANGELOG.md)). It
 works end to end on Linux and is packaged for Windows and macOS, but **has
 not yet been run on real Windows or macOS hardware**, and the programs are
 not yet code-signed (see [Status](#status)).
@@ -226,7 +226,8 @@ See [docs/development.md](docs/development.md).
 | **Implemented (Phase 4)** | `arcana.local` on the network (built-in mDNS), QR codes and a printable connection card, optional HTTPS on the same port, password-protected remote administration (off by default), Wi-Fi hotspot control on Linux |
 | **Implemented (Phase 5), not yet run on hardware** | Raspberry Pi / Linux appliance: installer, confined systemd service with watchdog, Wi-Fi access point with captive portal ([docs/appliance.md](docs/appliance.md)) |
 | **Implemented (Phase 6)** | Integration API for other programs (RadioPost, Aether HF) with scoped, approved tokens and citations ([docs/integration-api.md](docs/integration-api.md)); copying between Arcana libraries on a LAN; signed community catalogs |
-| **Implemented (unreleased)** | Question answering over installed sources with citations, a relevance floor and an evaluation set; llamafile sidecar or an OpenAI-compatible server ([ADR-0021](docs/adr/0021-question-answering-over-the-library.md)). Not yet measured on a Raspberry Pi or with a real model in CI |
+| **Implemented (0.8.0)** | Question answering over installed sources with citations, a relevance floor and an evaluation set; llamafile sidecar or an OpenAI-compatible server ([ADR-0021](docs/adr/0021-question-answering-over-the-library.md)). FDA drug label reference built on the user's computer ([ADR-0022](docs/adr/0022-fda-drug-label-reference.md)). Offline translation of archive pages in the reader's browser ([ADR-0023](docs/adr/0023-offline-translation-in-the-browser.md)). Getting started wizard; scheduled content updates; Meshtastic nodes on the map (listen only); optional Kolibri search ([docs/kolibri.md](docs/kolibri.md)); OpenAPI document for the integration API |
+| **Not yet verified** | Question answering with the real llamafile engine and models (tested with stand-ins), speed on a Raspberry Pi; Meshtastic with a real radio and Kolibri with a real server (tested against fakes) |
 | **Planned** | Ready-made Raspberry Pi SD image; hardware and power-loss tests. Terrain and contours; road networks for the largest countries; scheduled peer sync |
 | **Not yet** | Code-signed programs (releases are not code-signed yet; Windows and macOS warn on first start) |
 

@@ -1,6 +1,6 @@
 # O. Optional local question answering
 
-Status: **implemented** (unreleased; ADR-0021). This note kept the rules
+Status: **implemented** (0.8.0; ADR-0021). This note kept the rules
 the implementation follows; the decisions and their trade-offs are in
 [ADR-0021](../adr/0021-question-answering-over-the-library.md), and the
 user-facing description is in the README and docs/portable-use.md.

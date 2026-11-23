@@ -1,6 +1,6 @@
 # ADR-0022: FDA drug label reference built on the user's computer
 
-- Status: Accepted (unreleased)
+- Status: Accepted (0.8.0)
 - Date: 2026-11-23
 
 ## Context
@@ -50,7 +50,9 @@ drugs) and would be unsearchable by name if those fields were relied on.
 ## Measurements (2026-11-20 export, this container)
 - First part alone: 20 000 records → 19 434 labels, 17 426 distinct
   texts, 78 MB database (0.60× the zip) in 37 s.
-- Full build: recorded in the CHANGELOG entry for the release.
+- Full build: 265 009 records → 257 670 labels, 181 161 distinct texts,
+  835 MB database (0.47× the 1.79 GB of zips) in 8.3 minutes including a
+  20-second download; about 57 MB of memory while building.
 
 ## Consequences
 - About 1 GB on the drive instead of 8–10 GB, and no server process.

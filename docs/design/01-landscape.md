@@ -173,7 +173,7 @@ largest community of the projects here.
     through the browser, unchecked against the catalog.
   - The hardware benchmark submits results to a public leaderboard
     (opt-in, HMAC-signed).
-- **Adopted into Arcana's plan (2026-11-23):** local question answering
+- **Adopted into Arcana (0.8.0):** local question answering
   built on Arcana's existing search rather than a vector store
   (15-local-ai.md), an openFDA drug reference, scheduled content updates,
   offline translation, a first-run wizard, Meshtastic on the map, link

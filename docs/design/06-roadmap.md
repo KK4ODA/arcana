@@ -58,7 +58,7 @@ Deliverables are in `docs/design/` and `docs/adr/`:
 | Milestone | Status and evidence |
 |---|---|
 | Gutenberg provider (catalog CSV from the official mirror, EPUB) | **Done.** Opt-in; 6,572 practical titles from the live catalog validated (`TestGutenbergRealCatalog`); downloads marked unverified (no published checksums); EPUB indexed and previewed in-app |
-| Government documents | **Partial.** Curated, hash-pinned 47 CFR Parts 95 and 97. FEMA and Ready.gov block automated downloads; more entries need curation by hand |
+| Government documents | **Partial.** Curated, hash-pinned 47 CFR Parts 95 and 97, and (0.8.0) three U.S. Army manuals cleared for public release (first aid, survival, land navigation). FEMA and Ready.gov block automated downloads; more entries need curation by hand |
 | PDF/EPUB/HTML/Markdown/text adapters + SQLite FTS5 index for non-ZIM content | **Done.** `internal/docs`; malformed and hostile documents tested; unified search returns archive and document hits |
 | User documents, bookmarks, notes, history, favorites | **Done.** Plain files in `user/` (JSON and Markdown), recoverable deletes, `.bak` copies; private data (history, notes, documents) host-only |
 | Collection export/import between drives with manifest | **Done.** `internal/transfer`; acceptance step 12 |
@@ -66,6 +66,7 @@ Deliverables are in `docs/design/` and `docs/adr/`:
 | Application updates: Ed25519-signed manifest, staged swap, rollback, offline package | **Done.** `internal/appupdate`, `tools/release-sign`; tampering, foreign keys, missing signatures and path escapes rejected in tests. Needs a maintainer signing key before it is active in releases |
 | Saved custom presets | **Done** (`user/presets/`); geography step moves to Phase 3 with map regions |
 | Scheduled catalog refresh (opt-in) | **Done**; off by default |
+| Scheduled content updates (opt-in) | **Done (0.8.0).** Time window, interval, bandwidth cap, important-only option; downloads pause outside the window |
 
 ## Phase 3 — Offline maps and GPS · Done (0.3.0; routing 0.7.0), except 3b terrain/overlays
 
@@ -83,7 +84,7 @@ Phase 1 content origin. Details: [05-maps-gps.md](05-maps-gps.md#implementation-
 | 3b: gazetteer, custom bbox | **Done.** Place search works offline |
 | 3b: terrain, contours, emergency overlays | Planned |
 | 3c: routing | **Done (0.7.0).** Built into Arcana instead of a Valhalla or BRouter sidecar (ADR-0020): road networks built from Geofabrik extracts, car/bicycle/foot, turn-by-turn guidance. Pi 5 memory not yet measured |
-| Geography step in the selection wizard | Planned |
+| Geography step in the selection wizard | **Done (0.8.0).** Getting started: topics, area, size tier, one plan across collections |
 
 ## Phase 4 — Network serving · Done (0.4.0)
 
@@ -127,7 +128,7 @@ Phase 1 content origin. Details: [05-maps-gps.md](05-maps-gps.md#implementation-
 - The library is prepared on a desktop and moved to the appliance with no
   conversion. Already true of the format; to be verified on hardware.
 
-## Phase 6 — Advanced · Partly done (0.6.0)
+## Phase 6 — Advanced · Partly done (0.6.0, 0.8.0)
 
 - **Done:** local integration API v1 (scoped bearer tokens, pairing with
   operator approval, search with citations, article text and excerpts,
@@ -138,8 +139,11 @@ Phase 1 content origin. Details: [05-maps-gps.md](05-maps-gps.md#implementation-
   library and pulls resources through its verified download queue
   (acceptance step 11b, inside the offline network namespace).
 - **Done:** signed community catalogs (Ed25519 publisher key per feed).
-- **Design only:** optional local question answering
-  ([15-local-ai.md](15-local-ai.md)).
+- **Done (0.8.0):** optional local question answering with citations
+  ([15-local-ai.md](15-local-ai.md), ADR-0021), and `GET /ask` in the
+  integration API; an FDA drug label reference (ADR-0022); offline
+  translation of archive pages (ADR-0023); Meshtastic nodes on the map;
+  optional Kolibri search; an OpenAPI document for the integration API.
 - **Planned:** unified cross-library search ranking across languages;
   advanced offline routing; automatic (scheduled) peer sync; multi-drive
   collections; rendered map snippets for the integration API.
