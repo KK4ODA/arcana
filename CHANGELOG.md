@@ -109,6 +109,17 @@ the library format version is tracked separately (docs/design/09-storage-and-dat
 - **Dependencies.** Queueing a resource also queues the resources it needs
   (a model queues the engine that runs it).
 
+### Fixed
+- **Your own documents no longer appear in searches from other devices.**
+  Library search returned the names and text snippets of the documents you
+  added (*Your documents*) to every device on the network, although the
+  files themselves could only be opened on the computer running Arcana.
+  Now devices on the network, signed-in administrators included, search
+  only installed resources, and searching *Your documents* from them is
+  refused; the computer running Arcana still finds everything. The
+  integration API and the assistant already left your documents out for
+  other devices; they now also stop them from taking up result slots.
+
 ### Changed
 - Text extracted from web pages keeps the cells of a table row on one line
   ("QTH | Location of the station"), so document search snippets and the

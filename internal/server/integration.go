@@ -21,6 +21,7 @@ import (
 	"github.com/KK4ODA/arcana/internal/app"
 	"github.com/KK4ODA/arcana/internal/buildinfo"
 	"github.com/KK4ODA/arcana/internal/catalog"
+	"github.com/KK4ODA/arcana/internal/docs"
 	"github.com/KK4ODA/arcana/internal/integration"
 	"github.com/KK4ODA/arcana/internal/library"
 	"github.com/KK4ODA/arcana/internal/maps"
@@ -210,7 +211,7 @@ func (s *Server) handleIntSearch(w http.ResponseWriter, r *http.Request, a *app.
 			}
 		}
 	}
-	if hits, _, err := a.Docs.Search(r.Context(), q, limit); err == nil {
+	if hits, _, err := a.Docs.SearchIn(r.Context(), q, docs.SharedDocuments, 0, limit); err == nil {
 		for _, h := range hits {
 			// The host user's own documents are private.
 			c, ok := cits[h.ResourceID]

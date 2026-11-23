@@ -607,3 +607,50 @@ func TestCaptivePortal(t *testing.T) {
 		t.Fatal("API reachable through the captive port")
 	}
 }
+
+// TestOwnDocumentsStayOnHost: the host user's own documents are found by
+// searches on the host, and never shown to devices on the network (their
+// files and previews are host-only too).
+func TestOwnDocumentsStayOnHost(t *testing.T) {
+	e := newEnv(t)
+	host := "127.0.0.1:18470"
+	var sess map[string]any
+	json.Unmarshal(e.do(e.appH, "GET", "/api/session", local, host, nil, nil).Body.Bytes(), &sess)
+	tok := sess["token"].(string)
+	rec := e.do(e.appH, "POST", "/api/user/documents", local, host,
+		map[string]string{"X-Arcana-Token": tok, "X-Filename": "medical%20history.txt"},
+		strings.NewReader("Allergic to penicillin. Insulin dose 12 units."))
+	if rec.Code != 200 {
+		t.Fatalf("upload: %d %s", rec.Code, rec.Body.String())
+	}
+	var found bool
+	for i := 0; i < 100 && !found; i++ {
+		time.Sleep(50 * time.Millisecond)
+		rec = e.do(e.appH, "GET", "/api/search?q=penicillin", local, host, nil, nil)
+		found = strings.Contains(rec.Body.String(), "medical history.txt")
+	}
+	if !found {
+		t.Fatalf("host cannot find its own document: %s", rec.Body.String())
+	}
+	if rec := e.do(e.appH, "GET", "/api/search?q=penicillin&resource=@user", local, host, nil, nil); !strings.Contains(rec.Body.String(), "medical history.txt") {
+		t.Fatalf("host search in own documents: %s", rec.Body.String())
+	}
+
+	// A network client: nothing about the document, not even its count.
+	rec = e.do(e.appH, "GET", "/api/search?q=penicillin", lanClient, host, nil, nil)
+	var resp struct {
+		Documents     []map[string]any `json:"documents"`
+		DocumentTotal int              `json:"documentTotal"`
+	}
+	json.Unmarshal(rec.Body.Bytes(), &resp)
+	if rec.Code != 200 || len(resp.Documents) != 0 || resp.DocumentTotal != 0 ||
+		strings.Contains(rec.Body.String(), "medical history") || strings.Contains(rec.Body.String(), "penicillin</b>") {
+		t.Fatalf("own document shown to a network client: %s", rec.Body.String())
+	}
+	if rec := e.do(e.appH, "GET", "/api/search?q=penicillin&resource=@user", lanClient, host, nil, nil); rec.Code != http.StatusForbidden {
+		t.Fatalf("network client searched own documents: %d %s", rec.Code, rec.Body.String())
+	}
+	if rec := e.do(e.appH, "GET", "/api/documents/text?key=user:medical%20history.txt", lanClient, host, nil, nil); rec.Code != http.StatusForbidden {
+		t.Fatalf("network client read own document: %d", rec.Code)
+	}
+}

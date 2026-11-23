@@ -31,6 +31,7 @@ import (
 	"github.com/KK4ODA/arcana/internal/buildinfo"
 	"github.com/KK4ODA/arcana/internal/catalog"
 	"github.com/KK4ODA/arcana/internal/content"
+	"github.com/KK4ODA/arcana/internal/docs"
 	"github.com/KK4ODA/arcana/internal/hotspot"
 	"github.com/KK4ODA/arcana/internal/kiwix"
 	"github.com/KK4ODA/arcana/internal/kolibri"
@@ -507,6 +508,14 @@ func (s *Server) handleSearch(w http.ResponseWriter, r *http.Request, a *app.App
 		return
 	}
 	resource := qv.Get("resource")
+	// The host user's own documents are private to the computer running
+	// Arcana (like their files and previews); network clients, signed-in
+	// administrators included, search only installed resources.
+	private := isLocal(r)
+	if resource == docs.UserDocuments && !private {
+		writeError(w, http.StatusForbidden, "Your documents are only available on the computer running Arcana.")
+		return
+	}
 	start := clampInt(qv.Get("start"), 0, 0, 10000)
 	limit := clampInt(qv.Get("limit"), 25, 1, 100)
 	resp := map[string]any{"query": q, "results": []kiwix.Result{}, "total": 0}
@@ -579,7 +588,11 @@ func (s *Server) handleSearch(w http.ResponseWriter, r *http.Request, a *app.App
 		resp["results"], resp["total"] = nonNil(results), total
 	}
 	// Documents (PDF, EPUB, user files) from Arcana's own index.
-	if hits, n, err := a.Docs.Search(r.Context(), q, 25); err == nil {
+	scope := ""
+	if !private {
+		scope = docs.SharedDocuments
+	}
+	if hits, n, err := a.Docs.SearchIn(r.Context(), q, scope, 0, 25); err == nil {
 		resp["documents"], resp["documentTotal"] = nonNil(hits), n
 	}
 	// Titles of installed resources also match, so documents without a

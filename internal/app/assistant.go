@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/KK4ODA/arcana/internal/assistant"
+	"github.com/KK4ODA/arcana/internal/docs"
 	"github.com/KK4ODA/arcana/internal/library"
 	"github.com/KK4ODA/arcana/internal/store"
 )
@@ -289,7 +290,13 @@ func (l *assistantLibrary) Search(ctx context.Context, q string, limit int, priv
 		}
 	}
 	if l.a.Docs != nil {
-		hits, _, err := l.a.Docs.Search(ctx, q, limit)
+		// Without private access, search only shared documents, so the
+		// person's own files neither appear nor crowd out the rest.
+		scope := docs.SharedDocuments
+		if private {
+			scope = ""
+		}
+		hits, _, err := l.a.Docs.SearchIn(ctx, q, scope, 0, limit)
 		if err != nil && firstErr == nil {
 			firstErr = err
 		}

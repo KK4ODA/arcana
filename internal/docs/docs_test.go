@@ -141,6 +141,8 @@ func TestIndexSyncAndSearch(t *testing.T) {
 	}{
 		{"iodine", UserDocuments, 1}, {"iodine", "x.y", 0}, {"batteries", "x.y", 1},
 		{"batteries", UserDocuments, 0}, {"batteries", "other", 0}, {"batteries", "", 1},
+		// Shared: installed resources' documents, never the person's own.
+		{"iodine", SharedDocuments, 0}, {"batteries", SharedDocuments, 1},
 	} {
 		if _, n, err := ix.SearchIn(context.Background(), c.query, c.in, 0, 10); err != nil || n != c.want {
 			t.Errorf("%q in %q: %d matches (%v), want %d", c.query, c.in, n, err, c.want)
