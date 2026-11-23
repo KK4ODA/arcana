@@ -62,6 +62,11 @@ the library format version is tracked separately (docs/design/09-storage-and-dat
   listed beside the map. Arcana only listens: it asks the radio for its
   node list and keeps the connection alive, and never transmits on the
   mesh. Network clients see the mesh only if you allow it.
+- **Kolibri courses in search.** If you run a Kolibri server (Khan Academy
+  and other courses, with progress for each learner), enter its address in
+  *Settings → Kolibri (courses)*: its courses appear in library search
+  after the library's own results, and the Library page links to it.
+  Kolibri stays a separate program; see docs/kolibri.md.
 - **U.S. Army field manuals.** Three public-domain manuals cleared for
   public release join the catalog as searchable PDFs: *FM 4-25.11 First
   Aid*, *ATP 3-50.21 Survival* (2018) and *FM 3-25.26 Map Reading and Land

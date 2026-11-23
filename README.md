@@ -111,6 +111,8 @@ not yet code-signed (see [Status](#status)).
 - **Raspberry Pi / Linux appliance.** An installer sets Arcana up as a
   service with its own Wi-Fi network and captive portal
   ([docs/appliance.md](docs/appliance.md); not yet run on hardware).
+- **Kolibri courses** (optional): point Arcana at a Kolibri server and
+  its courses appear in library search ([docs/kolibri.md](docs/kolibri.md)).
 - **Integration API** for other programs, such as RadioPost and Aether HF:
   search with citations, article excerpts and position, with scoped tokens
   the operator approves ([docs/integration-api.md](docs/integration-api.md)).

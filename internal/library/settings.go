@@ -33,6 +33,8 @@ type Settings struct {
 	Assistant                    AssistantSettings     `json:"assistant"`
 	ContentUpdates               ContentUpdateSettings `json:"contentUpdates"`
 	Mesh                         MeshSettings          `json:"mesh"`
+	// Kolibri is a Kolibri server whose courses appear in library search.
+	Kolibri KolibriSettings `json:"kolibri"`
 	// Links are shortcuts on the Library page to other services on the
 	// network (a Kolibri server, a radio's web page, a file share).
 	Links []LinkTile `json:"links,omitempty"`
@@ -119,6 +121,12 @@ type AssistantSettings struct {
 	// NetworkClients lets devices on the network ask questions. Off by
 	// default: answers use this computer's processor and memory.
 	NetworkClients bool `json:"networkClients"`
+}
+
+// KolibriSettings name a Kolibri server (Learning Equality's offline
+// courses, such as Khan Academy). Empty URL: not used.
+type KolibriSettings struct {
+	URL string `json:"url,omitempty"`
 }
 
 // LinkTile is a shortcut to another service.

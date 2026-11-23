@@ -53,6 +53,7 @@ packaging/             launcher and first-run readme for release bundles
 packaging/appliance/   appliance installer, systemd units, captive-portal rules (docs/appliance.md)
 internal/sdnotify/     systemd readiness and watchdog notifications
 internal/integration/  integration API tokens, scopes and pairing
+internal/kolibri/      Kolibri server client: status, course search, links
 internal/mesh/         Meshtastic radio (listen only): stream framing, protobuf decoding, node table
 internal/translate/    translation language packs (Mozilla's model registry), decompression and verification
 internal/drugs/        FDA drug label reference: openFDA provider, download and build, queries, situations
@@ -133,6 +134,7 @@ docs/design/14-radio-and-integrations.md.
 | `GET /api/translate` | Translation engine and installed language packs (files with their URLs, directions) |
 | `GET /translate/engine.wasm`, `GET /translate/model/{resource}/{file}` | Engine and model files, decompressed and checked against Mozilla's hash (ETag = decompressed SHA-256) |
 | `GET /api/updates/schedule`, `POST /api/updates/schedule/run` | Automatic content updates: settings, state, window; check and queue now |
+| `GET /api/kolibri`, `GET /api/kolibri/search?q=`, `POST /api/kolibri/test` `{url}` | Kolibri server status; its courses matching a search; check an address |
 | `GET /api/mesh` | Meshtastic radio: state, nodes (positions, last heard, hops, SNR) and text messages; host and administrators, or everyone when shared |
 | `GET /api/gps`, `GET /api/gps/stream` | Position status; server-sent events (host only unless sharing is on) |
 | `GET /api/gps/ports` | Serial ports (host only) |

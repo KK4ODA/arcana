@@ -33,6 +33,7 @@ import (
 	"github.com/KK4ODA/arcana/internal/content"
 	"github.com/KK4ODA/arcana/internal/hotspot"
 	"github.com/KK4ODA/arcana/internal/kiwix"
+	"github.com/KK4ODA/arcana/internal/kolibri"
 	"github.com/KK4ODA/arcana/internal/library"
 	"github.com/KK4ODA/arcana/internal/mdns"
 	"github.com/KK4ODA/arcana/internal/storage"
@@ -245,6 +246,9 @@ func (s *Server) appHandler() http.Handler {
 	s.registerDrugs(mux)
 	s.registerTranslate(mux)
 	mux.HandleFunc("GET /api/mesh", s.withApp(s.handleMesh))
+	mux.HandleFunc("GET /api/kolibri", s.withApp(s.handleKolibri))
+	mux.HandleFunc("GET /api/kolibri/search", s.withApp(s.handleKolibriSearch))
+	mux.HandleFunc("POST /api/kolibri/test", s.withApp(s.handleKolibriTest))
 	mux.HandleFunc("GET /api/", func(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusNotFound, "unknown API endpoint")
 	})
@@ -921,6 +925,7 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *ap
 		WelcomeDone                  *bool                          `json:"welcomeDone"`
 		Mesh                         *library.MeshSettings          `json:"mesh"`
 		Links                        *[]library.LinkTile            `json:"links"`
+		Kolibri                      *library.KolibriSettings       `json:"kolibri"`
 	}
 	if err := readJSON(r, &req); err != nil {
 		writeError(w, 400, err.Error())
@@ -1024,6 +1029,16 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *ap
 				return errors.New("invalid GPS settings")
 			}
 			st.GPS = g
+		}
+		if req.Kolibri != nil {
+			u := strings.TrimSpace(req.Kolibri.URL)
+			if u != "" {
+				var err error
+				if u, err = kolibri.Normalize(u); err != nil {
+					return err
+				}
+			}
+			st.Kolibri.URL = u
 		}
 		if req.Links != nil {
 			links := *req.Links
@@ -1241,4 +1256,69 @@ func (s *Server) handleMesh(w http.ResponseWriter, r *http.Request, a *app.App) 
 	st := a.Mesh.Status()
 	writeJSON(w, http.StatusOK, map[string]any{"state": st.State, "error": st.Error, "source": st.Source, "myNode": st.MyNode,
 		"nodes": st.Nodes, "messages": st.Messages, "since": st.Since, "shared": set.ShareWithClients})
+}
+
+// Kolibri: courses from a Kolibri server appear in library search. The
+// server is contacted by Arcana (the browser's policy allows no other
+// origins), only at the address the owner entered.
+
+func (s *Server) handleKolibri(w http.ResponseWriter, r *http.Request, a *app.App) {
+	u := a.Lib.Settings.Get().Kolibri.URL
+	resp := map[string]any{"configured": u != "", "url": u}
+	if u != "" {
+		ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+		defer cancel()
+		info, err := (&kolibri.Client{BaseURL: u}).Info(ctx)
+		resp["reachable"] = err == nil
+		if err != nil {
+			resp["error"] = err.Error()
+		} else {
+			resp["version"], resp["deviceName"] = info.Version, info.DeviceName
+		}
+	}
+	writeJSON(w, http.StatusOK, resp)
+}
+
+func (s *Server) handleKolibriSearch(w http.ResponseWriter, r *http.Request, a *app.App) {
+	u := a.Lib.Settings.Get().Kolibri.URL
+	q := strings.TrimSpace(r.URL.Query().Get("q"))
+	if u == "" {
+		writeError(w, http.StatusNotFound, "No Kolibri server is set up.")
+		return
+	}
+	if q == "" || len(q) > 200 {
+		writeError(w, http.StatusBadRequest, "enter a search term")
+		return
+	}
+	ctx, cancel := context.WithTimeout(r.Context(), 8*time.Second)
+	defer cancel()
+	items, err := (&kolibri.Client{BaseURL: u}).Search(ctx, q, clampInt(r.URL.Query().Get("limit"), 8, 1, 30))
+	if err != nil {
+		writeJSON(w, http.StatusOK, map[string]any{"items": []kolibri.Item{}, "error": err.Error(), "url": u})
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"items": items, "url": u})
+}
+
+func (s *Server) handleKolibriTest(w http.ResponseWriter, r *http.Request, a *app.App) {
+	var req struct {
+		URL string `json:"url"`
+	}
+	if err := readJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid request")
+		return
+	}
+	u, err := kolibri.Normalize(req.URL)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	ctx, cancel := context.WithTimeout(r.Context(), 8*time.Second)
+	defer cancel()
+	info, err := (&kolibri.Client{BaseURL: u}).Info(ctx)
+	if err != nil {
+		writeError(w, http.StatusBadGateway, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, info)
 }

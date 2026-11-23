@@ -145,6 +145,7 @@ func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request, a *app.App
 		"assistant": s.assistantSummary(r, a),
 		"drugs":     map[string]any{"installed": a.Drugs() != nil},
 		"links":     nonNil(a.Lib.Settings.Get().Links),
+		"kolibri":   map[string]any{"configured": a.Lib.Settings.Get().Kolibri.URL != "", "url": a.Lib.Settings.Get().Kolibri.URL},
 		// Getting started is offered until finished or skipped, while
 		// nothing but the sample is installed.
 		"welcome":      map[string]any{"pending": !a.Lib.Settings.Get().WelcomeDone && onlySample(installed) && !a.Lib.ReadOnly},

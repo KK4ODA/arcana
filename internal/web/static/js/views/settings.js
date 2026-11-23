@@ -189,6 +189,21 @@ export async function settingsView(main) {
       renderLinks();
     } }, 'Add'))), 'Shortcuts shown to everyone on the Library page, for other things on this network: a Kolibri server, a radio\u2019s web page, a file share. Arcana does not check or manage them.')));
 
+  // Kolibri.
+  const kUrl = h('input', { type: 'url', value: st.kolibri?.url || '', placeholder: 'http://192.168.1.20:8080', style: 'width:min(320px,100%)', disabled: ro });
+  const kMsg = h('span', { class: 'small muted' });
+  const kTest = h('button', { disabled: ro, onclick: async () => {
+    kMsg.textContent = 'Connecting…';
+    try {
+      const r = await api.post('/api/kolibri/test', { url: kUrl.value.trim() });
+      kMsg.textContent = `Connected: Kolibri ${r.version || ''}${r.deviceName ? ` on ${r.deviceName}` : ''}.`;
+    } catch (e) { kMsg.textContent = e.message; }
+  } }, 'Test');
+  main.appendChild(h('section', { class: 'panel' },
+    h('header', null, h('h2', null, 'Kolibri (courses)')),
+    field('Kolibri server', h('span', null, h('span', { class: 'row' }, kUrl, kTest), kMsg),
+      'Kolibri, from Learning Equality, hosts Khan Academy and other courses with progress tracking for each learner. It is a separate program (see docs/kolibri.md). With its address here, its courses appear in library search and on the Library page. Leave empty to turn this off. Khan Academy material is licensed for non-commercial use only.')));
+
   const ap = assistantPanel(st, asst, ro, field);
   main.appendChild(ap.el);
 
@@ -216,6 +231,7 @@ export async function settingsView(main) {
     const mb = meshBody();
     if (JSON.stringify(mb) !== meshInitial) body.mesh = mb;
     if (JSON.stringify(links) !== linksInitial) body.links = links;
+    if (kUrl.value.trim() !== (st.kolibri?.url || '')) body.kolibri = { url: kUrl.value.trim() };
     const ab = ap.body();
     if (JSON.stringify(ab) !== ap.initial) body.assistant = ab;
     try {
