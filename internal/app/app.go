@@ -28,6 +28,7 @@ import (
 	"github.com/KK4ODA/arcana/internal/kiwix"
 	"github.com/KK4ODA/arcana/internal/library"
 	"github.com/KK4ODA/arcana/internal/maps"
+	"github.com/KK4ODA/arcana/internal/mesh"
 	"github.com/KK4ODA/arcana/internal/routing"
 	"github.com/KK4ODA/arcana/internal/storage"
 	"github.com/KK4ODA/arcana/internal/store"
@@ -71,6 +72,8 @@ type App struct {
 	Assistant *assistant.Service
 	engine    *assistant.Engine
 	drugs     drugState
+	// Mesh reads a Meshtastic radio.
+	Mesh *mesh.Manager
 	// contentUpd runs scheduled content updates.
 	contentUpd contentUpdater
 	events     eventHub
@@ -144,6 +147,7 @@ func Open(root string, opts Options) (*App, error) {
 	}
 	a.roads = routing.NewService()
 	a.openGPS()
+	a.Mesh = mesh.New(a.Log)
 	a.openAssistant()
 	a.Admin = auth.NewStore(lib.User())
 	if a.Integrations, err = integration.Open(lib.User(), lib.ReadOnly); err != nil {
@@ -210,6 +214,7 @@ func (a *App) Start(ctx context.Context) error {
 	a.reloadDrugs()
 	go a.placesLoop(ctx)
 	a.ApplyGPSSettings()
+	a.ApplyMeshSettings()
 	go a.reindexLoop(ctx)
 	go a.autoRefreshLoop(ctx)
 	go a.contentUpdateLoop(ctx)
@@ -229,6 +234,9 @@ func (a *App) Close() {
 	}
 	if a.GPS != nil {
 		a.GPS.Stop()
+	}
+	if a.Mesh != nil {
+		a.Mesh.Stop()
 	}
 	a.closeAssistant()
 	a.closeDrugs()

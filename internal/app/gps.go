@@ -5,6 +5,7 @@ import (
 
 	"github.com/KK4ODA/arcana/internal/gps"
 	"github.com/KK4ODA/arcana/internal/library"
+	"github.com/KK4ODA/arcana/internal/mesh"
 )
 
 func gpsSettings(s library.GPSSettings) gps.Settings {
@@ -36,4 +37,14 @@ func (a *App) ApplyGPSSettings() {
 		ctx = context.Background()
 	}
 	a.GPS.Apply(ctx, gpsSettings(a.Lib.Settings.Get().GPS))
+}
+
+// ApplyMeshSettings connects to (or disconnects from) the Meshtastic radio.
+func (a *App) ApplyMeshSettings() {
+	ctx := a.runCtx
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	s := a.Lib.Settings.Get().Mesh
+	a.Mesh.Apply(ctx, mesh.Settings{Source: s.Source, Address: s.Address, SerialPort: s.SerialPort, BaudRate: s.BaudRate})
 }

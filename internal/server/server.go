@@ -243,6 +243,7 @@ func (s *Server) appHandler() http.Handler {
 	s.registerAssistant(mux)
 	s.registerDrugs(mux)
 	s.registerTranslate(mux)
+	mux.HandleFunc("GET /api/mesh", s.withApp(s.handleMesh))
 	mux.HandleFunc("GET /api/", func(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusNotFound, "unknown API endpoint")
 	})
@@ -917,6 +918,7 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *ap
 		Assistant                    *library.AssistantSettings     `json:"assistant"`
 		ContentUpdates               *library.ContentUpdateSettings `json:"contentUpdates"`
 		WelcomeDone                  *bool                          `json:"welcomeDone"`
+		Mesh                         *library.MeshSettings          `json:"mesh"`
 	}
 	if err := readJSON(r, &req); err != nil {
 		writeError(w, 400, err.Error())
@@ -1021,6 +1023,22 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *ap
 			}
 			st.GPS = g
 		}
+		if req.Mesh != nil {
+			ms := *req.Mesh
+			switch ms.Source {
+			case "", "tcp", "serial":
+			default:
+				return fmt.Errorf("unknown radio connection %q", ms.Source)
+			}
+			if len(ms.Address) > 200 || len(ms.SerialPort) > 200 || ms.BaudRate < 0 || ms.BaudRate > 921600 {
+				return errors.New("invalid radio settings")
+			}
+			if ms.Source == "tcp" && strings.TrimSpace(ms.Address) == "" {
+				return errors.New("enter the radio's address, for example 192.168.1.40")
+			}
+			ms.Address = strings.TrimSpace(ms.Address)
+			st.Mesh = ms
+		}
 		if req.WelcomeDone != nil {
 			st.WelcomeDone = *req.WelcomeDone
 		}
@@ -1068,6 +1086,9 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *ap
 	}
 	if req.GPS != nil {
 		a.ApplyGPSSettings()
+	}
+	if req.Mesh != nil {
+		go a.ApplyMeshSettings()
 	}
 	if req.Assistant != nil {
 		a.ApplyAssistantSettings()
@@ -1187,4 +1208,17 @@ func (s *Server) handleWelcomePlan(w http.ResponseWriter, r *http.Request, a *ap
 		return
 	}
 	writeJSON(w, 200, plan)
+}
+
+// handleMesh reports the Meshtastic radio's nodes and messages: to the
+// host and administrators, and to network clients only when shared.
+func (s *Server) handleMesh(w http.ResponseWriter, r *http.Request, a *app.App) {
+	set := a.Lib.Settings.Get().Mesh
+	if !s.isAdmin(r) && !set.ShareWithClients {
+		writeJSON(w, http.StatusOK, map[string]any{"state": "hidden", "nodes": []any{}, "messages": []any{}, "shared": false})
+		return
+	}
+	st := a.Mesh.Status()
+	writeJSON(w, http.StatusOK, map[string]any{"state": st.State, "error": st.Error, "source": st.Source, "myNode": st.MyNode,
+		"nodes": st.Nodes, "messages": st.Messages, "since": st.Since, "shared": set.ShareWithClients})
 }

@@ -186,3 +186,27 @@ func TestAssistantLocalBackendNeedsModel(t *testing.T) {
 		t.Fatalf("status: %s", rec.Body.String())
 	}
 }
+
+func TestMeshPrivacy(t *testing.T) {
+	e := newEnv(t)
+	host := "127.0.0.1:18470"
+	if rec := e.do(e.appH, "GET", "/api/mesh", local, host, nil, nil); !strings.Contains(rec.Body.String(), `"state":"off"`) {
+		t.Fatalf("host: %s", rec.Body.String())
+	}
+	if rec := e.do(e.appH, "GET", "/api/mesh", lanClient, host, nil, nil); !strings.Contains(rec.Body.String(), `"state":"hidden"`) {
+		t.Fatalf("network client saw the mesh: %s", rec.Body.String())
+	}
+	e.app.Lib.Settings.Update(func(s *library.Settings) error { s.Mesh.ShareWithClients = true; return nil })
+	if rec := e.do(e.appH, "GET", "/api/mesh", lanClient, host, nil, nil); !strings.Contains(rec.Body.String(), `"state":"off"`) {
+		t.Fatalf("shared mesh hidden: %s", rec.Body.String())
+	}
+	var sess map[string]any
+	json.Unmarshal(e.do(e.appH, "GET", "/api/session", local, host, nil, nil).Body.Bytes(), &sess)
+	tok := map[string]string{"X-Arcana-Token": sess["token"].(string), "Content-Type": "application/json"}
+	if rec := e.do(e.appH, "PUT", "/api/settings", local, host, tok, strings.NewReader(`{"mesh":{"source":"radio"}}`)); rec.Code != 400 {
+		t.Fatalf("bad source accepted: %d", rec.Code)
+	}
+	if rec := e.do(e.appH, "PUT", "/api/settings", local, host, tok, strings.NewReader(`{"mesh":{"source":"tcp","address":""}}`)); rec.Code != 400 {
+		t.Fatalf("empty address accepted: %d", rec.Code)
+	}
+}

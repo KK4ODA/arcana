@@ -32,6 +32,7 @@ type Settings struct {
 	GPS                          GPSSettings           `json:"gps"`
 	Assistant                    AssistantSettings     `json:"assistant"`
 	ContentUpdates               ContentUpdateSettings `json:"contentUpdates"`
+	Mesh                         MeshSettings          `json:"mesh"`
 	// WelcomeDone is set once the person finished or skipped Getting
 	// started, so it is not offered again.
 	WelcomeDone bool `json:"welcomeDone"`
@@ -115,6 +116,21 @@ type AssistantSettings struct {
 	// NetworkClients lets devices on the network ask questions. Off by
 	// default: answers use this computer's processor and memory.
 	NetworkClients bool `json:"networkClients"`
+}
+
+// MeshSettings connect to a Meshtastic radio. Arcana only listens: it
+// shows the mesh's nodes on the map and its text messages, and never
+// transmits.
+type MeshSettings struct {
+	// Source is "" (off), "tcp" (a radio on Wi-Fi or Ethernet) or
+	// "serial" (USB).
+	Source     string `json:"source"`
+	Address    string `json:"address,omitempty"`
+	SerialPort string `json:"serialPort,omitempty"`
+	BaudRate   int    `json:"baudRate,omitempty"`
+	// ShareWithClients shows nodes and messages to network clients. Off
+	// by default: positions of people on the mesh are personal data.
+	ShareWithClients bool `json:"shareWithClients"`
 }
 
 // GPSSettings select a position source. Arcana only reads positions; it

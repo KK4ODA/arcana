@@ -54,6 +54,14 @@ the library format version is tracked separately (docs/design/09-storage-and-dat
   text. Between two languages other than English, Arcana goes through
   English when both packs are installed. Files are checked against
   Mozilla's published hashes before and after decompression. See ADR-0023.
+- **Meshtastic on the map.** Connect a Meshtastic radio (*Settings → Maps
+  and position → Meshtastic radio*: a radio on Wi-Fi or Ethernet, or on
+  USB) and the map shows every node it hears that reports a position, with
+  its name, when it was last heard, hops, signal and altitude; nodes
+  without a position and the text messages on the radio's channels are
+  listed beside the map. Arcana only listens: it asks the radio for its
+  node list and keeps the connection alive, and never transmits on the
+  mesh. Network clients see the mesh only if you allow it.
 - **Getting started.** A new library opens a short guided setup (and the
   Library view offers it until you finish or skip it): choose topics (the
   nine collections) and tools (maps of your area, directions, the medicines

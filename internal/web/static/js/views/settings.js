@@ -127,6 +127,33 @@ export async function settingsView(main) {
   });
   let gpsInitial = JSON.stringify(gpsBody());
 
+  // Meshtastic radio (listen only).
+  const mc = { source: '', address: '', serialPort: '', baudRate: 115200, shareWithClients: false, ...(st.mesh || {}) };
+  const meshSource = h('select', { disabled: ro }, [['', 'Off'], ['tcp', 'Radio on the network (Wi-Fi or Ethernet)'], ['serial', 'Radio on USB']]
+    .map(([v, t]) => h('option', { value: v, selected: v === (mc.source || '') }, t)));
+  const meshAddr = h('input', { type: 'text', value: mc.address || '', placeholder: 'radio address, e.g. 192.168.1.40 or meshtastic.local', style: 'width:min(320px,100%)', disabled: ro });
+  const meshPort = h('select', { disabled: ro, style: 'min-width:200px' });
+  const fillMeshPorts = async () => {
+    let ports = [];
+    try { ports = (await api.get('/api/gps/ports')).ports || []; } catch (_) { /* unavailable */ }
+    if (mc.serialPort && !ports.includes(mc.serialPort)) ports.unshift(mc.serialPort);
+    fill(meshPort, ports.length ? ports.map((p) => h('option', { value: p, selected: p === mc.serialPort }, p)) : h('option', { value: '' }, 'No serial ports found'));
+  };
+  const meshShare = h('input', { type: 'checkbox', checked: !!mc.shareWithClients, disabled: ro });
+  const meshFields = h('div');
+  const renderMesh = () => {
+    fill(meshFields,
+      meshSource.value === 'tcp' ? field('Radio address', meshAddr, 'The radio must have Wi-Fi or Ethernet turned on in its network settings. Arcana connects to port 4403.') : null,
+      meshSource.value === 'serial' ? field('Port', h('span', { class: 'row' }, meshPort, h('button', { onclick: fillMeshPorts }, 'Rescan')),
+        'Close the Meshtastic app or web client first: only one program can use the radio\u2019s USB port at a time.') : null);
+    if (meshSource.value === 'serial') fillMeshPorts();
+  };
+  meshSource.addEventListener('change', renderMesh);
+  renderMesh();
+  const meshBody = () => ({ source: meshSource.value, address: meshAddr.value.trim(),
+    serialPort: (meshSource.value === 'serial' && meshPort.value) || mc.serialPort || '', baudRate: mc.baudRate || 115200, shareWithClients: meshShare.checked });
+  let meshInitial = JSON.stringify(meshBody());
+
   main.appendChild(h('section', { class: 'panel' },
     h('header', null, h('h2', null, 'Maps and position')),
     field('Map regions', h('label', { class: 'inline' }, mapsOn, 'Offer OpenStreetMap regions in Discover'),
@@ -136,7 +163,11 @@ export async function settingsView(main) {
     field('Track recording', h('label', { class: 'inline' }, record, 'Record a track while a position is available'),
       'Tracks are saved as GPX files in user/tracks on the drive.'),
     field('Share position', h('label', { class: 'inline' }, shareGPS, 'Show the position, waypoints and tracks to network clients'),
-      'Off by default. Applies only when network sharing is on.')));
+      'Off by default. Applies only when network sharing is on.'),
+    field('Meshtastic radio', meshSource, 'Show the nodes a Meshtastic radio hears on the map, with their positions and the text messages on its channels. Arcana only listens; it never transmits.'),
+    meshFields,
+    field('Share the mesh', h('label', { class: 'inline' }, meshShare, 'Show mesh nodes and messages to network clients'),
+      'Off by default: the positions of people on the mesh are personal.')));
 
   const ap = assistantPanel(st, asst, ro, field);
   main.appendChild(ap.el);
@@ -162,6 +193,8 @@ export async function settingsView(main) {
     };
     const gb = gpsBody();
     if (JSON.stringify(gb) !== gpsInitial || !st.gps) body.gps = gb;
+    const mb = meshBody();
+    if (JSON.stringify(mb) !== meshInitial) body.mesh = mb;
     const ab = ap.body();
     if (JSON.stringify(ab) !== ap.initial) body.assistant = ab;
     try {
@@ -169,6 +202,7 @@ export async function settingsView(main) {
       toast(lan.checked !== st.server.shareOnLan ? 'Saved. Restart Arcana to change network sharing.' : 'Settings saved to the drive.');
       Object.assign(st, res.settings);
       gpsInitial = JSON.stringify(gpsBody());
+      meshInitial = JSON.stringify(meshBody());
       ap.initial = JSON.stringify(ap.body());
       window.dispatchEvent(new Event('arcana-status'));
     } catch (e) { toast(e.message); }

@@ -136,6 +136,8 @@ export async function mapsView(main, params) {
   const trkBox = h('div');
   const areaBoxEl = h('div');
   const toolsBox = h('div');
+  const meshBox = h('div');
+  const meshSec = h('section', { class: 'map-sec', hidden: true }, h('h3', null, 'Mesh radio'), meshBox);
 
   const dirs = createDirections({
     map: () => map,
@@ -158,6 +160,7 @@ export async function mapsView(main, params) {
     h('section', { class: 'map-sec' }, h('h3', null, 'Installed maps'), setsBox),
     h('section', { class: 'map-sec' }, h('h3', null, 'Waypoints'), wptBox),
     h('section', { class: 'map-sec' }, h('h3', null, 'Tracks'), trkBox),
+    meshSec,
     canChange ? h('section', { class: 'map-sec' }, h('h3', null, 'Download this area'), areaBoxEl) : null,
   );
 
@@ -220,6 +223,8 @@ export async function mapsView(main, params) {
       map.on('dragstart', () => { if (follow) { follow = false; renderPosition(); } });
       map.on('click', (ev) => {
         if (dirs.onMapClick(ev.lngLat)) return;
+        const hit = !measure && map.getLayer('arcana-mesh-dot') && map.queryRenderedFeatures(ev.point, { layers: ['arcana-mesh-dot'] })[0];
+        if (hit) { showMeshPopup(ml, hit.properties.num); return; }
         if (measure) addMeasurePoint(ev.lngLat); else showPointPopup(ml, ev.lngLat);
       });
       map.on('dblclick', (ev) => { if (measure && !measure.done) { ev.preventDefault(); finishMeasure(); } });
@@ -252,7 +257,7 @@ export async function mapsView(main, params) {
     const surface = cssVar('--surface') || '#fff';
     const text = cssVar('--text') || '#111';
     const empty = { type: 'FeatureCollection', features: [] };
-    for (const id of ['arcana-area', 'arcana-tracks', 'arcana-waypoints', 'arcana-measure', 'arcana-position']) {
+    for (const id of ['arcana-area', 'arcana-tracks', 'arcana-waypoints', 'arcana-measure', 'arcana-position', 'arcana-mesh']) {
       if (!map.getSource(id)) map.addSource(id, { type: 'geojson', data: empty });
     }
     map.addLayer({ id: 'arcana-area-line', type: 'line', source: 'arcana-area',
@@ -277,6 +282,13 @@ export async function mapsView(main, params) {
       paint: { 'line-color': measureColor, 'line-width': 2, 'line-dasharray': [2, 2] } });
     map.addLayer({ id: 'arcana-measure-pts', type: 'circle', source: 'arcana-measure', filter: ['==', ['geometry-type'], 'Point'],
       paint: { 'circle-radius': 4, 'circle-color': surface, 'circle-stroke-width': 2, 'circle-stroke-color': measureColor } });
+    map.addLayer({ id: 'arcana-mesh-dot', type: 'circle', source: 'arcana-mesh',
+      paint: { 'circle-radius': ['case', ['get', 'local'], 7, 6], 'circle-color': ['case', ['get', 'stale'], '#7c8a8f', '#0f8a7e'],
+        'circle-stroke-width': 2, 'circle-stroke-color': surface } });
+    map.addLayer({ id: 'arcana-mesh-label', type: 'symbol', source: 'arcana-mesh',
+      layout: { 'text-field': ['get', 'short'], 'text-font': ['Noto Sans Medium'], 'text-size': 11, 'text-offset': [0, 1.1], 'text-anchor': 'top', 'text-optional': true },
+      paint: { 'text-color': text, 'text-halo-color': surface, 'text-halo-width': 1.5 } });
+    map.getSource('arcana-mesh').setData(meshData());
     dirs.addLayers(map);
     map.addLayer({ id: 'arcana-pos-halo', type: 'circle', source: 'arcana-position',
       paint: { 'circle-radius': 15, 'circle-color': ['get', 'color'], 'circle-opacity': 0.18 } });
@@ -409,6 +421,68 @@ export async function mapsView(main, params) {
       onGPS({ private: true });
     }
   }
+
+  // ------------------------------------------------------------ mesh
+  // Nodes heard by a Meshtastic radio connected to Arcana (Settings → Maps
+  // and position). Arcana only listens; it never transmits.
+  let mesh = { state: 'off', nodes: [], messages: [] };
+  const meshName = (num) => {
+    const n = mesh.nodes.find((x) => x.num === num);
+    return n ? (n.shortName || n.longName || n.id) : `!${num.toString(16).padStart(8, '0')}`;
+  };
+  const staleAfter = 2 * 3600;
+  function meshData() {
+    const now = Date.now() / 1000;
+    return { type: 'FeatureCollection', features: mesh.nodes.filter((n) => n.position).map((n) => ({ type: 'Feature',
+      properties: { num: n.num, short: n.shortName || n.id, local: !!n.local, stale: !n.lastHeard || now - n.lastHeard > staleAfter },
+      geometry: { type: 'Point', coordinates: [n.position.lon, n.position.lat] } })) };
+  }
+  function meshDetails(n) {
+    const bits = [];
+    if (n.local) bits.push('the radio connected to Arcana');
+    if (n.lastHeard) bits.push(`heard ${fmtAgo(new Date(n.lastHeard * 1000).toISOString())}`);
+    if (n.hops !== undefined && n.hops !== null) bits.push(n.hops === 0 ? 'direct' : `${n.hops} hop${n.hops === 1 ? '' : 's'}`);
+    if (n.snr) bits.push(`SNR ${n.snr.toFixed(1)} dB`);
+    if (n.position?.alt) bits.push(`altitude ${fmtAltitude(n.position.alt)}`);
+    if (n.licensed) bits.push('licensed operator');
+    return bits.join(' · ');
+  }
+  function showMeshPopup(ml, num) {
+    const n = mesh.nodes.find((x) => x.num === num);
+    if (!n || !n.position) return;
+    const content = h('div', { class: 'pt-popup' }, h('b', null, `${n.longName || n.id}`), n.shortName ? h('span', { class: 'muted' }, ` (${n.shortName})`) : null,
+      h('div', { class: 'small' }, meshDetails(n)),
+      h('div', { class: 'small mono' }, coordLines(n.position.lat, n.position.lon)[0]),
+      h('div', { class: 'small muted' }, n.id));
+    new ml.Popup({ closeButton: true, maxWidth: '280px' }).setLngLat([n.position.lon, n.position.lat]).setDOMContent(content).addTo(map);
+  }
+  function renderMesh() {
+    meshSec.hidden = mesh.state === 'off' || mesh.state === 'hidden';
+    if (meshSec.hidden) return;
+    const placed = mesh.nodes.filter((n) => n.position);
+    const unplaced = mesh.nodes.filter((n) => !n.position);
+    fill(meshBox,
+      mesh.state !== 'connected' ? h('div', { class: `small ${mesh.state === 'error' ? 'warn-text' : 'muted'}` },
+        mesh.state === 'connecting' ? 'Connecting to the radio…' : (mesh.error || mesh.state)) : null,
+      mesh.state === 'connected' ? h('div', { class: 'small muted' }, `${mesh.nodes.length} node${mesh.nodes.length === 1 ? '' : 's'} heard, ${placed.length} with a position.`) : null,
+      placed.length ? h('ul', { class: 'mesh-nodes' }, placed.map((n) => h('li', null,
+        h('button', { class: 'linkish', onclick: () => flyTo(n.position.lon, n.position.lat, 13) }, h('b', null, n.shortName || n.id), ' ', n.longName || ''),
+        h('div', { class: 'sub' }, meshDetails(n))))) : null,
+      unplaced.length ? h('details', null, h('summary', { class: 'small' }, `${unplaced.length} without a position`),
+        h('ul', { class: 'mesh-nodes' }, unplaced.map((n) => h('li', null, h('b', null, n.shortName || n.id), ' ', n.longName || '', h('div', { class: 'sub' }, meshDetails(n)))))) : null,
+      mesh.messages.length ? h('details', { open: true }, h('summary', { class: 'small' }, 'Messages'),
+        h('ul', { class: 'mesh-msgs' }, mesh.messages.slice(-12).reverse().map((m) => h('li', null,
+          h('b', null, meshName(m.from)), m.direct ? h('span', { class: 'badge', title: 'Sent to this radio, not to the channel' }, 'direct') : null, ' ', m.text,
+          h('div', { class: 'sub' }, fmtAgo(new Date(m.time * 1000).toISOString())))))) : null);
+  }
+  async function loadMesh() {
+    try { mesh = await api.get('/api/mesh'); } catch (_) { mesh = { state: 'off', nodes: [], messages: [] }; }
+    setData('arcana-mesh', meshData());
+    renderMesh();
+  }
+  loadMesh();
+  const meshTimer = setInterval(() => { if (!document.hidden) loadMesh(); }, 10000);
+  disposers.push(() => clearInterval(meshTimer));
 
   // ------------------------------------------------------------ waypoints
   function waypointData() {

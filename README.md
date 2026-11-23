@@ -85,6 +85,8 @@ not yet code-signed (see [Status](#status)).
   1 GB of data). Position
   from a USB or serial GPS receiver, gpsd, NMEA over UDP/TCP, a simulator
   or a fixed point; waypoints, track recording and GPX import and export.
+  A Meshtastic radio (Wi-Fi or USB) puts the mesh's nodes on the map and
+  lists its messages; Arcana only listens.
 - **Share on the local network** (`--lan`). Phones and other computers can
   browse and search; only the host computer can make changes. Other
   devices find the library as `arcana.local` or by scanning a QR code.
