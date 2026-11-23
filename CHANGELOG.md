@@ -54,6 +54,15 @@ the library format version is tracked separately (docs/design/09-storage-and-dat
   text. Between two languages other than English, Arcana goes through
   English when both packs are installed. Files are checked against
   Mozilla's published hashes before and after decompression. See ADR-0023.
+- **Getting started.** A new library opens a short guided setup (and the
+  Library view offers it until you finish or skip it): choose topics (the
+  nine collections) and tools (maps of your area, directions, the medicines
+  reference, question answering, translation), your language and region,
+  and how much of the drive to use (Essential, about 8 GB; Standard, about
+  40 GB; Comprehensive, everything above the reserve). Arcana's recommender
+  fits editions to that budget across all chosen topics, adds what models
+  need (the engine), shows the plan on the storage bar with each item's
+  reason, and queues it in one click.
 - **Automatic content updates** (Updates → Automatic updates; off by
   default). Choose the hours they may run, how often the catalogs are
   checked, whether to take every update or only medical and regulatory

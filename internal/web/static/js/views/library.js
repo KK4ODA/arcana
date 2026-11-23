@@ -21,6 +21,11 @@ export async function libraryView(main, params, ctx) {
   if (status?.library.readOnly) {
     main.appendChild(h('div', { class: 'banner warn' }, `Read-only: ${status.library.readOnlyReason}. You can browse and search; downloads and changes are disabled.`));
   }
+  if (status?.welcome?.pending && canChange) {
+    main.appendChild(h('div', { class: 'banner info' }, h('b', null, 'Getting started: '),
+      'choose what this drive should hold, and Arcana suggests editions that fit. ',
+      h('a', { class: 'button primary', href: '#/welcome' }, 'Start')));
+  }
   main.appendChild(dashboard(status));
 
   // Search: titles that match, the best full-text matches from each

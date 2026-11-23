@@ -38,7 +38,8 @@ not yet code-signed (see [Status](#status)).
 - **Storage-aware selection.** Pick resources or start from nine
   collections ("Family Emergency Preparedness", "Amateur Radio Operator",
   …). Arcana recommends editions that fit your drive and explains each
-  choice.
+  choice. A new library starts with *Getting started*: topics, tools,
+  your area and a size tier become one download plan.
 - **Downloads you can trust.**
   - Large files download in pieces from several mirrors at once, with
     most of the work going to whichever mirror is fastest for you.

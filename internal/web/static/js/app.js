@@ -4,6 +4,7 @@ import { renderUpdateBanner } from './updatebanner.js';
 import { libraryView } from './views/library.js';
 import { askView } from './views/ask.js';
 import { medicinesView } from './views/medicines.js';
+import { welcomeView } from './views/welcome.js';
 import { discoverView } from './views/discover.js';
 import { mapsView } from './views/maps.js';
 import { downloadsView } from './views/downloads.js';
@@ -136,6 +137,12 @@ async function route() {
   }
   if (r.name === 'read') {
     cleanup = await readerView(main, r.args[0], r.params);
+    return;
+  }
+  if (r.name === 'welcome') {
+    renderTabs('library');
+    document.title = 'Getting started — Arcana';
+    cleanup = await welcomeView(main);
     return;
   }
   if (r.name === 'connect') {

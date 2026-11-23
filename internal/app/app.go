@@ -607,6 +607,12 @@ func (a *App) EnqueueByID(ctx context.Context, ids []string) map[string]string {
 
 // Recommend runs the preset recommender against current storage.
 func (a *App) Recommend(ctx context.Context, presetID, lang string) (catalog.Recommendation, error) {
+	return a.recommendWithin(ctx, presetID, lang, -1, nil)
+}
+
+// recommendWithin runs the recommender with a budget (negative: the
+// drive's headroom) and extra resources to treat as already present.
+func (a *App) recommendWithin(ctx context.Context, presetID, lang string, budget int64, chosen map[string]bool) (catalog.Recommendation, error) {
 	presets, err := a.Presets()
 	if err != nil {
 		return catalog.Recommendation{}, err
@@ -643,8 +649,14 @@ func (a *App) Recommend(ctx context.Context, presetID, lang string) (catalog.Rec
 			present[j.ResourceID] = true
 		}
 	}
+	for id := range chosen {
+		present[id] = true
+	}
+	if budget < 0 {
+		budget = rep.Plan.Headroom
+	}
 	return catalog.Recommend(catalog.RecommendInput{
-		Preset: *preset, Language: lang, Budget: rep.Plan.Headroom, Families: fam, Present: present,
+		Preset: *preset, Language: lang, Budget: budget, Families: fam, Present: present,
 	}), nil
 }
 

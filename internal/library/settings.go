@@ -32,6 +32,9 @@ type Settings struct {
 	GPS                          GPSSettings           `json:"gps"`
 	Assistant                    AssistantSettings     `json:"assistant"`
 	ContentUpdates               ContentUpdateSettings `json:"contentUpdates"`
+	// WelcomeDone is set once the person finished or skipped Getting
+	// started, so it is not offered again.
+	WelcomeDone bool `json:"welcomeDone"`
 	// Peers are other Arcana libraries on the network to copy from.
 	Peers []PeerSource `json:"peers,omitempty"`
 }

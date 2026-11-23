@@ -91,6 +91,7 @@ docs/design/14-radio-and-integrations.md.
 | `POST /api/catalog/refresh` | Refresh enabled providers |
 | `GET /api/presets`, `POST /api/recommend` | Collections and explained recommendations |
 | `POST /api/storage/plan` | Capacity plan for a selection |
+| `POST /api/welcome/plan` `{presets, language, tier, extras}` | Getting started: a download plan across collections within a size tier (`essential`, `standard`, `comprehensive`), extras and their dependencies first |
 | `GET/POST /api/downloads`, `POST /api/downloads/{id}/{pause,resume,cancel}`, `DELETE /api/downloads/{id}` | Queue |
 | `GET /api/updates` | Installed vs. latest known editions |
 | `GET /api/check?full=1` | Integrity check |

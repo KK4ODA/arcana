@@ -218,6 +218,7 @@ func (s *Server) appHandler() http.Handler {
 	mux.HandleFunc("POST /api/catalog/refresh", s.withApp(s.handleRefresh))
 	mux.HandleFunc("GET /api/presets", s.withApp(s.handlePresets))
 	mux.HandleFunc("POST /api/recommend", s.withApp(s.handleRecommend))
+	mux.HandleFunc("POST /api/welcome/plan", s.withApp(s.handleWelcomePlan))
 	mux.HandleFunc("POST /api/storage/plan", s.withApp(s.handlePlan))
 	mux.HandleFunc("GET /api/downloads", s.withApp(s.handleDownloads))
 	mux.HandleFunc("POST /api/downloads", s.withApp(s.handleEnqueue))
@@ -915,6 +916,7 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *ap
 		GPS                          *library.GPSSettings           `json:"gps"`
 		Assistant                    *library.AssistantSettings     `json:"assistant"`
 		ContentUpdates               *library.ContentUpdateSettings `json:"contentUpdates"`
+		WelcomeDone                  *bool                          `json:"welcomeDone"`
 	}
 	if err := readJSON(r, &req); err != nil {
 		writeError(w, 400, err.Error())
@@ -1018,6 +1020,9 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *ap
 				return errors.New("invalid GPS settings")
 			}
 			st.GPS = g
+		}
+		if req.WelcomeDone != nil {
+			st.WelcomeDone = *req.WelcomeDone
 		}
 		if req.ContentUpdates != nil {
 			cu := *req.ContentUpdates
@@ -1167,4 +1172,19 @@ func (s *Server) handleUpdateScheduleRun(w http.ResponseWriter, r *http.Request,
 	defer cancel()
 	ev := a.RunContentUpdatesNow(ctx)
 	writeJSON(w, http.StatusOK, map[string]any{"result": ev, "status": a.ContentUpdateStatus()})
+}
+
+// handleWelcomePlan turns the Getting started choices into a download plan.
+func (s *Server) handleWelcomePlan(w http.ResponseWriter, r *http.Request, a *app.App) {
+	var req app.WelcomeRequest
+	if err := readJSON(r, &req); err != nil {
+		writeError(w, 400, err.Error())
+		return
+	}
+	plan, err := a.PlanWelcome(r.Context(), req)
+	if err != nil {
+		writeError(w, 400, err.Error())
+		return
+	}
+	writeJSON(w, 200, plan)
 }

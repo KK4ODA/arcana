@@ -455,3 +455,17 @@ fieldset.situations label.inline { display: inline-flex; margin: 2px 14px 2px 0;
 .translate-box select { max-width: 220px; }
 .translate-status { display: block; padding: 2px 12px; }
 .translate-status:empty { display: none; }
+
+/* Getting started */
+.wizard-steps { display: flex; gap: 6px; list-style: none; margin: 0; padding: 8px 12px 0; flex-wrap: wrap; counter-reset: step; }
+.wizard-steps li { counter-increment: step; font-size: 13px; color: var(--muted); padding: 3px 10px; border-radius: 12px; border: 1px solid var(--border); }
+.wizard-steps li::before { content: counter(step) ". "; }
+.wizard-steps li.current { border-color: var(--accent); color: var(--text); background: var(--accent-soft); }
+.wizard-steps li.done { color: var(--ok); }
+.choices { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px; margin-bottom: 10px; }
+label.choice { display: flex; gap: 8px; align-items: flex-start; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; background: var(--surface-2); }
+label.choice:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+label.choice > span { display: flex; flex-direction: column; gap: 2px; }
+.wizard .body h3 { font-size: 14px; margin: 14px 0 6px; }
+.wizard-buttons { justify-content: flex-end; padding: 0 12px 12px; }
+.region-list { max-width: 520px; }
