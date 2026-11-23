@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -352,6 +353,110 @@ func TestUserDataAndDocumentsAPI(t *testing.T) {
 	rec = e.do(e.content, "GET", "/userdocs/page.html", local, "127.0.0.1:18471", nil, nil)
 	if rec.Header().Get("Content-Disposition") != "attachment" {
 		t.Fatal("HTML document must not render inline")
+	}
+}
+
+// Documents in folders below user/documents are searched, served and
+// removed by their folder path.
+func TestUserDocumentsInFolders(t *testing.T) {
+	e := newEnv(t)
+	tok := e.token()
+	dir := filepath.Join(e.app.Lib.Documents(), "Radios", "Yaesu")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	os.WriteFile(filepath.Join(dir, "manual.txt"), []byte("Set the CAT rate in menu 031."), 0o644)
+	e.app.RequestReindex()
+	var found bool
+	var rec *httptest.ResponseRecorder
+	for i := 0; i < 100 && !found; i++ {
+		time.Sleep(50 * time.Millisecond)
+		rec = e.do(e.appH, "GET", "/api/search?q=cat+rate", local, "127.0.0.1:18470", nil, nil)
+		found = strings.Contains(rec.Body.String(), `"key":"user:Radios/Yaesu/manual.txt"`)
+	}
+	if !found {
+		t.Fatalf("nested document not searchable: %s", rec.Body.String())
+	}
+	if rec := e.do(e.appH, "GET", "/api/user/documents", local, "127.0.0.1:18470", nil, nil); !strings.Contains(rec.Body.String(), `"name":"Radios/Yaesu/manual.txt"`) ||
+		!strings.Contains(rec.Body.String(), `"url":"/userdocs/Radios/Yaesu/manual.txt"`) {
+		t.Fatalf("listing: %s", rec.Body.String())
+	}
+	if rec := e.do(e.content, "GET", "/userdocs/Radios/Yaesu/manual.txt", local, "127.0.0.1:18471", nil, nil); rec.Code != 200 || !strings.Contains(rec.Body.String(), "menu 031") {
+		t.Fatalf("serve nested: %d", rec.Code)
+	}
+	if rec := e.do(e.content, "GET", "/userdocs/Radios/Yaesu/manual.txt", lanClient, "127.0.0.1:18471", nil, nil); rec.Code == 200 {
+		t.Fatal("a network client read the host's document")
+	}
+	for _, p := range []string{"/userdocs/Radios/..%2F..%2Fsettings.json", "/userdocs/Radios"} {
+		if rec := e.do(e.content, "GET", p, local, "127.0.0.1:18471", nil, nil); rec.Code == 200 {
+			t.Errorf("%s served", p)
+		}
+	}
+	h := map[string]string{"X-Arcana-Token": tok}
+	if rec := e.do(e.appH, "DELETE", "/api/user/documents/Radios/..%2F..%2Fsettings.json", local, "127.0.0.1:18470", h, nil); rec.Code == 200 {
+		t.Fatal("traversal delete accepted")
+	}
+	if rec := e.do(e.appH, "DELETE", "/api/user/documents/Radios/Yaesu/manual.txt", local, "127.0.0.1:18470", h, nil); rec.Code != 200 {
+		t.Fatalf("delete nested: %d %s", rec.Code, rec.Body.String())
+	}
+	trash, _ := filepath.Glob(filepath.Join(e.app.Lib.Documents(), ".deleted", "*-Radios - Yaesu - manual.txt"))
+	if len(trash) != 1 {
+		t.Errorf("not kept in .deleted: %v", trash)
+	}
+	if _, err := os.Stat(filepath.Join(e.app.Lib.Documents(), "Radios")); !os.IsNotExist(err) {
+		t.Errorf("empty folders left behind: %v", err)
+	}
+	if rec := e.do(e.appH, "DELETE", "/api/user/documents/Radios/Yaesu/manual.txt", local, "127.0.0.1:18470", h, nil); rec.Code != 404 {
+		t.Errorf("second delete: %d", rec.Code)
+	}
+}
+
+// Adding a folder is planned and started from the host only, runs as a
+// background task and makes the documents searchable.
+func TestAddFolderEndpoints(t *testing.T) {
+	e := newEnv(t)
+	tok := e.token()
+	src := filepath.Join(t.TempDir(), "Radio Manuals")
+	os.MkdirAll(filepath.Join(src, "Kenwood"), 0o755)
+	os.WriteFile(filepath.Join(src, "Kenwood", "TM-V71A.txt"), []byte("Press F then MHz to set the repeater offset."), 0o644)
+	os.WriteFile(filepath.Join(src, "photo.jpg"), []byte("jpeg"), 0o644)
+	q := "/api/user/documents/folder?path=" + url.QueryEscape(src)
+
+	if rec := e.do(e.appH, "GET", q, lanClient, "127.0.0.1:18470", nil, nil); rec.Code != 403 {
+		t.Fatalf("a network client listed the host's folder: %d", rec.Code)
+	}
+	body := `{"path":` + strconv.Quote(src) + `}`
+	if rec := e.do(e.appH, "POST", "/api/user/documents/folder", lanClient, "127.0.0.1:18470",
+		map[string]string{"Content-Type": "application/json"}, strings.NewReader(body)); rec.Code != 403 {
+		t.Fatalf("a network client started an import: %d", rec.Code)
+	}
+	rec := e.do(e.appH, "GET", q, local, "127.0.0.1:18470", nil, nil)
+	if rec.Code != 200 || !strings.Contains(rec.Body.String(), `"into":"Radio Manuals"`) || !strings.Contains(rec.Body.String(), `"files":1`) {
+		t.Fatalf("plan: %d %s", rec.Code, rec.Body.String())
+	}
+	if rec := e.do(e.appH, "GET", "/api/user/documents/folder?path=relative", local, "127.0.0.1:18470", nil, nil); rec.Code != 400 {
+		t.Errorf("relative path: %d", rec.Code)
+	}
+	h := map[string]string{"X-Arcana-Token": tok, "Content-Type": "application/json"}
+	if rec := e.do(e.appH, "POST", "/api/user/documents/folder", local, "127.0.0.1:18470", h, strings.NewReader(`{"path":"/no/such/folder"}`)); rec.Code != 400 {
+		t.Errorf("missing folder: %d %s", rec.Code, rec.Body.String())
+	}
+	rec = e.do(e.appH, "POST", "/api/user/documents/folder", local, "127.0.0.1:18470", h, strings.NewReader(body))
+	if rec.Code != 200 {
+		t.Fatalf("start: %d %s", rec.Code, rec.Body.String())
+	}
+	var found bool
+	for i := 0; i < 100 && !found; i++ {
+		time.Sleep(50 * time.Millisecond)
+		rec = e.do(e.appH, "GET", "/api/search?q=repeater+offset", local, "127.0.0.1:18470", nil, nil)
+		found = strings.Contains(rec.Body.String(), `"key":"user:Radio Manuals/Kenwood/TM-V71A.txt"`)
+	}
+	if !found {
+		t.Fatalf("added document not searchable: %s", rec.Body.String())
+	}
+	rec = e.do(e.appH, "GET", "/api/tasks", local, "127.0.0.1:18470", nil, nil)
+	if !strings.Contains(rec.Body.String(), `"copied":1`) {
+		t.Errorf("task result: %s", rec.Body.String())
 	}
 }
 

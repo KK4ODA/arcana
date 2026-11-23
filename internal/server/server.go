@@ -257,7 +257,7 @@ func (s *Server) contentHandler() http.Handler {
 		a.Kiwix.Handler().ServeHTTP(w, r)
 	})
 	mux.HandleFunc("GET /files/{id}/{name}", s.handleFile)
-	mux.HandleFunc("GET /userdocs/{name}", s.handleUserDocFile)
+	mux.HandleFunc("GET /userdocs/{name...}", s.handleUserDocFile)
 	mux.HandleFunc("GET /_arcana/frame.js", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/javascript; charset=utf-8")
 		w.Header().Set("Cache-Control", "no-cache")

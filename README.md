@@ -51,12 +51,17 @@ not yet code-signed (see [Status](#status)).
 - **Offline reading and search.** Archives open through Kiwix's reader,
   and PDFs and EPUBs in Arcana's own viewer. Search covers every installed
   archive and your own documents: matching titles first, then each
-  source's best matches with its own count. The reader searches the open
-  archive (titles complete as you type), and documents have a find bar.
-  Provenance and warnings are shown above every page.
+  source's best matches with its own count. Documents are searched page
+  by page: a result lists the pages that match (with the PDF's bookmark
+  headings) and opens the document at that page. The reader searches the
+  open archive (titles complete as you type), and documents have a find
+  bar and a page box. Provenance and warnings are shown above every page.
 - **Your own material.** Bookmarks, favorites, notes and reading history.
-  Add your own PDF, EPUB, HTML, Markdown and text files; they are indexed
-  and searched with everything else.
+  Add your own PDF, EPUB, HTML, Markdown and text files, one by one or a
+  whole folder at a time: *Add a folder* copies every document in a folder
+  and its subfolders, keeping the folders and skipping files already in
+  the library. They are indexed and searched with everything else, and
+  scanned PDFs without text are pointed out.
 - **Offline maps, directions and GPS.** Vector maps of countries, states
   and continents from OpenStreetMap, or a custom area, with offline place
   search, distance and area measuring, and miles or kilometres. Directions
@@ -165,6 +170,7 @@ arcana get RESOURCE-ID...                       # download, verify, install
 arcana import FILE... [--id ID] [--allow-unverified]
 arcana import --from DIR [ID...] [--user-documents]
 arcana export --to DIR [ID...|--all] [--user-documents]
+arcana add-documents DIR [--into NAME] [--types pdf,txt] [--dry-run]
 arcana manifest
 arcana update stage DIR | apply | rollback | status
 arcana hotspot start --ssid NAME --password PW [--device wlan0] | stop | status
@@ -192,7 +198,7 @@ See [docs/development.md](docs/development.md).
 |---|---|
 | **Implemented and tested** | Portable library layout; drive detection (Linux tested; Windows and macOS code compiled); capacity planning; catalog (bundled, Kiwix OPDS, feeds); recommender; verified resumable downloads; offline import; ZIM reading and search via kiwix-serve; web UI; read-only LAN sharing; integrity check; offline acceptance test |
 | **Built, not yet run on hardware** | Windows `Arcana.exe`, macOS binaries, Linux ARM64 |
-| **Implemented (Phase 2)** | Bookmarks, favorites, history and notes; your own documents with full-text search (PDF, EPUB, HTML, Markdown, text); drive-to-drive collection transfer; signed application updates with rollback; Project Gutenberg provider |
+| **Implemented (Phase 2)** | Bookmarks, favorites, history and notes; your own documents with full-text search by page (PDF, EPUB, HTML, Markdown, text), in folders, added one by one or a folder at a time; drive-to-drive collection transfer; signed application updates with rollback; Project Gutenberg provider |
 | **Implemented (Phase 3)** | Offline vector maps: 541 OpenStreetMap regions (world, continents, countries, states) extracted on demand from Protomaps planet builds, custom areas, seamless merging of overlapping maps, offline place search; GPS from USB/serial receivers, gpsd, NMEA over UDP/TCP, a GPX simulator or a fixed position; waypoints, track recording, GPX import/export; distance and area measuring; offline directions and turn-by-turn navigation (car, bicycle, foot) from road networks built on the user's computer |
 | **Implemented (Phase 4)** | `arcana.local` on the network (built-in mDNS), QR codes and a printable connection card, optional HTTPS on the same port, password-protected remote administration (off by default), Wi-Fi hotspot control on Linux |
 | **Implemented (Phase 5), not yet run on hardware** | Raspberry Pi / Linux appliance: installer, confined systemd service with watchdog, Wi-Fi access point with captive portal ([docs/appliance.md](docs/appliance.md)) |

@@ -60,6 +60,14 @@ func TestExportImportRoundTrip(t *testing.T) {
 	a.install(t, "test.two", "2", []byte("second resource"), "CC-BY-NC-SA-3.0")
 	os.WriteFile(filepath.Join(a.l.Documents(), "plan.txt"), []byte("meeting point: north gate"), 0o644)
 	os.WriteFile(filepath.Join(b.l.Documents(), "plan.txt"), []byte("a different plan"), 0o644)
+	// Documents in folders keep their folders, and a clash is resolved in
+	// the same folder.
+	for _, l := range []*library.Library{a.l, b.l} {
+		os.MkdirAll(filepath.Join(l.Documents(), "Radios", "Yaesu"), 0o755)
+	}
+	os.WriteFile(filepath.Join(a.l.Documents(), "Radios", "Yaesu", "manual.pdf"), []byte("FT-991A"), 0o644)
+	os.WriteFile(filepath.Join(a.l.Documents(), "Radios", "band plan.txt"), []byte("2 m: 144-148"), 0o644)
+	os.WriteFile(filepath.Join(b.l.Documents(), "Radios", "Yaesu", "manual.pdf"), []byte("FT-710"), 0o644)
 
 	exportDir := filepath.Join(t.TempDir(), "usb", "ArcanaExport")
 	res, err := Export(ctx, a.l, a.cm, a.st, []string{"test.one", "test.two"}, exportDir, true, nil)
@@ -83,7 +91,7 @@ func TestExportImportRoundTrip(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(ir.Installed) != 2 || ir.UserDocs != 1 {
+	if len(ir.Installed) != 2 || ir.UserDocs != 3 {
 		t.Fatalf("import: %+v", ir)
 	}
 	in, err := b.st.GetInstalled(ctx, "test.one")
@@ -95,6 +103,13 @@ func TestExportImportRoundTrip(t *testing.T) {
 	merged, _ := os.ReadFile(filepath.Join(b.l.Documents(), "plan (2).txt"))
 	if string(own) != "a different plan" || string(merged) != "meeting point: north gate" {
 		t.Fatalf("user documents: own=%q merged=%q", own, merged)
+	}
+	for rel, want := range map[string]string{
+		"Radios/Yaesu/manual.pdf": "FT-710", "Radios/Yaesu/manual (2).pdf": "FT-991A", "Radios/band plan.txt": "2 m: 144-148",
+	} {
+		if got, _ := os.ReadFile(filepath.Join(b.l.Documents(), filepath.FromSlash(rel))); string(got) != want {
+			t.Errorf("%s: %q, want %q", rel, got, want)
+		}
 	}
 	// Importing again skips identical resources.
 	ir2, _ := Import(ctx, b.l, b.cm, b.st, exportDir, nil, false, 0, nil)

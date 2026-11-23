@@ -49,6 +49,10 @@ Usage:
                                 Copy resources from an export or another library
   arcana export --to DIR [ID...|--all] [--user-documents]
                                 Copy resources to a folder or drive (verified)
+  arcana add-documents DIR [--into NAME] [--types pdf,txt] [--dry-run]
+                                Add the documents in a folder and its subfolders
+                                to your documents, keeping the folders; files
+                                already in the library are not copied again
   arcana manifest               Write manifest/library.json describing this library
   arcana update stage DIR | apply | rollback | status
                                 Install a signed application update (offline)
@@ -92,6 +96,8 @@ func main() {
 		err = cmdImport(args)
 	case "export":
 		err = cmdExport(args)
+	case "add-documents":
+		err = cmdAddDocuments(args)
 	case "manifest":
 		err = cmdManifest(args)
 	case "update":
@@ -695,6 +701,87 @@ func cmdExport(args []string) error {
 		return err
 	}
 	return waitTask(a, t.ID)
+}
+
+func cmdAddDocuments(args []string) error {
+	var into, types string
+	var dryRun bool
+	c, fs, err := parseFlags("add-documents", reorder(args), func(fs *flag.FlagSet) {
+		fs.StringVar(&into, "into", "", "")
+		fs.StringVar(&types, "types", "", "")
+		fs.BoolVar(&dryRun, "dry-run", false, "")
+	})
+	if err != nil {
+		return err
+	}
+	if fs.NArg() != 1 {
+		return errors.New("usage: arcana add-documents DIR [--into NAME] [--types pdf,txt] [--dry-run]")
+	}
+	src, err := filepath.Abs(fs.Arg(0))
+	if err != nil {
+		return err
+	}
+	var typeList []string
+	for _, t := range strings.Split(types, ",") {
+		if t = strings.ToLower(strings.TrimSpace(t)); t != "" {
+			typeList = append(typeList, "."+strings.TrimPrefix(t, "."))
+		}
+	}
+	a, done, err := openCLI(c)
+	if err != nil {
+		return err
+	}
+	defer done()
+	ctx := context.Background()
+	plan, err := a.PlanFolder(ctx, src, into, typeList)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Folder:      %s\n", plan.Source)
+	fmt.Printf("Copy to:     Your documents / %s\n", plan.Into)
+	fmt.Printf("New:         %d documents, %s\n", plan.Files, storage.FormatBytes(plan.Bytes))
+	if plan.Duplicates > 0 {
+		fmt.Printf("Duplicates:  %d, identical to a document already in the library or earlier in the folder (not copied)\n", plan.Duplicates)
+	}
+	if plan.Renamed > 0 {
+		fmt.Printf("Renamed:     %d, so that the names work on every file system\n", plan.Renamed)
+	}
+	if len(plan.Skipped) > 0 {
+		fmt.Println("Not copied:")
+	}
+	for _, g := range plan.Skipped {
+		fmt.Printf("  %s: %d", g.Reason, g.Count)
+		if len(g.Examples) > 0 {
+			fmt.Printf(" (%s)", strings.Join(g.Examples, ", "))
+		}
+		fmt.Println()
+	}
+	if plan.Truncated {
+		fmt.Println("Stopped looking after the first 100,000 documents (or 1,000,000 files).")
+	}
+	if dryRun || plan.Files == 0 {
+		if plan.Files == 0 {
+			fmt.Println("Nothing new to add.")
+		}
+		return nil
+	}
+	t, err := a.StartAddFolder(src, into, typeList)
+	if err != nil {
+		return err
+	}
+	if err := waitTask(a, t.ID); err != nil {
+		return err
+	}
+	fmt.Println("Indexing for search…")
+	res, err := a.ReindexDocuments(ctx)
+	if err != nil {
+		return err
+	}
+	for _, f := range res.Failed {
+		fmt.Println("  could not read:", f)
+	}
+	fmt.Println("Done.")
+	return nil
 }
 
 // waitTask prints progress of a background task until it finishes.

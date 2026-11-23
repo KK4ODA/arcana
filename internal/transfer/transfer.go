@@ -138,14 +138,13 @@ func Export(ctx context.Context, lib *library.Library, cm *content.Manager, st *
 	}
 	var userDocs []string
 	if withUserDocs {
-		entries, _ := os.ReadDir(lib.Documents())
-		for _, e := range entries {
-			if e.Type().IsRegular() && fsutil.ValidateFileName(e.Name()) == nil {
-				userDocs = append(userDocs, e.Name())
-				if info, err := e.Info(); err == nil {
-					total += info.Size()
-				}
-			}
+		files, err := lib.DocumentFiles()
+		if err != nil {
+			return res, err
+		}
+		for _, f := range files {
+			userDocs = append(userDocs, f.Path)
+			total += f.Size
 		}
 	}
 	if err := os.MkdirAll(dest, 0o755); err != nil {
@@ -206,8 +205,11 @@ func Export(ctx context.Context, lib *library.Library, cm *content.Manager, st *
 		}
 	}
 	for _, name := range userDocs {
-		src := filepath.Join(lib.Documents(), name)
-		dst := filepath.Join(dest, "user-documents", name)
+		src, err := lib.DocumentPath(name)
+		if err != nil {
+			continue // removed since it was listed
+		}
+		dst := filepath.Join(dest, "user-documents", filepath.FromSlash(name))
 		sum, err := hashFile(ctx, src)
 		if err != nil {
 			return res, err
@@ -511,28 +513,36 @@ func Import(ctx context.Context, lib *library.Library, cm *content.Manager, st *
 	return res, nil
 }
 
-// importUserDocs merges exported user documents. Existing files are never
-// overwritten; a differing file with the same name is saved as "name (2).ext".
+// importUserDocs merges exported user documents, keeping their folders.
+// Existing files are never overwritten; a differing file with the same name
+// is saved as "name (2).ext" in the same folder.
 func importUserDocs(ctx context.Context, lib *library.Library, src string, m Manifest) (int, error) {
 	n := 0
 	if err := os.MkdirAll(lib.Documents(), 0o755); err != nil {
 		return 0, err
 	}
 	for _, d := range m.UserDocuments {
-		if fsutil.ValidateFileName(d.Name) != nil || len(d.SHA256) != 64 {
+		if len(d.SHA256) != 64 || strings.Count(d.Name, "/") >= library.MaxDocumentDepth {
 			continue
 		}
-		from := filepath.Join(src, "user-documents", d.Name)
-		target := filepath.Join(lib.Documents(), d.Name)
+		from, err := fsutil.SafeJoin(filepath.Join(src, "user-documents"), d.Name)
+		if err != nil {
+			continue
+		}
+		target, err := fsutil.SafeJoin(lib.Documents(), d.Name)
+		if err != nil {
+			continue
+		}
 		if sum, err := hashFile(ctx, target); err == nil && sum == d.SHA256 {
 			continue // already present
 		}
+		dir, base := filepath.Split(target)
 		for i := 2; ; i++ {
-			if _, err := os.Stat(target); errors.Is(err, os.ErrNotExist) {
+			if _, err := os.Lstat(target); errors.Is(err, os.ErrNotExist) {
 				break
 			}
-			ext := filepath.Ext(d.Name)
-			target = filepath.Join(lib.Documents(), fmt.Sprintf("%s (%d)%s", strings.TrimSuffix(d.Name, ext), i, ext))
+			ext := filepath.Ext(base)
+			target = filepath.Join(dir, fmt.Sprintf("%s (%d)%s", strings.TrimSuffix(base, ext), i, ext))
 		}
 		if _, err := copyVerified(ctx, from, target, d.SHA256, func(int64) {}); err != nil {
 			return n, err

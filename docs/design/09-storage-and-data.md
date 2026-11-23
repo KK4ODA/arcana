@@ -16,12 +16,12 @@ Arcana/                        ← library root; any folder works, "Arcana" at d
 ├─ state/arcana.db (+-wal)     ← SQLite index (rebuildable cache)
 ├─ state/arcana.lock           ← OS-level lock (released automatically on crash)
 ├─ catalog/<provider>.json     ← last good catalog per provider (for offline browsing)
-├─ index/documents.db          ← full-text index of documents (rebuildable cache)
+├─ index/documents.db          ← full-text index of documents, by document and by page (rebuildable cache)
 ├─ user/                       ← never touched by content operations
 │  ├─ settings.json            ← settings (unknown keys preserved)
 │  ├─ bookmarks.json, favorites.json, recent.json (+ .bak previous copies)
 │  ├─ notes/<id>.md            ← one Markdown file per note; notes/deleted/ keeps removed notes
-│  ├─ documents/               ← the user's own files; .deleted/ keeps removed ones
+│  ├─ documents/               ← the user's own files, in folders if they like; .deleted/ keeps removed ones
 │  └─ presets/user-*.json      ← saved collections
 ├─ manifest/library.json       ← portable description of installed resources (on request)
 └─ logs/arcana.log             ← diagnostics (rotated at 5 MB)

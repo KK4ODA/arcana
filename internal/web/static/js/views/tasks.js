@@ -40,6 +40,7 @@ function resultLine(r) {
   const parts = [];
   if (r.resources !== undefined && r.destination) parts.push(`Exported ${r.resources} resources (${fmtBytes(r.bytes)}) to ${r.destination}${r.skipped ? `, ${r.skipped} already up to date` : ''}.`);
   if (r.installed) parts.push(`Installed ${r.installed.length}; skipped ${(r.skipped || []).length} identical or older${r.userDocuments ? `; ${r.userDocuments} documents added` : ''}.`);
+  if (r.copied !== undefined && r.into) parts.push(`Added ${r.copied} documents (${fmtBytes(r.bytes)}) to Your documents › ${r.into}${r.duplicates ? `; ${r.duplicates} already in the library` : ''}${r.failed?.length ? `; ${r.failed.length} could not be read` : ''}.`);
   if (r.problems) parts.push(r.problems.length ? `${r.problems.length} problem(s) found: ${r.problems.slice(0, 3).map((p) => `${p.resourceId} ${p.kind}`).join(', ')}` : `No problems in ${r.files} files.`);
   if (r.warnings?.length) parts.push(...r.warnings);
   return parts.length ? h('div', { class: 'small' }, parts.join(' ')) : null;

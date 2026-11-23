@@ -1,8 +1,12 @@
 # P. Growing the amateur radio library, and searching manuals by page (design)
 
-Status: **mostly design and research.** Two parts are implemented: the
-Kiwix additions (section 1), and the PDF text fixes with scanned-PDF
-detection (section 4). Sources and licenses were checked on 2026-11-23;
+Status: **partly implemented.** Done:
+- the Kiwix additions (section 1);
+- *Add a folder* (section 3);
+- search by page, the PDF text fixes and scanned-PDF detection
+  (section 4).
+
+The rest is design. Sources and licenses were checked on 2026-11-23;
 recheck each one when its catalog entry is written. Builds on [14-radio-and-integrations.md](14-radio-and-integrations.md)
 (radio content decisions) and [15-local-ai.md](15-local-ai.md) (question
 answering).
@@ -369,9 +373,22 @@ every supported document in it and its subfolders and adds them to the
 library, keeping the folder structure. The result is searchable with
 everything else.
 
-**Today.** *My documents* accepts one file at a time through the browser.
-Files land in one flat folder, `user/documents/`. `arcana import --from`
-reads only Arcana exports.
+**Status: done**, as described below, with these differences:
+- **Not built yet:** linked folders (indexing in place), opening `.zip`
+  files, and limiting a search to one folder. *Your documents* gets a
+  filter box instead, for name or folder.
+- **Preview speed.** The preview hashes only files whose size matches
+  another file, so it stays fast. The copy hashes every file while
+  copying.
+- **Code:**
+  - `internal/app/folderimport.go` (`PlanFolder`, `AddFolder`);
+  - `library.DocumentFiles` and `library.DocumentPath` (folders below
+    `user/documents`, never through links);
+  - `fsutil.SanitizeFileName`;
+  - `GET`/`POST /api/user/documents/folder`;
+  - `arcana add-documents`.
+- **Measured.** A folder with the six test PDFs (39 MB) was planned and
+  copied in about a second, and indexed by page in about 10 s.
 
 ### Behaviour
 
@@ -471,7 +488,23 @@ Findings:
 
 ### Changes
 
-- **Index pages, not documents.**
+- **Index pages, not documents. Done** (index layout 3, ExtractorVersion
+  3). Two FTS5 tables work together:
+  - `docs_fts` is contentless, one row per document. It decides what
+    matches and the order, exactly as before.
+  - `pages_fts` has one row per page or section. Each document's pages
+    are a contiguous rowid range, so finding a result's best pages is a
+    range lookup.
+  - When no single page holds every word, the pages holding any of them
+    are shown.
+  - Bookmarks are resolved through `/Dest`, GoTo actions and named
+    destinations. Pages are recognised by their dictionaries, because the
+    PDF library hides object numbers. Every walk is bounded.
+  - On the 2025 ATP 6-02.53 (206 pages), "field expedient antenna" finds
+    p. 153 "Section V – Field Expedient Antenna Repair". Searches take
+    1–4 ms.
+
+  The design as written:
   - PDFs are indexed one row per page. EPUBs are indexed one row per
     chapter or heading section, and other text in sections of about 400
     words.
@@ -481,7 +514,8 @@ Findings:
   - Results are grouped by document, with each document's best pages
     shown, for example: *FT-991A Operating Manual · p. 47 · Menu mode 031
     CAT RATE … set the **CAT** rate to match …*.
-- **Open at the page.**
+- **Open at the page. Done**, plus a page box and an *Original* link on
+  every page marker.
   - Browsers' built-in PDF viewers accept `#page=N`, so *Open original*
     can go straight to the matching page.
   - The text view gets page markers and scrolls to the page, with the
@@ -615,8 +649,8 @@ Design points:
 |---|---|---|
 | Add Kiwix archives to the *Amateur Radio Operator* collection | **Done** | — |
 | Fix PDF word joining; detect scanned PDFs | **Done** | — |
-| Search by page, open at the page, outline headings | Medium | — |
-| Add a folder (copy, keep structure, duplicates, preview) | Medium | Subfolders in `user/documents` |
+| Search by page, open at the page, outline headings | **Done** | — |
+| Add a folder (copy, keep structure, duplicates, preview) | **Done**; linked folders and `.zip` not yet | Subfolders in `user/documents` (**done**) |
 | Curated government and open documents (catalog or signed radio feed) | Medium, mostly curation | Mirrors for sites that block automated downloads |
 | Email archive import (`.mbox`, `.eml`) | Small to medium | Search by page (one row per message) |
 | Groups.io connector (API key; archive, Files, wiki) | Medium | Email import; *Add a folder*; confirmation from Groups.io |

@@ -185,6 +185,7 @@ export async function readerView(main, id, params) {
 // with a link to the original file on the content origin.
 export async function documentView(main, params) {
   const key = params.get('key') || '';
+  const wantPage = Number(params.get('page')) || 0;
   let d;
   try {
     d = await api.get(`/api/documents/text?key=${encodeURIComponent(key)}`);
@@ -198,83 +199,149 @@ export async function documentView(main, params) {
     resource = lib.resources.find((x) => key.startsWith(`res:${x.resourceId}/`));
   }
   document.title = `${d.title} — Arcana`;
+  // Browsers' PDF viewers open a PDF at #page=N.
+  const original = (n) => contentURL(d.url) + (d.paged && n > 0 ? `#page=${n}` : '');
+  const unit = d.paged ? 'page' : 'section';
+
+  // Plain text only: each page (or section) gets a marker, and paragraphs
+  // are rebuilt from blank lines.
   const textEl = h('div', { class: 'doc-text' });
-  // Plain text only: paragraphs are rebuilt from blank lines.
   const paras = [];
-  for (const para of d.text.split(/\n{2,}|\n(?=[A-Z0-9•\-–])/)) {
-    const t = para.trim();
-    if (!t) continue;
-    const el = h('p', null, t);
-    paras.push({ el, text: t, lower: t.toLowerCase() });
-    textEl.appendChild(el);
+  const markers = new Map();
+  let lastHeading = '';
+  for (const sec of d.sections) {
+    let marker;
+    if (d.paged) {
+      marker = h('div', { class: 'page-mark', id: `page-${sec.n}` },
+        h('span', { class: 'page-no' }, `Page ${sec.n}`),
+        sec.heading ? h('span', { class: 'page-heading' }, sec.heading) : null,
+        sec.text.trim() ? null : h('span', { class: 'muted' }, 'no text'),
+        h('a', { href: original(sec.n), target: '_blank', rel: 'noopener', title: `Open page ${sec.n} of the original` }, 'Original'));
+    } else if (sec.heading && sec.heading !== lastHeading) {
+      marker = h('h3', { class: 'section-mark', id: `section-${sec.n}` }, sec.heading);
+    } else {
+      marker = h('span', { id: `section-${sec.n}` });
+    }
+    lastHeading = sec.heading || '';
+    markers.set(sec.n, marker);
+    textEl.appendChild(marker);
+    for (const para of sec.text.split(/\n{2,}|\n(?=[A-Z0-9•\-–])/)) {
+      const t = para.trim();
+      if (!t) continue;
+      const el = h('p', null, t);
+      paras.push({ el, text: t, n: sec.n });
+      textEl.appendChild(el);
+    }
   }
 
   // Find in document: every match is marked; Enter and the arrows step
-  // through them.
+  // through them. When the words never occur together, each word is
+  // marked on its own, as search matches words anywhere on a page.
   const findInput = h('input', { type: 'search', placeholder: 'Find in this document', 'aria-label': 'Find in this document', value: params.get('find') || '' });
   const findCount = h('span', { class: 'small muted', 'aria-live': 'polite' });
   const prevBtn = h('button', { 'aria-label': 'Previous match', title: 'Previous match (Shift+Enter)', disabled: true }, '↑');
   const nextBtn = h('button', { 'aria-label': 'Next match', title: 'Next match (Enter)', disabled: true }, '↓');
+  const escapeRe = (x) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   let marks = [];
   let cur = -1;
   let marked = new Set();
-  function find() {
-    const q = findInput.value.trim().toLowerCase();
+  let anyWord = false;
+  function markAll(re) {
+    for (const p of paras) {
+      re.lastIndex = 0;
+      if (!re.test(p.text)) continue;
+      re.lastIndex = 0;
+      const parts = [];
+      let pos = 0;
+      for (const m of p.text.matchAll(re)) {
+        if (m.index > pos) parts.push(p.text.slice(pos, m.index));
+        const el = h('mark', null, m[0]);
+        marks.push({ el, n: p.n });
+        parts.push(el);
+        pos = m.index + m[0].length;
+      }
+      if (pos < p.text.length) parts.push(p.text.slice(pos));
+      fill(p.el, parts);
+      marked.add(p);
+    }
+  }
+  function find(jump = true) {
+    const q = findInput.value.trim();
     for (const p of marked) fill(p.el, p.text);
     marked = new Set();
     marks = [];
     cur = -1;
+    anyWord = false;
     if (q.length >= 2) {
-      for (const p of paras) {
-        let i = p.lower.indexOf(q);
-        if (i < 0) continue;
-        const parts = [];
-        let pos = 0;
-        while (i >= 0) {
-          if (i > pos) parts.push(p.text.slice(pos, i));
-          const m = h('mark', null, p.text.slice(i, i + q.length));
-          marks.push(m);
-          parts.push(m);
-          pos = i + q.length;
-          i = p.lower.indexOf(q, pos);
-        }
-        if (pos < p.text.length) parts.push(p.text.slice(pos));
-        fill(p.el, parts);
-        marked.add(p);
+      markAll(new RegExp(escapeRe(q), 'gi'));
+      const words = q.split(/\s+/).filter((w) => w.length >= 2);
+      if (!marks.length && words.length > 1) {
+        anyWord = true;
+        words.sort((a, b) => b.length - a.length);
+        markAll(new RegExp(words.map(escapeRe).join('|'), 'gi'));
       }
     }
-    findCount.textContent = q.length < 2 ? '' : marks.length ? `${marks.length.toLocaleString()} match${marks.length === 1 ? '' : 'es'}` : 'No matches';
+    const what = anyWord ? ' of these words' : '';
+    findCount.textContent = q.length < 2 ? '' : marks.length ? `${marks.length.toLocaleString()} match${marks.length === 1 ? '' : 'es'}${what}` : 'No matches';
     prevBtn.disabled = nextBtn.disabled = !marks.length;
-    if (marks.length) step(1);
+    if (marks.length && jump) step(1);
   }
   function step(dir) {
     if (!marks.length) return;
-    if (cur >= 0) marks[cur].classList.remove('current');
+    if (cur >= 0) marks[cur].el.classList.remove('current');
     cur = (cur + dir + marks.length) % marks.length;
-    marks[cur].classList.add('current');
-    marks[cur].scrollIntoView({ block: 'center' });
-    findCount.textContent = `${cur + 1} of ${marks.length.toLocaleString()}`;
+    marks[cur].el.classList.add('current');
+    marks[cur].el.scrollIntoView({ block: 'center' });
+    findCount.textContent = `${cur + 1} of ${marks.length.toLocaleString()}${anyWord ? ' (any of the words)' : ''}`;
   }
-  const findLater = debounce(find, 200);
+  // goTo shows a page: its first match when there is one, else its top.
+  function goTo(n) {
+    const i = marks.findIndex((m) => m.n === n);
+    if (i >= 0) {
+      cur = i - 1;
+      step(1);
+      return;
+    }
+    const m = markers.get(n);
+    if (m) m.scrollIntoView({ block: 'start' });
+  }
+  const findLater = debounce(() => find(), 200);
   findInput.addEventListener('input', findLater);
   findInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') { e.preventDefault(); if (cur < 0) find(); else step(e.shiftKey ? -1 : 1); }
   });
   prevBtn.addEventListener('click', () => step(-1));
   nextBtn.addEventListener('click', () => step(1));
-  const findBar = h('div', { class: 'toolbar find-bar', role: 'search' }, h('div', { class: 'grow' }, findInput), findCount, prevBtn, nextBtn);
-  if (findInput.value) setTimeout(find, 0);
+  const count = d.sections.length;
+  const pageInput = d.paged && count > 1 ? h('input', { type: 'number', min: 1, max: count, class: 'page-input', 'aria-label': 'Go to page',
+    value: wantPage || '', placeholder: 'Page' }) : null;
+  if (pageInput) {
+    pageInput.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      const n = Math.min(Math.max(Math.round(Number(pageInput.value)), 1), count);
+      if (n) goTo(n);
+    });
+  }
+  const findBar = h('div', { class: 'toolbar find-bar', role: 'search' }, h('div', { class: 'grow' }, findInput), findCount, prevBtn, nextBtn,
+    pageInput ? h('label', { class: 'small muted page-go' }, pageInput, ` of ${count.toLocaleString()}`) : null);
 
   main.appendChild(h('section', { class: 'panel' },
     h('header', null, h('a', { class: 'button', href: '#/library' }, '← Library'), h('h2', null, d.title),
-      h('a', { class: 'button', href: contentURL(d.url), target: '_blank', rel: 'noopener' }, 'Open original')),
+      h('a', { class: 'button', href: original(wantPage), target: '_blank', rel: 'noopener' }, wantPage && d.paged ? `Open original at page ${wantPage}` : 'Open original')),
     findBar,
     resource ? h('div', { class: 'toolbar small muted' }, resource.title, ` · ${resource.version} · published ${fmtDate(resource.published)} · `, licenseBadge(resource.license)) : null,
     resource ? (resource.warnings || []).map((w) => h('div', { class: `banner ${w.kind === 'medical' ? 'err' : 'warn'}`, style: 'margin:8px 12px' }, w.text)) : null,
     d.problem ? h('div', { class: 'banner warn', style: 'margin:8px 12px' }, d.problem) : null,
     h('div', { class: 'body' },
-      h('p', { class: 'small muted' }, 'Text extracted for reading and search. Layout, images and tables appear only in the original.'),
+      h('p', { class: 'small muted' }, `Text extracted for reading and search, ${unit} by ${unit}. Layout, images and tables appear only in the original.`),
       textEl,
       d.truncated ? h('p', { class: 'small muted' }, 'Preview shortened. Open the original for the full document.') : null)));
+  // Arriving from a search result: the matches are marked, and the view
+  // goes to the page the result named.
+  setTimeout(() => {
+    if (findInput.value) find(!wantPage);
+    if (wantPage) goTo(wantPage);
+  }, 0);
   return null;
 }

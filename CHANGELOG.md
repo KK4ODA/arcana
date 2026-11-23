@@ -6,6 +6,43 @@ the library format version is tracked separately (docs/design/09-storage-and-dat
 ## Unreleased
 
 ### Added
+- **Search finds the page.** Documents are now searched page by page.
+  EPUB chapters and other documents are searched in sections.
+  - A result lists up to three of its best pages, each with the PDF's
+    bookmark heading where it has one ("p. 153 · Section V – Field
+    Expedient Antenna Repair"), and says how many pages match.
+  - Choosing a page opens the document there, with the search words
+    marked.
+  - When the words are on different pages, the pages that hold any of
+    them are shown.
+  - Documents match and rank as before.
+  - The document view now marks every page and has a page box ("Page 47
+    of 206"). Each page has a link that opens the original PDF at that
+    page.
+  - For programs using the integration API, document results now carry
+    the page.
+- **Add a folder.** *Your documents → Add a folder of documents* (or
+  `arcana add-documents DIR`) copies every document in a folder on the
+  computer, and in its subfolders, into your documents, keeping the
+  folders.
+  - It first shows what it would do: the documents found, by type, with a
+    choice of types; how many are already in the library; names that
+    must change to work on every file system; what is left out and why;
+    and the space left above the reserve.
+  - Files identical to one already in the library, or found twice in the
+    folder, are not copied again. Running it again later adds only what
+    is new. A changed file with the same name is kept beside the old one
+    as "name (2)".
+  - Hidden and system folders, links, empty files and files over 2 GB
+    are left out. So is the library itself when it sits inside the
+    folder.
+  - The copy runs in the background, checks the free space before each
+    file, and can be cancelled. It works only on the computer running
+    Arcana.
+- **Documents in folders.** Your documents may now be kept in folders
+  inside `user/documents`. They are listed with their folder, searched,
+  opened, removed and copied between drives by their folder path. The
+  list can be filtered once it is long.
 - **More for radio operators.** The *Amateur Radio Operator* collection
   now suggests three more archives, as space allows:
   - **Engineering LibreTexts:** open textbooks on antennas, transmission
@@ -38,6 +75,11 @@ the library format version is tracked separately (docs/design/09-storage-and-dat
     background, after updating.
 - Large PDFs get more time to be read: 60 s plus a quarter of a second
   per page, instead of a fixed 60 s.
+- *Find in this document* marks each of the words when the exact phrase
+  does not occur, as search matches words anywhere on a page.
+- The document search index has a new layout. After updating, it is
+  rebuilt once in the background; until that finishes, documents not yet
+  read again are missing from search results.
 
 ## 0.7.0 — 2026-11-23
 

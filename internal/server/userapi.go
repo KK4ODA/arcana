@@ -13,6 +13,7 @@ import (
 
 	"github.com/KK4ODA/arcana/internal/app"
 	"github.com/KK4ODA/arcana/internal/library"
+	"github.com/KK4ODA/arcana/internal/tasks"
 	"github.com/KK4ODA/arcana/internal/userdata"
 )
 
@@ -33,7 +34,11 @@ func (s *Server) registerPhase2(mux *http.ServeMux) {
 	mux.HandleFunc("DELETE /api/user/notes/{id}", s.withApp(s.handleDeleteNote))
 	mux.HandleFunc("GET /api/user/documents", localOnly(s.withApp(s.handleUserDocs)))
 	mux.HandleFunc("POST /api/user/documents", s.withApp(s.handleUploadDoc))
-	mux.HandleFunc("DELETE /api/user/documents/{name}", s.withApp(s.handleDeleteDoc))
+	mux.HandleFunc("DELETE /api/user/documents/{name...}", s.withApp(s.handleDeleteDoc))
+	// Adding a folder: the plan reveals the host's folders, so it is
+	// host-only; starting the copy is a host-only mutation.
+	mux.HandleFunc("GET /api/user/documents/folder", localOnly(s.withApp(s.handleFolderPlan)))
+	mux.HandleFunc("POST /api/user/documents/folder", s.withApp(s.handleAddFolder))
 	mux.HandleFunc("POST /api/presets", s.withApp(s.handleSavePreset))
 	mux.HandleFunc("GET /api/documents/text", s.withApp(s.handleDocText))
 
@@ -59,6 +64,8 @@ func userErr(w http.ResponseWriter, err error) {
 	switch {
 	case errors.Is(err, userdata.ErrReadOnly), errors.Is(err, library.ErrReadOnly):
 		writeError(w, http.StatusConflict, err.Error())
+	case errors.Is(err, library.ErrNoDocument):
+		writeError(w, http.StatusNotFound, err.Error())
 	default:
 		writeError(w, http.StatusBadRequest, err.Error())
 	}
@@ -236,22 +243,62 @@ func (s *Server) handleDeleteDoc(w http.ResponseWriter, r *http.Request, a *app.
 	writeJSON(w, 200, map[string]string{"status": "deleted"})
 }
 
-// handleDocText returns extracted text for an in-app preview. Text is
-// returned as JSON and rendered with textContent, so documents cannot inject
-// markup into the interface.
+// handleFolderPlan looks through a folder on the host for documents to add
+// and says what adding it would do, without copying anything.
+func (s *Server) handleFolderPlan(w http.ResponseWriter, r *http.Request, a *app.App) {
+	q := r.URL.Query()
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Minute)
+	defer cancel()
+	plan, err := a.PlanFolder(ctx, strings.TrimSpace(q.Get("path")), q.Get("into"), q["type"])
+	if err != nil {
+		writeError(w, 400, err.Error())
+		return
+	}
+	writeJSON(w, 200, plan)
+}
+
+// handleAddFolder starts copying a folder's documents in the background.
+func (s *Server) handleAddFolder(w http.ResponseWriter, r *http.Request, a *app.App) {
+	var req struct {
+		Path  string   `json:"path"`
+		Into  string   `json:"into"`
+		Types []string `json:"types"`
+	}
+	if err := readJSON(r, &req); err != nil {
+		writeError(w, 400, err.Error())
+		return
+	}
+	t, err := a.StartAddFolder(strings.TrimSpace(req.Path), req.Into, req.Types)
+	if err != nil {
+		code := errStatus(err)
+		switch {
+		case errors.Is(err, tasks.ErrBusy):
+			code, err = http.StatusConflict, errors.New("a folder is already being added; wait for it to finish")
+		case code == http.StatusInternalServerError:
+			code = http.StatusBadRequest // a folder that cannot be used
+		}
+		writeError(w, code, err.Error())
+		return
+	}
+	writeJSON(w, 200, t)
+}
+
+// handleDocText returns extracted text for an in-app preview, page by page
+// (or section by section). Text is returned as JSON and rendered with
+// textContent, so documents cannot inject markup into the interface.
 func (s *Server) handleDocText(w http.ResponseWriter, r *http.Request, a *app.App) {
 	key := r.URL.Query().Get("key")
 	if strings.HasPrefix(key, "user:") && !isLocal(r) {
 		writeError(w, 403, "Your documents are only available on the computer running Arcana.")
 		return
 	}
-	title, text, u, err := a.Docs.Text(r.Context(), key, 2<<20)
+	d, err := a.Docs.Sections(r.Context(), key, 2<<20)
 	if err != nil {
 		writeError(w, 404, "document not indexed")
 		return
 	}
-	writeJSON(w, 200, map[string]any{"key": key, "title": title, "text": text, "url": u, "truncated": len(text) >= 2<<20,
-		"problem": a.Docs.Problem(r.Context(), key)})
+	writeJSON(w, 200, map[string]any{"key": key, "title": d.Title, "url": d.URL, "paged": d.Paged, "sections": d.Sections,
+		"truncated": d.Truncated, "problem": a.Docs.Problem(r.Context(), key)})
 }
 
 func (s *Server) handleSavePreset(w http.ResponseWriter, r *http.Request, a *app.App) {

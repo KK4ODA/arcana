@@ -78,7 +78,7 @@ docs/design/14-radio-and-integrations.md.
 | `GET /api/session` | Version, setup mode, admin flag, content port, token (local only) |
 | `GET /api/status` | Dashboard: installed, storage plan, offline readiness, updates, sharing, GPS, attention |
 | `GET /api/library`, `DELETE /api/library/{id}` | Installed resources; remove |
-| `GET /api/search?q=` | Search everything installed: `titles` (articles whose titles match, best first), `groups` (each archive's first five full-text matches and its total), `titleOnly` (archives without a full-text index), `documents`, and `resources`. `results`/`total` flatten the groups. |
+| `GET /api/search?q=` | Search everything installed: `titles` (articles whose titles match, best first), `groups` (each archive's first five full-text matches and its total), `titleOnly` (archives without a full-text index), `documents`, and `resources`. `results`/`total` flatten the groups. Each document carries `paged` (a PDF), `pages` (its best pages or sections: `n`, `heading`, `snippet`) and `pageMatches`. |
 | `GET /api/search?q=&resource=ID&start=N&limit=N` | One source, a page at a time: an archive (`results`, `total`, `titles`, `notSearchable`), a book or document resource, or `@user` for your own documents (`documents`, `documentTotal`) |
 | `GET /api/suggest?q=[&resource=ID]` | Article titles completing what was typed, in one archive or all of them |
 | `GET /api/roads` | Installed road networks (for directions) |
@@ -98,8 +98,10 @@ docs/design/14-radio-and-integrations.md.
 | `GET/PUT /api/user/favorites` | Favorite resources |
 | `GET/POST/DELETE /api/user/recent` | Reading history (host only) |
 | `GET/POST /api/user/notes`, `DELETE /api/user/notes/{id}` | Notes (host only) |
-| `GET/POST /api/user/documents`, `DELETE /api/user/documents/{name}` | User documents (host only; upload body is the file, name in `X-Filename`) |
-| `GET /api/documents/text?key=` | Extracted text for in-app preview |
+| `GET/POST /api/user/documents`, `DELETE /api/user/documents/{path...}` | User documents (host only; upload body is the file, name in `X-Filename`). Names are paths below `user/documents`, such as `Radios/Yaesu/FT-991A.pdf` |
+| `GET /api/user/documents/folder?path=&into=&type=.pdf…` | What adding a folder on the host would do: documents by type, new files and bytes, duplicates, renamed and skipped files, space (host only; copies nothing) |
+| `POST /api/user/documents/folder` `{path, into, types}` | Add a folder's documents in the background (a task with kind `documents`) |
+| `GET /api/documents/text?key=` | Extracted text for in-app preview, as `sections` (`n`, `heading`, `text`; pages of a PDF when `paged`) |
 | `GET /api/tasks`, `POST /api/tasks/{id}/cancel` | Background tasks |
 | `POST /api/transfer/export`, `GET /api/transfer/scan?source=`, `POST /api/transfer/import`, `POST /api/manifest` | Drive-to-drive transfer |
 | `POST /api/check/full`, `POST /api/documents/reindex` | Maintenance |

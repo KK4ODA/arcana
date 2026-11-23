@@ -303,6 +303,27 @@ textarea { font: inherit; font-size: 13px; padding: 6px 8px; border: 1px solid v
 .doc-text { max-width: 46rem; font-size: 15px; line-height: 1.6; }
 .doc-text p { margin: 0 0 .8em; }
 .doc-problem { color: var(--warn); margin-top: 2px; max-width: 46rem; }
+.page-mark { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; max-width: 46rem; margin: 1.4em 0 .6em;
+  padding-top: 6px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); scroll-margin-top: 12px; }
+.page-mark:first-child { margin-top: 0; }
+.page-mark .page-no { font-weight: 600; color: var(--text); }
+.page-mark .page-heading { flex: 1; min-width: 0; }
+.page-mark a { margin-left: auto; }
+.section-mark { max-width: 46rem; margin: 1.2em 0 .5em; font-size: 16px; scroll-margin-top: 12px; }
+.page-go { display: flex; gap: 4px; align-items: center; white-space: nowrap; }
+.page-input { width: 5.5em; }
+.folder-add { padding: 4px 12px 8px; border-bottom: 1px solid var(--border); }
+.folder-add .grow input { width: 100%; }
+.folder-add summary { cursor: pointer; padding: 6px 0; font-weight: 600; }
+.folder-add .toolbar { padding-left: 0; padding-right: 0; flex-wrap: wrap; }
+.folder-plan p { margin: 6px 0; overflow-wrap: anywhere; }
+.folder-types { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 4px 0; }
+.folder-notes { margin: 6px 0; padding-left: 18px; }
+.folder-notes li { margin: 2px 0; }
+.page-hits { list-style: none; margin: 4px 0 0; padding: 0; }
+.page-hits li { padding: 3px 0 0; border: 0; font-size: 13px; }
+.page-hits .page-ref { font-weight: 600; margin-right: 6px; }
+.page-hits .snippet { display: inline; }
 .task { padding: 8px 12px; border-top: 1px solid var(--border); }
 .task:first-child { border-top: 0; }
 .checklist { max-height: 260px; overflow: auto; border: 1px solid var(--border); border-radius: var(--radius); padding: 4px 8px; }

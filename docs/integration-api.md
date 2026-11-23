@@ -59,7 +59,7 @@ can be revoked at any time.
 |---|---|
 | `GET /` | `{api, version, server, authenticated, scopes, granted?, library?}` — no token needed |
 | `POST /pair`, `GET /pair/{id}?secret=` | Pairing, above |
-| `GET /search?q=&limit=` | `{query, results:[{resourceId, title, snippet, path, citation}]}`; snippets are plain text; the host's private documents are never included |
+| `GET /search?q=&limit=` | `{query, results:[{resourceId, title, snippet, path, page?, citation}]}`; snippets are plain text; `page` (from 1) is the best matching page when the result is a PDF document; the host's private documents are never included |
 | `GET /documents/{resource}/text?path=&max=` | `{article:{title, path, text, truncated}, citation}`; `path` as returned by search (archives) or a file name (documents); `max` bytes, default 20 000, at most 2 MiB |
 | `GET /documents/{resource}/excerpt?path=&max=` | `{title, path, excerpt, truncated, footer, citation}`; `max` default 1 200, at most 4 000; `footer` is a one-line attribution including warnings |
 | `POST /share/excerpt` `{resource, path}` | `{code, path:"/s/<code>", urls, expires}`: a 24-hour link people on the network can open in Arcana's reader |

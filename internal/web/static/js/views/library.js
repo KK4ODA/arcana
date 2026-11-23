@@ -55,10 +55,21 @@ export async function libraryView(main, params, ctx) {
   const n = (x) => Number(x || 0).toLocaleString();
   const resultItem = (it) => h('li', null,
     h('a', { href: articleHref(it) }, it.title), h('div', { class: 'src' }, it.book), snippet(it.snippet));
-  const docItem = (d, q) => h('li', null,
-    h('a', { href: `#/doc?key=${encodeURIComponent(d.key)}&find=${encodeURIComponent(q)}` }, d.title || d.name),
-    h('div', { class: 'src' }, d.source === 'user' ? `Your document · ${d.name}` : `${titles[d.resourceId] || d.resourceId} · ${d.name}`),
-    snippet(d.snippet));
+  // A document result lists its best pages (or sections); each opens the
+  // document at that page with the search words marked.
+  const docHref = (d, q, page) => `#/doc?key=${encodeURIComponent(d.key)}&find=${encodeURIComponent(q)}${page ? `&page=${page}` : ''}`;
+  const docItem = (d, q) => {
+    const pages = d.pages || [];
+    const unit = d.paged ? 'page' : 'part';
+    const count = d.pageMatches ? ` · ${n(d.pageMatches)} ${unit}${d.pageMatches === 1 ? '' : 's'} match` : '';
+    return h('li', null,
+      h('a', { href: docHref(d, q, pages[0]?.n) }, d.title || d.name),
+      h('div', { class: 'src' }, (d.source === 'user' ? `Your document · ${d.name}` : `${titles[d.resourceId] || d.resourceId} · ${d.name}`) + count),
+      pages.length ? h('ul', { class: 'page-hits' }, pages.map((p) => h('li', null,
+        h('a', { class: 'page-ref', href: docHref(d, q, p.n) }, d.paged ? `p. ${p.n}` : `Part ${p.n}`),
+        p.heading ? h('span', { class: 'small muted' }, `${p.heading} · `) : null,
+        snippet(p.snippet)))) : snippet(d.snippet));
+  };
   const titleList = (list, q, withBook) => h('ul', { class: 'title-hits' }, list.map((t) => h('li', null,
     h('a', { href: articleHref(t) }, highlight(t.title, q)), withBook ? h('span', { class: 'src' }, ` · ${t.book}`) : null)));
 
@@ -294,23 +305,122 @@ export async function libraryView(main, params, ctx) {
       }
       renderDocuments();
     };
+    // Documents in folders show their folder; the path is also what search
+    // and the document view use.
+    const docPath = (name) => name.split('/').map(encodeURIComponent).join('/');
+    const rows = documents.map((d) => {
+      const parts = d.name.split('/');
+      const file = parts.pop();
+      const tr = h('tr', null,
+        h('td', null,
+          parts.length ? h('div', { class: 'small muted' }, parts.join(' › ')) : null,
+          d.indexed ? h('a', { href: `#/doc?key=${encodeURIComponent('user:' + d.name)}` }, file) : file,
+          !d.indexed ? h('div', { class: 'small muted' }, 'Not searchable (format not indexed)') : null,
+          d.problem ? h('div', { class: 'small doc-problem' }, d.problem) : null),
+        h('td', { class: 'right num' }, fmtBytes(d.size)),
+        h('td', { class: 'hide-sm small' }, fmtDate(d.modified)),
+        h('td', { class: 'right' }, canChange ? h('button', { class: 'danger', onclick: async () => {
+          if (!confirm(`Remove ${d.name}? It is moved to user/documents/.deleted on the drive.`)) return;
+          try { await api.del(`/api/user/documents/${docPath(d.name)}`); renderDocuments(); } catch (e) { toast(e.message); }
+        } }, 'Remove') : null));
+      return { tr, text: d.name.toLowerCase() };
+    });
+    const filter = documents.length > 12 ? h('input', { type: 'search', placeholder: 'Filter your documents by name or folder', 'aria-label': 'Filter your documents' }) : null;
+    if (filter) {
+      filter.addEventListener('input', () => {
+        const q = filter.value.trim().toLowerCase();
+        for (const r of rows) r.tr.hidden = q !== '' && !r.text.includes(q);
+      });
+    }
     fill(body,
       canChange ? h('div', { class: 'toolbar' }, fileInput, h('button', { class: 'primary', onclick: upload }, 'Add documents'),
         h('span', { class: 'small muted' }, 'PDF, EPUB, text, Markdown and HTML are indexed for search. Files are stored in user/documents on the drive.')) : null,
+      canChange ? folderPanel() : null,
+      filter ? h('div', { class: 'toolbar' }, h('div', { class: 'grow' }, filter)) : null,
       documents.length ? h('div', { class: 'table-wrap' }, h('table', null,
         h('thead', null, h('tr', null, h('th', null, 'Document'), h('th', { class: 'right' }, 'Size'), h('th', { class: 'hide-sm' }, 'Added'), h('th', null, ''))),
-        h('tbody', null, documents.map((d) => h('tr', null,
-          h('td', null, d.indexed ? h('a', { href: `#/doc?key=${encodeURIComponent('user:' + d.name)}` }, d.name) : d.name,
-            !d.indexed ? h('div', { class: 'small muted' }, 'Not searchable (format not indexed)') : null,
-            d.problem ? h('div', { class: 'small doc-problem' }, d.problem) : null),
-          h('td', { class: 'right num' }, fmtBytes(d.size)),
-          h('td', { class: 'hide-sm small' }, fmtDate(d.modified)),
-          h('td', { class: 'right' }, canChange ? h('button', { class: 'danger', onclick: async () => {
-            if (!confirm(`Remove ${d.name}? It is moved to user/documents/.deleted on the drive.`)) return;
-            try { await api.del(`/api/user/documents/${encodeURIComponent(d.name)}`); renderDocuments(); } catch (e) { toast(e.message); }
-          } }, 'Remove') : null))))),
-        h('div', { class: 'toolbar small muted' }, `${indexed} documents in the search index.`))
+        h('tbody', null, rows.map((r) => r.tr))),
+        h('div', { class: 'toolbar small muted' }, `${n(documents.length)} documents; ${n(indexed)} in the search index.`))
         : h('p', { class: 'empty' }, 'No documents yet. Add your own plans, contact lists, manuals or maps.'));
+  }
+
+  // folderPanel adds every document in a folder on this computer and its
+  // subfolders: first a look at what it would do, then the copy, which runs
+  // in the background.
+  function folderPanel() {
+    const pathInput = h('input', { type: 'text', 'aria-label': 'Folder to add',
+      placeholder: 'A folder on this computer, such as C:\\Radio\\Manuals or /home/you/Radio' });
+    const plan = h('div', { class: 'folder-plan' });
+    const label = (ext) => (ext ? ext.slice(1).toUpperCase() : 'other');
+    let current = null;
+    async function look(types) {
+      const path = pathInput.value.trim();
+      if (!path) { pathInput.focus(); return; }
+      fill(plan, h('p', { class: 'small muted' }, 'Looking through the folder…'));
+      const qs = [`path=${encodeURIComponent(path)}`].concat((types || []).map((t) => `type=${encodeURIComponent(t)}`));
+      try {
+        current = await api.get(`/api/user/documents/folder?${qs.join('&')}`);
+        showPlan(current, types);
+      } catch (e) { fill(plan, h('div', { class: 'banner warn' }, e.message)); }
+    }
+    function showPlan(p, chosen) {
+      const types = Object.keys(p.documents).sort((a, b) => p.documents[b] - p.documents[a]);
+      const found = types.reduce((sum, t) => sum + p.documents[t], 0);
+      const boxes = types.map((t) => {
+        const cb = h('input', { type: 'checkbox', value: t, checked: !chosen || chosen.includes(t) });
+        cb.addEventListener('change', () => look(boxes.filter((b) => b.checked).map((b) => b.value)));
+        return cb;
+      });
+      const into = h('input', { type: 'text', value: p.into, 'aria-label': 'Folder name in your documents' });
+      const lines = [];
+      const skippedLines = p.skipped.map((g) => `${g.reason[0].toUpperCase()}${g.reason.slice(1)}: ${n(g.count)}${g.examples?.length ? ` (${g.examples.join(', ')})` : ''}`);
+      if (p.duplicates) lines.push(`${n(p.duplicates)} ${p.duplicates === 1 ? 'is' : 'are'} identical to a document already in your library, or appear${p.duplicates === 1 ? 's' : ''} twice in the folder, and will not be copied again.`);
+      if (p.renamed) lines.push(`${n(p.renamed)} name${p.renamed === 1 ? '' : 's'} will be changed slightly so that ${p.renamed === 1 ? 'it works' : 'they work'} on every file system.`);
+      if (p.truncated) lines.push('Stopped looking after 100,000 documents (or 1,000,000 files). Choose a smaller folder to add the rest.');
+      const add = h('button', { class: 'primary', disabled: !p.files || !p.fits },
+        p.files ? `Add ${n(p.files)} document${p.files === 1 ? '' : 's'} (${fmtBytes(p.bytes)})` : 'Nothing new to add');
+      const status = h('div', { class: 'small', 'aria-live': 'polite' });
+      add.addEventListener('click', async () => {
+        add.disabled = true;
+        try {
+          const t = await api.post('/api/user/documents/folder', { path: p.source, into: into.value.trim(), types: chosen || [] });
+          follow(t.id, status);
+        } catch (e) { add.disabled = false; fill(status, h('div', { class: 'banner warn' }, e.message)); }
+      });
+      fill(plan,
+        h('p', null, found ? `Found ${n(found)} document${found === 1 ? '' : 's'} in ${p.source}: ` : `No documents that Arcana can search were found in ${p.source}.`),
+        types.length ? h('div', { class: 'folder-types' }, types.map((t, i) => h('label', null, boxes[i], ` ${label(t)} (${n(p.documents[t])})`))) : null,
+        lines.length ? h('ul', { class: 'small muted folder-notes' }, lines.map((l) => h('li', null, l))) : null,
+        skippedLines.length ? h('div', { class: 'small muted' }, 'Not copied:', h('ul', { class: 'folder-notes' }, skippedLines.map((l) => h('li', null, l)))) : null,
+        h('div', { class: 'toolbar' }, h('label', { class: 'small' }, 'Copy into Your documents › ', into),
+          h('span', { class: 'small muted' }, p.fits ? `Leaves ${fmtBytes(p.free)} free above the ${fmtBytes(p.reserve)} reserve.` : 'Not enough space: this would use part of the reserve.'),
+          add),
+        status);
+    }
+    // follow shows a running copy until it ends, then refreshes the list.
+    async function follow(id, status) {
+      for (;;) {
+        let t;
+        try { t = (await api.get('/api/tasks')).tasks.find((x) => x.id === id); } catch (_) { t = null; }
+        if (!t) return;
+        const pct = t.total > 0 ? Math.min(100, (100 * t.done) / t.total) : 0;
+        fill(status, h('div', { class: 'progress', style: 'margin:6px 0' }, h('span', { style: `width:${pct}%` })), t.message || '');
+        if (t.state !== 'running') {
+          const r = t.result || {};
+          if (t.state === 'succeeded') toast(`Added ${n(r.copied)} document${r.copied === 1 ? '' : 's'} to Your documents › ${r.into}. They are indexed for search in the background.`);
+          else toast(t.error || 'Adding the folder stopped.');
+          renderDocuments();
+          return;
+        }
+        await new Promise((res) => setTimeout(res, 800));
+      }
+    }
+    pathInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); look(); } });
+    return h('details', { class: 'folder-add' },
+      h('summary', null, 'Add a folder of documents'),
+      h('p', { class: 'small muted' }, 'Copies every document in a folder on this computer, and in its subfolders, into Your documents, keeping the folders. Files already in your library are not copied again. Nothing is copied until you confirm.'),
+      h('div', { class: 'toolbar' }, h('div', { class: 'grow' }, pathInput), h('button', { onclick: () => look() }, 'Look in folder')),
+      plan);
   }
 
   async function remove(r) {

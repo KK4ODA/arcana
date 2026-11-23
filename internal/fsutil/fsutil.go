@@ -175,6 +175,46 @@ func ValidateFileName(name string) error {
 	return nil
 }
 
+// SanitizeFileName turns a name from another file system into one that
+// passes ValidateFileName: characters not allowed on every file system
+// become "_", trailing dots and spaces are removed, a Windows device name
+// gets a "_" prefix, and a long name is shortened, keeping its extension. It
+// returns "" when no valid name can be made, such as for a hidden name
+// starting with a dot.
+func SanitizeFileName(name string) string {
+	name = strings.ToValidUTF8(name, "_")
+	var b strings.Builder
+	for _, r := range name {
+		if r < 0x20 || r == 0x7f || strings.ContainsRune(`<>:"/\|?*`, r) {
+			r = '_'
+		}
+		b.WriteRune(r)
+	}
+	s := strings.TrimRight(b.String(), ". ")
+	if len(s) > MaxNameLen {
+		ext := filepath.Ext(s)
+		if len(ext) > 16 {
+			ext = ""
+		}
+		cut := MaxNameLen - len(ext)
+		for cut > 0 && !utf8.RuneStart(s[cut]) {
+			cut--
+		}
+		s = strings.TrimRight(s[:cut], ". ") + ext
+	}
+	base := strings.ToLower(s)
+	if i := strings.IndexByte(base, '.'); i >= 0 {
+		base = base[:i]
+	}
+	if windowsReserved[base] {
+		s = "_" + s
+	}
+	if ValidateFileName(s) != nil {
+		return ""
+	}
+	return s
+}
+
 // SafeJoin joins root with a relative, slash-separated path and guarantees the
 // result stays inside root. Every component is validated with
 // ValidateFileName, so absolute paths, drive letters, ".." and backslashes are

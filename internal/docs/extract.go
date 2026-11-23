@@ -35,11 +35,24 @@ var ErrUnsupported = errors.New("unsupported document format")
 // Extracted is the text and title of a document.
 type Extracted struct {
 	Title string
-	Text  string
+	// Text is the whole text: the sections joined by blank lines.
+	Text string
+	// Sections divide the text into the parts search results point to: the
+	// pages of a PDF (Paged), the chapters of an EPUB, or runs of about
+	// sectionChars of other documents.
+	Sections []Section
+	Paged    bool
 	// Problem explains, for the reader, why search cannot see some or all
 	// of a document that was otherwise read without error. For example, a
 	// PDF made of scanned page images has no text to search.
 	Problem string
+}
+
+// Section is one part of a document. Heading names the chapter or bookmark
+// it belongs to, when the document says.
+type Section struct {
+	Heading string `json:"heading,omitempty"`
+	Text    string `json:"text"`
 }
 
 // ExtractorVersion is stored with each indexed document. Raising it makes
@@ -48,7 +61,9 @@ type Extracted struct {
 //
 // 2: PDF text is rebuilt from glyph positions, hyphenated line breaks are
 // rejoined, and scanned PDFs are reported.
-const ExtractorVersion = 2
+// 3: documents are divided into pages and sections, with PDF bookmarks as
+// headings.
+const ExtractorVersion = 3
 
 // Time allowed to read one document: extractBase, plus perPDFPage for each
 // page of a PDF (at most maxPDFPages), because rebuilding a page's text from
@@ -112,11 +127,7 @@ func Extract(ctx context.Context, p string) (ex Extracted, err error) {
 	for {
 		select {
 		case r := <-ch:
-			r.ex.Text = clip(r.ex.Text, MaxText)
-			r.ex.Title = clip(strings.TrimSpace(r.ex.Title), 300)
-			if r.ex.Title == "" {
-				r.ex.Title = strings.TrimSuffix(filepath.Base(p), filepath.Ext(p))
-			}
+			r.ex = finish(r.ex, p)
 			return r.ex, r.err
 		case n := <-pages:
 			if budget != nil {
@@ -128,6 +139,44 @@ func Extract(ctx context.Context, p string) (ex Extracted, err error) {
 			return Extracted{}, fmt.Errorf("document took too long to read: %w", ctx.Err())
 		}
 	}
+}
+
+// finish fills in what every extractor leaves to it: sections for documents
+// that did not divide themselves, the MaxText limit across all sections, the
+// joined text and a title.
+func finish(ex Extracted, p string) Extracted {
+	if len(ex.Sections) == 0 && strings.TrimSpace(ex.Text) != "" {
+		ex.Sections = splitSections(ex.Text, "", isMarkdown(p))
+	}
+	total := 0
+	for i := range ex.Sections {
+		s := &ex.Sections[i]
+		s.Heading = clip(strings.Join(strings.Fields(s.Heading), " "), 200)
+		if total+len(s.Text) > MaxText {
+			s.Text = clip(s.Text, max(MaxText-total, 0))
+			ex.Sections = ex.Sections[:i+1]
+			break
+		}
+		total += len(s.Text)
+	}
+	texts := make([]string, len(ex.Sections))
+	for i, s := range ex.Sections {
+		texts[i] = s.Text
+	}
+	ex.Text = strings.Join(texts, "\n\n")
+	ex.Title = clip(strings.TrimSpace(ex.Title), 300)
+	if ex.Title == "" {
+		ex.Title = strings.TrimSuffix(filepath.Base(p), filepath.Ext(p))
+	}
+	return ex
+}
+
+func isMarkdown(p string) bool {
+	switch strings.ToLower(filepath.Ext(p)) {
+	case ".md", ".markdown":
+		return true
+	}
+	return false
 }
 
 // extract reads one document. PDFs report their page count through pages
@@ -190,19 +239,27 @@ func markdownTitle(s string) string {
 
 // htmlText returns visible text, skipping scripts, styles and markup.
 func htmlText(r io.Reader) (Extracted, error) {
+	title, _, text, err := htmlParse(r)
+	return Extracted{Title: title, Text: text}, err
+}
+
+// htmlParse returns a page's title, its first h1 to h3 heading, and its
+// visible text with block elements on lines of their own.
+func htmlParse(r io.Reader) (title, heading, text string, err error) {
 	z := html.NewTokenizer(r)
-	var b strings.Builder
-	var title string
+	var b, hb strings.Builder
 	skip := 0
 	inTitle := false
+	inHeading, headingDone := false, false
 	for {
 		tt := z.Next()
 		switch tt {
 		case html.ErrorToken:
+			heading = strings.Join(strings.Fields(hb.String()), " ")
 			if errors.Is(z.Err(), io.EOF) {
-				return Extracted{Title: title, Text: collapse(b.String())}, nil
+				return title, heading, collapse(b.String()), nil
 			}
-			return Extracted{Title: title, Text: collapse(b.String())}, z.Err()
+			return title, heading, collapse(b.String()), z.Err()
 		case html.StartTagToken, html.SelfClosingTagToken:
 			name, _ := z.TagName()
 			switch string(name) {
@@ -212,7 +269,10 @@ func htmlText(r io.Reader) (Extracted, error) {
 				}
 			case "title":
 				inTitle = tt == html.StartTagToken
-			case "p", "div", "br", "li", "tr", "h1", "h2", "h3", "h4", "h5", "h6", "section", "article", "td":
+			case "h1", "h2", "h3":
+				inHeading = !headingDone && tt == html.StartTagToken
+				b.WriteByte('\n')
+			case "p", "div", "br", "li", "tr", "h4", "h5", "h6", "section", "article", "td":
 				b.WriteByte('\n')
 			}
 		case html.EndTagToken:
@@ -224,6 +284,11 @@ func htmlText(r io.Reader) (Extracted, error) {
 				}
 			case "title":
 				inTitle = false
+			case "h1", "h2", "h3":
+				if inHeading {
+					inHeading = false
+					headingDone = strings.TrimSpace(hb.String()) != ""
+				}
 			}
 		case html.TextToken:
 			if skip > 0 {
@@ -234,10 +299,14 @@ func htmlText(r io.Reader) (Extracted, error) {
 				title += t
 				continue
 			}
+			if inHeading {
+				hb.WriteString(t)
+				hb.WriteByte(' ')
+			}
 			b.WriteString(t)
 			b.WriteByte(' ')
 			if b.Len() > MaxText {
-				return Extracted{Title: title, Text: collapse(b.String())}, nil
+				return title, strings.Join(strings.Fields(hb.String()), " "), collapse(b.String()), nil
 			}
 		}
 	}
@@ -318,7 +387,9 @@ func epubText(p string) (Extracted, error) {
 		hrefs[it.ID] = it.Href
 	}
 	base := path.Dir(opfPath)
-	var b strings.Builder
+	bookTitle := strings.TrimSpace(opf.Title)
+	var sections []Section
+	total := 0
 	for _, ref := range opf.Spine {
 		href, ok := hrefs[ref.IDRef]
 		if !ok {
@@ -329,13 +400,21 @@ func epubText(p string) (Extracted, error) {
 		if err != nil {
 			continue
 		}
-		ex, _ := htmlText(bytes.NewReader(chunk))
-		b.WriteString(ex.Text)
-		if b.Len() > MaxText {
+		title, heading, text, _ := htmlParse(bytes.NewReader(chunk))
+		if strings.TrimSpace(text) == "" {
+			continue
+		}
+		// A chapter is named by its first heading, or by its own title
+		// when that is not just the book's title again.
+		if title = strings.TrimSpace(title); heading == "" && title != bookTitle {
+			heading = title
+		}
+		sections = append(sections, splitSections(text, heading, false)...)
+		if total += len(text); total > MaxText {
 			break
 		}
 	}
-	return Extracted{Title: strings.TrimSpace(opf.Title), Text: b.String()}, nil
+	return Extracted{Title: bookTitle, Sections: sections}, nil
 }
 
 func clip(s string, n int) string {

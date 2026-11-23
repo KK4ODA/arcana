@@ -148,11 +148,14 @@ func (s *Server) handlePairPoll(w http.ResponseWriter, r *http.Request, a *app.A
 // ---------------------------------------------------------------- content
 
 type intResult struct {
-	ResourceID string       `json:"resourceId"`
-	Title      string       `json:"title"`
-	Snippet    string       `json:"snippet"`
-	Path       string       `json:"path"`
-	Citation   app.Citation `json:"citation"`
+	ResourceID string `json:"resourceId"`
+	Title      string `json:"title"`
+	Snippet    string `json:"snippet"`
+	Path       string `json:"path"`
+	// Page is the best matching page of a PDF document (from 1), when
+	// the result is one.
+	Page     int          `json:"page,omitempty"`
+	Citation app.Citation `json:"citation"`
 }
 
 var tagRe = regexp.MustCompile(`<[^>]*>`)
@@ -204,8 +207,12 @@ func (s *Server) handleIntSearch(w http.ResponseWriter, r *http.Request, a *app.
 			if h.Source != "resource" || !ok {
 				continue
 			}
-			results = append(results, intResult{ResourceID: h.ResourceID, Title: h.Title, Snippet: plainSnippet(h.Snippet),
-				Path: strings.TrimPrefix(h.Key, "res:"+h.ResourceID+"/"), Citation: c})
+			res := intResult{ResourceID: h.ResourceID, Title: h.Title, Snippet: plainSnippet(h.Snippet),
+				Path: strings.TrimPrefix(h.Key, "res:"+h.ResourceID+"/"), Citation: c}
+			if h.Paged && len(h.Pages) > 0 {
+				res.Page = h.Pages[0].N
+			}
+			results = append(results, res)
 		}
 	}
 	if len(results) > limit {

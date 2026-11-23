@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
 	"path/filepath"
-	"sort"
 	"strings"
 	"time"
 
@@ -32,12 +32,10 @@ type UserDocument struct {
 // MaxUserDocument bounds one uploaded document (2 GB).
 const MaxUserDocument = 2 << 30
 
-// UserDocuments lists the user's own documents.
+// UserDocuments lists the user's own documents, including those in folders.
+// Name is the path below user/documents, slash-separated.
 func (a *App) UserDocuments() ([]UserDocument, error) {
-	entries, err := os.ReadDir(a.Lib.Documents())
-	if errors.Is(err, os.ErrNotExist) {
-		return nil, nil
-	}
+	files, err := a.Lib.DocumentFiles()
 	if err != nil {
 		return nil, err
 	}
@@ -45,19 +43,11 @@ func (a *App) UserDocuments() ([]UserDocument, error) {
 	if a.Docs != nil {
 		problems, _ = a.Docs.Problems(context.Background())
 	}
-	var out []UserDocument
-	for _, e := range entries {
-		if !e.Type().IsRegular() || fsutil.ValidateFileName(e.Name()) != nil {
-			continue
-		}
-		info, err := e.Info()
-		if err != nil {
-			continue
-		}
-		out = append(out, UserDocument{Name: e.Name(), Size: info.Size(), Modified: info.ModTime().UTC(),
-			URL: docs.UserDocURL(e.Name()), Indexed: docs.Supported(e.Name()), Problem: problems["user:"+e.Name()]})
+	out := make([]UserDocument, 0, len(files))
+	for _, f := range files {
+		out = append(out, UserDocument{Name: f.Path, Size: f.Size, Modified: f.ModTime,
+			URL: docs.UserDocURL(f.Path), Indexed: docs.Supported(f.Path), Problem: problems["user:"+f.Path]})
 	}
-	sort.Slice(out, func(i, j int) bool { return strings.ToLower(out[i].Name) < strings.ToLower(out[j].Name) })
 	return out, nil
 }
 
@@ -118,40 +108,41 @@ func (a *App) SaveUserDocument(name string, r io.Reader, size int64) (string, er
 }
 
 // DeleteUserDocument moves a document to user/documents/.deleted so it can
-// be recovered from the drive.
+// be recovered from the drive. A document in a folder keeps its folder path
+// in its new name, and folders left empty are removed.
 func (a *App) DeleteUserDocument(name string) error {
 	if a.Lib.ReadOnly {
 		return library.ErrReadOnly
 	}
-	if err := fsutil.ValidateFileName(name); err != nil {
-		return err
-	}
-	src := filepath.Join(a.Lib.Documents(), name)
-	if _, err := os.Stat(src); err != nil {
-		return errors.New("no such document")
+	src, err := a.Lib.DocumentPath(name)
+	if err != nil {
+		return library.ErrNoDocument
 	}
 	trash := filepath.Join(a.Lib.Documents(), ".deleted")
 	if err := os.MkdirAll(trash, 0o755); err != nil {
 		return err
 	}
-	if err := os.Rename(src, filepath.Join(trash, time.Now().UTC().Format("20060102-150405")+"-"+name)); err != nil {
+	stamp := time.Now().UTC().Format("20060102-150405") + "-"
+	kept := stamp + strings.ReplaceAll(name, "/", " - ")
+	if fsutil.ValidateFileName(kept) != nil {
+		kept = stamp + path.Base(name)
+	}
+	if err := os.Rename(src, filepath.Join(trash, kept)); err != nil {
 		return err
+	}
+	for dir := filepath.Dir(src); dir != filepath.Clean(a.Lib.Documents()) && strings.HasPrefix(dir, a.Lib.Documents()); dir = filepath.Dir(dir) {
+		if os.Remove(dir) != nil {
+			break // not empty
+		}
 	}
 	a.RequestReindex()
 	return nil
 }
 
-// UserDocumentPath resolves a user document for serving.
+// UserDocumentPath resolves a user document (a slash-separated path below
+// user/documents) for serving.
 func (a *App) UserDocumentPath(name string) (string, error) {
-	if err := fsutil.ValidateFileName(name); err != nil {
-		return "", err
-	}
-	p := filepath.Join(a.Lib.Documents(), name)
-	st, err := os.Stat(p)
-	if err != nil || !st.Mode().IsRegular() {
-		return "", errors.New("no such document")
-	}
-	return p, nil
+	return a.Lib.DocumentPath(name)
 }
 
 // ---------------------------------------------------------------- index
@@ -238,7 +229,7 @@ func (a *App) IndexableDocuments(ctx context.Context) ([]docs.Doc, error) {
 		if !d.Indexed {
 			continue
 		}
-		p := filepath.Join(a.Lib.Documents(), d.Name)
+		p := filepath.Join(a.Lib.Documents(), filepath.FromSlash(d.Name))
 		out = append(out, docs.Doc{Key: "user:" + d.Name, Source: "user", Name: d.Name, Path: p, URL: d.URL,
 			Size: d.Size, ModTime: d.Modified.Unix()})
 	}

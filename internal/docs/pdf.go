@@ -43,33 +43,36 @@ func pdfText(ctx context.Context, p string, pages func(int)) (Extracted, error) 
 	if pages != nil {
 		pages(n)
 	}
-	var b strings.Builder
-	read, empty := 0, 0
-	for i := 1; i <= n && i <= maxPDFPages; i++ {
+	// One section per page, empty pages included, so that section i is
+	// always page i+1.
+	var texts []string
+	total, empty := 0, 0
+	for i := 1; i <= n && i <= maxPDFPages && total <= MaxText; i++ {
 		if err := ctx.Err(); err != nil {
 			return Extracted{}, err // Extract has already given up on this document.
 		}
-		page := r.Page(i)
-		if page.V.IsNull() {
-			continue
+		text := ""
+		if page := r.Page(i); !page.V.IsNull() {
+			text = strings.TrimSpace(ligatures.Replace(pageText(page)))
 		}
-		text := pageText(page)
-		read++
 		if visibleChars(text) < minPageChars {
 			empty++
 		}
-		b.WriteString(text)
-		b.WriteString("\n\n")
-		if b.Len() > MaxText {
-			break
-		}
+		texts = append(texts, text)
+		total += len(text)
+	}
+	texts = dehyphenateAll(texts)
+	headings := outlineHeadings(r, len(texts))
+	sections := make([]Section, len(texts))
+	for i, t := range texts {
+		sections[i] = Section{Heading: headings[i], Text: t}
 	}
 	title := ""
 	if info := r.Trailer().Key("Info"); !info.IsNull() {
 		title = info.Key("Title").Text()
 	}
-	ex := Extracted{Title: title, Text: dehyphenate(ligatures.Replace(b.String()))}
-	if read > 0 && empty*2 >= read {
+	ex := Extracted{Title: title, Sections: sections, Paged: true}
+	if read := len(texts); read > 0 && empty*2 >= read {
 		ex.Problem = scannedProblem(empty, read)
 	}
 	return ex, nil
@@ -256,32 +259,51 @@ var (
 // indexed as "operator". A real compound such as "high-⏎frequency" keeps
 // its hyphen: the document itself decides, by whether the joined word or
 // both halves appear elsewhere in it.
-func dehyphenate(s string) string {
-	breaks := hyphenBreak.FindAllStringSubmatchIndex(s, -1)
-	if len(breaks) == 0 {
-		return s
+func dehyphenate(s string) string { return dehyphenateAll([]string{s})[0] }
+
+// dehyphenateAll dehyphenates the pages of one document, using the words of
+// all of them as evidence.
+func dehyphenateAll(pages []string) []string {
+	breaks := make([][][]int, len(pages))
+	found := false
+	for i, s := range pages {
+		breaks[i] = hyphenBreak.FindAllStringSubmatchIndex(s, -1)
+		found = found || len(breaks[i]) > 0
+	}
+	if !found {
+		return pages
 	}
 	count := map[string]int{}
-	for _, w := range letters.FindAllString(s, -1) {
-		count[strings.ToLower(w)]++
-	}
-	// The halves at the breaks themselves are not evidence.
-	for _, m := range breaks {
-		count[strings.ToLower(s[m[2]:m[3]])]--
-		count[strings.ToLower(s[m[4]:m[5]])]--
-	}
-	var b strings.Builder
-	last := 0
-	for _, m := range breaks {
-		head, tail := s[m[2]:m[3]], s[m[4]:m[5]]
-		b.WriteString(s[last:m[2]])
-		b.WriteString(head)
-		if count[strings.ToLower(head+tail)] <= 0 && count[strings.ToLower(head)] > 0 && count[strings.ToLower(tail)] > 0 {
-			b.WriteByte('-')
+	for i, s := range pages {
+		for _, w := range letters.FindAllString(s, -1) {
+			count[strings.ToLower(w)]++
 		}
-		b.WriteString(tail)
-		last = m[1]
+		// The halves at the breaks themselves are not evidence.
+		for _, m := range breaks[i] {
+			count[strings.ToLower(s[m[2]:m[3]])]--
+			count[strings.ToLower(s[m[4]:m[5]])]--
+		}
 	}
-	b.WriteString(s[last:])
-	return b.String()
+	out := make([]string, len(pages))
+	for i, s := range pages {
+		if len(breaks[i]) == 0 {
+			out[i] = s
+			continue
+		}
+		var b strings.Builder
+		last := 0
+		for _, m := range breaks[i] {
+			head, tail := s[m[2]:m[3]], s[m[4]:m[5]]
+			b.WriteString(s[last:m[2]])
+			b.WriteString(head)
+			if count[strings.ToLower(head+tail)] <= 0 && count[strings.ToLower(head)] > 0 && count[strings.ToLower(tail)] > 0 {
+				b.WriteByte('-')
+			}
+			b.WriteString(tail)
+			last = m[1]
+		}
+		b.WriteString(s[last:])
+		out[i] = b.String()
+	}
+	return out
 }

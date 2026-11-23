@@ -3,6 +3,7 @@ package fsutil
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -76,4 +77,27 @@ func TestLockExclusive(t *testing.T) {
 		t.Fatalf("relock after release: %v", err)
 	}
 	l2.Release()
+}
+
+func TestSanitizeFileName(t *testing.T) {
+	long := strings.Repeat("é", 120) + ".pdf"
+	cases := map[string]string{
+		"FT-991A Manual.pdf":    "FT-991A Manual.pdf",
+		`Menu: CAT "rate"?.pdf`: "Menu_ CAT _rate__.pdf",
+		"notes. ":               "notes",
+		"con.txt":               "_con.txt",
+		"tab\there.txt":         "tab_here.txt",
+		".DS_Store":             "",
+		"...":                   "",
+		"bad\xffbyte.pdf":       "bad_byte.pdf",
+	}
+	for in, want := range cases {
+		if got := SanitizeFileName(in); got != want {
+			t.Errorf("SanitizeFileName(%q) = %q, want %q", in, got, want)
+		}
+	}
+	got := SanitizeFileName(long)
+	if ValidateFileName(got) != nil || !strings.HasSuffix(got, ".pdf") || len(got) > MaxNameLen {
+		t.Errorf("long name: %q (%d bytes)", got, len(got))
+	}
 }
