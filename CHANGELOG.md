@@ -3,6 +3,45 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
+## Unreleased
+
+### Added
+- **Ask your library.** A new *Ask* view (and an *Ask* button beside the
+  library search) answers questions in plain words from your installed
+  archives and documents. Arcana searches the library, picks the passages
+  that cover the question, and a language model writes a short answer that
+  cites them; each passage is listed with its resource, edition, date,
+  license and warnings, and links to the page it came from. When nothing in
+  the library covers the question closely enough, Arcana says so and no
+  model runs. Answers appear as they are written; an answer that cites
+  nothing is flagged, and medical sources bring the medical notice with
+  them. Off until you turn it on in *Settings → Assistant*, where you choose
+  where the model runs:
+  - **On this computer:** download a model from *Discover → Question
+    answering* (Qwen2.5 0.5B, 0.5 GB, for small computers; Granite 3.3 2B,
+    1.5 GB, recommended; Qwen3 4B, 2.5 GB, for 8 GB of memory or more). The
+    llamafile engine (370 MB) is queued with the first model. It runs only
+    while answering, only on this computer, and stops when idle.
+  - **On a model server:** Ollama, LM Studio or another OpenAI-compatible
+    server, on this computer or another (*Test connection* lists its
+    models).
+  Devices on the network can ask only if you allow it; they never see your
+  own documents. Optional instructions ("Use metric units") and a
+  strictness setting tune the answers. See ADR-0021.
+- **`arcana ask`** answers a question in the terminal; `arcana ask --eval
+  FILE [--with-model]` scores retrieval (and answers) against a set of
+  questions with known sources.
+- **Integration API:** `GET /api/integration/v1/ask` with the new scope
+  `assistant:ask` lets paired programs ask questions and receive the answer
+  with its passages and citations.
+- **Dependencies.** Queueing a resource also queues the resources it needs
+  (a model queues the engine that runs it).
+
+### Changed
+- Text extracted from web pages keeps the cells of a table row on one line
+  ("QTH | Location of the station"), so document search snippets and the
+  assistant read tables correctly.
+
 ## 0.7.0 — 2026-11-23
 
 Directions and turn-by-turn navigation without internet, search inside the

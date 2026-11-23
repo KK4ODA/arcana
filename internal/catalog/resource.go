@@ -183,6 +183,8 @@ var knownFormats = map[string]bool{
 	"zim": true, "pdf": true, "epub": true, "html": true, "markdown": true, "text": true,
 	"image": true, "audio": true, "video": true, "pmtiles": true, "mbtiles": true, "gpx": true,
 	"archive": true, "arcroute": true,
+	// The assistant's engine (a portable llamafile executable) and models.
+	"llamafile": true, "gguf": true,
 }
 
 var hashLengths = map[string]int{"sha256": 64, "sha512": 128, "sha1": 40, "md5": 32}

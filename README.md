@@ -54,6 +54,14 @@ not yet code-signed (see [Status](#status)).
   source's best matches with its own count. The reader searches the open
   archive (titles complete as you type), and documents have a find bar.
   Provenance and warnings are shown above every page.
+- **Ask questions of your library** (optional, off until you turn it on).
+  Type a question in plain words; Arcana finds passages in your archives
+  and documents and a language model writes a short answer from them,
+  citing each passage with its edition, date and warnings. When nothing in
+  the library covers the question it says so instead of guessing. The
+  model runs on your computer through Mozilla.ai's llamafile (three openly
+  licensed models from 0.5 to 2.5 GB in the catalog), or on an Ollama or
+  LM Studio server you choose.
 - **Your own material.** Bookmarks, favorites, notes and reading history.
   Add your own PDF, EPUB, HTML, Markdown and text files; they are indexed
   and searched with everything else.
@@ -168,6 +176,7 @@ arcana export --to DIR [ID...|--all] [--user-documents]
 arcana manifest
 arcana update stage DIR | apply | rollback | status
 arcana hotspot start --ssid NAME --password PW [--device wlan0] | stop | status
+arcana ask [--no-library] QUESTION | ask --eval FILE [--with-model]
 ```
 
 `arcana --help` describes each command.
@@ -197,7 +206,7 @@ See [docs/development.md](docs/development.md).
 | **Implemented (Phase 4)** | `arcana.local` on the network (built-in mDNS), QR codes and a printable connection card, optional HTTPS on the same port, password-protected remote administration (off by default), Wi-Fi hotspot control on Linux |
 | **Implemented (Phase 5), not yet run on hardware** | Raspberry Pi / Linux appliance: installer, confined systemd service with watchdog, Wi-Fi access point with captive portal ([docs/appliance.md](docs/appliance.md)) |
 | **Implemented (Phase 6)** | Integration API for other programs (RadioPost, Aether HF) with scoped, approved tokens and citations ([docs/integration-api.md](docs/integration-api.md)); copying between Arcana libraries on a LAN; signed community catalogs |
-| **Design only** | Optional local question answering over installed sources ([docs/design/15-local-ai.md](docs/design/15-local-ai.md)) |
+| **Implemented (unreleased)** | Question answering over installed sources with citations, a relevance floor and an evaluation set; llamafile sidecar or an OpenAI-compatible server ([ADR-0021](docs/adr/0021-question-answering-over-the-library.md)). Not yet measured on a Raspberry Pi or with a real model in CI |
 | **Planned** | Ready-made Raspberry Pi SD image; hardware and power-loss tests. Terrain and contours; road networks for the largest countries; scheduled peer sync |
 | **Not yet** | Code-signed programs (releases are not code-signed yet; Windows and macOS warn on first start) |
 

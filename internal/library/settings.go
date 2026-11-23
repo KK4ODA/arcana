@@ -24,12 +24,13 @@ type Settings struct {
 	// LAN, loopback or link-local addresses. Off by default so a remote
 	// catalog cannot make Arcana send requests to devices on the local
 	// network.
-	AllowPrivateNetworkDownloads bool            `json:"allowPrivateNetworkDownloads"`
-	Server                       ServerSettings  `json:"server"`
-	Catalog                      CatalogSettings `json:"catalog"`
-	Updates                      UpdateSettings  `json:"updates"`
-	Maps                         MapSettings     `json:"maps"`
-	GPS                          GPSSettings     `json:"gps"`
+	AllowPrivateNetworkDownloads bool              `json:"allowPrivateNetworkDownloads"`
+	Server                       ServerSettings    `json:"server"`
+	Catalog                      CatalogSettings   `json:"catalog"`
+	Updates                      UpdateSettings    `json:"updates"`
+	Maps                         MapSettings       `json:"maps"`
+	GPS                          GPSSettings       `json:"gps"`
+	Assistant                    AssistantSettings `json:"assistant"`
 	// Peers are other Arcana libraries on the network to copy from.
 	Peers []PeerSource `json:"peers,omitempty"`
 }
@@ -56,6 +57,42 @@ type MapSettings struct {
 	// RoadsURL is the index of OSM extracts road networks are built from.
 	// Empty means Geofabrik's.
 	RoadsURL string `json:"roadsUrl,omitempty"`
+}
+
+// AssistantSettings control question answering over the library. It is
+// off until the owner turns it on, and never downloads a model by itself.
+type AssistantSettings struct {
+	Enabled bool `json:"enabled"`
+	// Backend is "local" (a model from the library, run by the llamafile
+	// engine on this computer) or "external" (an OpenAI-compatible server
+	// such as Ollama or LM Studio, possibly on another computer).
+	Backend string `json:"backend"`
+	// Model is the installed model resource used by the local backend;
+	// empty picks the largest installed model.
+	Model string `json:"model,omitempty"`
+	// URL, ExternalModel and APIKey configure the external backend. The
+	// key is stored in clear text because Arcana must send it.
+	URL           string `json:"url,omitempty"`
+	ExternalModel string `json:"externalModel,omitempty"`
+	APIKey        string `json:"apiKey,omitempty"`
+	// Instructions are added to the model's instructions (for example
+	// "Use metric units" or "Answer in Spanish").
+	Instructions string `json:"instructions,omitempty"`
+	// RelevanceFloor (0.1–1) is how much of a question the best passage
+	// must cover before the model is asked; higher is stricter.
+	RelevanceFloor float64 `json:"relevanceFloor"`
+	// Passages is the most passages given to the model (1–12).
+	Passages int `json:"passages"`
+	// ContextSize is the local model's context window in tokens.
+	ContextSize int `json:"contextSize"`
+	// Threads used by the local engine; 0 lets it choose.
+	Threads int `json:"threads,omitempty"`
+	// IdleMinutes stops the local engine after this long unused, giving
+	// its memory back (0 means 10 minutes).
+	IdleMinutes int `json:"idleMinutes,omitempty"`
+	// NetworkClients lets devices on the network ask questions. Off by
+	// default: answers use this computer's processor and memory.
+	NetworkClients bool `json:"networkClients"`
 }
 
 // GPSSettings select a position source. Arcana only reads positions; it
@@ -150,6 +187,8 @@ func DefaultSettings() Settings {
 		Updates: UpdateSettings{URL: "https://github.com/KK4ODA/arcana/releases/latest/download", AutoCheck: true},
 		Maps:    MapSettings{Enabled: true},
 		GPS:     GPSSettings{BaudRate: 4800, UDPPort: 10110, SimulatorSpeed: 1},
+		Assistant: AssistantSettings{Backend: "local", RelevanceFloor: 0.5, Passages: 5, ContextSize: 4096,
+			URL: "http://127.0.0.1:11434/v1"},
 	}
 }
 

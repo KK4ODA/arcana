@@ -2,6 +2,7 @@ import { loadSession, getSession, api } from './api.js';
 import { h, clear } from './util.js';
 import { renderUpdateBanner } from './updatebanner.js';
 import { libraryView } from './views/library.js';
+import { askView } from './views/ask.js';
 import { discoverView } from './views/discover.js';
 import { mapsView } from './views/maps.js';
 import { downloadsView } from './views/downloads.js';
@@ -13,6 +14,7 @@ import { readerView, documentView } from './views/reader.js';
 
 const views = {
   library: { title: 'Library', render: libraryView },
+  ask: { title: 'Ask', render: askView, when: (st) => st?.assistant?.canAsk },
   discover: { title: 'Discover', render: discoverView },
   maps: { title: 'Maps', render: mapsView },
   downloads: { title: 'Downloads', render: downloadsView },
@@ -43,6 +45,7 @@ function renderTabs(active) {
   const s = getSession();
   for (const [name, v] of Object.entries(views)) {
     if (v.admin && !s.admin) continue;
+    if (v.when && !v.when(status) && active !== name) continue;
     let count = null;
     if (status && name === 'downloads' && status.downloads.active) count = status.downloads.active;
     if (status && name === 'updates' && status.updates.available) count = status.updates.available;

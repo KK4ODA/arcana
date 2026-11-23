@@ -142,6 +142,7 @@ func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request, a *app.App
 		"appUpdate":    appUpdateFor(r, a),
 		"gps":          s.gpsSummary(r, a),
 		"maps":         mapSummary(a),
+		"assistant":    s.assistantSummary(r, a),
 		"attention":    att,
 		"serverUptime": int64(time.Since(s.startedAt).Seconds()),
 	})
@@ -267,4 +268,10 @@ func appUpdateFor(r *http.Request, a *app.App) any {
 		return nil
 	}
 	return a.UpdateNotice()
+}
+
+// assistantSummary tells the interface whether to offer the Ask view.
+func (s *Server) assistantSummary(r *http.Request, a *app.App) map[string]any {
+	ok, _ := s.canAsk(r, a)
+	return map[string]any{"enabled": a.Lib.Settings.Get().Assistant.Enabled, "canAsk": ok}
 }

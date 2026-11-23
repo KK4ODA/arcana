@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/KK4ODA/arcana/internal/app"
+	"github.com/KK4ODA/arcana/internal/assistant"
 	"github.com/KK4ODA/arcana/internal/auth"
 	"github.com/KK4ODA/arcana/internal/buildinfo"
 	"github.com/KK4ODA/arcana/internal/catalog"
@@ -233,6 +234,7 @@ func (s *Server) appHandler() http.Handler {
 	s.registerAuth(mux)
 	s.registerNetwork(mux)
 	s.registerIntegration(mux)
+	s.registerAssistant(mux)
 	mux.HandleFunc("GET /api/", func(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusNotFound, "unknown API endpoint")
 	})
@@ -443,6 +445,8 @@ func (s *Server) installedViews(r *http.Request, a *app.App) ([]installedView, e
 		if b, ok := books[in.ResourceID]; ok {
 			v.OpenPath = b.ContentPath
 			v.Search = res.Capabilities.FullTextSearch
+		} else if res.Format == "gguf" || res.Format == "llamafile" {
+			// Models and the engine are used by the assistant, not opened.
 		} else if res.Format != "zim" && len(in.Files) > 0 {
 			v.OpenPath = "/files/" + in.ResourceID + "/" + path.Base(in.Files[0].Path)
 		} else if res.Format == "zim" {
@@ -863,8 +867,15 @@ func (s *Server) handleCheck(w http.ResponseWriter, r *http.Request, a *app.App)
 	writeJSON(w, 200, rep)
 }
 
+// keptSecret stands in for a saved secret in settings sent to the
+// browser; sending it back leaves the secret unchanged.
+const keptSecret = "(saved)"
+
 func (s *Server) handleGetSettings(w http.ResponseWriter, r *http.Request, a *app.App) {
 	set := a.Lib.Settings.Get()
+	if set.Assistant.APIKey != "" {
+		set.Assistant.APIKey = keptSecret
+	}
 	vol, _ := storage.Stat(a.Lib.Root)
 	writeJSON(w, 200, map[string]any{
 		"settings":       set,
@@ -877,21 +888,22 @@ func (s *Server) handleGetSettings(w http.ResponseWriter, r *http.Request, a *ap
 
 func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *app.App) {
 	var req struct {
-		ReserveBytes                 *int64                `json:"reserveBytes"`
-		MaxConcurrentDownloads       *int                  `json:"maxConcurrentDownloads"`
-		BandwidthLimit               *int64                `json:"bandwidthLimit"`
-		AllowPrivateNetworkDownloads *bool                 `json:"allowPrivateNetworkDownloads"`
-		ShareOnLAN                   *bool                 `json:"shareOnLan"`
-		KiwixEnabled                 *bool                 `json:"kiwixEnabled"`
-		GutenbergEnabled             *bool                 `json:"gutenbergEnabled"`
-		AutoRefreshHours             *int                  `json:"autoRefreshHours"`
-		UpdateURL                    *string               `json:"updateUrl"`
-		AutoUpdateCheck              *bool                 `json:"autoUpdateCheck"`
-		Feeds                        *[]library.FeedSource `json:"feeds"`
-		MapsEnabled                  *bool                 `json:"mapsEnabled"`
-		MDNS                         *bool                 `json:"mdns"`
-		MDNSName                     *string               `json:"mdnsName"`
-		GPS                          *library.GPSSettings  `json:"gps"`
+		ReserveBytes                 *int64                     `json:"reserveBytes"`
+		MaxConcurrentDownloads       *int                       `json:"maxConcurrentDownloads"`
+		BandwidthLimit               *int64                     `json:"bandwidthLimit"`
+		AllowPrivateNetworkDownloads *bool                      `json:"allowPrivateNetworkDownloads"`
+		ShareOnLAN                   *bool                      `json:"shareOnLan"`
+		KiwixEnabled                 *bool                      `json:"kiwixEnabled"`
+		GutenbergEnabled             *bool                      `json:"gutenbergEnabled"`
+		AutoRefreshHours             *int                       `json:"autoRefreshHours"`
+		UpdateURL                    *string                    `json:"updateUrl"`
+		AutoUpdateCheck              *bool                      `json:"autoUpdateCheck"`
+		Feeds                        *[]library.FeedSource      `json:"feeds"`
+		MapsEnabled                  *bool                      `json:"mapsEnabled"`
+		MDNS                         *bool                      `json:"mdns"`
+		MDNSName                     *string                    `json:"mdnsName"`
+		GPS                          *library.GPSSettings       `json:"gps"`
+		Assistant                    *library.AssistantSettings `json:"assistant"`
 	}
 	if err := readJSON(r, &req); err != nil {
 		writeError(w, 400, err.Error())
@@ -993,6 +1005,20 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *ap
 			}
 			st.GPS = g
 		}
+		if req.Assistant != nil {
+			as := *req.Assistant
+			as.URL = strings.TrimSpace(as.URL)
+			if as.APIKey == keptSecret {
+				as.APIKey = st.Assistant.APIKey
+			}
+			if err := app.AssistantSettingsValid(as); err != nil {
+				return err
+			}
+			if as.Backend == "external" {
+				as.URL, _ = assistant.NormalizeBaseURL(as.URL)
+			}
+			st.Assistant = as
+		}
 		return nil
 	})
 	if err != nil {
@@ -1002,6 +1028,12 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *ap
 	a.Downloads.ApplySettings()
 	if req.GPS != nil {
 		a.ApplyGPSSettings()
+	}
+	if req.Assistant != nil {
+		a.ApplyAssistantSettings()
+	}
+	if next.Assistant.APIKey != "" {
+		next.Assistant.APIKey = keptSecret
 	}
 	if req.MDNS != nil || req.MDNSName != nil {
 		s.applyMDNS()

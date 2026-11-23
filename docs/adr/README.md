@@ -22,3 +22,4 @@
 | [0018](0018-integration-api-and-peer-sync.md) | Versioned integration API with scoped tokens; peer sync over it | Accepted |
 | [0019](0019-parallel-multi-mirror-downloads.md) | Download large files in pieces from several mirrors at once | Accepted |
 | [0020](0020-built-in-offline-routing.md) | Built-in offline routing from OpenStreetMap extracts | Accepted |
+| [0021](0021-question-answering-over-the-library.md) | Question answering from Arcana's own search, with a llamafile sidecar | Accepted |

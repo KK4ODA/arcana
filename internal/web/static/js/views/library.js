@@ -47,8 +47,12 @@ export async function libraryView(main, params, ctx) {
     onPick: (t) => { location.hash = articleHref(t); },
     onSubmit: () => runSearch(),
   });
+  // When question answering is available, a question typed here can be
+  // sent to the assistant instead.
+  const askBtn = status?.assistant?.canAsk ? h('button', { type: 'button', title: 'Ask the assistant: an answer written from passages of your library, with sources',
+    onclick: () => { location.hash = `#/ask?q=${encodeURIComponent(input.value.trim())}`; } }, 'Ask') : null;
   const form = h('form', { class: 'toolbar', role: 'search', onsubmit: (e) => { e.preventDefault(); runSearch(); } },
-    h('div', { class: 'grow' }, box), scope, h('button', { type: 'submit', class: 'primary' }, 'Search'));
+    h('div', { class: 'grow' }, box), scope, h('button', { type: 'submit', class: 'primary' }, 'Search'), askBtn);
   main.appendChild(h('section', { class: 'panel' }, form, results));
 
   const articleHref = (it) => `#/read/${encodeURIComponent(it.resourceId)}?path=${encodeURIComponent(it.path)}`;
@@ -223,6 +227,7 @@ export async function libraryView(main, params, ctx) {
           h('td', { class: 'right num' }, fmtBytes(r.size)),
           h('td', { class: 'hide-sm' }, licenseBadge(r.license)),
           h('td', { class: 'right' }, h('div', { class: 'row actions' },
+            r.format === 'gguf' || r.format === 'llamafile' ? h('a', { class: 'button', href: '#/ask', title: 'Used by the assistant to answer questions' }, 'Ask') :
             r.openPath ? h('a', { class: 'button', href: openHref(r) }, 'Open') :
               h('a', { class: 'small', href: `#/read/${encodeURIComponent(r.resourceId)}`, title: r.openError || 'The archive reader is not available.' }, 'Cannot open — why?'),
             canChange ? h('button', { class: 'danger', onclick: () => remove(r) }, 'Remove') : null)),

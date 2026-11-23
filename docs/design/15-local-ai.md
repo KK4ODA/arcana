@@ -1,8 +1,9 @@
-# O. Optional local question answering (design only)
+# O. Optional local question answering
 
-Status: **design, not implemented.** The brief excludes local AI from the
-MVP; this note records how it could be added later without changing
-Arcana's guarantees.
+Status: **implemented** (unreleased; ADR-0021). This note kept the rules
+the implementation follows; the decisions and their trade-offs are in
+[ADR-0021](../adr/0021-question-answering-over-the-library.md), and the
+user-facing description is in the README and docs/portable-use.md.
 
 ## Goals and non-goals
 
@@ -46,7 +47,22 @@ flowchart LR
 | Languages | Retrieval works per language; the model must handle the library's languages or say it cannot. |
 | Evaluation | A fixed question set over the sample library, scored for citation correctness and refusal when the answer is absent. |
 
-## Decision for now
+## As built
 
-No implementation. The integration API (v1) already lets an external tool
-build this on top of Arcana without changing Arcana itself.
+- **Retrieval** (`internal/assistant/retrieve.go`): topic words, Xapian and
+  FTS5 searches, passages along line breaks, coverage weighted by rarity,
+  at most two passages per article, a character budget from the context
+  window. Table rows are kept on one line ("QTH | Location of the station").
+- **Relevance floor**: below it the answer is "I could not find this in
+  your library" and no model runs.
+- **Backends**: llamafile 0.10.6 as a supervised loopback sidecar (catalog
+  resources `arcana.llamafile` and three Apache-2.0 models: Qwen2.5 0.5B,
+  Granite 3.3 2B, Qwen3 4B), or any OpenAI-compatible server.
+- **Checks**: invalid citations removed, uncited sentences counted, an
+  answer without citations flagged, source warnings shown with the answer.
+- **Evaluation**: `internal/assistant/testdata/sample-golden.json` (nine
+  questions, three unanswerable) passes 9/9 for retrieval against the
+  sample archive; `arcana ask --eval FILE --with-model` adds answer checks.
+- **Not yet**: follow-up questions in a conversation, synonyms or
+  embeddings for questions worded differently from the article, measured
+  answer quality and speed on a Raspberry Pi.

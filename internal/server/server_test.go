@@ -149,6 +149,11 @@ func TestInterfaceMakesNoExternalRequests(t *testing.T) {
 	allowed := map[string]bool{
 		"https://example.org/arcana-catalog.json": true, // input placeholder text
 		"http://192.168.1.20:8470":                true, // input placeholder text (peer address)
+		// Assistant settings: placeholder and help text naming local model
+		// servers. Only Arcana's server contacts the address the owner
+		// enters; the browser never does.
+		"http://127.0.0.1:11434/v1": true,
+		"http://127.0.0.1:1234/v1":  true,
 		// Map attribution links required by the ODbL; followed only if
 		// the user clicks them.
 		"https://www.openstreetmap.org/copyright": true,

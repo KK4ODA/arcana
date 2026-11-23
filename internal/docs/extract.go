@@ -168,8 +168,15 @@ func htmlText(r io.Reader) (Extracted, error) {
 				}
 			case "title":
 				inTitle = tt == html.StartTagToken
-			case "p", "div", "br", "li", "tr", "h1", "h2", "h3", "h4", "h5", "h6", "section", "article", "td":
+			case "p", "div", "br", "li", "tr", "h1", "h2", "h3", "h4", "h5", "h6", "section", "article":
 				b.WriteByte('\n')
+			case "td", "th":
+				// Cells of a row stay on one line ("QTH | Location of
+				// the station"), which reads better in snippets and for
+				// the assistant than one cell per line.
+				if t := strings.TrimRight(b.String()[max(0, b.Len()-64):], " "); t != "" && !strings.HasSuffix(t, "\n") {
+					b.WriteString(" | ")
+				}
 			}
 		case html.EndTagToken:
 			name, _ := z.TagName()

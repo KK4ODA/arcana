@@ -49,6 +49,7 @@ func (s *Server) registerIntegration(mux *http.ServeMux) {
 	mux.HandleFunc("GET "+p+"/maps/reference", s.withApp(s.scoped(integration.ScopeMaps, s.handleIntReference)))
 	mux.HandleFunc("GET "+p+"/events", s.withApp(s.handleIntEvents))
 	mux.HandleFunc("GET "+p+"/library", s.withApp(s.scoped(integration.ScopeLibrary, s.handleIntLibrary)))
+	mux.HandleFunc("GET "+p+"/ask", s.withApp(s.scoped(integration.ScopeAsk, s.handleIntAsk)))
 	mux.HandleFunc("GET "+p+"/files/{id}/{name}", s.withApp(s.scoped(integration.ScopeLibrary, s.handleIntFile)))
 	mux.HandleFunc("GET "+p+"/", func(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusNotFound, "unknown integration endpoint")
