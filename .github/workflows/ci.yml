@@ -48,7 +48,7 @@ jobs:
       # kiwix-serve is pinned by hash in the fetch script: download it once
       # per change of the pins, not on every run (download.kiwix.org
       # answers busy CI runners with 429 Too Many Requests).
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: third_party/kiwix
           key: kiwix-serve-${{ runner.os }}-${{ hashFiles('scripts/fetch-kiwix.sh') }}
@@ -73,7 +73,7 @@ jobs:
         with:
           node-version: 22
       # The same Linux kiwix-serve the Linux test job caches.
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: third_party/kiwix
           key: kiwix-serve-${{ runner.os }}-${{ hashFiles('scripts/fetch-kiwix.sh') }}
@@ -126,7 +126,7 @@ jobs:
       # kiwix-serve binaries, their sources (about 170 MB) and the Visual
       # C++ runtime, pinned by the fetch scripts: download them once per
       # change of the pins.
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: |
             third_party/kiwix
