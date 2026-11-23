@@ -1,6 +1,6 @@
 # ADR-0020: Built-in offline routing from OpenStreetMap extracts
 
-- Status: Accepted (unreleased)
+- Status: Accepted (0.7.0)
 - Date: 2026-11-23
 
 ## Context

@@ -67,7 +67,7 @@ Deliverables are in `docs/design/` and `docs/adr/`:
 | Saved custom presets | **Done** (`user/presets/`); geography step moves to Phase 3 with map regions |
 | Scheduled catalog refresh (opt-in) | **Done**; off by default |
 
-## Phase 3 — Offline maps and GPS · Done (0.3.0), except 3b terrain/overlays and 3c routing
+## Phase 3 — Offline maps and GPS · Done (0.3.0; routing 0.7.0), except 3b terrain/overlays
 
 **Dependencies:** the Phase 2 adapters (for GPX in the library) and the
 Phase 1 content origin. Details: [05-maps-gps.md](05-maps-gps.md#implementation-status-phase-3).
@@ -82,7 +82,7 @@ Phase 1 content origin. Details: [05-maps-gps.md](05-maps-gps.md#implementation-
 | Distance and bearing tool, DDM/MGRS coordinates | Planned |
 | 3b: gazetteer, custom bbox | **Done.** Place search works offline |
 | 3b: terrain, contours, emergency overlays | Planned |
-| 3c: routing evaluation (Valhalla sidecar; BRouter alternative) | Planned: decision ADR with measured sizes and Pi 5 memory |
+| 3c: routing | **Done (0.7.0).** Built into Arcana instead of a Valhalla or BRouter sidecar (ADR-0020): road networks built from Geofabrik extracts, car/bicycle/foot, turn-by-turn guidance. Pi 5 memory not yet measured |
 | Geography step in the selection wizard | Planned |
 
 ## Phase 4 — Network serving · Done (0.4.0)

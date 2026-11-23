@@ -3,7 +3,14 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
-## Unreleased
+## 0.7.0 — 2026-11-23
+
+Directions and turn-by-turn navigation without internet, search inside the
+archive or document you are reading, a reworked library search, measuring
+on the map, and a choice of miles or kilometres. Archives that cannot be
+opened now say why. Arcana 0.6.0 to 0.6.2 offer this version by themselves
+within a day of being online: choose *Update now* in the banner at the top
+of the page.
 
 ### Added
 - **Units.** Choose kilometres and metres or miles and feet, in the map's

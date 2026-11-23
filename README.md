@@ -15,7 +15,7 @@ it with no internet connection.
   <img alt="The Arcana library: a dashboard with installed content, free space, offline readiness, network sharing and GPS status, above a drive usage bar, a full-text search box and the list of installed resources with their categories, editions, sizes and licenses." src="docs/screenshots/library.png">
 </picture>
 
-Status: **0.6.2** ([changelog](CHANGELOG.md)). It
+Status: **0.7.0** ([changelog](CHANGELOG.md)). It
 works end to end on Linux and is packaged for Windows and macOS, but **has
 not yet been run on real Windows or macOS hardware**, and the programs are
 not yet code-signed (see [Status](#status)).
@@ -49,14 +49,21 @@ not yet code-signed (see [Status](#status)).
   - An update never removes the working version until the new one is
     verified.
 - **Offline reading and search.** Archives open through Kiwix's reader,
-  and PDFs and EPUBs in Arcana's own viewer. Full-text search covers every
-  installed archive and your own documents. Provenance and warnings are
-  shown above every page.
+  and PDFs and EPUBs in Arcana's own viewer. Search covers every installed
+  archive and your own documents: matching titles first, then each
+  source's best matches with its own count. The reader searches the open
+  archive (titles complete as you type), and documents have a find bar.
+  Provenance and warnings are shown above every page.
 - **Your own material.** Bookmarks, favorites, notes and reading history.
   Add your own PDF, EPUB, HTML, Markdown and text files; they are indexed
   and searched with everything else.
-- **Offline maps and GPS.** Vector maps of countries, states and continents
-  from OpenStreetMap, or a custom area, with offline place search. Position
+- **Offline maps, directions and GPS.** Vector maps of countries, states
+  and continents from OpenStreetMap, or a custom area, with offline place
+  search, distance and area measuring, and miles or kilometres. Directions
+  by car, bicycle or on foot, with turn-by-turn guidance that follows the
+  GPS and finds a new route when you leave it, from road networks Arcana
+  builds from OpenStreetMap extracts (countries and states up to about
+  1 GB of data). Position
   from a USB or serial GPS receiver, gpsd, NMEA over UDP/TCP, a simulator
   or a fixed point; waypoints, track recording and GPX import and export.
 - **Share on the local network** (`--lan`). Phones and other computers can
@@ -186,12 +193,12 @@ See [docs/development.md](docs/development.md).
 | **Implemented and tested** | Portable library layout; drive detection (Linux tested; Windows and macOS code compiled); capacity planning; catalog (bundled, Kiwix OPDS, feeds); recommender; verified resumable downloads; offline import; ZIM reading and search via kiwix-serve; web UI; read-only LAN sharing; integrity check; offline acceptance test |
 | **Built, not yet run on hardware** | Windows `Arcana.exe`, macOS binaries, Linux ARM64 |
 | **Implemented (Phase 2)** | Bookmarks, favorites, history and notes; your own documents with full-text search (PDF, EPUB, HTML, Markdown, text); drive-to-drive collection transfer; signed application updates with rollback; Project Gutenberg provider |
-| **Implemented (Phase 3)** | Offline vector maps: 541 OpenStreetMap regions (world, continents, countries, states) extracted on demand from Protomaps planet builds, custom areas, seamless merging of overlapping maps, offline place search; GPS from USB/serial receivers, gpsd, NMEA over UDP/TCP, a GPX simulator or a fixed position; waypoints, track recording, GPX import/export |
+| **Implemented (Phase 3)** | Offline vector maps: 541 OpenStreetMap regions (world, continents, countries, states) extracted on demand from Protomaps planet builds, custom areas, seamless merging of overlapping maps, offline place search; GPS from USB/serial receivers, gpsd, NMEA over UDP/TCP, a GPX simulator or a fixed position; waypoints, track recording, GPX import/export; distance and area measuring; offline directions and turn-by-turn navigation (car, bicycle, foot) from road networks built on the user's computer |
 | **Implemented (Phase 4)** | `arcana.local` on the network (built-in mDNS), QR codes and a printable connection card, optional HTTPS on the same port, password-protected remote administration (off by default), Wi-Fi hotspot control on Linux |
 | **Implemented (Phase 5), not yet run on hardware** | Raspberry Pi / Linux appliance: installer, confined systemd service with watchdog, Wi-Fi access point with captive portal ([docs/appliance.md](docs/appliance.md)) |
 | **Implemented (Phase 6)** | Integration API for other programs (RadioPost, Aether HF) with scoped, approved tokens and citations ([docs/integration-api.md](docs/integration-api.md)); copying between Arcana libraries on a LAN; signed community catalogs |
 | **Design only** | Optional local question answering over installed sources ([docs/design/15-local-ai.md](docs/design/15-local-ai.md)) |
-| **Planned** | Ready-made Raspberry Pi SD image; hardware and power-loss tests. Map routing, terrain and measuring tools; scheduled peer sync |
+| **Planned** | Ready-made Raspberry Pi SD image; hardware and power-loss tests. Terrain and contours; road networks for the largest countries; scheduled peer sync |
 | **Not yet** | Code-signed programs (releases are not code-signed yet; Windows and macOS warn on first start) |
 
 The full design package is in [docs/](docs/README.md).
