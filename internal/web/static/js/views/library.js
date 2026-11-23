@@ -224,7 +224,7 @@ export async function libraryView(main, params, ctx) {
           h('td', { class: 'hide-sm' }, licenseBadge(r.license)),
           h('td', { class: 'right' }, h('div', { class: 'row actions' },
             r.openPath ? h('a', { class: 'button', href: openHref(r) }, 'Open') :
-              h('span', { class: 'small muted', title: 'The archive reader is not available.' }, 'Cannot open'),
+              h('a', { class: 'small', href: `#/read/${encodeURIComponent(r.resourceId)}`, title: r.openError || 'The archive reader is not available.' }, 'Cannot open — why?'),
             canChange ? h('button', { class: 'danger', onclick: () => remove(r) }, 'Remove') : null)),
         ))))));
   }

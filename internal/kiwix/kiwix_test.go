@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/KK4ODA/arcana/internal/buildinfo"
 )
@@ -200,5 +201,90 @@ func TestServeAndSearchSample(t *testing.T) {
 	}
 	if st := s.Status(); st.State != "idle" {
 		t.Fatalf("state %s", st.State)
+	}
+}
+
+// kiwix-serve opens every archive before it answers, and a large archive
+// such as iFixit costs about a thousand scattered reads to open. The time
+// allowed must grow with the archives, or a library on an external hard
+// disk never starts and newly installed archives show "Cannot open".
+func TestSlowStartIsNotCutShort(t *testing.T) {
+	exe, err := os.Executable()
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("ARCANA_TEST_KIWIX_SLOW", "1500ms")
+	defer func(b, p time.Duration) { ReadyBase, ReadyPerArchive = b, p }(ReadyBase, ReadyPerArchive)
+	// Scaled down: the base alone (0.5 s) is shorter than the fake's start.
+	ReadyBase, ReadyPerArchive = 500*time.Millisecond, time.Second
+	s := New(exe, t.TempDir(), nil)
+	defer s.Stop()
+	err = s.Apply(context.Background(), []Archive{
+		{ResourceID: "kiwix.ifixit_en_all", Path: "/lib/content/kiwix.ifixit_en_all/2025-12/ifixit_en_all_2025-12.zim"},
+		{ResourceID: "kiwix.wikipedia_en_all", Path: "/lib/content/kiwix.wikipedia_en_all/2026-01/wikipedia_en_all_maxi_2026-01.zim"},
+	})
+	if err != nil {
+		t.Fatalf("a slow but working start was given up: %v", err)
+	}
+	if b, ok := s.Books()["kiwix.ifixit_en_all"]; !ok || b.ContentPath != "/kiwix/content/ifixit_en_all_2025-12/" {
+		t.Fatalf("iFixit not served: %+v", s.Books())
+	}
+	if why := s.Problem("kiwix.ifixit_en_all"); why != "" {
+		t.Errorf("served archive reported a problem: %q", why)
+	}
+}
+
+// When kiwix-serve cannot start, the archives it was meant to serve say
+// why instead of blaming the computer.
+func TestFailedStartIsExplained(t *testing.T) {
+	exe, err := os.Executable()
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("ARCANA_TEST_KIWIX_EXIT", "3")
+	s := New(exe, t.TempDir(), nil)
+	if err := s.Apply(context.Background(), []Archive{{ResourceID: "kiwix.ifixit_en_all", Path: "/lib/ifixit_en_all_2025-12.zim"}}); err == nil {
+		t.Fatal("start must fail")
+	}
+	if why := s.Problem("kiwix.ifixit_en_all"); !strings.Contains(why, "could not start") {
+		t.Errorf("problem = %q", why)
+	}
+}
+
+// An archive kiwix-serve skips (here a truncated copy) is explained with
+// kiwix-serve's own message, and the other archives keep working.
+func TestSkippedArchiveIsExplained(t *testing.T) {
+	bin := testBinary(t)
+	sample, _ := filepath.Abs(filepath.Join("..", "..", "testdata", "sample", "arcana-sample_en_2026-11.zim"))
+	data, err := os.ReadFile(sample)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dir := t.TempDir()
+	broken := filepath.Join(dir, "content", "kiwix.ifixit_en_all", "2025-12", "ifixit_en_all_2025-12.zim")
+	if err := os.MkdirAll(filepath.Dir(broken), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(broken, data[:len(data)/2], 0o644); err != nil {
+		t.Fatal(err)
+	}
+	s := New(bin, dir, nil)
+	defer s.Stop()
+	err = s.Apply(context.Background(), []Archive{
+		{ResourceID: "arcana.sample", Path: sample, Language: "en"},
+		{ResourceID: "kiwix.ifixit_en_all", Path: broken, Language: "en"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if why := s.Problem("arcana.sample"); why != "" {
+		t.Errorf("sample: %q", why)
+	}
+	if _, ok := s.Books()["kiwix.ifixit_en_all"]; ok {
+		t.Fatal("truncated archive must not be served")
+	}
+	why := s.Problem("kiwix.ifixit_en_all")
+	if !strings.Contains(why, "Skipping invalid") || !strings.Contains(why, "ifixit_en_all_2025-12.zim") {
+		t.Errorf("problem = %q", why)
 	}
 }

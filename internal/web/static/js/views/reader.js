@@ -17,7 +17,7 @@ export async function readerView(main, id, params) {
     return null;
   }
   if (!r.openPath) {
-    main.appendChild(h('div', { class: 'banner err' }, 'This resource cannot be opened: the archive reader is not available on this computer.'));
+    main.appendChild(h('div', { class: 'banner err' }, `This resource cannot be opened. ${r.openError || 'The archive reader is not available on this computer.'}`));
     return null;
   }
   // Documents (PDF and others) open in the document view.

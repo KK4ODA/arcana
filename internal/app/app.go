@@ -265,7 +265,7 @@ func (a *App) reloadKiwix() {
 				UUID: in.Resource.ProviderRef["uuid"], Language: lang, Title: in.Resource.Title})
 		}
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute+kiwix.ReadyTimeout(len(archives)))
 	defer cancel()
 	if err := a.Kiwix.Apply(ctx, archives); err != nil {
 		a.Log.Error("start ZIM reader", "err", err)

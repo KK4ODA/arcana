@@ -85,12 +85,17 @@ type Server struct {
 	archives []Archive
 	client   *http.Client
 	closed   bool
+
+	// skipped explains, by resource ID, archives that the running
+	// kiwix-serve was given but does not serve.
+	skipped map[string]string
 }
 
 type process struct {
-	cmd  *exec.Cmd
-	port int
-	done chan struct{}
+	cmd    *exec.Cmd
+	port   int
+	done   chan struct{}
+	stderr *limitedWriter
 }
 
 // FindBinary locates kiwix-serve. Search order: explicit path; the
@@ -200,12 +205,70 @@ func (s *Server) Apply(ctx context.Context, archives []Archive) error {
 	}
 	s.proc = proc
 	s.books = books
+	s.skipped = skippedReasons(archives, books, proc.stderr.String(), s.relPath)
 	s.status.State = "running"
 	s.status.LastError = ""
 	s.mu.Unlock()
+	for id, why := range s.skipped {
+		s.Log.Warn("archive not served", "resource", id, "reason", why)
+	}
 	stopProcess(old)
 	go s.supervise(proc)
 	return nil
+}
+
+// Problem explains why an archive that was handed to Apply cannot be
+// opened, or returns "" when it is served. Before this, a failed start or an
+// archive skipped by kiwix-serve showed only "Cannot open" in the library,
+// blamed on the computer, with the cause in no place the reader could see.
+func (s *Server) Problem(resourceID string) string {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if _, ok := s.books[resourceID]; ok {
+		return ""
+	}
+	if s.Binary == "" {
+		return s.status.LastError
+	}
+	requested := false
+	for _, a := range s.archives {
+		if a.ResourceID == resourceID {
+			requested = true
+			break
+		}
+	}
+	switch {
+	case !requested:
+		return "This archive is not available to the reader. Run a check from Settings, or restart Arcana."
+	case s.status.State == "starting":
+		return "The archive reader is still opening the installed archives. Try again in a moment."
+	case s.status.State == "failed":
+		return "The archive reader could not start with this archive: " + s.status.LastError
+	case s.skipped[resourceID] != "":
+		return s.skipped[resourceID]
+	}
+	return "The archive reader did not load this archive."
+}
+
+// skippedReasons explains each archive that kiwix-serve was given but does
+// not list, using its own message ("Skipping invalid '<path>'") when there
+// is one.
+func skippedReasons(archives []Archive, books map[string]Book, stderr string, rel func(string) string) map[string]string {
+	out := map[string]string{}
+	for _, a := range archives {
+		if _, ok := books[a.ResourceID]; ok {
+			continue
+		}
+		why := "kiwix-serve could not open this archive; the file may be damaged or incomplete. Run a full check from Settings."
+		for _, line := range strings.Split(stderr, "\n") {
+			if p := rel(a.Path); strings.Contains(line, p) {
+				why = "kiwix-serve could not open this archive (" + strings.TrimSpace(line) + "). Run a full check from Settings."
+				break
+			}
+		}
+		out[a.ResourceID] = why
+	}
+	return out
 }
 
 func (s *Server) launch(ctx context.Context, archives []Archive) (*process, map[string]Book, error) {
@@ -233,14 +296,14 @@ func (s *Server) launch(ctx context.Context, archives []Archive) (*process, map[
 		}
 		cmd := exec.Command(bin, args...)
 		cmd.Dir = s.WorkDir
-		var stderr bytes.Buffer
+		stderr := &limitedWriter{buf: &bytes.Buffer{}, max: 64 << 10}
 		cmd.Stdout = io.Discard
-		cmd.Stderr = &limitedWriter{buf: &stderr, max: 64 << 10}
+		cmd.Stderr = stderr
 		hideWindow(cmd)
 		if err := cmd.Start(); err != nil {
 			return nil, nil, fmt.Errorf("start kiwix-serve: %w", err)
 		}
-		p := &process{cmd: cmd, port: port, done: make(chan struct{})}
+		p := &process{cmd: cmd, port: port, done: make(chan struct{}), stderr: stderr}
 		go func() { _ = cmd.Wait(); close(p.done) }()
 
 		books, err := s.waitReady(ctx, p, archives)
@@ -254,6 +317,10 @@ func (s *Server) launch(ctx context.Context, archives []Archive) (*process, map[
 			return nil, nil, known // retrying cannot help
 		}
 		lastErr = fmt.Errorf("%v: %s", err, strings.TrimSpace(stderr.String()))
+		if ctx.Err() != nil || errors.Is(err, errNotReady) {
+			// Starting again would repeat the same slow work from scratch.
+			return nil, nil, lastErr
+		}
 	}
 	return nil, nil, lastErr
 }
@@ -272,8 +339,29 @@ func (s *Server) relPath(p string) string {
 	return p
 }
 
+// ReadyBase and ReadyPerArchive bound how long kiwix-serve may take to
+// start. It opens every archive before it answers at all, and opening a
+// large archive (iFixit, Wikipedia: hundreds of thousands of entries) costs
+// about a thousand scattered reads, measured on iFixit (3.5 GB) with an
+// empty page cache: 1,049 block reads, against 32 for a 77 MB Stack
+// Exchange archive. At 10 to 15 ms per read on an external hard disk that
+// is roughly 10 to 15 seconds per large archive, so a fixed 30 seconds
+// could expire before a library with a few large archives was open.
+var (
+	ReadyBase       = 30 * time.Second
+	ReadyPerArchive = 20 * time.Second
+	ReadyMax        = 15 * time.Minute
+)
+
+// ReadyTimeout is how long kiwix-serve may take to open n archives.
+func ReadyTimeout(n int) time.Duration {
+	return min(ReadyBase+time.Duration(n)*ReadyPerArchive, ReadyMax)
+}
+
+var errNotReady = errors.New("kiwix-serve did not finish opening the archives in time")
+
 func (s *Server) waitReady(ctx context.Context, p *process, archives []Archive) (map[string]Book, error) {
-	deadline := time.Now().Add(30 * time.Second)
+	deadline := time.Now().Add(ReadyTimeout(len(archives)))
 	base := fmt.Sprintf("http://127.0.0.1:%d%s", p.port, URLRoot)
 	for time.Now().Before(deadline) {
 		select {
@@ -297,7 +385,7 @@ func (s *Server) waitReady(ctx context.Context, p *process, archives []Archive) 
 		}
 		return mapBooks(data, archives)
 	}
-	return nil, errors.New("kiwix-serve did not become ready")
+	return nil, errNotReady
 }
 
 type localEntry struct {
@@ -561,11 +649,23 @@ func canExec(p string) bool {
 }
 
 type limitedWriter struct {
+	mu  sync.Mutex
 	buf *bytes.Buffer
 	max int
 }
 
+func (l *limitedWriter) String() string {
+	if l == nil {
+		return ""
+	}
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return l.buf.String()
+}
+
 func (l *limitedWriter) Write(p []byte) (int, error) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
 	if l.buf.Len() < l.max {
 		room := l.max - l.buf.Len()
 		if len(p) > room {

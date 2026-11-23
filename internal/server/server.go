@@ -414,6 +414,9 @@ type installedView struct {
 	// cannot be opened (e.g. ZIM reader unavailable).
 	OpenPath string `json:"openPath"`
 	Search   bool   `json:"search"`
+
+	// OpenError says why an installed archive cannot be opened.
+	OpenError string `json:"openError,omitempty"`
 }
 
 func (s *Server) installedViews(r *http.Request, a *app.App) ([]installedView, error) {
@@ -442,6 +445,13 @@ func (s *Server) installedViews(r *http.Request, a *app.App) ([]installedView, e
 			v.Search = res.Capabilities.FullTextSearch
 		} else if res.Format != "zim" && len(in.Files) > 0 {
 			v.OpenPath = "/files/" + in.ResourceID + "/" + path.Base(in.Files[0].Path)
+		} else if res.Format == "zim" {
+			v.OpenError = "The archive reader is not available on this computer."
+			if a.Kiwix != nil {
+				if why := a.Kiwix.Problem(in.ResourceID); why != "" {
+					v.OpenError = why
+				}
+			}
 		}
 		out = append(out, v)
 	}

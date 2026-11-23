@@ -153,6 +153,9 @@ func TestInterfaceMakesNoExternalRequests(t *testing.T) {
 		// the user clicks them.
 		"https://www.openstreetmap.org/copyright": true,
 		"https://protomaps.com":                   true,
+		// XML namespace of the GPX files the directions panel saves; an
+		// identifier, never fetched.
+		"http://www.topografix.com/GPX/1/1": true,
 	}
 	urlRe := regexp.MustCompile(`https?://[^\s'"` + "`" + `)<>]+`)
 	err := fs.WalkDir(web.Static, "static", func(p string, d fs.DirEntry, err error) error {
