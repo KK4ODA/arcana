@@ -163,6 +163,17 @@ func (ix *Index) upsert(ctx context.Context, d Doc, ex Extracted, errText string
 
 // Search runs a full-text query.
 func (ix *Index) Search(ctx context.Context, query string, limit int) ([]Hit, int, error) {
+	return ix.SearchIn(ctx, query, "", 0, limit)
+}
+
+// UserDocuments, passed to SearchIn as a resource ID, limits a search to the
+// person's own documents.
+const UserDocuments = "@user"
+
+// SearchIn runs a full-text query limited to one installed resource's
+// documents (UserDocuments for the person's own, or every document when
+// resourceID is empty), returning results from offset on.
+func (ix *Index) SearchIn(ctx context.Context, query, resourceID string, offset, limit int) ([]Hit, int, error) {
 	q := ftsQuery(query)
 	if q == "" {
 		return nil, 0, nil
@@ -170,16 +181,22 @@ func (ix *Index) Search(ctx context.Context, query string, limit int) ([]Hit, in
 	if limit <= 0 || limit > 100 {
 		limit = 25
 	}
+	if offset < 0 {
+		offset = 0
+	}
 	ix.mu.Lock()
 	defer ix.mu.Unlock()
 	var total int
-	if err := ix.db.QueryRowContext(ctx, "SELECT count(*) FROM docs_fts WHERE docs_fts MATCH ?", q).Scan(&total); err != nil {
+	if err := ix.db.QueryRowContext(ctx, `SELECT count(*) FROM docs_fts f JOIN docs d ON d.key = f.key
+		WHERE docs_fts MATCH ? AND (? = '' OR (? = '@user' AND d.source = 'user') OR (d.source = 'resource' AND d.resource_id = ?))`,
+		q, resourceID, resourceID, resourceID).Scan(&total); err != nil {
 		return nil, 0, err
 	}
 	rows, err := ix.db.QueryContext(ctx, `SELECT d.key, d.source, d.resource_id, d.name, d.url, d.title,
 		snippet(docs_fts, 2, char(1), char(2), '…', 14)
-		FROM docs_fts f JOIN docs d ON d.key = f.key WHERE docs_fts MATCH ?
-		ORDER BY bm25(docs_fts, 0, 8.0, 1.0) LIMIT ?`, q, limit)
+		FROM docs_fts f JOIN docs d ON d.key = f.key
+		WHERE docs_fts MATCH ? AND (? = '' OR (? = '@user' AND d.source = 'user') OR (d.source = 'resource' AND d.resource_id = ?))
+		ORDER BY bm25(docs_fts, 0, 8.0, 1.0) LIMIT ? OFFSET ?`, q, resourceID, resourceID, resourceID, limit, offset)
 	if err != nil {
 		return nil, 0, err
 	}

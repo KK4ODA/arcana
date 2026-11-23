@@ -134,6 +134,21 @@ func TestIndexSyncAndSearch(t *testing.T) {
 	if !strings.Contains(hits[0].Snippet, "<b>iodine</b>") || !strings.Contains(hits[0].Snippet, "&amp;") {
 		t.Errorf("snippet: %q", hits[0].Snippet)
 	}
+	// Searching one source: a resource's documents, or the person's own.
+	for _, c := range []struct {
+		query, in string
+		want      int
+	}{
+		{"iodine", UserDocuments, 1}, {"iodine", "x.y", 0}, {"batteries", "x.y", 1},
+		{"batteries", UserDocuments, 0}, {"batteries", "other", 0}, {"batteries", "", 1},
+	} {
+		if _, n, err := ix.SearchIn(context.Background(), c.query, c.in, 0, 10); err != nil || n != c.want {
+			t.Errorf("%q in %q: %d matches (%v), want %d", c.query, c.in, n, err, c.want)
+		}
+	}
+	if hits, n, _ := ix.SearchIn(context.Background(), "batteries", "", 1, 10); n != 1 || len(hits) != 0 {
+		t.Errorf("offset past the end: %d %+v", n, hits)
+	}
 	// Unchanged documents are not re-extracted; removed ones are dropped.
 	res, _ = ix.Sync(context.Background(), docs[1:], nil)
 	if res.Indexed != 0 || res.Removed != 1 {

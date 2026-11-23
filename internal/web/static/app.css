@@ -222,6 +222,34 @@ dialog.detail { border-top: 2px solid var(--accent); }
 .results .src { font-size: 12px; color: var(--muted); }
 .results .snippet { font-size: 13px; color: var(--muted); margin-top: 2px; }
 .results .snippet b { color: var(--text); }
+.grow { flex: 1; min-width: 0; }
+.gap-right { margin-right: 10px; }
+mark { background: var(--warn-soft); color: inherit; border-radius: 2px; padding: 0 1px; }
+mark.current { background: var(--accent); color: var(--accent-text); }
+
+/* Title completion under a search box. */
+.title-search { position: relative; }
+.title-search input { width: 100%; }
+.title-suggest { position: absolute; left: 0; right: 0; top: calc(100% + 2px); z-index: 60; list-style: none; margin: 0; padding: 4px 0;
+  background: var(--surface); border: 1px solid var(--border-strong); border-radius: 6px; box-shadow: 0 6px 18px rgba(0, 0, 0, .18); max-height: 60vh; overflow-y: auto; }
+.title-suggest li { padding: 6px 10px; cursor: pointer; display: flex; gap: 8px; align-items: baseline; }
+.title-suggest li[aria-selected="true"], .title-suggest li:hover { background: var(--surface-2); }
+.title-suggest .t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.title-suggest .b { font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+/* Search results grouped by source. */
+.search-sec { border-top: 1px solid var(--border); }
+.search-sec > h3, .search-group-head { padding: 10px 12px 4px; margin: 0; }
+.search-group-head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.search-group-head h3 { margin: 0; }
+.search-group-head button { margin-left: auto; }
+.title-hits { list-style: none; margin: 0; padding: 2px 12px 10px; display: grid; gap: 4px; }
+.search-note { padding: 8px 12px; margin: 0; border-top: 1px solid var(--border); }
+.search-panel h3 { margin: 6px 0; }
+.search-panel .results li { padding: 8px 0; }
+.search-panel .title-hits { padding: 0; }
+.reader > header .reader-search { flex: 0 1 300px; min-width: 180px; }
+.find-bar input { width: 100%; }
 
 /* ---------------------------------------------------------- reader */
 .reader { position: fixed; inset: 0; display: flex; flex-direction: column; background: var(--bg); z-index: 40; }

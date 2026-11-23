@@ -15,7 +15,6 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"html"
 	"io"
 	"log/slog"
 	"net"
@@ -25,7 +24,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
 	"runtime"
 	"sort"
 	"strconv"
@@ -497,161 +495,6 @@ func (s *Server) Handler() http.Handler {
 		proxy.ServeHTTP(w, r)
 	})
 }
-
-// ---------------------------------------------------------------- search
-
-// Result is one full-text search hit.
-type Result struct {
-	ResourceID string `json:"resourceId"`
-	Book       string `json:"book"`
-	Title      string `json:"title"`
-	// Snippet is HTML-escaped text in which only <b> highlighting remains.
-	Snippet string `json:"snippet"`
-	Path    string `json:"path"`
-}
-
-type rss struct {
-	Channel struct {
-		// Total is text: kiwix-serve formats it for display, with a
-		// thousands separator ("1,800"). See parseCount.
-		Total string `xml:"totalResults"`
-		Items []struct {
-			Title string `xml:"title"`
-			Link  string `xml:"link"`
-			// innerxml: kiwix-serve marks matches with <b> child
-			// elements, which chardata would silently drop.
-			Description struct {
-				Inner string `xml:",innerxml"`
-			} `xml:"description"`
-		} `xml:"item"`
-	} `xml:"channel"`
-}
-
-// Search runs a full-text query. kiwix-serve only searches several archives
-// at once when they share one language, so archives are grouped by
-// language and the groups are queried in turn.
-func (s *Server) Search(ctx context.Context, query string, only map[string]bool, limit int) ([]Result, int, error) {
-	target, ok := s.target()
-	if !ok {
-		return nil, 0, errors.New("archive reader is not running")
-	}
-	if limit <= 0 || limit > 140 {
-		limit = 25
-	}
-	groups := map[string][]Book{}
-	for id, b := range s.Books() {
-		if only != nil && !only[id] {
-			continue
-		}
-		groups[b.Language] = append(groups[b.Language], b)
-	}
-	var results []Result
-	total := 0
-	var lastErr error
-	langs := make([]string, 0, len(groups))
-	for l := range groups {
-		langs = append(langs, l)
-	}
-	sort.Strings(langs)
-	for _, lang := range langs {
-		books := groups[lang]
-		byName := map[string]Book{}
-		v := url.Values{}
-		for _, b := range books {
-			v.Add("books.name", b.Name)
-			byName[b.Name] = b
-		}
-		v.Set("pattern", query)
-		v.Set("format", "xml")
-		v.Set("pageLength", strconv.Itoa(limit))
-		u := target.String() + URLRoot + "/search?" + v.Encode()
-		req, _ := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
-		resp, err := s.client.Do(req)
-		if err != nil {
-			lastErr = err
-			continue
-		}
-		data, _ := io.ReadAll(io.LimitReader(resp.Body, 8<<20))
-		resp.Body.Close()
-		if resp.StatusCode != http.StatusOK {
-			// Archives without a full-text index return an error page.
-			continue
-		}
-		var doc rss
-		if err := xml.Unmarshal(data, &doc); err != nil {
-			lastErr = err
-			continue
-		}
-		if n, ok := parseCount(doc.Channel.Total); ok {
-			total += n
-		} else {
-			// A count that cannot be read must not discard real results.
-			total += len(doc.Channel.Items)
-		}
-		for _, it := range doc.Channel.Items {
-			name := strings.TrimPrefix(it.Link, URLRoot+"/content/")
-			if i := strings.IndexByte(name, '/'); i >= 0 {
-				name = name[:i]
-			}
-			b := byName[name]
-			results = append(results, Result{
-				ResourceID: b.ResourceID,
-				Book:       b.Title,
-				Title:      it.Title,
-				Snippet:    SanitizeSnippet(it.Description.Inner),
-				Path:       it.Link,
-			})
-		}
-	}
-	if len(results) == 0 && lastErr != nil {
-		return nil, 0, lastErr
-	}
-	return results, total, nil
-}
-
-// parseCount reads a result count that kiwix-serve may have formatted for
-// display. The thousands separator depends on the locale ("1,800", "1.800",
-// "1 800", or with a no-break or narrow no-break space), so every character
-// other than an ASCII digit is dropped. It reports false when no number
-// remains or the number is out of range.
-func parseCount(s string) (int, bool) {
-	digits := strings.Map(func(r rune) rune {
-		if r >= '0' && r <= '9' {
-			return r
-		}
-		return -1
-	}, s)
-	if digits == "" {
-		return 0, false
-	}
-	n, err := strconv.Atoi(digits)
-	if err != nil {
-		return 0, false
-	}
-	return n, true
-}
-
-// SanitizeSnippet converts an XML search snippet into safe HTML: text is
-// unescaped and re-escaped, <b> highlighting is kept, and every other tag is
-// removed.
-func SanitizeSnippet(inner string) string {
-	s := strings.Map(func(r rune) rune {
-		if r == '\x01' || r == '\x02' {
-			return -1
-		}
-		return r
-	}, inner)
-	s = strings.ReplaceAll(s, "<b>", "\x01")
-	s = strings.ReplaceAll(s, "</b>", "\x02")
-	s = tagRe.ReplaceAllString(s, "")
-	s = html.EscapeString(html.UnescapeString(s))
-	if strings.Count(s, "\x01") != strings.Count(s, "\x02") {
-		s = strings.NewReplacer("\x01", "", "\x02", "").Replace(s)
-	}
-	return strings.NewReplacer("\x01", "<b>", "\x02", "</b>").Replace(s)
-}
-
-var tagRe = regexp.MustCompile(`<[^>]*>`)
 
 // ---------------------------------------------------------------- helpers
 

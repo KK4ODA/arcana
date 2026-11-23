@@ -29,7 +29,6 @@ import (
 	"github.com/KK4ODA/arcana/internal/buildinfo"
 	"github.com/KK4ODA/arcana/internal/catalog"
 	"github.com/KK4ODA/arcana/internal/content"
-	"github.com/KK4ODA/arcana/internal/docs"
 	"github.com/KK4ODA/arcana/internal/hotspot"
 	"github.com/KK4ODA/arcana/internal/kiwix"
 	"github.com/KK4ODA/arcana/internal/library"
@@ -208,6 +207,7 @@ func (s *Server) appHandler() http.Handler {
 	mux.HandleFunc("GET /api/library", s.withApp(s.handleLibrary))
 	mux.HandleFunc("DELETE /api/library/{id}", s.withApp(s.handleRemove))
 	mux.HandleFunc("GET /api/search", s.withApp(s.handleSearch))
+	mux.HandleFunc("GET /api/suggest", s.withApp(s.handleSuggest))
 	mux.HandleFunc("GET /api/catalog", s.withApp(s.handleCatalog))
 	mux.HandleFunc("GET /api/catalog/facets", s.withApp(s.handleFacets))
 	mux.HandleFunc("GET /api/catalog/item/{id}", s.withApp(s.handleCatalogItem))
@@ -469,35 +469,87 @@ func (s *Server) handleRemove(w http.ResponseWriter, r *http.Request, a *app.App
 }
 
 func (s *Server) handleSearch(w http.ResponseWriter, r *http.Request, a *app.App) {
-	q := strings.TrimSpace(r.URL.Query().Get("q"))
+	qv := r.URL.Query()
+	q := strings.TrimSpace(qv.Get("q"))
 	if q == "" || len(q) > 200 {
 		writeError(w, 400, "enter a search term")
 		return
 	}
-	var only map[string]bool
-	if id := r.URL.Query().Get("resource"); id != "" {
-		only = map[string]bool{id: true}
-	}
+	resource := qv.Get("resource")
+	start := clampInt(qv.Get("start"), 0, 0, 10000)
+	limit := clampInt(qv.Get("limit"), 25, 1, 100)
 	resp := map[string]any{"query": q, "results": []kiwix.Result{}, "total": 0}
+	ctx, cancel := context.WithTimeout(r.Context(), 20*time.Second)
+	defer cancel()
+	books := map[string]kiwix.Book{}
 	if a.Kiwix != nil {
-		ctx, cancel := context.WithTimeout(r.Context(), 20*time.Second)
-		defer cancel()
-		results, total, err := a.Kiwix.Search(ctx, q, only, 25)
+		books = a.Kiwix.Books()
+	}
+
+	// One source: a page of its results, for "more results" and for the
+	// search box inside the reader.
+	if resource != "" {
+		resp["resource"], resp["start"] = resource, start
+		if _, ok := books[resource]; ok {
+			results, total, err := a.Kiwix.SearchBook(ctx, resource, q, start, limit)
+			switch {
+			case errors.Is(err, kiwix.ErrNotSearchable):
+				resp["notSearchable"] = true
+			case err != nil:
+				resp["error"] = "Full-text search is unavailable: " + err.Error()
+			default:
+				resp["results"], resp["total"] = nonNil(results), total
+			}
+			if start == 0 {
+				titles, _ := a.Kiwix.Suggest(ctx, resource, q, 10)
+				resp["titles"] = nonNil(titles)
+			}
+		} else {
+			hits, n, err := a.Docs.SearchIn(ctx, q, resource, start, limit)
+			if err != nil {
+				resp["error"] = "Document search is unavailable: " + err.Error()
+			}
+			resp["documents"], resp["documentTotal"] = nonNil(hits), n
+		}
+		writeJSON(w, 200, resp)
+		return
+	}
+
+	// Everything: articles whose titles match, then each archive's best
+	// full-text matches, then documents.
+	if a.Kiwix != nil && len(books) > 0 {
+		var titles []kiwix.Suggestion
+		done := make(chan struct{})
+		go func() {
+			defer close(done)
+			titles, _ = a.Kiwix.SuggestAll(ctx, q, 5, 8)
+		}()
+		groups, err := a.Kiwix.SearchEach(ctx, q, 5)
+		<-done
+		resp["titles"] = nonNil(titles)
 		if err != nil {
 			resp["error"] = "Full-text search is unavailable: " + err.Error()
-		} else {
-			if results == nil {
-				results = []kiwix.Result{}
-			}
-			resp["results"], resp["total"] = results, total
 		}
+		var results []kiwix.Result
+		var shown []kiwix.Group
+		titleOnly := []string{}
+		total := 0
+		for _, g := range groups {
+			switch {
+			case g.Error == kiwix.ErrNotSearchable.Error():
+				titleOnly = append(titleOnly, g.ResourceID)
+			case g.Total > 0 || g.Error != "":
+				shown = append(shown, g)
+				results = append(results, g.Results...)
+				total += g.Total
+			}
+		}
+		resp["groups"], resp["titleOnly"] = nonNil(shown), titleOnly
+		resp["results"], resp["total"] = nonNil(results), total
 	}
 	// Documents (PDF, EPUB, user files) from Arcana's own index.
 	if hits, n, err := a.Docs.Search(r.Context(), q, 25); err == nil {
-		if hits == nil {
-			hits = []docs.Hit{}
-		}
-		resp["documents"], resp["documentTotal"] = hits, n
+		resp["documents"], resp["documentTotal"] = nonNil(hits), n
 	}
 	// Titles of installed resources also match, so documents without a
 	// full-text index can still be found.
@@ -511,6 +563,54 @@ func (s *Server) handleSearch(w http.ResponseWriter, r *http.Request, a *app.App
 	}
 	resp["resources"] = matches
 	writeJSON(w, 200, resp)
+}
+
+// handleSuggest completes article titles as someone types: in one archive
+// (resource=ID) or across all of them.
+func (s *Server) handleSuggest(w http.ResponseWriter, r *http.Request, a *app.App) {
+	qv := r.URL.Query()
+	q := strings.TrimSpace(qv.Get("q"))
+	if q == "" || len(q) > 200 {
+		writeJSON(w, 200, map[string]any{"titles": []kiwix.Suggestion{}})
+		return
+	}
+	limit := clampInt(qv.Get("limit"), 10, 1, 50)
+	if a.Kiwix == nil {
+		writeJSON(w, 200, map[string]any{"titles": []kiwix.Suggestion{}})
+		return
+	}
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
+	defer cancel()
+	var titles []kiwix.Suggestion
+	var err error
+	if id := qv.Get("resource"); id != "" {
+		titles, err = a.Kiwix.Suggest(ctx, id, q, limit)
+	} else {
+		titles, err = a.Kiwix.SuggestAll(ctx, q, 5, limit)
+	}
+	if err != nil {
+		writeError(w, 503, "Title search is unavailable: "+err.Error())
+		return
+	}
+	writeJSON(w, 200, map[string]any{"titles": nonNil(titles)})
+}
+
+// clampInt parses a query parameter, using def when it is missing or not a
+// number and keeping it within [lo, hi].
+func clampInt(v string, def, lo, hi int) int {
+	n, err := strconv.Atoi(v)
+	if err != nil {
+		return def
+	}
+	return max(lo, min(hi, n))
+}
+
+// nonNil makes an empty result encode as [] rather than null.
+func nonNil[T any](s []T) []T {
+	if s == nil {
+		return []T{}
+	}
+	return s
 }
 
 type catalogItem struct {

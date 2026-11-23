@@ -250,6 +250,39 @@ func TestEndToEndInstallAndRead(t *testing.T) {
 	if sr.Total == 0 || !strings.Contains(sr.Results[0].Title, "alphabet") {
 		t.Fatalf("search: %s", rec.Body.String())
 	}
+
+	// The overview groups results by archive and leads with title matches.
+	rec = e.do(e.appH, "GET", "/api/search?q=morse+code", local, "127.0.0.1:18470", nil, nil)
+	var ov struct {
+		Titles []struct {
+			Title, Path, ResourceID string
+		} `json:"titles"`
+		Groups []struct {
+			ResourceID string `json:"resourceId"`
+			Total      int    `json:"total"`
+		} `json:"groups"`
+	}
+	json.Unmarshal(rec.Body.Bytes(), &ov)
+	if len(ov.Titles) == 0 || ov.Titles[0].Title != "International Morse code" || len(ov.Groups) != 1 || ov.Groups[0].ResourceID != "arcana.sample" {
+		t.Fatalf("overview: %s", rec.Body.String())
+	}
+	// Inside one archive (the reader's search box), with paging.
+	rec = e.do(e.appH, "GET", "/api/search?q=morse&resource=arcana.sample&start=1&limit=1", local, "127.0.0.1:18470", nil, nil)
+	var one struct {
+		Total   int `json:"total"`
+		Start   int `json:"start"`
+		Results []struct {
+			Title string `json:"title"`
+		} `json:"results"`
+	}
+	json.Unmarshal(rec.Body.Bytes(), &one)
+	if one.Total < 2 || one.Start != 1 || len(one.Results) != 1 {
+		t.Fatalf("one archive: %s", rec.Body.String())
+	}
+	rec = e.do(e.appH, "GET", "/api/suggest?q=phon&resource=arcana.sample", local, "127.0.0.1:18470", nil, nil)
+	if rec.Code != 200 || !strings.Contains(rec.Body.String(), "Spelling") {
+		t.Fatalf("suggest: %d %s", rec.Code, rec.Body.String())
+	}
 }
 
 func (e *env) token() string {

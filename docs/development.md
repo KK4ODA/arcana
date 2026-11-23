@@ -77,7 +77,9 @@ docs/design/14-radio-and-integrations.md.
 | `GET /api/session` | Version, setup mode, admin flag, content port, token (local only) |
 | `GET /api/status` | Dashboard: installed, storage plan, offline readiness, updates, sharing, GPS, attention |
 | `GET /api/library`, `DELETE /api/library/{id}` | Installed resources; remove |
-| `GET /api/search?q=` | Full-text search across installed archives |
+| `GET /api/search?q=` | Search everything installed: `titles` (articles whose titles match, best first), `groups` (each archive's first five full-text matches and its total), `titleOnly` (archives without a full-text index), `documents`, and `resources`. `results`/`total` flatten the groups. |
+| `GET /api/search?q=&resource=ID&start=N&limit=N` | One source, a page at a time: an archive (`results`, `total`, `titles`, `notSearchable`), a book or document resource, or `@user` for your own documents (`documents`, `documentTotal`) |
+| `GET /api/suggest?q=[&resource=ID]` | Article titles completing what was typed, in one archive or all of them |
 | `GET /api/catalog?q=&category=&lang=&sort=&offset=&limit=` | Catalog query |
 | `GET /api/catalog/facets`, `GET /api/catalog/item/{id}` | Categories, languages, providers; one resource with editions |
 | `POST /api/catalog/refresh` | Refresh enabled providers |

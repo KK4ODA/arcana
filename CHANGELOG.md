@@ -17,6 +17,27 @@ the library format version is tracked separately (docs/design/09-storage-and-dat
   of the last leg; *Measure area* shows the area and perimeter of the shape
   you outline. Double-click or press *Done* to finish, *Undo point* (or
   Backspace) to take back a point, Escape to stop. Works offline.
+- **Search inside what you are reading.** The reader has a search box for
+  the open archive (press `/` to reach it). Titles complete as you type, so
+  you can jump straight to an article; Enter lists every page that mentions
+  the words beside the page you are reading, with *Show more results*.
+  Archives without a full-text index are searched by title.
+- **Find in documents.** PDFs, EPUBs and your own documents have a *Find in
+  this document* bar that marks every match and steps through them with
+  Enter, Shift+Enter or the arrows. Opening a document from search results
+  marks the words you searched for.
+
+### Changed
+- **Library search, reworked.** Results now start with articles whose
+  titles match (an exact title first), then show each source separately
+  with its number of matches, so a small archive such as a repair guide is
+  no longer buried under an encyclopedia. *Show all in …* (or the new
+  *Search in* menu) searches one source, a page at a time. Titles complete
+  as you type, and the menu also offers your own documents.
+
+### Fixed
+- In search results, a matching map opened the document viewer instead of
+  the map.
 
 ## 0.6.2 — 2026-11-22
 

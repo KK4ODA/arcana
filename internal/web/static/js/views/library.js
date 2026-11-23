@@ -1,5 +1,6 @@
 import { api, getSession } from '../api.js';
 import { h, clear, fill, fmtBytes, fmtAgo, fmtDate, langName, licenseBadge, warningBadges, storageBar, toast } from '../util.js';
+import { titleSearchBox, highlight, snippet, setMore } from '../search.js';
 
 const CATEGORY_TITLES = {};
 
@@ -22,54 +23,140 @@ export async function libraryView(main, params, ctx) {
   }
   main.appendChild(dashboard(status));
 
-  // Search
+  // Search: titles that match, the best full-text matches from each
+  // archive (with a count per source), and documents. Choosing a source
+  // searches only that source, a page at a time.
   const results = h('div');
-  const input = h('input', { type: 'search', placeholder: 'Search installed content and documents (full text)', 'aria-label': 'Search installed content', value: params.get('q') || '' });
+  const input = h('input', { type: 'search', placeholder: 'Search installed content and documents', 'aria-label': 'Search installed content', value: params.get('q') || '' });
+  const archives = lib.resources.filter((r) => r.openPath && r.openPath.startsWith('/kiwix/'));
+  const docSources = lib.resources.filter((r) => r.openPath && r.openPath.startsWith('/files/') && r.format !== 'pmtiles');
+  const scope = h('select', { 'aria-label': 'Search in' },
+    h('option', { value: '' }, 'Everything installed'),
+    archives.length ? h('optgroup', { label: 'Archives' }, archives.map((r) => h('option', { value: r.resourceId }, r.title))) : null,
+    docSources.length ? h('optgroup', { label: 'Books and documents' }, docSources.map((r) => h('option', { value: r.resourceId }, r.title))) : null,
+    s.local ? h('option', { value: '@user' }, 'Your documents') : null);
+  scope.value = params.get('in') || '';
+  if (scope.selectedIndex < 0) scope.value = '';
+  scope.addEventListener('change', () => { if (input.value.trim()) runSearch(); });
+  const box = titleSearchBox(input, {
+    showBook: true,
+    fetchTitles: async (q) => {
+      const r = await api.get(`/api/suggest?q=${encodeURIComponent(q)}&limit=8${scope.value && !scope.value.startsWith('@') ? `&resource=${encodeURIComponent(scope.value)}` : ''}`);
+      return r.titles;
+    },
+    onPick: (t) => { location.hash = articleHref(t); },
+    onSubmit: () => runSearch(),
+  });
   const form = h('form', { class: 'toolbar', role: 'search', onsubmit: (e) => { e.preventDefault(); runSearch(); } },
-    h('div', { class: 'grow' }, input), h('button', { type: 'submit', class: 'primary' }, 'Search'));
+    h('div', { class: 'grow' }, box), scope, h('button', { type: 'submit', class: 'primary' }, 'Search'));
   main.appendChild(h('section', { class: 'panel' }, form, results));
 
+  const articleHref = (it) => `#/read/${encodeURIComponent(it.resourceId)}?path=${encodeURIComponent(it.path)}`;
+  const n = (x) => Number(x || 0).toLocaleString();
+  const resultItem = (it) => h('li', null,
+    h('a', { href: articleHref(it) }, it.title), h('div', { class: 'src' }, it.book), snippet(it.snippet));
+  const docItem = (d, q) => h('li', null,
+    h('a', { href: `#/doc?key=${encodeURIComponent(d.key)}&find=${encodeURIComponent(q)}` }, d.title || d.name),
+    h('div', { class: 'src' }, d.source === 'user' ? `Your document · ${d.name}` : `${titles[d.resourceId] || d.resourceId} · ${d.name}`),
+    snippet(d.snippet));
+  const titleList = (list, q, withBook) => h('ul', { class: 'title-hits' }, list.map((t) => h('li', null,
+    h('a', { href: articleHref(t) }, highlight(t.title, q)), withBook ? h('span', { class: 'src' }, ` · ${t.book}`) : null)));
+
+  let searchSeq = 0;
   async function runSearch() {
     const q = input.value.trim();
+    const where = scope.value;
+    const mine = ++searchSeq;
     clear(results);
     if (!q) return;
-    history.replaceState(null, '', `#/library?q=${encodeURIComponent(q)}`);
+    history.replaceState(null, '', `#/library?q=${encodeURIComponent(q)}${where ? `&in=${encodeURIComponent(where)}` : ''}`);
     results.appendChild(h('p', { class: 'empty' }, 'Searching…'));
     try {
-      const r = await api.get(`/api/search?q=${encodeURIComponent(q)}`);
+      const url = `/api/search?q=${encodeURIComponent(q)}${where ? `&resource=${encodeURIComponent(where)}` : ''}`;
+      const r = await api.get(url);
+      if (mine !== searchSeq) return;
       clear(results);
       if (r.error) results.appendChild(h('div', { class: 'banner warn' }, r.error));
-      if (r.resources?.length) {
-        results.appendChild(h('div', { class: 'toolbar small muted' }, 'Matching resources: ',
-          r.resources.map((v) => h('a', { href: `#/read/${encodeURIComponent(v.resourceId)}`, style: 'margin-right:10px' }, v.title))));
-      }
-      const docs = r.documents || [];
-      if (!r.results.length && !docs.length) {
-        results.appendChild(h('p', { class: 'empty' }, 'No matches. Archives without a full-text index can only be searched by title from inside the reader.'));
-        return;
-      }
-      const snippet = (html) => {
-        const el = h('div', { class: 'snippet' });
-        // Snippets are escaped on the server; only <b> highlighting remains.
-        el.innerHTML = html;
-        return el;
-      };
-      if (docs.length) {
-        results.appendChild(h('div', { class: 'toolbar small muted' }, `Documents: ${r.documentTotal} matches.`));
-        results.appendChild(h('ul', { class: 'results' }, docs.map((d) => h('li', null,
-          h('a', { href: `#/doc?key=${encodeURIComponent(d.key)}` }, d.title || d.name),
-          h('div', { class: 'src' }, d.source === 'user' ? `Your document · ${d.name}` : `${titles[d.resourceId] || d.resourceId} · ${d.name}`),
-          snippet(d.snippet)))));
-      }
-      if (r.results.length) {
-        results.appendChild(h('div', { class: 'toolbar small muted' }, `Articles: ${r.total} matches; showing ${r.results.length}.`));
-        results.appendChild(h('ul', { class: 'results' }, r.results.map((it) => h('li', null,
-          h('a', { href: `#/read/${encodeURIComponent(it.resourceId)}?path=${encodeURIComponent(it.path)}` }, it.title),
-          h('div', { class: 'src' }, it.book), snippet(it.snippet)))));
-      }
+      if (where) renderOne(r, q, where, url);
+      else renderAll(r, q);
     } catch (e) {
-      clear(results).appendChild(h('div', { class: 'banner err' }, e.message));
+      if (mine === searchSeq) fill(results, h('div', { class: 'banner err' }, e.message));
     }
+  }
+
+  function renderAll(r, q) {
+    if (r.resources?.length) {
+      results.appendChild(h('div', { class: 'toolbar small muted' }, 'Matching resources: ',
+        r.resources.map((v) => h('a', { href: openHref(v), class: 'gap-right' }, v.title))));
+    }
+    const groups = r.groups || [];
+    const docs = r.documents || [];
+    const titleHits = r.titles || [];
+    if (titleHits.length) {
+      results.appendChild(h('section', { class: 'search-sec' }, h('h3', null, 'Articles with matching titles'), titleList(titleHits, q, true)));
+    }
+    for (const g of groups) {
+      const head = h('div', { class: 'search-group-head' },
+        h('h3', null, g.book || titles[g.resourceId] || g.resourceId),
+        h('span', { class: 'small muted' }, g.error ? g.error : `${n(g.total)} match${g.total === 1 ? '' : 'es'}`),
+        g.total > g.results.length ? h('button', { class: 'linkish small', onclick: () => { scope.value = g.resourceId; runSearch(); } }, `Show all in ${g.book || 'this source'}`) : null);
+      results.appendChild(h('section', { class: 'search-sec' }, head, h('ul', { class: 'results' }, g.results.map(resultItem))));
+    }
+    if (docs.length) {
+      results.appendChild(h('section', { class: 'search-sec' },
+        h('div', { class: 'search-group-head' }, h('h3', null, 'Documents'), h('span', { class: 'small muted' }, `${n(r.documentTotal)} match${r.documentTotal === 1 ? '' : 'es'}`)),
+        h('ul', { class: 'results' }, docs.map((d) => docItem(d, q)))));
+    }
+    if ((r.titleOnly || []).length) {
+      results.appendChild(h('p', { class: 'small muted search-note' },
+        `Searched by title only, because they have no full-text index: ${r.titleOnly.map((id) => titles[id] || id).join(', ')}.`));
+    }
+    if (!groups.length && !docs.length && !titleHits.length && !r.resources?.length) {
+      results.appendChild(h('p', { class: 'empty' }, `Nothing installed matches “${q}”. Try fewer or different words.`));
+    }
+  }
+
+  function renderOne(r, q, where, url) {
+    const name = where === '@user' ? 'your documents' : (titles[where] || where);
+    const isArchive = archives.some((a) => a.resourceId === where);
+    const list = h('ul', { class: 'results' });
+    const more = h('div', { class: 'toolbar' });
+    if ((r.titles || []).length) {
+      results.appendChild(h('section', { class: 'search-sec' }, h('h3', null, 'Matching titles'), titleList(r.titles, q, false)));
+    }
+    if (isArchive) {
+      if (r.notSearchable) {
+        results.appendChild(h('p', { class: 'small muted search-note' }, `${name} has no full-text index, so only titles can be searched.`));
+      } else {
+        results.appendChild(h('div', { class: 'toolbar small muted' }, `${n(r.total)} page${r.total === 1 ? '' : 's'} in ${name} match “${q}”.`));
+      }
+      r.results.forEach((it) => list.appendChild(resultItem(it)));
+      let shown = r.results.length;
+      const next = () => setMore(more, r.total - shown, 'Show more results', async () => {
+        const p = await api.get(`${url}&start=${shown}`);
+        p.results.forEach((it) => list.appendChild(resultItem(it)));
+        shown += p.results.length;
+        if (!p.results.length) shown = r.total;
+        next();
+      });
+      next();
+    } else {
+      const docs = r.documents || [];
+      results.appendChild(h('div', { class: 'toolbar small muted' }, `${n(r.documentTotal)} match${r.documentTotal === 1 ? '' : 'es'} in ${name}.`));
+      docs.forEach((d) => list.appendChild(docItem(d, q)));
+      let shown = docs.length;
+      const next = () => setMore(more, r.documentTotal - shown, 'Show more results', async () => {
+        const p = await api.get(`${url}&start=${shown}`);
+        (p.documents || []).forEach((d) => list.appendChild(docItem(d, q)));
+        shown += (p.documents || []).length;
+        if (!(p.documents || []).length) shown = r.documentTotal;
+        next();
+      });
+      next();
+    }
+    results.appendChild(list);
+    results.appendChild(more);
+    results.appendChild(h('div', { class: 'toolbar small' }, h('button', { class: 'linkish', onclick: () => { scope.value = ''; runSearch(); } }, 'Search everything installed instead')));
   }
   if (input.value) runSearch();
 
