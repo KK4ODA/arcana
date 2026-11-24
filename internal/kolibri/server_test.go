@@ -266,3 +266,28 @@ func TestProxyGuards(t *testing.T) {
 		t.Fatalf("cookies %q", got)
 	}
 }
+
+// New options replace the running Kolibri with one started with them,
+// after the first has exited (the slot); Stop returns at once.
+func TestServerRestartsWithNewOptions(t *testing.T) {
+	opts, _ := fakeOptions(t)
+	s := NewServer(nil)
+	defer s.Close()
+	s.Start(opts)
+	waitState(t, s, "running")
+	opts.ContentPort = 9999
+	s.Start(opts)
+	waitState(t, s, "running")
+	env, _ := os.ReadFile(filepath.Join(opts.Home, "fake-env.txt"))
+	if !strings.Contains(string(env), "KOLIBRI_ZIP_CONTENT_ORIGIN=9999") {
+		t.Fatal("not restarted with the new content port")
+	}
+	start := time.Now()
+	s.Stop()
+	if time.Since(start) > time.Second {
+		t.Fatalf("Stop waited %s", time.Since(start))
+	}
+	if st := s.Status(); st.State != "stopped" {
+		t.Fatalf("state %s", st.State)
+	}
+}

@@ -58,6 +58,9 @@ type Server struct {
 	status Status
 	closed bool
 	gen    int
+	// slot is held from a process's start until it has exited, so a new
+	// Kolibri never shares KOLIBRI_HOME with one still shutting down.
+	slot chan struct{}
 }
 
 type process struct {
@@ -74,7 +77,8 @@ func NewServer(log *slog.Logger) *Server {
 	if log == nil {
 		log = slog.Default()
 	}
-	return &Server{Log: log, ReadyTimeout: 15 * time.Minute, status: Status{State: "stopped", Since: time.Now()}}
+	return &Server{Log: log, ReadyTimeout: 15 * time.Minute, status: Status{State: "stopped", Since: time.Now()},
+		slot: make(chan struct{}, 1)}
 }
 
 // Status returns the current status.
@@ -119,6 +123,8 @@ func (s *Server) setState(gen int, state, lastErr string) {
 
 // Start runs Kolibri in the background with opts, replacing a process
 // started with other options. It returns at once; Status follows progress.
+// Neither Start nor Stop waits for a process to end: the next one waits
+// for the slot instead.
 func (s *Server) Start(opts Options) {
 	s.mu.Lock()
 	if s.closed {
@@ -139,14 +145,28 @@ func (s *Server) Start(opts Options) {
 	s.opts = opts
 	s.status = Status{State: "starting", Since: time.Now(), Restarts: s.status.Restarts}
 	s.mu.Unlock()
-	stopProcess(old)
+	go stopProcess(old)
 	go s.run(gen, opts)
 }
 
+func (s *Server) current(gen int) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return gen == s.gen && !s.closed
+}
+
 func (s *Server) run(gen int, opts Options) {
+	s.slot <- struct{}{}
+	if !s.current(gen) {
+		<-s.slot
+		return
+	}
 	p, version, err := s.launch(gen, opts)
 	if err != nil {
-		s.Log.Warn("kolibri did not start", "err", err)
+		<-s.slot
+		if !errors.Is(err, errSuperseded) {
+			s.Log.Warn("kolibri did not start", "err", err)
+		}
 		s.setState(gen, "failed", err.Error())
 		return
 	}
@@ -154,6 +174,7 @@ func (s *Server) run(gen int, opts Options) {
 	if gen != s.gen || s.closed {
 		s.mu.Unlock()
 		stopProcess(p)
+		<-s.slot
 		return
 	}
 	s.proc = p
@@ -166,9 +187,11 @@ func (s *Server) run(gen int, opts Options) {
 	go s.supervise(gen, p, opts)
 }
 
-// supervise restarts Kolibri if it stops by itself, a few times.
+// supervise frees the slot when Kolibri ends, and restarts it if it
+// stopped by itself, a few times.
 func (s *Server) supervise(gen int, p *process, opts Options) {
 	<-p.done
+	<-s.slot
 	s.mu.Lock()
 	if gen != s.gen || s.closed || s.proc != p {
 		s.mu.Unlock()
@@ -193,23 +216,35 @@ func (s *Server) supervise(gen int, p *process, opts Options) {
 	}
 }
 
-// Stop ends Kolibri and keeps it stopped until Start is called.
+// Stop ends Kolibri and keeps it stopped until Start is called. It does
+// not wait for Kolibri to exit.
 func (s *Server) Stop() {
+	go stopProcess(s.detach())
+}
+
+func (s *Server) detach() *process {
 	s.mu.Lock()
+	defer s.mu.Unlock()
 	p := s.proc
 	s.proc = nil
 	s.gen++
 	s.status = Status{State: "stopped", Since: time.Now(), Restarts: s.status.Restarts}
-	s.mu.Unlock()
-	stopProcess(p)
+	return p
 }
 
-// Close stops Kolibri for good.
+// Close stops Kolibri for good and waits until it has exited (a start in
+// progress notices within half a second), so the library can be released.
 func (s *Server) Close() {
 	s.mu.Lock()
 	s.closed = true
 	s.mu.Unlock()
-	s.Stop()
+	stopProcess(s.detach())
+	select {
+	case s.slot <- struct{}{}:
+		<-s.slot
+	case <-time.After(40 * time.Second):
+		s.Log.Warn("kolibri did not stop in time")
+	}
 }
 
 // bootstrap runs Kolibri's command line, and ends Kolibri when its standard
