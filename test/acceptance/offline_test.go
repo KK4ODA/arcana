@@ -211,25 +211,44 @@ func launchWith(t *testing.T, bin, drive, logPath string, needReady bool) *insta
 		t.Fatal(err)
 	}
 	in := &instance{t: t, cmd: cmd, port: port, log: logPath}
+	// What the last attempt saw, for the failure message.
+	last := "no answer yet"
 	deadline := time.Now().Add(20 * time.Second)
 	for time.Now().Before(deadline) {
 		var s map[string]any
-		if err := in.getJSON("/api/session", &s); err == nil {
+		if err := in.getJSON("/api/session", &s); err != nil {
+			last = "session: " + err.Error()
+		} else {
 			in.tok, _ = s["token"].(string)
 			// Wait for the archive reader.
 			var st struct {
+				Installed struct {
+					Count int `json:"count"`
+				} `json:"installed"`
 				Offline struct {
-					Ready bool `json:"ready"`
+					Ready  bool `json:"ready"`
+					Reader struct {
+						State     string `json:"state"`
+						LastError string `json:"lastError"`
+					} `json:"reader"`
 				} `json:"offline"`
 			}
-			if in.getJSON("/api/status", &st) == nil && (st.Offline.Ready || !needReady) {
+			err := in.getJSON("/api/status", &st)
+			if err == nil && (st.Offline.Ready || !needReady) {
 				return in
+			}
+			if err != nil {
+				last = "status: " + err.Error()
+			} else {
+				last = fmt.Sprintf("status: not ready (%d installed, reader %q %s)", st.Installed.Count, st.Offline.Reader.State, st.Offline.Reader.LastError)
 			}
 		}
 		time.Sleep(200 * time.Millisecond)
 	}
+	// Stop it, or the next steps meet a library this one still holds.
+	in.kill()
 	logData, _ := os.ReadFile(logPath)
-	t.Fatalf("Arcana did not become ready:\n%s", logData)
+	t.Fatalf("Arcana did not become ready on port %d within 20 s; last: %s\n%s", port, last, logData)
 	return nil
 }
 
