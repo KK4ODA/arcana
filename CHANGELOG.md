@@ -3,7 +3,12 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
-## Unreleased
+## 0.9.0-rc.1 — 2026-11-24
+
+A test release of 0.9.0, for trying the new classroom on real computers
+before everyone is offered it. Installed copies of Arcana do not offer
+test releases as updates: download it from this page. Ask within chosen
+sources is new too.
 
 ### Added
 - **Ask within chosen sources.** *Search in*, under the question in the
