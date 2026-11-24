@@ -16,6 +16,15 @@ the library format version is tracked separately (docs/design/09-storage-and-dat
 - *Settings → Integrations* no longer says that RadioPost and Aether HF
   use the integration API already; they will in coming versions.
 
+### Fixed
+- **"Get a road network" and "Browse map regions" opened an empty list.**
+  The links from the Directions panel and the Maps view asked Discover
+  for a category that does not exist, so nothing matched, however many
+  road networks and map regions the catalog held. They now open *Maps and
+  navigation*, and a test checks every link into Discover against the
+  catalog's categories. Until you update, choose *Maps and navigation* in
+  Discover yourself and search for "road network".
+
 ## 0.8.0 — 2026-11-23
 
 Ask questions of your library and get answers that cite their sources, a
