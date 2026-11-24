@@ -3,11 +3,13 @@ package assistant
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"os/exec"
+	"slices"
 	"strings"
 	"sync"
 	"testing"
@@ -19,17 +21,22 @@ import (
 type fakeLib struct {
 	articles []fakeArticle
 	searches []string
+	scopes   []Scope
 }
 
 type fakeArticle struct {
 	id, path, title, text, kind string
 }
 
-func (f *fakeLib) Search(ctx context.Context, q string, limit int, private bool) ([]Hit, error) {
+func (f *fakeLib) Search(ctx context.Context, q string, limit int, scope Scope) ([]Hit, error) {
 	f.searches = append(f.searches, q)
+	f.scopes = append(f.scopes, scope)
 	var out []Hit
 	for _, a := range f.articles {
-		if a.kind == "user" && !private {
+		if a.kind == "user" && !scope.Own {
+			continue
+		}
+		if scope.Only && a.kind != "user" && !slices.Contains(scope.Resources, a.id) {
 			continue
 		}
 		words := tokens(a.title + " " + a.text)
@@ -129,9 +136,55 @@ func TestRetrieveRanksAndFalls(t *testing.T) {
 			t.Fatalf("private document leaked: %+v", p)
 		}
 	}
-	ps, _, _ = Retrieve(context.Background(), lib, "Where do we meet at the water tower?", RetrieveOptions{IncludePrivate: true})
+	ps, _, _ = Retrieve(context.Background(), lib, "Where do we meet at the water tower?", RetrieveOptions{Scope: Scope{Own: true}})
 	if len(ps) == 0 || ps[0].Kind != "user" {
 		t.Fatalf("private document not found: %+v", ps)
+	}
+}
+
+// A question can be limited to chosen sources: only their articles are
+// read, and a scope with nothing in it finds nothing.
+func TestRetrieveWithinChosenSources(t *testing.T) {
+	lib := sampleLib()
+	ps, _, err := Retrieve(context.Background(), lib, "What does QTH mean?", RetrieveOptions{Scope: Scope{Only: true, Resources: []string{"radio"}}})
+	if err != nil || len(ps) == 0 || ps[0].ResourceID != "radio" {
+		t.Fatalf("within radio: %+v %v", ps, err)
+	}
+	for _, sc := range lib.scopes {
+		if !sc.Only || len(sc.Resources) != 1 || sc.Resources[0] != "radio" || sc.Own {
+			t.Fatalf("search scopes = %+v", lib.scopes)
+		}
+	}
+	// The radio archive alone has nothing on burns.
+	ps, _, _ = Retrieve(context.Background(), lib, "How do I cool a burn?", RetrieveOptions{Scope: Scope{Only: true, Resources: []string{"radio"}}})
+	for _, p := range ps {
+		if p.ResourceID != "radio" {
+			t.Fatalf("passage from outside the chosen source: %+v", p)
+		}
+	}
+	// Several sources, and the person's own documents among them.
+	ps, _, _ = Retrieve(context.Background(), lib, "Where do we meet at the water tower?", RetrieveOptions{Scope: Scope{Only: true, Resources: []string{"med"}, Own: true}})
+	if len(ps) == 0 || ps[0].Kind != "user" {
+		t.Fatalf("own documents among chosen sources: %+v", ps)
+	}
+	ps, _, _ = Retrieve(context.Background(), lib, "What does QTH mean?", RetrieveOptions{Scope: Scope{Only: true}})
+	if len(ps) != 0 {
+		t.Fatalf("an empty choice found %+v", ps)
+	}
+}
+
+func TestRequestScope(t *testing.T) {
+	sc, named, err := Request{IncludePrivate: true}.scope()
+	if err != nil || sc.Only || !sc.Own || len(named) != 0 {
+		t.Fatalf("whole library: %+v %v %v", sc, named, err)
+	}
+	sc, named, err = Request{Sources: []string{"radio", " radio", "", OwnDocuments, "med"}, IncludePrivate: true}.scope()
+	if err != nil || !sc.Only || !sc.Own || strings.Join(sc.Resources, ",") != "radio,med" ||
+		strings.Join(named, ",") != "radio,"+OwnDocuments+",med" {
+		t.Fatalf("chosen: %+v %v %v", sc, named, err)
+	}
+	if _, _, err = (Request{Sources: []string{OwnDocuments}}).scope(); !errors.Is(err, ErrPrivateSource) {
+		t.Fatalf("own documents without access: %v", err)
 	}
 }
 
@@ -314,6 +367,24 @@ func TestServiceAsk(t *testing.T) {
 	res, err = svc.Ask(context.Background(), Request{Question: "Who won the 1966 World Cup final?", Retrieval: true}, nil)
 	if err != nil || !res.Skipped || res.Answer != NotFound || calls != 1 {
 		t.Fatalf("irrelevant question: %+v err=%v calls=%d", res, err, calls)
+	}
+
+	// Limited to one source: the result says which, and a source without
+	// the answer skips the model.
+	res, err = svc.Ask(context.Background(), Request{Question: "What does QTH mean?", Retrieval: true, Sources: []string{"radio"}}, nil)
+	if err != nil || res.Skipped || strings.Join(res.Sources, ",") != "radio" || res.Passages[0].ResourceID != "radio" || calls != 2 {
+		t.Fatalf("within radio: %+v err=%v calls=%d", res, err, calls)
+	}
+	res, err = svc.Ask(context.Background(), Request{Question: "What does QTH mean?", Retrieval: true, Sources: []string{"med"}}, nil)
+	if err != nil || !res.Skipped || calls != 2 {
+		t.Fatalf("within med: %+v err=%v calls=%d", res, err, calls)
+	}
+	if _, err = svc.Ask(context.Background(), Request{Question: "Where do we meet?", Retrieval: true, Sources: []string{OwnDocuments}}, nil); !errors.Is(err, ErrPrivateSource) {
+		t.Fatalf("own documents without access: %v", err)
+	}
+	res, _ = svc.Ask(context.Background(), Request{Question: "Who won the 1966 World Cup final?", Retrieval: true}, nil)
+	if res.Sources == nil || len(res.Sources) != 0 {
+		t.Fatalf("whole library sources = %#v", res.Sources)
 	}
 
 	// Retrieval off: no passages, labelled as general knowledge.

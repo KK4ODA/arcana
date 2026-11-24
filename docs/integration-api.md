@@ -71,7 +71,7 @@ can be revoked at any time.
 | `GET /events` | Server-sent events: `hello`, `location` (at most once a second), `library` (installed content changed); keep-alive comments every 30 s |
 | `GET /library` | `{library:{id,label}, resources:[{resource, version, files:[{name,size,sha256}], verification, unverified}]}` |
 | `GET /files/{id}/{name}` | The installed file, with `Range` support, `ETag` and `X-Arcana-SHA256` |
-| `GET /ask?q=` | `{question, answer, notFound, unsupported, cited:[n], passages:[{n, resourceId, path, kind, title, text, score, source, citation}], truncated}`: an answer written from the library's passages, citing them as `[n]`; `notFound` when the library does not cover the question (no model runs then). Can take a minute on a small computer; 429 when several questions are already being answered, 503 when the assistant is off |
+| `GET /ask?q=&in=` | `{question, answer, notFound, unsupported, cited:[n], passages:[{n, resourceId, path, kind, title, text, score, source, citation}], truncated, sources}`: an answer written from the library's passages, citing them as `[n]`; `notFound` when the library does not cover the question (no model runs then). `in` limits the question to some resources, comma-separated IDs as search results and `/library` give them (400 for one that is not installed or holds nothing to search); `sources` repeats them, empty when the whole library was searched. Can take a minute on a small computer; 429 when several questions are already being answered, 503 when the assistant is off |
 
 Errors are JSON `{"error": "..."}` with 400 (bad input), 401 (no or
 invalid token), 403 (scope missing), 404 (not found or no position).

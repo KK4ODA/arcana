@@ -123,8 +123,8 @@ docs/design/14-radio-and-integrations.md.
 | `GET/POST /api/integrations`, `DELETE /api/integrations/{id}`, `POST /api/integrations/pair/{id}/{approve,deny}` | Integration tokens and pairing requests (host only) |
 | `GET/POST /api/peers`, `DELETE /api/peers/{id}`, `GET /api/peers/{id}/library`, `POST /api/peers/{id}/pull` | Other Arcana libraries to copy from (host only) |
 | `/api/integration/v1/*` | Versioned API for other programs: see [integration-api.md](integration-api.md) |
-| `GET /api/assistant` | Assistant status: enabled, backend, readiness, engine state, installed models, `canAsk` for this client |
-| `GET /api/assistant/ask?q=&retrieval=0\|1` | Server-sent events while a question is answered: `status`, `passages`, `token`, `done` (`{result}`), `error`. Host and administrators; network clients only when allowed in settings |
+| `GET /api/assistant` | Assistant status: enabled, backend, readiness, engine state, installed models, `canAsk` for this client, `sources` a question can be limited to (`{id, title, kind: archive\|documents\|own}`; `own`, the host user's documents, only for the host) |
+| `GET /api/assistant/ask?q=&retrieval=0\|1&in=ID,ID` | Server-sent events while a question is answered: `status`, `passages`, `token`, `done` (`{result}`, whose `sources` names what was searched), `error`. `in` limits the question to those sources (`@user`: the host user's documents, host only, 403 otherwise; 400 for one that is not installed or holds nothing to search); without it the whole library. Host and administrators; network clients only when allowed in settings |
 | `POST /api/assistant/test` `{url, apiKey}`, `POST /api/assistant/stop` | List an OpenAI-compatible server's models; stop the local engine |
 | `GET /api/drugs` | Drug label reference: installed, statistics, situations, citation |
 | `GET /api/drugs/search?q=&kind=otc\|rx&homeopathic=1&limit=&offset=` | Products grouped by active ingredients, best match first |

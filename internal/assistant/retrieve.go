@@ -36,12 +36,27 @@ type Warning struct {
 	Text string `json:"text"`
 }
 
+// OwnDocuments names the person's own documents among a question's
+// sources (the value library search uses for them too).
+const OwnDocuments = "@user"
+
+// Scope says where a search looks. The zero value is every installed
+// resource, without the person's own documents.
+type Scope struct {
+	// Only limits the search to Resources (and the person's own documents
+	// with Own); otherwise every installed resource is searched.
+	Only bool
+	// Resources are the installed resources searched when Only is set.
+	Resources []string
+	// Own adds the person's own documents.
+	Own bool
+}
+
 // Library is what the assistant needs from Arcana: search, text and
 // provenance. Implemented by the app package.
 type Library interface {
-	// Search finds articles and documents. includePrivate adds the
-	// person's own documents.
-	Search(ctx context.Context, query string, limit int, includePrivate bool) ([]Hit, error)
+	// Search finds articles and documents within a scope.
+	Search(ctx context.Context, query string, limit int, scope Scope) ([]Hit, error)
 	// Text returns the plain text of a hit, at most max bytes.
 	Text(ctx context.Context, h Hit, max int) (title, text string, err error)
 	// Source describes an installed resource ("" for the person's own
@@ -154,8 +169,8 @@ type RetrieveOptions struct {
 	// PassageSize is the target size of one passage in characters
 	// (default 700).
 	PassageSize int
-	// IncludePrivate adds the person's own documents.
-	IncludePrivate bool
+	// Scope says where to look (default: every installed resource).
+	Scope Scope
 }
 
 func (o *RetrieveOptions) defaults() {
@@ -194,7 +209,7 @@ func Retrieve(ctx context.Context, lib Library, question string, opt RetrieveOpt
 	if len(kws) == 0 {
 		return nil, kws, nil
 	}
-	hits, err := gather(ctx, lib, kws, opt.IncludePrivate)
+	hits, err := gather(ctx, lib, kws, opt.Scope)
 	if err != nil && len(hits) == 0 {
 		return nil, kws, err
 	}
@@ -293,7 +308,7 @@ func Retrieve(ctx context.Context, lib Library, question string, opt RetrieveOpt
 // gather runs searches: all keywords together first, then the most
 // specific keywords on their own when that finds little (full-text search
 // requires every word, which a long question rarely satisfies).
-func gather(ctx context.Context, lib Library, kws []string, private bool) ([]Hit, error) {
+func gather(ctx context.Context, lib Library, kws []string, scope Scope) ([]Hit, error) {
 	var out []Hit
 	seen := map[string]bool{}
 	add := func(hs []Hit) {
@@ -306,7 +321,7 @@ func gather(ctx context.Context, lib Library, kws []string, private bool) ([]Hit
 			out = append(out, h)
 		}
 	}
-	hs, err := lib.Search(ctx, strings.Join(kws, " "), 6, private)
+	hs, err := lib.Search(ctx, strings.Join(kws, " "), 6, scope)
 	add(hs)
 	if len(out) >= 4 || len(kws) == 1 {
 		return out, err
@@ -315,7 +330,7 @@ func gather(ctx context.Context, lib Library, kws []string, private bool) ([]Hit
 	byLen := append([]string(nil), kws...)
 	sort.SliceStable(byLen, func(i, j int) bool { return len(byLen[i]) > len(byLen[j]) })
 	if len(byLen) > 2 {
-		pair, err2 := lib.Search(ctx, byLen[0]+" "+byLen[1], 4, private)
+		pair, err2 := lib.Search(ctx, byLen[0]+" "+byLen[1], 4, scope)
 		add(pair)
 		if err == nil {
 			err = err2
@@ -325,7 +340,7 @@ func gather(ctx context.Context, lib Library, kws []string, private bool) ([]Hit
 		if len(out) >= maxArticles {
 			break
 		}
-		one, err2 := lib.Search(ctx, kw, 3, private)
+		one, err2 := lib.Search(ctx, kw, 3, scope)
 		add(one)
 		if err == nil {
 			err = err2

@@ -58,7 +58,8 @@ not yet code-signed (see [Status](#status)).
 - **Ask questions of your library** (optional, off until you turn it on).
   Type a question in plain words; Arcana finds passages in your archives
   and documents and a language model writes a short answer from them,
-  citing each passage with its edition, date and warnings. When nothing in
+  citing each passage with its edition, date and warnings. *Search in*
+  limits a question to the archives and documents you tick. When nothing in
   the library covers the question it says so instead of guessing. The
   model runs on your computer through Mozilla.ai's llamafile (three openly
   licensed models from 0.5 to 2.5 GB in the catalog), or on an Ollama or
@@ -197,7 +198,7 @@ arcana export --to DIR [ID...|--all] [--user-documents]
 arcana manifest
 arcana update stage DIR | apply | rollback | status
 arcana hotspot start --ssid NAME --password PW [--device wlan0] | stop | status
-arcana ask [--no-library] QUESTION | ask --eval FILE [--with-model]
+arcana ask [--no-library] [--in ID,ID] QUESTION | ask --eval FILE [--with-model]
 ```
 
 `arcana --help` describes each command.

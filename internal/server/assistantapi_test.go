@@ -14,6 +14,8 @@ import (
 
 	"github.com/KK4ODA/arcana/internal/app"
 	"github.com/KK4ODA/arcana/internal/assistant"
+	"github.com/KK4ODA/arcana/internal/docs"
+	"github.com/KK4ODA/arcana/internal/integration"
 	"github.com/KK4ODA/arcana/internal/library"
 )
 
@@ -208,5 +210,143 @@ func TestMeshPrivacy(t *testing.T) {
 	}
 	if rec := e.do(e.appH, "PUT", "/api/settings", local, host, tok, strings.NewReader(`{"mesh":{"source":"tcp","address":""}}`)); rec.Code != 400 {
 		t.Fatalf("empty address accepted: %d", rec.Code)
+	}
+}
+
+// TestAskWithinChosenSources: a question can be limited to chosen sources.
+// Only their passages are used, and a source without the answer skips the
+// model. The host user's own documents can be chosen only on the host, and
+// a source that is not installed is refused before anything is searched.
+func TestAskWithinChosenSources(t *testing.T) {
+	if kiwixBinary() == "" {
+		t.Skip("kiwix-serve not available")
+	}
+	if assistant.OwnDocuments != docs.UserDocuments {
+		t.Fatalf("own documents are %q to the assistant and %q to library search", assistant.OwnDocuments, docs.UserDocuments)
+	}
+	e := newEnv(t)
+	importSample(t, e)
+	model, prompts := fakeModel(t)
+	host := "127.0.0.1:18470"
+	if _, err := e.app.Lib.Settings.Update(func(s *library.Settings) error {
+		s.Assistant.Enabled, s.Assistant.Backend, s.Assistant.URL, s.Assistant.ExternalModel = true, "external", model.URL+"/v1", "fake-1"
+		s.Assistant.NetworkClients = true
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+	// A document of the host user's own that covers the same question.
+	var sess map[string]any
+	json.Unmarshal(e.do(e.appH, "GET", "/api/session", local, host, nil, nil).Body.Bytes(), &sess)
+	rec := e.do(e.appH, "POST", "/api/user/documents", local, host,
+		map[string]string{"X-Arcana-Token": sess["token"].(string), "X-Filename": "station%20notes.txt"},
+		strings.NewReader("QTH\nLocation of the station: the garage, grid square EM73."))
+	if rec.Code != 200 {
+		t.Fatalf("upload: %d %s", rec.Code, rec.Body.String())
+	}
+	for i := 0; i < 100; i++ {
+		if strings.Contains(e.do(e.appH, "GET", "/api/search?q=garage&resource=@user", local, host, nil, nil).Body.String(), "station notes") {
+			break
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+
+	// The sources a question can be limited to; the host's own documents
+	// only for the host.
+	sources := func(remote string) map[string]string {
+		var resp struct {
+			Sources []app.AskSource `json:"sources"`
+		}
+		json.Unmarshal(e.do(e.appH, "GET", "/api/assistant", remote, host, nil, nil).Body.Bytes(), &resp)
+		out := map[string]string{}
+		for _, s := range resp.Sources {
+			out[s.ID] = s.Kind
+		}
+		return out
+	}
+	if got := sources(local); got["arcana.sample"] != "archive" || got["@user"] != "own" {
+		t.Fatalf("sources for the host: %v", got)
+	}
+	if got := sources(lanClient); got["arcana.sample"] != "archive" || got["@user"] != "" {
+		t.Fatalf("sources for a network client: %v", got)
+	}
+
+	ask := func(remote, in string) (int, *assistant.Result, string) {
+		rec := e.do(e.appH, "GET", "/api/assistant/ask?q=What+does+QTH+mean%3F&in="+in, remote, host, nil, nil)
+		if rec.Code != 200 {
+			return rec.Code, nil, rec.Body.String()
+		}
+		evs := sseEvents(t, rec.Body.String())
+		if len(evs["done"]) != 1 {
+			t.Fatalf("in=%s: events %v", in, evs)
+		}
+		var done assistant.Event
+		json.Unmarshal([]byte(evs["done"][0]), &done)
+		return rec.Code, done.Result, ""
+	}
+	kinds := func(r *assistant.Result) map[string]bool {
+		out := map[string]bool{}
+		for _, p := range r.Passages {
+			out[p.Kind] = true
+		}
+		return out
+	}
+	// The archive alone, the host's own documents alone, both.
+	_, res, _ := ask(local, "arcana.sample")
+	if res.Skipped || strings.Join(res.Sources, ",") != "arcana.sample" || len(kinds(res)) != 1 || !kinds(res)["archive"] {
+		t.Fatalf("within the archive: %+v", res)
+	}
+	_, res, _ = ask(local, "%40user")
+	if res.Skipped || strings.Join(res.Sources, ",") != "@user" || len(kinds(res)) != 1 || !kinds(res)["user"] {
+		t.Fatalf("within own documents: %+v", res)
+	}
+	if !strings.Contains((*prompts)[len(*prompts)-1], "the garage") {
+		t.Fatalf("prompt lacks the own document: %s", (*prompts)[len(*prompts)-1])
+	}
+	_, res, _ = ask(local, "arcana.sample,%40user")
+	if res.Skipped || !kinds(res)["archive"] || !kinds(res)["user"] {
+		t.Fatalf("within both: %+v", res)
+	}
+	// The whole library: both sources answer, and the result names none.
+	_, res, _ = ask(local, "")
+	if res.Skipped || res.Sources == nil || len(res.Sources) != 0 || !kinds(res)["archive"] || !kinds(res)["user"] {
+		t.Fatalf("whole library: %+v", res)
+	}
+	// A network client: the archive, never the host's own documents.
+	_, res, _ = ask(lanClient, "arcana.sample")
+	if res.Skipped || kinds(res)["user"] {
+		t.Fatalf("network client within the archive: %+v", res)
+	}
+	if code, _, body := ask(lanClient, "%40user"); code != http.StatusForbidden {
+		t.Fatalf("network client chose own documents: %d %s", code, body)
+	}
+	n := len(*prompts)
+	if code, _, body := ask(local, "no.such.archive"); code != http.StatusBadRequest || !strings.Contains(body, "no.such.archive") {
+		t.Fatalf("unknown source: %d %s", code, body)
+	}
+	if len(*prompts) != n {
+		t.Fatal("a refused question reached the model")
+	}
+
+	// The integration API: chosen sources, never the host's own documents.
+	_, tok, err := e.app.Integrations.Create("Radio program", []string{integration.ScopeAsk})
+	if err != nil {
+		t.Fatal(err)
+	}
+	intAsk := func(in string) (int, map[string]any) {
+		rec := e.do(e.appH, "GET", "/api/integration/v1/ask?q=What+does+QTH+mean%3F&in="+in, lanClient, host,
+			map[string]string{"Authorization": "Bearer " + tok}, nil)
+		var m map[string]any
+		json.Unmarshal(rec.Body.Bytes(), &m)
+		return rec.Code, m
+	}
+	if code, m := intAsk("arcana.sample"); code != 200 || m["notFound"] == true || fmt.Sprint(m["sources"]) != "[arcana.sample]" {
+		t.Fatalf("integration within the archive: %d %v", code, m)
+	}
+	if code, m := intAsk("%40user"); code != http.StatusForbidden {
+		t.Fatalf("integration chose own documents: %d %v", code, m)
+	}
+	if code, m := intAsk("no.such.archive"); code != http.StatusBadRequest {
+		t.Fatalf("integration unknown source: %d %v", code, m)
 	}
 }

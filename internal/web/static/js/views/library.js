@@ -63,7 +63,8 @@ export async function libraryView(main, params, ctx) {
   // When question answering is available, a question typed here can be
   // sent to the assistant instead.
   const askBtn = status?.assistant?.canAsk ? h('button', { type: 'button', title: 'Ask the assistant: an answer written from passages of your library, with sources',
-    onclick: () => { location.hash = `#/ask?q=${encodeURIComponent(input.value.trim())}`; } }, 'Ask') : null;
+    // The question goes where the search does: "Search in" carries over.
+    onclick: () => { location.hash = `#/ask?q=${encodeURIComponent(input.value.trim())}${scope.value ? `&in=${encodeURIComponent(scope.value)}` : ''}`; } }, 'Ask') : null;
   const form = h('form', { class: 'toolbar', role: 'search', onsubmit: (e) => { e.preventDefault(); runSearch(); } },
     h('div', { class: 'grow' }, box), scope, h('button', { type: 'submit', class: 'primary' }, 'Search'), askBtn);
   main.appendChild(h('section', { class: 'panel' }, form, results));

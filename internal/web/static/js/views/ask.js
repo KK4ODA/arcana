@@ -99,13 +99,21 @@ function passageCard(p, idPrefix, cited) {
     warningList(src.warnings));
 }
 
-function resultBlock(res, idPrefix) {
+// sourceNames names the sources an answer searched.
+function sourceNames(ids, titleOf) {
+  return ids.map((id) => titleOf[id] || (id === '@user' ? 'Your documents' : id)).join(', ');
+}
+
+function resultBlock(res, idPrefix, opts = {}) {
   const cited = new Set(res.check?.cited || []);
   const flags = [];
+  const within = res.sources || [];
+  const where = within.length ? 'the chosen sources' : 'your library';
   if (!res.fromLibrary) flags.push(h('div', { class: 'banner warn' }, 'General answer: your library was not searched, so nothing here is checked against a source. The model may be wrong.'));
   else if (res.skipped) flags.push(h('div', { class: 'banner info' }, (res.passages || []).length
-    ? 'Nothing in your library covers this question closely enough, so no answer was written. The closest passages are below; try other words or search the library.'
-    : 'Nothing in your library matches this question, so no answer was written. Try other words, or search the library.'));
+    ? `Nothing in ${where} covers this question closely enough, so no answer was written. The closest passages are below; try other words or search the library.`
+    : `Nothing in ${where} matches this question, so no answer was written. Try other words, or search the library.`,
+    within.length && opts.askWhole ? [' ', h('button', { type: 'button', onclick: () => opts.askWhole(res.question) }, 'Ask the whole library')] : null));
   else if (res.check?.notFound) flags.push(h('div', { class: 'banner info' }, 'The model found no answer in the passages from your library.'));
   else if (res.check?.unsupported) flags.push(h('div', { class: 'banner warn' }, 'This answer cites no passage. Treat it with caution and read the sources.'));
   else if (res.check?.uncited) flags.push(h('div', { class: 'small muted' }, `${res.check.uncited} sentence${res.check.uncited === 1 ? '' : 's'} without a citation.`));
@@ -113,6 +121,7 @@ function resultBlock(res, idPrefix) {
   const medical = (res.passages || []).some((p) => (p.source?.warnings || []).some((w) => w.kind === 'medical'));
   if (medical) flags.push(h('div', { class: 'banner err' }, 'Medical sources: this is dated reference material, not current medical advice. In an emergency, contact emergency services or a qualified clinician whenever possible.'));
   return h('div', null,
+    within.length ? h('div', { class: 'small muted ask-within' }, `Searched only: ${sourceNames(within, opts.titleOf || {})}`) : null,
     flags,
     res.skipped ? null : renderAnswer(res.answer, res.passages || [], idPrefix),
     (res.passages || []).length ? h('div', { class: 'passages' },
@@ -170,6 +179,45 @@ export async function askView(main, params) {
   const q = h('textarea', { rows: 2, maxlength: 1000, placeholder: 'Ask a question, e.g. "How do I purify water without a filter?"', 'aria-label': 'Question', style: 'width:100%' });
   q.value = params.get('q') || '';
   const useLib = h('input', { type: 'checkbox', checked: true });
+
+  // Search in: the whole library, or the sources ticked here (archives,
+  // books and documents, and on this computer the person's own).
+  const sources = info.sources || [];
+  const titleOf = Object.fromEntries(sources.map((src) => [src.id, src.title]));
+  const asked = (params.get('in') || '').split(',').map((id) => id.trim()).filter(Boolean);
+  const gone = asked.filter((id) => !titleOf[id]);
+  const checks = new Map();
+  const summaryText = h('b');
+  const chosenIds = () => sources.filter((src) => checks.get(src.id)?.checked).map((src) => src.id);
+  function updateSummary() {
+    const ids = chosenIds();
+    summaryText.textContent = !ids.length ? 'the whole library' : ids.length === 1 ? titleOf[ids[0]] : `${ids.length} sources`;
+    // Keep the choice in the address, so a reload keeps it (without
+    // asking again).
+    window.history.replaceState(null, '', ids.length ? `#/ask?in=${encodeURIComponent(ids.join(','))}` : '#/ask');
+  }
+  const group = (kind, legend) => {
+    const list = sources.filter((src) => src.kind === kind);
+    if (!list.length) return null;
+    return h('fieldset', null, h('legend', null, legend), list.map((src) => {
+      const c = h('input', { type: 'checkbox', value: src.id, checked: asked.includes(src.id) });
+      c.addEventListener('change', updateSummary);
+      checks.set(src.id, c);
+      return h('label', { class: 'inline', title: src.id }, c, src.title);
+    }));
+  };
+  const picker = sources.length ? h('details', { class: 'ask-sources', open: asked.length > 0 || null },
+    h('summary', { title: 'Limit the question to some of your library: only the ticked sources are searched' }, 'Search in: ', summaryText),
+    h('div', { class: 'ask-sources-body' },
+      h('div', { class: 'row small' },
+        h('button', { type: 'button', onclick: () => { for (const c of checks.values()) c.checked = false; updateSummary(); } }, 'Whole library'),
+        h('span', { class: 'muted' }, 'or tick the sources to search:')),
+      group('archive', 'Archives'), group('documents', 'Books and documents'), group('own', 'Yours'),
+      gone.length ? h('p', { class: 'small muted' }, `Not in this library, so left out: ${gone.join(', ')}`) : null)) : null;
+  useLib.addEventListener('change', () => {
+    for (const c of checks.values()) c.disabled = !useLib.checked;
+    picker?.classList.toggle('off', !useLib.checked);
+  });
   const askBtn = h('button', { class: 'primary', type: 'submit' }, 'Ask');
   const stopBtn = h('button', { type: 'button', hidden: true }, 'Stop');
   const statusLine = h('div', { class: 'small muted', role: 'status', 'aria-live': 'polite' });
@@ -189,8 +237,8 @@ export async function askView(main, params) {
     historyEl.appendChild(h('h3', null, 'Earlier in this session'));
     history.forEach((res, i) => {
       historyEl.appendChild(h('details', { class: 'ask-history' },
-        h('summary', null, res.question),
-        resultBlock(res, `h${i}`)));
+        h('summary', null, res.question, res.sources?.length ? h('span', { class: 'small muted' }, ` · in ${sourceNames(res.sources, titleOf)}`) : null),
+        resultBlock(res, `h${i}`, resultOpts)));
     });
   }
 
@@ -208,7 +256,8 @@ export async function askView(main, params) {
     const live = h('div', { class: 'answer-text streaming' });
     fill(current, h('h3', null, question), live);
     statusLine.textContent = 'Starting…';
-    const url = `/api/assistant/ask?q=${encodeURIComponent(question)}&retrieval=${useLib.checked ? 1 : 0}`;
+    const within = useLib.checked ? chosenIds() : [];
+    const url = `/api/assistant/ask?q=${encodeURIComponent(question)}&retrieval=${useLib.checked ? 1 : 0}${within.length ? `&in=${encodeURIComponent(within.join(','))}` : ''}`;
     try {
       await streamAsk(url, controller.signal, (type, e) => {
         if (mine !== seq) return;
@@ -222,7 +271,7 @@ export async function askView(main, params) {
         } else if (type === 'done') {
           const res = e.result;
           statusLine.textContent = '';
-          fill(current, h('h3', null, res.question), resultBlock(res, 'cur'));
+          fill(current, h('h3', null, res.question), resultBlock(res, 'cur', resultOpts));
           history.unshift(res);
           saveHistory(history);
         } else if (type === 'error') {
@@ -245,6 +294,18 @@ export async function askView(main, params) {
     }
   }
 
+  // A question the chosen sources do not cover, asked of the whole library.
+  const resultOpts = {
+    titleOf,
+    askWhole: (question) => {
+      for (const c of checks.values()) c.checked = false;
+      updateSummary();
+      useLib.checked = true;
+      q.value = question;
+      ask();
+    },
+  };
+
   stopBtn.addEventListener('click', () => controller?.abort());
   q.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ask(); } });
 
@@ -253,11 +314,13 @@ export async function askView(main, params) {
     h('div', { class: 'body' }, intro, remoteNote,
       h('form', { onsubmit: ask },
         q,
+        picker,
         h('div', { class: 'row', style: 'justify-content:space-between' },
           h('label', { class: 'inline', title: 'Turn off to get a general answer that is not checked against your library.' }, useLib, 'Answer from my library (recommended)'),
           h('span', { class: 'row' }, stopBtn, askBtn))),
       statusLine, current, historyEl)));
   renderHistory();
+  if (picker) updateSummary();
   if (q.value) ask();
   else q.focus();
   return () => { if (controller) controller.abort(); };
