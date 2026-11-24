@@ -14,6 +14,17 @@ function addressList(info) {
     h('figcaption', { class: 'mono' }, u))));
 }
 
+// connectHelp lists what usually stops another device from connecting when
+// this computer itself opens Arcana fine: each looks like a network fault.
+function connectHelp() {
+  return h('details', { style: 'margin-top:8px' }, h('summary', { class: 'small' }, 'Another device cannot connect?'),
+    h('ul', { class: 'small' },
+      h('li', null, h('b', null, 'Windows (this computer): '), 'Windows lets Arcana in only on the kinds of network you allowed when it first asked, usually private ones. If Settings → Network & internet shows this Wi-Fi as a ', h('i', null, 'Public network'), ', other devices time out: make it a private network, or tick ', h('i', null, 'Public'), ' for Arcana under Windows Defender Firewall → Allow an app or feature.'),
+      h('li', null, h('b', null, 'A Mac: '), 'Chrome, Firefox and other browsers need permission to reach devices on the network (System Settings → Privacy & Security → Local Network); without it the page times out. Safari needs no permission.'),
+      h('li', null, h('b', null, 'Phones: '), 'Android may use mobile data when the Wi-Fi has no internet; choose to stay connected, or turn mobile data off. A VPN on the device can also block local addresses.'),
+      h('li', null, h('b', null, 'The network: '), 'guest Wi-Fi and shared building networks often keep devices from reaching each other. Make a hotspot on this computer (Wi-Fi hotspot, below), or use a mesh VPN such as Tailscale on both devices.')));
+}
+
 export async function serverView(main) {
   const s = getSession();
   const info = await api.get('/api/server');
@@ -39,6 +50,7 @@ export async function serverView(main) {
       h('dl', { class: 'meta' }, rows.map(([k, v]) => [h('dt', null, k), h('dd', null, v)])),
       h('h3', null, 'Open from another device'),
       addressList(info),
+      info.active && host ? connectHelp() : null,
       !info.active && s.admin ? h('p', { class: 'small muted' },
         'To share with phones and other computers, turn on network sharing in Settings and restart Arcana (or start it with --lan). Other devices then scan a code or open one of the addresses shown here. Your operating system may ask whether to allow incoming connections.') : null,
       h('p', { class: 'small muted' }, info.remoteAdmin

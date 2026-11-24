@@ -3,6 +3,36 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
+## 0.8.1 — 2026-11-24
+
+*Get a road network* and *Browse map regions* open their lists again: on
+0.8.0 they opened Discover filtered to a category that does not exist, so
+the road networks needed for directions never appeared. The Server view
+also explains why another device on the network might not connect.
+Arcana 0.6.0 to 0.8.0 offer this version by themselves within a day of
+being online: choose *Update now* in the banner at the top of the page, or
+*Settings → Application updates → Check now* to look straight away.
+
+### Changed
+- **Help when another device cannot connect.** The Server view (*Another
+  device cannot connect?*) and the sharing guide (docs/portable-use.md)
+  now cover the causes that look like a network fault: Windows treating
+  the Wi-Fi as a public network, where Arcana is usually allowed only on
+  private ones; a Mac's browser without macOS's Local Network permission
+  (Chrome and Firefox time out, Safari works); Android on mobile data; a
+  VPN; and networks that keep devices apart.
+- *Settings → Integrations* no longer says that RadioPost and Aether HF
+  use the integration API already; they will in coming versions.
+- Discover lists its categories alphabetically.
+
+### Fixed
+- **"Get a road network" and "Browse map regions" opened an empty list.**
+  The links from the Directions panel and the Maps view asked Discover
+  for a category that does not exist, so nothing matched, however many
+  road networks and map regions the catalog held. They now open *Maps and
+  navigation*, and a test checks every link into Discover against the
+  catalog's categories.
+
 ## 0.8.0 — 2026-11-23
 
 Ask questions of your library and get answers that cite their sources, a

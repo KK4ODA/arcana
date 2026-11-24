@@ -20,6 +20,7 @@ import (
 	"net/url"
 	"path"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -744,6 +745,8 @@ func (s *Server) handleFacets(w http.ResponseWriter, r *http.Request, a *app.App
 	for _, c := range catalog.Categories {
 		out = append(out, cat{c.ID, c.Title, counts[c.ID]})
 	}
+	// Listed by title, as people look for them.
+	sort.SliceStable(out, func(i, j int) bool { return strings.ToLower(out[i].Title) < strings.ToLower(out[j].Title) })
 	writeJSON(w, 200, map[string]any{"categories": out, "languages": langs, "providers": providers})
 }
 

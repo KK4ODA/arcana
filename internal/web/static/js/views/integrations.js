@@ -46,7 +46,7 @@ export function integrationsPanel() {
     } }, 'Create token');
 
     fill(body,
-      h('p', { class: 'small muted' }, `Other programs, such as RadioPost or Aether HF, can search the library, read articles with their source and license, look up coordinates and read the GPS position through a separate, versioned API (${d.endpoint}). They can never change the library. A program either asks for access and you approve it here, or you create a token and paste it into the program.`),
+      h('p', { class: 'small muted' }, `Other programs can search the library, read articles with their source and license, look up coordinates and read the GPS position through a separate, versioned API (${d.endpoint}). RadioPost and Aether HF will use it in coming versions. Programs can never change the library. A program either asks for access and you approve it here, or you create a token and paste it into the program.`),
       pending, clients,
       h('h3', { style: 'margin-top:12px' }, 'New token'),
       h('div', { class: 'row' }, name),

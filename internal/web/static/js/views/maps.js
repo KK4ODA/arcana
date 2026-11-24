@@ -172,7 +172,7 @@ export async function mapsView(main, params) {
   function renderSets() {
     if (!ms.sets.length) {
       fill(setsBox, h('p', { class: 'small muted' }, 'No maps installed. ',
-        h('a', { href: '#/discover?category=maps&lang=' }, 'Browse map regions'),
+        h('a', { href: '#/discover?category=maps-navigation&lang=' }, 'Browse map regions'),
         ' — the world overview is about 46 MB.'));
       return;
     }
@@ -182,7 +182,7 @@ export async function mapsView(main, params) {
         h('span', { class: 'sub' }, x.error ? `cannot open: ${x.error}` : `detail to zoom ${x.maxZoom} · ${x.version}`)))),
       ms.indexing ? h('p', { class: 'small muted' }, `Indexing place names in ${ms.indexing} (${Math.round((ms.progress || 0) * 100)}%)…`) : null,
       ms.error ? h('p', { class: 'small', style: 'color:var(--err)' }, `Place index: ${ms.error}`) : null,
-      h('p', { class: 'small muted' }, h('a', { href: '#/discover?category=maps&lang=' }, 'Get more map regions')));
+      h('p', { class: 'small muted' }, h('a', { href: '#/discover?category=maps-navigation&lang=' }, 'Get more map regions')));
   }
 
   function fitSet(x) {
@@ -247,7 +247,7 @@ export async function mapsView(main, params) {
     fill(mapEl, h('div', { class: 'map-empty' },
       h('h2', null, 'No maps installed yet'),
       h('p', null, 'Maps are downloaded once and then work without internet. Start with the world overview, then add the countries or states you need in more detail.'),
-      h('p', null, h('a', { class: 'button primary', href: '#/discover?category=maps&lang=' }, 'Browse map regions')),
+      h('p', null, h('a', { class: 'button primary', href: '#/discover?category=maps-navigation&lang=' }, 'Browse map regions')),
       h('p', { class: 'small muted' }, 'Map data © OpenStreetMap contributors, available under the Open Database License.')));
   }
   renderSets();

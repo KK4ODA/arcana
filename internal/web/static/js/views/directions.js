@@ -238,7 +238,7 @@ export function createDirections(ctx) {
 
   function noNetworkHelp(msg) {
     if (!/road network/.test(msg)) return null;
-    return h('p', { class: 'small' }, h('a', { href: '#/discover?category=maps&lang=&q=road%20network' }, 'Get a road network for your area'));
+    return h('p', { class: 'small' }, h('a', { href: '#/discover?category=maps-navigation&lang=&q=road%20network' }, 'Get a road network for your area'));
   }
 
   function stepItem(s, i) {
@@ -440,7 +440,7 @@ export function createDirections(ctx) {
   function render() {
     if (!networks.length) {
       fill(el, h('p', { class: 'small muted' }, 'Directions need a road network for the area, built from OpenStreetMap. ',
-        h('a', { href: '#/discover?category=maps&lang=&q=road%20network' }, 'Get a road network'), '.'), out);
+        h('a', { href: '#/discover?category=maps-navigation&lang=&q=road%20network' }, 'Get a road network'), '.'), out);
       return;
     }
     fill(el, modeBar, fromI.row, fromI.list, toI.row, toI.list, hint,

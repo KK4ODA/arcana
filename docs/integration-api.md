@@ -1,9 +1,10 @@
 # Arcana integration API (v1)
 
-Programs such as RadioPost (offline messaging) or Aether HF can use an
-Arcana library: search with citations, read articles as plain text, look up
-coordinates, read the GPS position, follow changes, and copy resources
-between Arcana libraries. The API is separate from Arcana's own interface
+Other programs can use an Arcana library: search with citations, read
+articles as plain text, look up coordinates, read the GPS position, follow
+changes, and copy resources between Arcana libraries. RadioPost (email by
+amateur radio) and Aether HF (an HF data modem) will use it in coming
+versions. The API is separate from Arcana's own interface
 API, versioned, and **read-only**: nothing in v1 changes the library.
 
 - Base: `http://<host>:8470/api/integration/v1/` (HTTPS on the same port
