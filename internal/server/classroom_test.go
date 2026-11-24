@@ -140,6 +140,12 @@ func TestClassroom(t *testing.T) {
 	if rec.Code != 200 || !strings.Contains(rec.Body.String(), `"size":1010`) {
 		t.Fatalf("size: %d %s", rec.Code, rec.Body)
 	}
+	// "Everything in this channel" is the root topic.
+	rec = e.do(e.appH, "POST", "/api/classroom/channels/"+kolibritest.ChannelID+"/size", local, host, tok,
+		strings.NewReader(`{"nodeIds":["`+kolibritest.Root+`"]}`))
+	if rec.Code != 200 || !strings.Contains(rec.Body.String(), `"size":1510`) || !strings.Contains(rec.Body.String(), `"resources":3`) {
+		t.Fatalf("whole channel size: %d %s", rec.Code, rec.Body)
+	}
 	if rec := e.do(e.appH, "GET", "/api/classroom/channels/0123/tree", local, host, nil, nil); rec.Code == 200 {
 		t.Fatal("a channel that is not offered was read")
 	}

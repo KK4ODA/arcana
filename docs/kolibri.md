@@ -4,9 +4,11 @@
 is an offline learning platform. Students watch videos, read and practise
 exercises; teachers make classes, lessons and quizzes and follow each
 student's progress. Arcana can run Kolibri itself, from the drive, as its
-**classroom**, with Khan Academy in English (US curriculum) or Spanish.
-It can also search a Kolibri server you installed separately (at the end of
-this page).
+**classroom**, with Khan Academy in English, Spanish and 25 other
+languages, its test preparation, and 30 channels from other publishers for
+high school, college and adults ([the channels](#the-channels)). It can
+also search a Kolibri server you installed separately (at the end of this
+page).
 
 ## Set up the classroom
 
@@ -20,22 +22,121 @@ this page).
    disk (about 340 MB in its cache folder, a few seconds), and the first
    start ever prepares Kolibri's database (about a minute, longer on a
    Raspberry Pi). The Classroom page shows each step.
-4. Under **Khan Academy**, press **Choose grades and subjects** for a
-   channel. Arcana fetches the channel's list of topics from Kolibri Studio
-   (17 MB for Spanish, 44 MB for English) and shows each subject with its
-   size. Tick whole subjects, or open one (▸) and tick grades or courses.
-   The total counts each video once, even when it appears under several
-   topics. Press **Download chosen**.
+4. Find a channel under **Khan Academy**, **More courses for high
+   school, college and adults** or **Khan Academy in other languages**
+   (folded; open it to see them). Each says who it is for, what it holds,
+   its size and its licence. Press **Choose grades and subjects** (or
+   **Choose topics**). Arcana fetches the channel's list of topics from
+   Kolibri Studio (up to 44 MB, for the largest channel) and shows each
+   subject with its size. Tick **Everything in this channel**, whole
+   subjects, or open one (▸) and tick grades or courses. The total counts
+   each file once, even when it appears under several topics. Press
+   **Download chosen**.
 5. Kolibri downloads the chosen courses. Progress shows on the Classroom
    page; downloads resume after an interruption. Choose more at any time.
 
-| Channel | Whole channel | Published |
-|---|---|---|
-| Khan Academy (English, US curriculum) | 67.8 GB | 23 January 2026 |
-| Khan Academy (Español) | 39.4 GB | 23 December 2025 |
+Single grades are much smaller than whole channels: English 3rd-grade math
+is 377 MB, Spanish 1° Primaria math 110 MB, AP Calculus AB and BC together
+1.9 GB.
 
-Single grades are much smaller: English 3rd-grade math is 377 MB, Spanish
-1° Primaria math 110 MB.
+## The channels
+
+Sizes, dates and licences are Kolibri Studio's on 24 November 2026; the
+picker shows each channel's current sizes. Many channels are licensed for
+**non-commercial use only**. Kolibri shows each resource's own licence.
+[ADR-0025](adr/0025-more-classroom-channels.md) records how they were
+chosen.
+
+**Khan Academy.** Its videos are CC BY-NC-SA; its exercises are
+distributed through Kolibri by permission, for non-commercial use.
+
+| Channel | Language | Levels | Whole channel | Published | Licence |
+|---|---|---|---|---|---|
+| Khan Academy (English, US curriculum) | English | Kindergarten to college, AP | 67.8 GB | 23 January 2026 | CC BY-NC-SA and permission (non-commercial) |
+| Khan Academy (Español) | Spanish | Primary school to college, AP | 39.4 GB | 23 December 2025 | CC BY-NC-SA and permission (non-commercial) |
+| Khan Academy: test preparation | English | High school to graduate school | 10.5 GB | 11 July 2020 | CC BY-NC-SA and permission (non-commercial) |
+| Khan Academy (English, Philippines curriculum) | English | Grade 1 to senior high school | 14.4 GB | 23 January 2026 | CC BY-NC-SA and permission (non-commercial) |
+| Khan Academy (English, India CBSE curriculum) | English | Class 1 to college | 54.8 GB | 23 January 2026 | CC BY-NC-SA and permission (non-commercial) |
+
+**For high school, AP and college,** Khan Academy's English (US) channel
+has AP Calculus AB and BC, AP Statistics, AP Biology, AP Physics 2, AP
+Macroeconomics and Microeconomics, AP US History, AP US Government and AP
+Art History, and college multivariable calculus, differential equations,
+linear algebra, organic chemistry and electrical engineering. It does not
+have AP Chemistry, AP Physics 1, AP Environmental Science, AP Computer
+Science Principles, computing, or Khan Academy's articles (only videos and
+exercises). Khan Academy's Spanish channel has AP Physics 1 and 2, AP
+Chemistry and AP Biology; OpenStax has The AP Physics Collection and AP
+editions of biology and economics; CK-12 and the Philippine channel have
+high school chemistry and physics with exercises.
+
+**More courses for high school, college and adults**, from other
+publishers:
+
+| Channel | Language | Levels | Whole channel | Published | Licence |
+|---|---|---|---|---|---|
+| CK-12 | English | Primary school to high school | 6.7 GB | 30 March 2023 | CC BY-NC (non-commercial) |
+| OpenStax | English | College, AP | 2.1 GB | 12 December 2020 | CC BY; 36 resources CC BY-NC-SA (non-commercial) |
+| MIT Blossoms | English | High school | 26.0 GB | 5 July 2023 | CC BY-NC-SA (non-commercial) |
+| PhET Interactive Simulations | English | Primary school to college | 1.1 GB | 7 December 2024 | CC BY |
+| EngageNY | English | Pre-kindergarten to grade 12 | 7.8 GB | 5 July 2023 | CC BY-NC-SA (non-commercial) |
+| Thoughtful Learning | English | Grades 1 to 12 | 352 MB | 25 July 2018 | CC BY-NC-SA (non-commercial) |
+| Sciensation | English | Secondary school | 125 MB | 5 March 2021 | CC BY-NC-SA (non-commercial) |
+| School of Thought | English | High school and adults | 115 MB | 18 October 2021 | CC BY |
+| BCcampus Open Textbooks | English | College and trades | 1.2 GB | 14 March 2025 | CC BY, CC BY-NC or CC BY-NC-SA by book (some non-commercial) |
+| Osmosis | English | Medical and nursing school | 5.2 GB | 5 July 2023 | CC BY-SA |
+| Goalkicker programming books | English | College and adults | 495 MB | 20 July 2020 | CC BY-SA |
+| Career Girls | English | Middle school to college | 24.4 GB | 7 August 2019 | Career Girls' permission for use in Kolibri |
+| HP LIFE courses | English | Adults | 771 MB | 11 February 2020 | CC BY |
+| Sikana | English | Teenagers and adults | 15.8 GB | 10 June 2025 | CC BY-NC-ND (non-commercial) |
+| Espresso English | English | Adults learning English | 4.0 GB | 5 July 2023 | CC BY |
+| Digital Awareness | English | Secondary school | 260 MB | 25 July 2022 | CC BY-NC-ND (non-commercial) |
+| Digital Discovery | English | Secondary school | 480 MB | 28 June 2022 | CC BY-NC-ND (non-commercial) |
+| PhET: simulaciones interactivas | Spanish | Primary school to college | 504 MB | 10 December 2024 | CC BY |
+| Proyecto Descartes | Spanish | Secondary school | 8.0 GB | 5 April 2019 | CC BY-NC-SA (non-commercial) |
+| EngageNY (Español) | Spanish | Pre-kindergarten to grade 12 | 9.1 GB | 5 July 2023 | CC BY-NC-SA (non-commercial) |
+| CommonLit (Español) | Spanish | Grades 3 to 12 | 179 MB | 13 March 2024 | CC BY-NC-SA (non-commercial) |
+| Ciencia NASA | Spanish | Secondary school and adults | 3.4 GB | 5 July 2023 | CC BY |
+| Ciensación | Spanish | Secondary school | 125 MB | 5 March 2021 | CC BY-NC-SA (non-commercial) |
+| Ceibal | Spanish | Primary and secondary school | 16.9 GB | 13 July 2019 | Mostly CC BY-NC (non-commercial) |
+| CREE+ | Spanish | Primary school to upper secondary | 26.8 GB | 28 August 2026 | CC BY-NC-SA, some by permission to distribute through Kolibri (non-commercial) |
+| Biblioteca Elejandria | Spanish | All ages to university | 1.0 GB | 11 April 2021 | Public domain |
+| WiiXii | Spanish | Primary school to adults | 86 MB | 17 June 2025 | CC BY-SA |
+| HP LIFE: cursos | Spanish | Adults | 684 MB | 11 February 2020 | CC BY |
+| Sikana (Español) | Spanish | Teenagers and adults | 10.1 GB | 22 April 2019 | CC BY-NC-ND (non-commercial) |
+| Cultura Emprendedora | Spanish | Secondary school and adults | 226 MB | 25 July 2019 | CC BY-NC-SA (non-commercial) |
+
+**Khan Academy in other languages** (CC BY-NC-SA and permission,
+non-commercial). Several hold only early math; the Classroom page
+describes each.
+
+| Language | Levels | Whole channel | Published |
+|---|---|---|---|
+| Armenian | Kindergarten to grade 12 | 8.7 GB | 23 December 2025 |
+| Azerbaijani | Preschool to college | 7.0 GB | 9 January 2026 |
+| Bangla | Kindergarten to grade 8 | 3.3 GB | 19 December 2025 |
+| Bulgarian | Preschool to college | 32.9 GB | 19 December 2025 |
+| Burmese | Kindergarten to grade 2 | 248 MB | 24 December 2025 |
+| Chinese | Kindergarten to college, AP | 14.8 GB | 27 December 2025 |
+| French | Primary school to college | 23.5 GB | 23 December 2025 |
+| Fulfulde | Kindergarten to grade 3 | 117 MB | 6 February 2026 |
+| Georgian | Kindergarten to college | 19.1 GB | 24 December 2025 |
+| Greek | Kindergarten to grade 8 | 2.2 GB | 19 December 2025 |
+| Gujarati | Kindergarten to Class 12 | 7.5 GB | 23 December 2025 |
+| Hindi | Classes 6 to 12 | 6.8 GB | 23 December 2025 |
+| Indonesian | Kindergarten to grade 6 | 1.1 GB | 23 December 2025 |
+| Italian | Kindergarten to grade 8, algebra | 2.8 GB | 23 December 2025 |
+| Kannada | Kindergarten to Class 10 | 1.2 GB | 6 February 2026 |
+| Khmer | Primary school | 814 MB | 24 December 2025 |
+| Korean | Primary school to college | 8.2 GB | 24 December 2025 |
+| Kyrgyz | Kindergarten to grade 2 | 213 MB | 24 December 2025 |
+| Portuguese (Brazil) | Primary school to college, AP | 31.0 GB | 25 December 2025 |
+| Portuguese (Portugal) | Preschool to grade 12 | 8.9 GB | 26 December 2025 |
+| Swahili | Kindergarten to college, AP | 2.9 GB | 6 July 2023 |
+| Tamil | Kindergarten to grade 5 | 1.2 GB | 26 December 2025 |
+| Turkish | Grade 1 to college, AP | 36.6 GB | 26 December 2025 |
+| Ukrainian | Preschool to grade 6 | 175 MB | 16 December 2022 |
+| Uzbek | Kindergarten to college | 13.8 GB | 26 December 2025 |
 
 ## Teachers and students
 
@@ -105,7 +206,8 @@ task), so Kolibri's own Device page shows the same imports.
 Kolibri is MIT-licensed and bundles its dependencies under their own
 licences; Python is under the Python Software Foundation License. Khan
 Academy material is licensed CC BY-NC-SA: **non-commercial use only**.
-Other channels carry their own licences, shown in Kolibri.
+Other channels carry their own licences, listed in [the
+channels](#the-channels) and shown for each resource in Kolibri.
 
 ## A Kolibri server installed separately
 

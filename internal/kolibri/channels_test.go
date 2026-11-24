@@ -6,8 +6,10 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/KK4ODA/arcana/internal/kolibri/kolibritest"
 )
@@ -60,11 +62,63 @@ func TestChannelTreeAndSizes(t *testing.T) {
 	if _, _, err := c.SizeOf(ctx, []string{"f0000000000000000000000000000000"}); err == nil {
 		t.Fatal("a topic outside the channel was measured")
 	}
-	if err := c.Has(ctx, []string{tArt, tGrade1}); err != nil {
+	// The root topic is the whole channel: the picker's "Everything".
+	if size, n, err := c.SizeOf(ctx, []string{kolibritest.Root}); err != nil || size != 1510 || n != 3 {
+		t.Fatalf("whole channel %d %d %v", size, n, err)
+	}
+	if err := c.Has(ctx, []string{tArt, tGrade1, kolibritest.Root}); err != nil {
 		t.Fatal(err)
 	}
 	if err := c.Has(ctx, []string{"f0000000000000000000000000000000"}); err == nil {
 		t.Fatal("Has accepted a stranger")
+	}
+}
+
+// TestOfferedChannels checks the list the Classroom page shows: each
+// channel can be fetched and imported by its ID, sits in a group the page
+// shows, and says who it is for, what it holds, how big it is and how it is
+// licensed, with non-commercial licences saying so in words.
+func TestOfferedChannels(t *testing.T) {
+	if Channels[0].ID != "c9d7f950ab6b5a1199e3d6c10d7f0103" || Channels[0].Group != GroupKhan {
+		t.Fatalf("Khan Academy in English (US curriculum) is not first: %+v", Channels[0])
+	}
+	lang := regexp.MustCompile(`^[a-z]{2,3}(-[A-Z]{2})?$`)
+	seen := map[string]bool{}
+	groups := map[string]int{}
+	for _, c := range Channels {
+		if !IsHexID(c.ID) || seen[c.ID] {
+			t.Errorf("%q: bad or repeated ID", c.ID)
+		}
+		seen[c.ID] = true
+		if got, ok := ChannelByID(c.ID); !ok || got.Title != c.Title {
+			t.Errorf("%s: ChannelByID %v %q", c.ID, ok, got.Title)
+		}
+		switch c.Group {
+		case GroupKhan, GroupMore, GroupKhanWorld:
+			groups[c.Group]++
+		default:
+			t.Errorf("%s: unknown group %q", c.Title, c.Group)
+		}
+		if c.Title == "" || c.Levels == "" || c.About == "" || c.License == "" || c.Size <= 0 {
+			t.Errorf("%s: incomplete %+v", c.ID, c)
+		}
+		if !lang.MatchString(c.Language) {
+			t.Errorf("%s: language %q", c.Title, c.Language)
+		}
+		if _, err := time.Parse("2006-01-02", c.Published); err != nil {
+			t.Errorf("%s: published %q", c.Title, c.Published)
+		}
+		if strings.Contains(c.License, "-NC") != strings.Contains(c.License, "non-commercial use only") {
+			t.Errorf("%s: licence %q does not say whether it is non-commercial", c.Title, c.License)
+		}
+		if khan := strings.HasPrefix(c.Title, "Khan Academy"); khan == (c.Group == GroupMore) {
+			t.Errorf("%s: in group %s", c.Title, c.Group)
+		}
+	}
+	for _, g := range []string{GroupKhan, GroupMore, GroupKhanWorld} {
+		if groups[g] == 0 {
+			t.Errorf("group %s is empty", g)
+		}
 	}
 }
 

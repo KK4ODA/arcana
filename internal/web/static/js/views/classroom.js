@@ -1,7 +1,7 @@
-// Classroom: Kolibri run by Arcana (ADR-0024). Khan Academy with classes,
-// lessons, quizzes and progress for each student. The owner sets it up and
-// chooses grades and subjects here; teachers and students use Kolibri's
-// own pages on the classroom's address.
+// Classroom: Kolibri run by Arcana (ADR-0024). Khan Academy and other
+// channels (ADR-0025) with classes, lessons, quizzes and progress for each
+// student. The owner sets it up and chooses grades and subjects here;
+// teachers and students use Kolibri's own pages on the classroom's address.
 import { api, getSession } from '../api.js';
 import { h, clear, fill, fmtBytes, toast } from '../util.js';
 
@@ -20,7 +20,28 @@ const IMPORT_TEXT = {
   CANCELING: 'Stopping', CANCELED: 'Stopped', FAILED: 'Failed', COMPLETED: 'Done',
 };
 
+// Kolibri's interface languages offered at setup.
 const LANG = { en: 'English', es: 'Español' };
+
+// A channel's language by name ("pt-BR" → "Brazilian Portuguese"), from the
+// browser's own data, which lacks some languages Kolibri Studio has.
+const LANG_NAMES = { fuv: 'Fulfulde' };
+let langNames = null;
+try { langNames = new Intl.DisplayNames(['en'], { type: 'language', fallback: 'none' }); } catch (_) { /* older browser */ }
+function langName(code) {
+  if (LANG_NAMES[code]) return LANG_NAMES[code];
+  try { return (langNames && langNames.of(code)) || code; } catch (_) { return code; }
+}
+
+// The channels by group (kolibri.Group*). Folded groups start closed.
+const GROUPS = [
+  { id: 'khan', title: 'Khan Academy',
+    help: 'Choose grades and subjects to download into the classroom. Kolibri downloads them from Kolibri Studio, resumes after interruptions, and keeps them in the library\'s kolibri folder.' },
+  { id: 'more', title: 'More courses for high school, college and adults',
+    help: 'Other publishers\' channels from Kolibri Studio\'s public library, in English and Spanish: textbooks, simulations, lesson plans and videos. Each shows its licence: many are for non-commercial use only.' },
+  { id: 'khan-world', title: 'Khan Academy in other languages', folded: true,
+    help: 'Khan Academy as translated for other countries. Several hold only early math; the description of each says what it covers.' },
+];
 
 export async function classroomView(main) {
   const s = getSession();
@@ -33,6 +54,7 @@ export async function classroomView(main) {
 
   let timer = null;
   let picker = null; // the channel whose picker is open, kept across refreshes
+  const unfolded = {}; // folded groups the owner opened or closed, by group
   let last = null;
 
   async function load() {
@@ -81,9 +103,9 @@ export async function classroomView(main) {
         'Students watch Khan Academy videos, read and practise exercises; teachers make classes, lessons and quizzes and follow each student\'s progress.'),
       h('ul', null,
         h('li', null, `Arcana first downloads Kolibri with Python for Windows, macOS and Linux (${fmtBytes(c.runtimeSize || 244721734)}), so this drive's classroom runs on any of them.`),
-        h('li', null, 'Then you choose the Khan Academy grades and subjects to download, in English (US curriculum) or Spanish, with the size of each.'),
+        h('li', null, 'Then you choose what to download, with the size of each: Khan Academy\'s grades and subjects in English (US, Philippine or Indian curriculum), Spanish and 25 other languages, its test preparation, and other publishers\' courses for high school, college and adults, such as CK-12, OpenStax and PhET.'),
         h('li', null, 'Students sign in with their username alone; teachers with a password. Anyone can also browse without an account, without progress.')),
-      h('p', { class: 'small muted' }, 'Khan Academy material is licensed CC BY-NC-SA: non-commercial use only. Kolibri is MIT-licensed.'),
+      h('p', { class: 'small muted' }, 'Khan Academy material is licensed CC BY-NC-SA: non-commercial use only. Each other channel shows its licence. Kolibri is MIT-licensed.'),
       h('div', { class: 'row' },
         h('label', null, 'Kolibri\'s language ', lang),
         h('button', { class: 'primary', onclick: () => setUp(lang.value) }, 'Set up the classroom')));
@@ -155,11 +177,27 @@ export async function classroomView(main) {
         h('header', null, h('h2', null, 'Downloading courses')),
         h('div', { class: 'body' }, imports.map(importRow))));
     }
-    content.appendChild(h('section', { class: 'panel' },
-      h('header', null, h('h2', null, 'Khan Academy')),
-      h('div', { class: 'body' },
-        h('p', { class: 'small muted' }, 'Choose grades and subjects to download into the classroom. Kolibri downloads them from Kolibri Studio, resumes after interruptions, and keeps them in the library\'s kolibri folder.'),
-        c.channels.map((ch) => channelCard(ch, onDevice.get(ch.id))))));
+    for (const g of GROUPS) {
+      const list = c.channels.filter((ch) => ch.group === g.id);
+      if (list.length) content.appendChild(groupPanel(g, list, onDevice));
+    }
+  }
+
+  function groupPanel(g, list, onDevice) {
+    const cards = list.map((ch) => channelCard(ch, onDevice.get(ch.id)));
+    let shown = cards;
+    if (g.folded) {
+      // Open when the owner opened it, or else when one of its channels is
+      // on this drive or being chosen; refreshes keep the owner's choice.
+      const open = unfolded[g.id] ?? list.some((ch) => ch.id === picker || onDevice.has(ch.id));
+      const d = h('details', { class: 'channel-group', open },
+        h('summary', null, `${list.length} channels: `, list.map((ch) => langName(ch.language)).join(', ')), cards);
+      d.addEventListener('toggle', () => { unfolded[g.id] = d.open; });
+      shown = d;
+    }
+    return h('section', { class: 'panel' },
+      h('header', null, h('h2', null, g.title), h('span', { class: 'muted small' }, `${list.length} channels`)),
+      h('div', { class: 'body' }, h('p', { class: 'small muted' }, g.help), shown));
   }
 
   function importRow(t) {
@@ -177,20 +215,22 @@ export async function classroomView(main) {
   }
 
   function channelCard(ch, dev) {
-    const box = h('div', { style: 'border-top:1px solid var(--border);padding:10px 0' });
+    const box = h('div', { class: 'channel' });
     const open = picker === ch.id;
     box.append(
       h('div', { class: 'row', style: 'align-items:baseline' },
-        h('div', { class: 'grow' }, h('b', null, ch.title), ' ', h('span', { class: 'badge' }, LANG[ch.language] || ch.language),
+        h('div', { class: 'grow' }, h('b', null, ch.title), ' ', h('span', { class: 'badge' }, langName(ch.language)),
+          ch.levels ? h('span', { class: 'small muted' }, ' · ', ch.levels) : null,
+          ch.about ? h('div', { class: 'small' }, ch.about) : null,
           h('div', { class: 'small muted' }, `Whole channel ${fmtBytes(ch.size)} · published ${ch.published} · ${ch.license}`,
             dev ? ` · on this drive: ${dev.resources} resources, ${fmtBytes(dev.size)}` : '')),
-        h('button', { onclick: () => { picker = open ? null : ch.id; load(); } }, open ? 'Close' : 'Choose grades and subjects')));
+        h('button', { onclick: () => { picker = open ? null : ch.id; load(); } }, open ? 'Close' : ch.group === 'more' ? 'Choose topics' : 'Choose grades and subjects')));
     if (open) box.appendChild(pickerFor(ch));
     return box;
   }
 
   function pickerFor(ch) {
-    const wrap = h('div', { class: 'small muted' }, 'Reading the channel\'s list of topics… The first time, this downloads it from Kolibri Studio (17–44 MB).');
+    const wrap = h('div', { class: 'small muted' }, 'Reading the channel\'s list of topics… The first time, this downloads it from Kolibri Studio (up to 44 MB, for the largest channel).');
     const holder = h('div', null, wrap);
     if (pickers[ch.id]) {
       fill(holder, pickers[ch.id]);
@@ -217,7 +257,7 @@ export async function classroomView(main) {
       total.textContent = 'Measuring…';
       try {
         const r = await api.post(`/api/classroom/channels/${ch.id}/size`, { nodeIds: [...chosen] });
-        if (mine === seq) total.textContent = `${fmtBytes(r.size)} · ${r.resources} videos, exercises and readings`;
+        if (mine === seq) total.textContent = `${fmtBytes(r.size)} · ${r.resources} resources (videos, exercises, readings and activities)`;
       } catch (e) { if (mine === seq) total.textContent = e.message; }
     };
     const boxes = [];
@@ -237,7 +277,19 @@ export async function classroomView(main) {
       });
       return h('label', null, cb, h('span', { class: 'grow' }, n.title), h('span', { class: 'small muted num' }, fmtBytes(n.size)));
     };
-    const list = h('div', { class: 'topic-tree' }, (tree.children || []).map((n) => {
+    // The channel's root topic: Kolibri imports everything under a topic, so
+    // this takes the whole channel, including resources kept outside its
+    // topics (some channels have only those).
+    const all = h('input', { type: 'checkbox', value: tree.id });
+    all.addEventListener('change', () => {
+      chosen.clear();
+      for (const b of boxes) { b.cb.checked = false; b.cb.disabled = all.checked; }
+      if (all.checked) chosen.add(tree.id);
+      update();
+    });
+    const everything = h('div', { class: 'topic topic-all' }, h('span', { class: 'toggle' }),
+      h('label', null, all, h('span', { class: 'grow' }, h('b', null, 'Everything in this channel')), h('span', { class: 'small muted num' }, fmtBytes(tree.size))));
+    const list = h('div', { class: 'topic-tree' }, everything, (tree.children || []).map((n) => {
       const head = topic(n, null);
       const headBox = boxes[boxes.length - 1].cb;
       if (!n.children?.length) return h('div', { class: 'topic' }, h('span', { class: 'toggle' }), head);
@@ -261,7 +313,7 @@ export async function classroomView(main) {
       } catch (e) { toast(e.message); go.disabled = false; }
     });
     return h('div', { style: 'margin-top:8px' },
-      h('p', { class: 'small muted' }, 'Tick a subject for all of it, or open it to choose grades and courses. Sizes count each video once, even when it appears under several topics.'),
+      h('p', { class: 'small muted' }, 'Tick the whole channel or a subject, or open a subject (▸) to choose grades and courses. Sizes count each file once, even when it appears under several topics.'),
       h('div', { class: 'checklist', style: 'max-height:420px' }, list),
       h('div', { class: 'row', style: 'margin-top:8px;align-items:center' }, h('span', { class: 'grow small' }, total), go));
   }
