@@ -462,9 +462,9 @@ func (s *Server) installedViews(r *http.Request, a *app.App) ([]installedView, e
 			v.OpenPath = b.ContentPath
 			v.Search = res.Capabilities.FullTextSearch
 		} else if res.Format == "gguf" || res.Format == "llamafile" || res.Format == "druglabels" ||
-			res.Format == "bergamot" || res.Format == "translation-models" {
+			res.Format == "bergamot" || res.Format == "translation-models" || res.Format == "kolibri" {
 			// Models and the engine are used by the assistant; the drug
-			// reference has its own view.
+			// reference has its own view, Kolibri the Classroom page.
 		} else if res.Format != "zim" && len(in.Files) > 0 {
 			v.OpenPath = "/files/" + in.ResourceID + "/" + path.Base(in.Files[0].Path)
 		} else if res.Format == "zim" {
