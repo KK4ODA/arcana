@@ -3,12 +3,18 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
-## 0.9.0-rc.1 — 2026-11-24
+## 0.9.0 — 2026-11-24
 
-A test release of 0.9.0, for trying the new classroom on real computers
-before everyone is offered it. Installed copies of Arcana do not offer
-test releases as updates: download it from this page. Ask within chosen
-sources is new too.
+Arcana can now run a classroom: Kolibri with Khan Academy in English or
+Spanish, chosen by grade and subject, with classes, lessons, quizzes and
+progress for each student. Set it up on the new *Classroom* page. It is
+new and so far tested against a stand-in for Kolibri rather than Kolibri
+itself, so tell us what goes wrong. *Ask* can also search only the sources
+you choose. Arcana now uses three neighbouring ports (8470 to 8472) instead
+of two. Arcana 0.6.0 to 0.8.1 offer this version by themselves within a
+day of being online: choose *Update now* in the banner at the top of the
+page, or *Settings → Application updates → Check now* to look straight
+away.
 
 ### Added
 - **Ask within chosen sources.** *Search in*, under the question in the
