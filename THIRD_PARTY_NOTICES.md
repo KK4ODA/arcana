@@ -72,6 +72,9 @@ file and the build it belongs to.
 | llamafile 0.10.6 model engine (bundled catalog entry; downloaded on request, not shipped) | Apache-2.0 (Mozilla.ai); bundles llama.cpp (MIT) and Cosmopolitan Libc (ISC) |
 | Question-answering models: Qwen2.5 0.5B Instruct, Granite 3.3 2B Instruct, Qwen3 4B (bundled catalog entries; downloaded on request, not shipped) | Apache-2.0 (Qwen team, Alibaba Cloud; IBM) |
 | Bergamot translation engine (WebAssembly) and Mozilla's translation models (downloaded on request, not shipped) | MPL-2.0 (Mozilla) |
+| Kolibri 0.19.5 (bundled catalog entry `arcana.kolibri`; downloaded on request, not shipped) | MIT (Learning Equality); its wheel bundles Django (BSD-3-Clause) and other dependencies under their own licences, listed in its `dist` folder |
+| CPython 3.11.17, python-build-standalone 20261003 (same entry; downloaded on request, not shipped) | Python Software Foundation License 2.0; the builds bundle OpenSSL (Apache-2.0), SQLite (public domain) and other libraries listed in each build's licence files |
+| Khan Academy channels imported by Kolibri (downloaded on request, not shipped) | CC BY-NC-SA (Khan Academy): non-commercial use only |
 | FDA drug labels (openFDA downloads; built into a reference on request, not shipped) | Public domain, CC0 1.0 (U.S. Food and Drug Administration); label text written by the manufacturers |
 | Map data downloaded through the maps provider (not shipped) | © OpenStreetMap contributors, ODbL 1.0; basemap by Protomaps; includes Natural Earth (public domain) and ESA WorldCover land cover (CC BY 4.0). The place-name index Arcana builds from it is a derivative database under the ODbL. |
 

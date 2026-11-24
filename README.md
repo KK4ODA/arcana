@@ -15,7 +15,7 @@ it with no internet connection.
   <img alt="The Arcana library: a dashboard with installed content, free space, offline readiness, network sharing and GPS status, above a drive usage bar, a full-text search box and the list of installed resources with their categories, editions, sizes and licenses." src="docs/screenshots/library.png">
 </picture>
 
-Status: **0.8.1** ([changelog](CHANGELOG.md)). It
+Status: **0.9.0** ([changelog](CHANGELOG.md)). It
 works end to end on Linux and is packaged for Windows and macOS, but **has
 not yet been run on real Windows or macOS hardware**, and the programs are
 not yet code-signed (see [Status](#status)).
@@ -112,8 +112,12 @@ not yet code-signed (see [Status](#status)).
 - **Raspberry Pi / Linux appliance.** An installer sets Arcana up as a
   service with its own Wi-Fi network and captive portal
   ([docs/appliance.md](docs/appliance.md); not yet run on hardware).
-- **Kolibri courses** (optional): point Arcana at a Kolibri server and
-  its courses appear in library search ([docs/kolibri.md](docs/kolibri.md)).
+- **Classroom** (optional): Kolibri built in, with Khan Academy in English
+  or Spanish chosen by grade and subject. Students sign in by username;
+  teachers make classes, lessons and quizzes and follow progress. Arcana
+  downloads and runs Kolibri for Windows, macOS and Linux from the drive
+  ([docs/kolibri.md](docs/kolibri.md)). A Kolibri server installed
+  separately can be searched instead.
 - **Integration API** for other programs: search with citations, article
   excerpts and position, with scoped tokens the operator approves
   ([docs/integration-api.md](docs/integration-api.md)). RadioPost and
@@ -229,7 +233,7 @@ See [docs/development.md](docs/development.md).
 | **Implemented (Phase 5), not yet run on hardware** | Raspberry Pi / Linux appliance: installer, confined systemd service with watchdog, Wi-Fi access point with captive portal ([docs/appliance.md](docs/appliance.md)) |
 | **Implemented (Phase 6)** | Integration API for other programs (RadioPost and Aether HF to come) with scoped, approved tokens and citations ([docs/integration-api.md](docs/integration-api.md)); copying between Arcana libraries on a LAN; signed community catalogs |
 | **Implemented (0.8.0)** | Question answering over installed sources with citations, a relevance floor and an evaluation set; llamafile sidecar or an OpenAI-compatible server ([ADR-0021](docs/adr/0021-question-answering-over-the-library.md)). FDA drug label reference built on the user's computer ([ADR-0022](docs/adr/0022-fda-drug-label-reference.md)). Offline translation of archive pages in the reader's browser ([ADR-0023](docs/adr/0023-offline-translation-in-the-browser.md)). Getting started wizard; scheduled content updates; Meshtastic nodes on the map (listen only); optional Kolibri search ([docs/kolibri.md](docs/kolibri.md)); OpenAPI document for the integration API |
-| **Not yet verified** | Question answering with the real llamafile engine and models (tested with stand-ins), speed on a Raspberry Pi; Meshtastic with a real radio and Kolibri with a real server (tested against fakes) |
+| **Not yet verified** | Question answering with the real llamafile engine and models (tested with stand-ins), speed on a Raspberry Pi; Meshtastic with a real radio and Kolibri with a real server (tested against fakes); the built-in classroom with Kolibri itself on Windows, macOS and Linux (tested against a stand-in, [ADR-0024](docs/adr/0024-kolibri-built-in.md)) |
 | **Planned** | Ready-made Raspberry Pi SD image; hardware and power-loss tests. Terrain and contours; road networks for the largest countries; scheduled peer sync |
 | **Not yet** | Code-signed programs (releases are not code-signed yet; Windows and macOS warn on first start) |
 

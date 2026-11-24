@@ -3,7 +3,18 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
-## Unreleased
+## 0.9.0 — 2026-11-24
+
+Arcana can now run a classroom: Kolibri with Khan Academy in English or
+Spanish, chosen by grade and subject, with classes, lessons, quizzes and
+progress for each student. Set it up on the new *Classroom* page. It is
+new and so far tested against a stand-in for Kolibri rather than Kolibri
+itself, so tell us what goes wrong. *Ask* can also search only the sources
+you choose. Arcana now uses three neighbouring ports (8470 to 8472) instead
+of two. Arcana 0.6.0 to 0.8.1 offer this version by themselves within a
+day of being online: choose *Update now* in the banner at the top of the
+page, or *Settings → Application updates → Check now* to look straight
+away.
 
 ### Added
 - **Ask within chosen sources.** *Search in*, under the question in the
@@ -15,6 +26,24 @@ the library format version is tracked separately (docs/design/09-storage-and-dat
   a question asked while searching one archive is answered from it. For
   programs: `in=ID,ID` on the integration API's `GET /ask`; on the command
   line, `arcana ask --in ID,ID`.
+- **The classroom: Khan Academy with Kolibri, built in.** A new
+  *Classroom* page sets up Learning Equality's Kolibri on the library, so
+  students watch, read and practise Khan Academy, and teachers make
+  classes, lessons and quizzes and follow each student's progress. Arcana
+  downloads Kolibri with Python for Windows, macOS and Linux (245 MB,
+  checksum-verified), unpacks it on each computer, creates the school and
+  an administrator (students sign in by username alone, teachers with a
+  password), and runs it on its own port, 8472 by default. Choose Khan
+  Academy grades and subjects, in English (US curriculum) or Spanish, with
+  the size of each, and Kolibri downloads them. Its courses appear in
+  library search and on the Library page. See docs/kolibri.md and
+  ADR-0024. Tested against a stand-in for Kolibri, not yet with Kolibri
+  itself on each system.
+
+### Changed
+- Arcana now listens on three neighbouring ports (8470, 8471 and 8472 by
+  default; the next free three if those are taken): the third is the
+  classroom's.
 
 ## 0.8.1 — 2026-11-24
 

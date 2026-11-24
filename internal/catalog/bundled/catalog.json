@@ -528,6 +528,144 @@
       "popularity": 9
     },
     {
+      "id": "arcana.kolibri",
+      "provider": "arcana",
+      "title": "Kolibri classroom (Khan Academy)",
+      "description": "Learning Equality's Kolibri 0.19.5, with Python 3.11 for Windows, macOS and Linux, so the drive works on any computer. Arcana runs it for classes: students watch, read and practise Khan Academy and other courses, and teachers make lessons and quizzes and follow each student's progress. Set it up from the Classroom page, which also chooses the Khan Academy grades and subjects to download.",
+      "category": "education",
+      "subcategory": "classroom",
+      "tags": [
+        "kolibri",
+        "khan academy",
+        "classroom",
+        "teachers",
+        "students"
+      ],
+      "family": "arcana.kolibri",
+      "variant": "standard",
+      "publisher": "Learning Equality",
+      "sourceUrl": "https://learningequality.org/kolibri/",
+      "version": "0.19.5",
+      "published": "2026-07-14",
+      "lastVerified": "2026-11-24T00:00:00Z",
+      "languages": [
+        "mul"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "kolibri",
+      "files": [
+        {
+          "name": "kolibri-0.19.5-py2.py3-none-any.whl",
+          "size": 103738893,
+          "hashes": {
+            "sha256": "dc4c187d29a80037594c2dadd1cbc862cb4b8b76166bfd4084314f8ab2bc6221"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/c8/b8/914701cb59959f6adee51305d5275dfaec954fe794daa78ecb13c34c2136/kolibri-0.19.5-py2.py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "python-3.11.17-windows-amd64.tar.gz",
+          "size": 25222085,
+          "hashes": {
+            "sha256": "861f9a03b0c4ca537da1754ed0556e0628dd2114a1be36e8aae6b1e2bb1304a0"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261003/cpython-3.11.17%2B20261003-x86_64-pc-windows-msvc-install_only_stripped.tar.gz"
+            },
+            {
+              "url": "https://releases.astral.sh/github/python-build-standalone/releases/download/20261003/cpython-3.11.17%2B20261003-x86_64-pc-windows-msvc-install_only_stripped.tar.gz"
+            }
+          ]
+        },
+        {
+          "name": "python-3.11.17-darwin-arm64.tar.gz",
+          "size": 26974674,
+          "hashes": {
+            "sha256": "0c9fbd0b2ddfbb6877493a650259bf379ee71a91b17f0f5f06dd2dcd52fbcade"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261003/cpython-3.11.17%2B20261003-aarch64-apple-darwin-install_only_stripped.tar.gz"
+            },
+            {
+              "url": "https://releases.astral.sh/github/python-build-standalone/releases/download/20261003/cpython-3.11.17%2B20261003-aarch64-apple-darwin-install_only_stripped.tar.gz"
+            }
+          ]
+        },
+        {
+          "name": "python-3.11.17-darwin-amd64.tar.gz",
+          "size": 26888478,
+          "hashes": {
+            "sha256": "ba62d0fb634c4e347341a4f3e29d7fb0b27920be6326c614d541c316e4da7693"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261003/cpython-3.11.17%2B20261003-x86_64-apple-darwin-install_only_stripped.tar.gz"
+            },
+            {
+              "url": "https://releases.astral.sh/github/python-build-standalone/releases/download/20261003/cpython-3.11.17%2B20261003-x86_64-apple-darwin-install_only_stripped.tar.gz"
+            }
+          ]
+        },
+        {
+          "name": "python-3.11.17-linux-amd64.tar.gz",
+          "size": 30785899,
+          "hashes": {
+            "sha256": "aadcba18994cb8f9ee752aceb31d61e04f75b5d900d76fb575c6fbfabadec434"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261003/cpython-3.11.17%2B20261003-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz"
+            },
+            {
+              "url": "https://releases.astral.sh/github/python-build-standalone/releases/download/20261003/cpython-3.11.17%2B20261003-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz"
+            }
+          ]
+        },
+        {
+          "name": "python-3.11.17-linux-arm64.tar.gz",
+          "size": 31111705,
+          "hashes": {
+            "sha256": "41f16793d33161dcd9bfa2622332b8af870cfdb4540bd1fdc477f9e6b7c58c26"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261003/cpython-3.11.17%2B20261003-aarch64-unknown-linux-gnu-install_only_stripped.tar.gz"
+            },
+            {
+              "url": "https://releases.astral.sh/github/python-build-standalone/releases/download/20261003/cpython-3.11.17%2B20261003-aarch64-unknown-linux-gnu-install_only_stripped.tar.gz"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 244721734,
+      "installedSize": 244721734,
+      "license": {
+        "id": "MIT",
+        "name": "MIT License",
+        "url": "https://github.com/learningequality/kolibri/blob/release-v0.19.x/LICENSE",
+        "redistribution": "permitted",
+        "verified": true,
+        "notes": "Kolibri is MIT and bundles its dependencies under their own licences (Django BSD-3-Clause and others). Python is under the PSF License. Khan Academy courses imported into Kolibri are CC BY-NC-SA: non-commercial use only."
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": false,
+        "videos": false
+      },
+      "updateStrategy": "snapshot-replace",
+      "popularity": 9
+    },
+    {
       "id": "arcana.us-army-fm-4-25-11",
       "provider": "arcana",
       "title": "FM 4-25.11 First Aid (U.S. Army)",

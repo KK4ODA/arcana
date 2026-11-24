@@ -79,9 +79,13 @@ type Server struct {
 
 	appSrv     *http.Server
 	contentSrv *http.Server
+	kolibriSrv *http.Server
 	appPort    int
 	content    int
-	startedAt  time.Time
+	// kolibriPort (port+2) is the classroom's origin (ADR-0024).
+	kolibriPort int
+	lk          net.Listener
+	startedAt   time.Time
 }
 
 // New creates a server. a may be nil (setup mode).
@@ -105,8 +109,10 @@ func (s *Server) current() *app.App {
 	return s.app
 }
 
-// Listen binds both ports, trying successive pairs if the preferred ones are
-// in use (for example when another program already uses 8470).
+// Listen binds the three ports (application, content, classroom), trying
+// successive triples if the preferred ones are in use (for example when
+// another program already uses 8470). The classroom's listener is kept
+// for Serve.
 func (s *Server) Listen() (net.Listener, net.Listener, error) {
 	host := "127.0.0.1"
 	if s.cfg.ShareOnLAN {
@@ -114,22 +120,29 @@ func (s *Server) Listen() (net.Listener, net.Listener, error) {
 	}
 	var lastErr error
 	for i := 0; i < 20; i++ {
-		p := s.cfg.Port + 2*i
-		la, err := net.Listen("tcp", net.JoinHostPort(host, strconv.Itoa(p)))
-		if err != nil {
-			lastErr = err
+		p := s.cfg.Port + 3*i
+		var ls []net.Listener
+		for j := 0; j < 3; j++ {
+			l, err := net.Listen("tcp", net.JoinHostPort(host, strconv.Itoa(p+j)))
+			if err != nil {
+				lastErr = err
+				break
+			}
+			ls = append(ls, l)
+		}
+		if len(ls) < 3 {
+			for _, l := range ls {
+				l.Close()
+			}
 			continue
 		}
-		lc, err := net.Listen("tcp", net.JoinHostPort(host, strconv.Itoa(p+1)))
-		if err != nil {
-			la.Close()
-			lastErr = err
-			continue
+		s.appPort, s.content, s.kolibriPort, s.lk = p, p+1, p+2, ls[2]
+		if a := s.current(); a != nil {
+			a.SetPorts(s.content, s.kolibriPort)
 		}
-		s.appPort, s.content = p, p+1
-		return la, lc, nil
+		return ls[0], ls[1], nil
 	}
-	return nil, nil, fmt.Errorf("no free port pair near %d: %w", s.cfg.Port, lastErr)
+	return nil, nil, fmt.Errorf("no three free ports near %d: %w", s.cfg.Port, lastErr)
 }
 
 // AppPort returns the bound application port.
@@ -161,9 +174,15 @@ func (s *Server) Serve(ctx context.Context, la, lc net.Listener) error {
 	lc = tlsutil.NewSniffer(lc, s.tlsConfig)
 	s.applyMDNS()
 	s.policy.refreshHosts(s.extraHosts())
-	errc := make(chan error, 2)
+	errc := make(chan error, 3)
 	go func() { errc <- s.appSrv.Serve(la) }()
 	go func() { errc <- s.contentSrv.Serve(lc) }()
+	if s.lk != nil {
+		// Kolibri answers slowly while it imports; its pages stream.
+		s.kolibriSrv = &http.Server{Handler: s.kolibriHandler(), ReadHeaderTimeout: 15 * time.Second, IdleTimeout: 120 * time.Second}
+		lk := tlsutil.NewSniffer(s.lk, s.tlsConfig)
+		go func() { errc <- s.kolibriSrv.Serve(lk) }()
+	}
 	// Interface addresses change (Wi-Fi joins, hotspot starts); keep the
 	// Host allowlist current.
 	go func() {
@@ -189,6 +208,9 @@ func (s *Server) Serve(ctx context.Context, la, lc net.Listener) error {
 	defer cancel()
 	_ = s.appSrv.Shutdown(shutdownCtx)
 	_ = s.contentSrv.Shutdown(shutdownCtx)
+	if s.kolibriSrv != nil {
+		_ = s.kolibriSrv.Shutdown(shutdownCtx)
+	}
 	return nil
 }
 
@@ -247,6 +269,7 @@ func (s *Server) appHandler() http.Handler {
 	s.registerAssistant(mux)
 	s.registerDrugs(mux)
 	s.registerTranslate(mux)
+	s.registerClassroom(mux)
 	mux.HandleFunc("GET /api/mesh", s.withApp(s.handleMesh))
 	mux.HandleFunc("GET /api/kolibri", s.withApp(s.handleKolibri))
 	mux.HandleFunc("GET /api/kolibri/search", s.withApp(s.handleKolibriSearch))
@@ -274,6 +297,7 @@ func (s *Server) contentHandler() http.Handler {
 		}
 		a.Kiwix.Handler().ServeHTTP(w, r)
 	})
+	mux.HandleFunc(kolibri.ZipPrefix, s.kolibriZip)
 	mux.HandleFunc("GET /files/{id}/{name}", s.handleFile)
 	mux.HandleFunc("GET /userdocs/{name}", s.handleUserDocFile)
 	mux.HandleFunc("GET /_arcana/frame.js", func(w http.ResponseWriter, r *http.Request) {
@@ -286,7 +310,8 @@ func (s *Server) contentHandler() http.Handler {
 	})
 	var h http.Handler = mux
 	h = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet && r.Method != http.MethodHead {
+		zip := strings.HasPrefix(r.URL.Path, kolibri.ZipPrefix)
+		if r.Method != http.MethodGet && r.Method != http.MethodHead && !(zip && r.Method == http.MethodOptions) {
 			http.Error(w, "read-only", http.StatusMethodNotAllowed)
 			return
 		}
@@ -462,9 +487,9 @@ func (s *Server) installedViews(r *http.Request, a *app.App) ([]installedView, e
 			v.OpenPath = b.ContentPath
 			v.Search = res.Capabilities.FullTextSearch
 		} else if res.Format == "gguf" || res.Format == "llamafile" || res.Format == "druglabels" ||
-			res.Format == "bergamot" || res.Format == "translation-models" {
+			res.Format == "bergamot" || res.Format == "translation-models" || res.Format == "kolibri" {
 			// Models and the engine are used by the assistant; the drug
-			// reference has its own view.
+			// reference has its own view, Kolibri the Classroom page.
 		} else if res.Format != "zim" && len(in.Files) > 0 {
 			v.OpenPath = "/files/" + in.ResourceID + "/" + path.Base(in.Files[0].Path)
 		} else if res.Format == "zim" {
@@ -1211,9 +1236,7 @@ func (s *Server) handleInit(w http.ResponseWriter, r *http.Request) {
 		writeError(w, 500, err.Error())
 		return
 	}
-	s.mu.Lock()
-	s.app = a
-	s.mu.Unlock()
+	s.SetApp(a)
 	_ = s.applyTLS()
 	s.applyMDNS()
 	writeJSON(w, 200, map[string]string{"root": root})
@@ -1224,6 +1247,9 @@ func (s *Server) SetApp(a *app.App) {
 	s.mu.Lock()
 	s.app = a
 	s.mu.Unlock()
+	if a != nil && s.content > 0 {
+		a.SetPorts(s.content, s.kolibriPort)
+	}
 }
 
 // App returns the open library, if any.
@@ -1279,6 +1305,12 @@ func (s *Server) handleMesh(w http.ResponseWriter, r *http.Request, a *app.App) 
 // origins), only at the address the owner entered.
 
 func (s *Server) handleKolibri(w http.ResponseWriter, r *http.Request, a *app.App) {
+	if a.ClassroomWanted() {
+		_, running := a.KolibriBase()
+		writeJSON(w, http.StatusOK, map[string]any{"configured": true, "builtIn": true, "url": s.kolibriOrigin(r),
+			"reachable": running, "deviceName": a.Lib.Identity.Label})
+		return
+	}
 	u := a.Lib.Settings.Get().Kolibri.URL
 	resp := map[string]any{"configured": u != "", "url": u}
 	if u != "" {
@@ -1295,10 +1327,28 @@ func (s *Server) handleKolibri(w http.ResponseWriter, r *http.Request, a *app.Ap
 	writeJSON(w, http.StatusOK, resp)
 }
 
-func (s *Server) handleKolibriSearch(w http.ResponseWriter, r *http.Request, a *app.App) {
+// kolibriClient returns the Kolibri to search: the built-in classroom when
+// it is set up, otherwise the server named in the settings.
+func (s *Server) kolibriClient(r *http.Request, a *app.App) (*kolibri.Client, string, error) {
+	if a.ClassroomWanted() {
+		public := s.kolibriOrigin(r)
+		base, ok := a.KolibriBase()
+		if !ok {
+			return nil, public, errors.New("the classroom is not running")
+		}
+		return &kolibri.Client{BaseURL: base, PublicURL: public}, public, nil
+	}
 	u := a.Lib.Settings.Get().Kolibri.URL
-	q := strings.TrimSpace(r.URL.Query().Get("q"))
 	if u == "" {
+		return nil, "", nil
+	}
+	return &kolibri.Client{BaseURL: u}, u, nil
+}
+
+func (s *Server) handleKolibriSearch(w http.ResponseWriter, r *http.Request, a *app.App) {
+	q := strings.TrimSpace(r.URL.Query().Get("q"))
+	c, u, err := s.kolibriClient(r, a)
+	if c == nil && err == nil {
 		writeError(w, http.StatusNotFound, "No Kolibri server is set up.")
 		return
 	}
@@ -1306,9 +1356,13 @@ func (s *Server) handleKolibriSearch(w http.ResponseWriter, r *http.Request, a *
 		writeError(w, http.StatusBadRequest, "enter a search term")
 		return
 	}
+	if err != nil {
+		writeJSON(w, http.StatusOK, map[string]any{"items": []kolibri.Item{}, "error": err.Error(), "url": u})
+		return
+	}
 	ctx, cancel := context.WithTimeout(r.Context(), 8*time.Second)
 	defer cancel()
-	items, err := (&kolibri.Client{BaseURL: u}).Search(ctx, q, clampInt(r.URL.Query().Get("limit"), 8, 1, 30))
+	items, err := c.Search(ctx, q, clampInt(r.URL.Query().Get("limit"), 8, 1, 30))
 	if err != nil {
 		writeJSON(w, http.StatusOK, map[string]any{"items": []kolibri.Item{}, "error": err.Error(), "url": u})
 		return

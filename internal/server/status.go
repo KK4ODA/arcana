@@ -145,13 +145,24 @@ func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request, a *app.App
 		"assistant": s.assistantSummary(r, a),
 		"drugs":     map[string]any{"installed": a.Drugs() != nil},
 		"links":     nonNil(a.Lib.Settings.Get().Links),
-		"kolibri":   map[string]any{"configured": a.Lib.Settings.Get().Kolibri.URL != "", "url": a.Lib.Settings.Get().Kolibri.URL},
+		"kolibri":   s.kolibriSummary(r, a),
 		// Getting started is offered until finished or skipped, while
 		// nothing but the sample is installed.
 		"welcome":      map[string]any{"pending": !a.Lib.Settings.Get().WelcomeDone && onlySample(installed) && !a.Lib.ReadOnly},
 		"attention":    att,
 		"serverUptime": int64(time.Since(s.startedAt).Seconds()),
 	})
+}
+
+// kolibriSummary says which Kolibri, if any, the Library page links to:
+// the built-in classroom (ADR-0024) or a server named in the settings.
+func (s *Server) kolibriSummary(r *http.Request, a *app.App) map[string]any {
+	if a.ClassroomWanted() {
+		_, running := a.KolibriBase()
+		return map[string]any{"configured": true, "builtIn": true, "running": running, "url": s.kolibriOrigin(r) + "/"}
+	}
+	u := a.Lib.Settings.Get().Kolibri.URL
+	return map[string]any{"configured": u != "", "url": u}
 }
 
 // rootFor hides the host path from network clients.

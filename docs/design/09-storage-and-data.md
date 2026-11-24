@@ -17,6 +17,9 @@ Arcana/                        ← library root; any folder works, "Arcana" at d
 ├─ state/arcana.lock           ← OS-level lock (released automatically on crash)
 ├─ catalog/<provider>.json     ← last good catalog per provider (for offline browsing)
 ├─ index/documents.db          ← full-text index of documents (rebuildable cache)
+├─ catalog/kolibri/<id>.sqlite3 ← Kolibri channel topic lists (classroom picker; refetched monthly)
+├─ state/kolibri.json          ← the classroom: on/off, school, Kolibri administrator and password
+├─ kolibri/                    ← Kolibri's own home (KOLIBRI_HOME): accounts, progress, imported courses
 ├─ user/                       ← never touched by content operations
 │  ├─ settings.json            ← settings (unknown keys preserved)
 │  ├─ bookmarks.json, favorites.json, recent.json (+ .bak previous copies)
@@ -34,6 +37,7 @@ Arcana/                        ← library root; any folder works, "Arcana" at d
 | `state/arcana.db` | Index | Rebuilt from sidecars and catalog caches at next start |
 | `catalog/` | Catalog refresh (atomic) | Bundled catalog still works; refresh when online |
 | `user/` | User actions only | Back it up (Phase 2 export) |
+| `kolibri/` | Kolibri only (ADR-0024) | Holds classroom accounts and progress: back it up; imported courses can be downloaded again |
 | `bin/` | Release / app update (Phase 2, staged swap) | Re-copy from release |
 
 ### Portability rules

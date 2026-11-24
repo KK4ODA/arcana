@@ -4,6 +4,7 @@ import { renderUpdateBanner } from './updatebanner.js';
 import { libraryView } from './views/library.js';
 import { askView } from './views/ask.js';
 import { medicinesView } from './views/medicines.js';
+import { classroomView } from './views/classroom.js';
 import { welcomeView } from './views/welcome.js';
 import { discoverView } from './views/discover.js';
 import { mapsView } from './views/maps.js';
@@ -18,6 +19,8 @@ const views = {
   library: { title: 'Library', render: libraryView },
   ask: { title: 'Ask', render: askView, when: (st) => st?.assistant?.canAsk },
   medicines: { title: 'Medicines', render: medicinesView, when: (st) => st?.drugs?.installed },
+  // Offered to administrators (to set it up) and to everyone once it is.
+  classroom: { title: 'Classroom', render: classroomView, when: (st) => st?.kolibri?.builtIn || getSession().admin },
   discover: { title: 'Discover', render: discoverView },
   maps: { title: 'Maps', render: mapsView },
   downloads: { title: 'Downloads', render: downloadsView },
