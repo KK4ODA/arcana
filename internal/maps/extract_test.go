@@ -136,9 +136,18 @@ type slowReader struct {
 	delay             time.Duration
 	active, maxActive atomic.Int32
 	calls             atomic.Int32
+	// first is when the first request started and last when the last one
+	// answered (Unix nanoseconds): together, how long fetching took.
+	first, last atomic.Int64
 }
 
 func (s *slowReader) ReadRange(ctx context.Context, off, n uint64) ([]byte, error) {
+	s.first.CompareAndSwap(0, time.Now().UnixNano())
+	defer func() {
+		end := time.Now().UnixNano()
+		for l := s.last.Load(); end > l && !s.last.CompareAndSwap(l, end); l = s.last.Load() {
+		}
+	}()
 	a := s.active.Add(1)
 	defer s.active.Add(-1)
 	for {
@@ -180,7 +189,6 @@ func TestExtractRequestsInParallel(t *testing.T) {
 	}
 
 	slow := &slowReader{RangeReader: rr, delay: 20 * time.Millisecond}
-	start := time.Now()
 	got, err := Extract(context.Background(), slow, plan, filepath.Join(dir, "many.pmtiles"), nil)
 	if err != nil {
 		t.Fatal(err)
@@ -191,8 +199,13 @@ func TestExtractRequestsInParallel(t *testing.T) {
 	if slow.maxActive.Load() < 4 {
 		t.Fatalf("at most %d requests ran at once", slow.maxActive.Load())
 	}
-	if serial := time.Duration(slow.calls.Load()) * slow.delay; time.Since(start) > serial/2 {
-		t.Fatalf("took %v for %d requests of %v each", time.Since(start), slow.calls.Load(), slow.delay)
+	// Time the fetching, from the first request to the last answer, not the
+	// whole extraction: Extract also syncs the file to disk at each
+	// checkpoint (every 16 ranges) and at the end, while fetching goes on,
+	// and on Windows CI disks each sync can take over 100 ms.
+	fetching := time.Duration(slow.last.Load() - slow.first.Load())
+	if serial := time.Duration(slow.calls.Load()) * slow.delay; fetching > serial/2 {
+		t.Fatalf("fetching took %v for %d requests of %v each", fetching, slow.calls.Load(), slow.delay)
 	}
 }
 
