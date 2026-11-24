@@ -3,7 +3,15 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
-## Unreleased
+## 0.8.1 — 2026-11-24
+
+*Get a road network* and *Browse map regions* open their lists again: on
+0.8.0 they opened Discover filtered to a category that does not exist, so
+the road networks needed for directions never appeared. The Server view
+also explains why another device on the network might not connect.
+Arcana 0.6.0 to 0.8.0 offer this version by themselves within a day of
+being online: choose *Update now* in the banner at the top of the page, or
+*Settings → Application updates → Check now* to look straight away.
 
 ### Changed
 - **Help when another device cannot connect.** The Server view (*Another
@@ -22,8 +30,7 @@ the library format version is tracked separately (docs/design/09-storage-and-dat
   for a category that does not exist, so nothing matched, however many
   road networks and map regions the catalog held. They now open *Maps and
   navigation*, and a test checks every link into Discover against the
-  catalog's categories. Until you update, choose *Maps and navigation* in
-  Discover yourself and search for "road network".
+  catalog's categories.
 
 ## 0.8.0 — 2026-11-23
 
