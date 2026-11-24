@@ -15,7 +15,7 @@ it with no internet connection.
   <img alt="The Arcana library: a dashboard with installed content, free space, offline readiness, network sharing and GPS status, above a drive usage bar, a full-text search box and the list of installed resources with their categories, editions, sizes and licenses." src="docs/screenshots/library.png">
 </picture>
 
-Status: **0.9.0** ([changelog](CHANGELOG.md)). It
+Status: **0.10.0** ([changelog](CHANGELOG.md)). It
 works end to end on Linux and is packaged for Windows and macOS, but **has
 not yet been run on real Windows or macOS hardware**, and the programs are
 not yet code-signed (see [Status](#status)).

@@ -3,7 +3,18 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
-## Unreleased
+## 0.10.0 — 2026-11-24
+
+The classroom now offers 60 Kolibri channels instead of two, for high
+school, AP, college and adults: Khan Academy for more curricula and
+languages and its test preparation, and courses from CK-12, OpenStax, PhET,
+MIT Blossoms and other publishers, each with who it is for, what it holds,
+its size and its licence. A whole channel can be chosen at once. The
+Settings page also fits a phone's screen. The new channels are tested, like
+the first two, against a stand-in for Kolibri rather than Kolibri itself.
+Arcana 0.6.0 to 0.9.0 offer this version by themselves within a day of
+being online: choose *Update now* in the banner at the top of the page, or
+*Settings → Application updates → Check now* to look straight away.
 
 ### Added
 - **Sixty channels in the classroom.** The *Classroom* page now offers,
