@@ -125,7 +125,10 @@ func (s *Server) Start(opts Options) {
 		s.mu.Unlock()
 		return
 	}
-	if s.proc != nil && s.opts == opts && (s.status.State == "running" || s.status.State == "starting") {
+	// The provisioning file only matters at the first start; dropping it
+	// later must not restart Kolibri.
+	same := s.opts.Runtime == opts.Runtime && s.opts.Home == opts.Home && s.opts.ContentPort == opts.ContentPort
+	if same && (s.status.State == "running" || s.status.State == "starting") {
 		s.mu.Unlock()
 		return
 	}

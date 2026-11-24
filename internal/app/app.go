@@ -44,7 +44,10 @@ type Options struct {
 	ForceReadOnly bool
 	// DisableKiwix skips starting kiwix-serve (used by CLI commands).
 	DisableKiwix bool
-	Log          *slog.Logger
+	// KolibriPython, in tests, is run as Kolibri's interpreter in place of
+	// the downloaded runtime (kolibritest).
+	KolibriPython string
+	Log           *slog.Logger
 }
 
 // App is an opened library with its services.
@@ -74,6 +77,8 @@ type App struct {
 	drugs     drugState
 	// Mesh reads a Meshtastic radio.
 	Mesh *mesh.Manager
+	// class runs Kolibri for the classroom (ADR-0024).
+	class *classroom
 	// contentUpd runs scheduled content updates.
 	contentUpd contentUpdater
 	events     eventHub
@@ -127,6 +132,7 @@ func Open(root string, opts Options) (*App, error) {
 		a.reloadMaps()
 		a.reloadRoads()
 		a.reloadDrugs()
+		a.reloadClassroom()
 		a.RequestReindex()
 		a.publish(Event{Type: "library"})
 	}
@@ -149,6 +155,7 @@ func Open(root string, opts Options) (*App, error) {
 	a.openGPS()
 	a.Mesh = mesh.New(a.Log)
 	a.openAssistant()
+	a.openClassroom()
 	a.Admin = auth.NewStore(lib.User())
 	if a.Integrations, err = integration.Open(lib.User(), lib.ReadOnly); err != nil {
 		a.Close()
@@ -212,6 +219,7 @@ func (a *App) Start(ctx context.Context) error {
 	a.reloadMaps()
 	a.reloadRoads()
 	a.reloadDrugs()
+	a.reloadClassroom()
 	go a.placesLoop(ctx)
 	a.ApplyGPSSettings()
 	a.ApplyMeshSettings()
@@ -240,6 +248,7 @@ func (a *App) Close() {
 	}
 	a.closeAssistant()
 	a.closeDrugs()
+	a.closeClassroom()
 	if a.Kiwix != nil {
 		a.Kiwix.Stop()
 	}

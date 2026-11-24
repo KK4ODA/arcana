@@ -53,6 +53,9 @@ The release binaries are not yet code-signed.
 - The Server tab lists the addresses that other devices on the same Wi-Fi
   or Ethernet network can open, e.g. `http://192.168.1.20:8470/`. The
   operating system may ask you to allow incoming connections.
+- The **classroom** (Kolibri with Khan Academy, set up on the *Classroom*
+  page) is on the next port, `http://192.168.1.20:8472/`; the Classroom
+  page and the Library page link to it. See [kolibri.md](kolibri.md).
 - Network devices can browse and search but **cannot change anything**,
   unless you turn on *remote administration* in the Server view and give
   them the password. They then sign in from the top bar.

@@ -2,57 +2,27 @@ package kolibri
 
 import (
 	"context"
-	"database/sql"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/KK4ODA/arcana/internal/kolibri/kolibritest"
 )
 
 const (
-	tChannel = "c1f2b7e6ac9f56a2bb44fa7a48b66dce"
-	tRoot    = "a0000000000000000000000000000000"
-	tMath    = "a1000000000000000000000000000000"
-	tGrade1  = "a1100000000000000000000000000000"
-	tGrade2  = "a1200000000000000000000000000000"
-	tArt     = "a2000000000000000000000000000000"
+	tChannel = kolibritest.ChannelID
+	tGrade1  = kolibritest.Grade1
+	tGrade2  = kolibritest.Grade2
+	tArt     = kolibritest.Art
 )
 
-// makeChannelDB writes a small channel database in Kolibri's layout:
-// Math (Grade 1, Grade 2) and Art, with one video shared by both grades.
 func makeChannelDB(t *testing.T, p, channelID string) {
 	t.Helper()
-	db, err := sql.Open("sqlite", "file:"+filepath.ToSlash(p))
-	if err != nil {
+	if err := kolibritest.WriteChannelDB(p, channelID); err != nil {
 		t.Fatal(err)
-	}
-	defer db.Close()
-	stmts := []string{
-		`CREATE TABLE content_channelmetadata (id TEXT, name TEXT, version INTEGER, root_id TEXT)`,
-		`CREATE TABLE content_contentnode (id TEXT, title TEXT, kind TEXT, content_id TEXT, tree_id INTEGER, lft INTEGER, rght INTEGER, parent_id TEXT)`,
-		`CREATE TABLE content_file (id TEXT, contentnode_id TEXT, local_file_id TEXT)`,
-		`CREATE TABLE content_localfile (id TEXT, file_size INTEGER)`,
-		`INSERT INTO content_channelmetadata VALUES ('` + channelID + `', 'Khan Academy (Español)', 14, '` + tRoot + `')`,
-		`INSERT INTO content_contentnode VALUES
-			('` + tRoot + `', 'Khan Academy', 'topic', 'r', 1, 1, 20, NULL),
-			('` + tMath + `', 'Matemáticas', 'topic', 'm', 1, 2, 13, '` + tRoot + `'),
-			('` + tGrade1 + `', '1° Primaria', 'topic', 'g1', 1, 3, 8, '` + tMath + `'),
-			('b1', 'Contar', 'video', 'v1', 1, 4, 5, '` + tGrade1 + `'),
-			('b2', 'Sumar', 'exercise', 'e1', 1, 6, 7, '` + tGrade1 + `'),
-			('` + tGrade2 + `', '2° Primaria', 'topic', 'g2', 1, 9, 12, '` + tMath + `'),
-			('b3', 'Sumar otra vez', 'video', 'v1', 1, 10, 11, '` + tGrade2 + `'),
-			('` + tArt + `', 'Arte', 'topic', 'a', 1, 14, 17, '` + tRoot + `'),
-			('b4', 'Pintura', 'video', 'v2', 1, 15, 16, '` + tArt + `'),
-			('` + "a3000000000000000000000000000000" + `', 'Vacío', 'topic', 'z', 1, 18, 19, '` + tRoot + `')`,
-		`INSERT INTO content_file VALUES ('f1', 'b1', 'L1'), ('f2', 'b2', 'L2'), ('f3', 'b3', 'L1'), ('f4', 'b4', 'L3')`,
-		`INSERT INTO content_localfile VALUES ('L1', 1000), ('L2', 10), ('L3', 500)`,
-	}
-	for _, s := range stmts {
-		if _, err := db.Exec(s); err != nil {
-			t.Fatal(err)
-		}
 	}
 }
 

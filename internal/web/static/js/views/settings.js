@@ -201,8 +201,10 @@ export async function settingsView(main) {
   } }, 'Test');
   main.appendChild(h('section', { class: 'panel' },
     h('header', null, h('h2', null, 'Kolibri (courses)')),
-    field('Kolibri server', h('span', null, h('span', { class: 'row' }, kUrl, kTest), kMsg),
-      'Kolibri, from Learning Equality, hosts Khan Academy and other courses with progress tracking for each learner. It is a separate program (see docs/kolibri.md). With its address here, its courses appear in library search and on the Library page. Leave empty to turn this off. Khan Academy material is licensed for non-commercial use only.')));
+    h('div', { class: 'toolbar small muted' }, 'Arcana can run Kolibri itself, with Khan Academy in English or Spanish: see ',
+      h('a', { href: '#/classroom' }, 'Classroom'), '. The address below is only for a Kolibri server installed separately; the classroom, when set up, takes its place.'),
+    field('Separate Kolibri server', h('span', null, h('span', { class: 'row' }, kUrl, kTest), kMsg),
+      'Kolibri, from Learning Equality, hosts Khan Academy and other courses with progress tracking for each learner. With the address of a Kolibri you installed yourself, its courses appear in library search and on the Library page (see docs/kolibri.md). Leave empty to turn this off. Khan Academy material is licensed for non-commercial use only.')));
 
   const ap = assistantPanel(st, asst, ro, field);
   main.appendChild(ap.el);

@@ -232,3 +232,37 @@ func TestPasswordAndFacilityName(t *testing.T) {
 		t.Fatal("facility name")
 	}
 }
+
+func TestProxyGuards(t *testing.T) {
+	post := func(h map[string]string) *http.Request {
+		r := httptest.NewRequest(http.MethodPost, "http://10.0.0.2:8472/api/auth/session/", nil)
+		for k, v := range h {
+			r.Header.Set(k, v)
+		}
+		return r
+	}
+	for _, c := range []struct {
+		h  map[string]string
+		ok bool
+	}{
+		{map[string]string{"Sec-Fetch-Site": "same-origin"}, true},
+		{map[string]string{"Sec-Fetch-Site": "same-site"}, false}, // an archive on the content port
+		{map[string]string{"Sec-Fetch-Site": "cross-site"}, false},
+		{map[string]string{"Origin": "http://10.0.0.2:8472"}, true},
+		{map[string]string{"Origin": "http://10.0.0.2:8471"}, false},
+		{map[string]string{}, true},
+	} {
+		if got := sameOriginWrite(post(c.h)); got != c.ok {
+			t.Errorf("%v: got %v", c.h, got)
+		}
+	}
+	if !sameOriginWrite(httptest.NewRequest(http.MethodGet, "http://10.0.0.2:8472/", nil)) {
+		t.Error("a read was refused")
+	}
+	r := httptest.NewRequest(http.MethodGet, "/", nil)
+	r.Header.Set("Cookie", "arcana_session=secret; sessionid=k; csrftoken=c")
+	dropCookies(r, []string{"arcana_session"})
+	if got := r.Header.Get("Cookie"); got != "sessionid=k; csrftoken=c" {
+		t.Fatalf("cookies %q", got)
+	}
+}

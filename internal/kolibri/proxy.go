@@ -21,11 +21,18 @@ type Proxy struct {
 	ContentPort int
 	// NotReady writes the page shown while Kolibri is not running.
 	NotReady func(w http.ResponseWriter, r *http.Request, st Status)
+	// DropCookies are cookies of Arcana's own that Kolibri must not see
+	// (browsers send a host's cookies to every port).
+	DropCookies []string
 }
 
 // Handler serves Kolibri's origin.
 func (p *Proxy) Handler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !sameOriginWrite(r) {
+			http.Error(w, "Cross-site request refused.", http.StatusForbidden)
+			return
+		}
 		base, ok := p.Server.Base()
 		if !ok {
 			p.notReady(w, r)
@@ -39,6 +46,7 @@ func (p *Proxy) Handler() http.Handler {
 				// Kolibri builds links from the Host the browser used.
 				pr.Out.Host = pr.In.Host
 				pr.SetXForwarded()
+				dropCookies(pr.Out, p.DropCookies)
 			},
 			ModifyResponse: func(resp *http.Response) error {
 				if csp := resp.Header.Get("Content-Security-Policy"); csp != "" {
@@ -86,6 +94,49 @@ func (p *Proxy) ZipHandler() http.Handler {
 		}
 		rp.ServeHTTP(w, r)
 	})
+}
+
+// sameOriginWrite refuses changes requested by other origins. Kolibri
+// (Django 3.2) checks CSRF tokens against a cookie, and a page on another
+// port of the same host, such as an archive on the content origin, can set
+// that cookie: so a form it posts must not reach Kolibri.
+func sameOriginWrite(r *http.Request) bool {
+	switch r.Method {
+	case http.MethodGet, http.MethodHead, http.MethodOptions:
+		return true
+	}
+	if site := r.Header.Get("Sec-Fetch-Site"); site != "" {
+		return site == "same-origin" || site == "none"
+	}
+	if origin := r.Header.Get("Origin"); origin != "" {
+		scheme := "http://"
+		if r.TLS != nil {
+			scheme = "https://"
+		}
+		return origin == scheme+r.Host
+	}
+	return true
+}
+
+// dropCookies removes the named cookies from a request.
+func dropCookies(r *http.Request, names []string) {
+	if len(names) == 0 || r.Header.Get("Cookie") == "" {
+		return
+	}
+	drop := map[string]bool{}
+	for _, n := range names {
+		drop[n] = true
+	}
+	var keep []string
+	for _, c := range r.Cookies() {
+		if !drop[c.Name] {
+			keep = append(keep, c.String())
+		}
+	}
+	r.Header.Del("Cookie")
+	if len(keep) > 0 {
+		r.Header.Set("Cookie", strings.Join(keep, "; "))
+	}
 }
 
 func (p *Proxy) notReady(w http.ResponseWriter, r *http.Request) {

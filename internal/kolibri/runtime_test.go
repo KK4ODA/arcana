@@ -102,9 +102,9 @@ func TestUnpackRefusesEscapes(t *testing.T) {
 	wheel := filepath.Join(dir, "kolibri.whl")
 	writeZip(t, wheel, map[string]string{"kolibri/__init__.py": ""})
 	for name, entries := range map[string][]entry{
-		"dot-dot":  {{name: "python/../../evil", body: "x", mode: 0o644}},
-		"absolute": {{name: "/etc/evil", body: "x", mode: 0o644}},
-		"link out": {{name: "python/bin/python3", link: "../../../../etc/passwd"}},
+		"dot-dot":   {{name: "python/../../evil", body: "x", mode: 0o644}},
+		"absolute":  {{name: "/etc/evil", body: "x", mode: 0o644}},
+		"link out":  {{name: "python/bin/python3", link: "../../../../etc/passwd"}},
 		"no python": {{name: "python/lib/os.py", body: "x", mode: 0o644}},
 	} {
 		py := filepath.Join(dir, strings.ReplaceAll(name, " ", "-")+".tar.gz")

@@ -36,7 +36,10 @@ type Info struct {
 // Client talks to one Kolibri server.
 type Client struct {
 	BaseURL string
-	HTTP    *http.Client
+	// PublicURL, when set, is the address links use (the built-in
+	// Kolibri's origin as the browser sees it); BaseURL otherwise.
+	PublicURL string
+	HTTP      *http.Client
 }
 
 // ErrSignIn means the server does not let guests browse content.
@@ -133,8 +136,12 @@ func (c *Client) Search(ctx context.Context, q string, max int) ([]Item, error) 
 		if r := []rune(desc); len(r) > 240 {
 			desc = string(r[:240]) + "…"
 		}
+		link := c.BaseURL
+		if c.PublicURL != "" {
+			link = c.PublicURL
+		}
 		out = append(out, Item{ID: n.ID, Title: n.Title, Kind: n.Kind, Description: desc, ChannelID: n.ChannelID,
-			URL: c.BaseURL + "/learn/#/topics/" + kind + "/" + url.PathEscape(n.ID)})
+			URL: link + "/learn/#/topics/" + kind + "/" + url.PathEscape(n.ID)})
 		if len(out) == max {
 			break
 		}

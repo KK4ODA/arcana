@@ -15,6 +15,24 @@ the library format version is tracked separately (docs/design/09-storage-and-dat
   a question asked while searching one archive is answered from it. For
   programs: `in=ID,ID` on the integration API's `GET /ask`; on the command
   line, `arcana ask --in ID,ID`.
+- **The classroom: Khan Academy with Kolibri, built in.** A new
+  *Classroom* page sets up Learning Equality's Kolibri on the library, so
+  students watch, read and practise Khan Academy, and teachers make
+  classes, lessons and quizzes and follow each student's progress. Arcana
+  downloads Kolibri with Python for Windows, macOS and Linux (245 MB,
+  checksum-verified), unpacks it on each computer, creates the school and
+  an administrator (students sign in by username alone, teachers with a
+  password), and runs it on its own port, 8472 by default. Choose Khan
+  Academy grades and subjects, in English (US curriculum) or Spanish, with
+  the size of each, and Kolibri downloads them. Its courses appear in
+  library search and on the Library page. See docs/kolibri.md and
+  ADR-0024. Tested against a stand-in for Kolibri, not yet with Kolibri
+  itself on each system.
+
+### Changed
+- Arcana now listens on three neighbouring ports (8470, 8471 and 8472 by
+  default; the next free three if those are taken): the third is the
+  classroom's.
 
 ## 0.8.1 — 2026-11-24
 

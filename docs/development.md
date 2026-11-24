@@ -53,7 +53,9 @@ packaging/             launcher and first-run readme for release bundles
 packaging/appliance/   appliance installer, systemd units, captive-portal rules (docs/appliance.md)
 internal/sdnotify/     systemd readiness and watchdog notifications
 internal/integration/  integration API tokens, scopes and pairing
-internal/kolibri/      Kolibri server client: status, course search, links
+internal/kolibri/      Kolibri: search client; the built-in classroom's runtime unpacking, supervisor,
+                       provisioning, administrator client, channel databases and proxy (ADR-0024);
+                       kolibritest/ is a stand-in Kolibri for tests
 internal/mesh/         Meshtastic radio (listen only): stream framing, protobuf decoding, node table
 internal/translate/    translation language packs (Mozilla's model registry), decompression and verification
 internal/drugs/        FDA drug label reference: openFDA provider, download and build, queries, situations
@@ -134,7 +136,13 @@ docs/design/14-radio-and-integrations.md.
 | `GET /api/translate` | Translation engine and installed language packs (files with their URLs, directions) |
 | `GET /translate/engine.wasm`, `GET /translate/model/{resource}/{file}` | Engine and model files, decompressed and checked against Mozilla's hash (ETag = decompressed SHA-256) |
 | `GET /api/updates/schedule`, `POST /api/updates/schedule/run` | Automatic content updates: settings, state, window; check and queue now |
-| `GET /api/kolibri`, `GET /api/kolibri/search?q=`, `POST /api/kolibri/test` `{url}` | Kolibri server status; its courses matching a search; check an address |
+| `GET /api/kolibri`, `GET /api/kolibri/search?q=`, `POST /api/kolibri/test` `{url}` | Kolibri status (the classroom when set up, else the server in settings); its courses matching a search, linked on the browser's address; check an address |
+| `GET /api/classroom` | The classroom (ADR-0024): `state` (`off`, `download`, `preparing`, `starting`, `running`, `failed`, `stopped`, `read-only`), the runtime's download, offered `channels`, and for administrators the Kolibri administrator's `username` and `password`, `onDevice` channels and `imports`; `url` is Kolibri's origin for this browser |
+| `POST /api/classroom/setup` `{language: en\|es}`, `POST /api/classroom/stop` | Turn the classroom on (creating the school the first time, downloading the runtime if needed) or off (data kept) |
+| `POST /api/classroom/password` `{password}` | Record the administrator's password after it was changed in Kolibri (checked first; 422 if Kolibri refuses it) |
+| `GET /api/classroom/channels/{id}/tree`, `POST /api/classroom/channels/{id}/size` `{nodeIds}` | A channel's subjects and grades with sizes (administrators; fetched from Kolibri Studio the first time); the size of a selection, shared files counted once |
+| `POST /api/classroom/import` `{channel, nodeIds}`, `POST /api/classroom/imports/{task}/cancel\|clear` | Ask Kolibri to import topics; stop an import or remove a finished one from the list |
+| Port+2 (`8472`) | Kolibri's origin, proxied to the classroom with the Host check; changes from other origins refused |
 | `GET /api/mesh` | Meshtastic radio: state, nodes (positions, last heard, hops, SNR) and text messages; host and administrators, or everyone when shared |
 | `GET /api/gps`, `GET /api/gps/stream` | Position status; server-sent events (host only unless sharing is on) |
 | `GET /api/gps/ports` | Serial ports (host only) |

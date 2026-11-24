@@ -28,7 +28,10 @@ export async function libraryView(main, params, ctx) {
   }
   main.appendChild(dashboard(status));
   const tiles = [...(status?.links || [])];
-  if (status?.kolibri?.configured) tiles.unshift({ title: 'Kolibri courses', url: status.kolibri.url, description: 'Khan Academy and other courses, with progress for each learner.' });
+  if (status?.kolibri?.builtIn) {
+    tiles.unshift({ title: 'Classroom (Khan Academy)', url: status.kolibri.url,
+      description: status.kolibri.running ? 'Lessons, exercises and quizzes in Kolibri. Students sign in with their username; teachers with a password.' : 'Kolibri is not running yet; see the Classroom page.' });
+  } else if (status?.kolibri?.configured) tiles.unshift({ title: 'Kolibri courses', url: status.kolibri.url, description: 'Khan Academy and other courses, with progress for each learner.' });
   if (tiles.length) {
     main.appendChild(h('section', { class: 'panel' }, h('header', null, h('h2', null, 'On this network')),
       h('div', { class: 'body link-tiles' }, tiles.map((l) => h('a', { class: 'link-tile', href: l.url, target: '_blank', rel: 'noopener noreferrer' },
@@ -90,8 +93,8 @@ export async function libraryView(main, params, ctx) {
     try {
       const r = await api.get(`/api/kolibri/search?q=${encodeURIComponent(q)}`);
       if (mine !== searchSeq) return;
-      const open = h('a', { href: r.url, target: '_blank', rel: 'noopener noreferrer', class: 'small' }, 'Open Kolibri');
-      fill(sec, h('div', { class: 'search-group-head' }, h('h3', null, 'Courses in Kolibri'),
+      const open = h('a', { href: r.url, target: '_blank', rel: 'noopener noreferrer', class: 'small' }, status?.kolibri?.builtIn ? 'Open the classroom' : 'Open Kolibri');
+      fill(sec, h('div', { class: 'search-group-head' }, h('h3', null, status?.kolibri?.builtIn ? 'Courses in the classroom' : 'Courses in Kolibri'),
         h('span', { class: 'small muted' }, r.error ? r.error : `${r.items.length} match${r.items.length === 1 ? '' : 'es'}`), open),
         r.items.length ? h('ul', { class: 'results' }, r.items.map((it) => h('li', null,
           h('a', { href: it.url, target: '_blank', rel: 'noopener noreferrer' }, it.title),

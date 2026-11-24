@@ -129,6 +129,11 @@ this way.)
 - Check the library: `sudo -u arcana /opt/arcana/arcana check --full --library /srv/arcana/library`
 - GPS receiver: plug it in and choose it under *Settings → Maps and
   position*; the service user may use serial ports.
+- Classroom (Kolibri with Khan Academy): set it up on the *Classroom* page
+  ([kolibri.md](kolibri.md)). The service cannot write outside
+  `/srv/arcana`, so Kolibri unpacks into the library's `state/runtime/`
+  folder rather than a cache folder. Phones on the access point open it at
+  `http://10.42.0.1:8472/`, or through the Library page's tile.
 
 ## Security notes
 
@@ -146,6 +151,8 @@ this way.)
 ## Not done yet
 
 - A ready-to-flash SD card image (pi-gen).
+- The classroom on a Raspberry Pi: Kolibri's first start and its speed
+  with a class of phones are untried.
 - Tests on Raspberry Pi hardware, including captive-portal behaviour on
   current Android and iOS versions and the number of phones a Pi 4/5 can
   serve at once.
