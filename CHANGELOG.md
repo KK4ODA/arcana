@@ -23,6 +23,7 @@ being online: choose *Update now* in the banner at the top of the page, or
   VPN; and networks that keep devices apart.
 - *Settings → Integrations* no longer says that RadioPost and Aether HF
   use the integration API already; they will in coming versions.
+- Discover lists its categories alphabetically.
 
 ### Fixed
 - **"Get a road network" and "Browse map regions" opened an empty list.**
