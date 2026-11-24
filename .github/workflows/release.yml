@@ -117,7 +117,7 @@ jobs:
       # pinned SHA-256 again after a restore; the kiwix-serve binaries were
       # checked against the pinned archive hash when the CI build on main
       # first downloaded them, and are not re-checked on restore.
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: |
             third_party/kiwix
