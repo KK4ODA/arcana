@@ -20,26 +20,38 @@ import (
 // StudioURL is Kolibri Studio, where Kolibri imports channels from.
 const StudioURL = "https://studio.learningequality.org"
 
-// Channel is a Kolibri channel Arcana offers.
+// Channel is a Kolibri channel Arcana offers (the list is Channels).
 type Channel struct {
-	ID       string `json:"id"`
-	Title    string `json:"title"`
+	ID    string `json:"id"`
+	Title string `json:"title"`
+	// Language is the channel's language as Kolibri Studio gives it
+	// (BCP 47: "en", "pt-BR", "fuv").
 	Language string `json:"language"`
-	// Size is the whole channel as last published (Kolibri Studio,
-	// checked 24 November 2026).
+	// Group places the channel on the Classroom page.
+	Group string `json:"group"`
+	// Levels says who the channel is for and About what it holds, so the
+	// owner can choose without opening its list of topics.
+	Levels string `json:"levels"`
+	About  string `json:"about"`
+	// Size is the whole channel as last published.
 	Size      int64  `json:"size"`
 	Published string `json:"published"`
-	License   string `json:"license"`
+	// License is how the channel marks its resources. Kolibri shows each
+	// resource's own licence.
+	License string `json:"license"`
 }
 
-// Channels are the channels offered on the Classroom page: Khan Academy in
-// English (US curriculum) and in Spanish (the owner's choice, ADR-0024).
-var Channels = []Channel{
-	{ID: "c9d7f950ab6b5a1199e3d6c10d7f0103", Title: "Khan Academy (English, US curriculum)", Language: "en",
-		Size: 67814440813, Published: "2026-01-23", License: "CC BY-NC-SA"},
-	{ID: "c1f2b7e6ac9f56a2bb44fa7a48b66dce", Title: "Khan Academy (Español)", Language: "es",
-		Size: 39371035076, Published: "2025-12-23", License: "CC BY-NC-SA"},
-}
+// The Classroom page's groups of channels.
+const (
+	// GroupKhan: Khan Academy in English (US, Philippines and India),
+	// Spanish, and its archive of test preparation.
+	GroupKhan = "khan"
+	// GroupMore: other publishers' channels for high school, college and
+	// adults, in English and Spanish.
+	GroupMore = "more"
+	// GroupKhanWorld: Khan Academy in other languages.
+	GroupKhanWorld = "khan-world"
+)
 
 // ChannelByID returns an offered channel.
 func ChannelByID(id string) (Channel, bool) {

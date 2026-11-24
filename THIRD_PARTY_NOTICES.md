@@ -74,7 +74,8 @@ file and the build it belongs to.
 | Bergamot translation engine (WebAssembly) and Mozilla's translation models (downloaded on request, not shipped) | MPL-2.0 (Mozilla) |
 | Kolibri 0.19.5 (bundled catalog entry `arcana.kolibri`; downloaded on request, not shipped) | MIT (Learning Equality); its wheel bundles Django (BSD-3-Clause) and other dependencies under their own licences, listed in its `dist` folder |
 | CPython 3.11.17, python-build-standalone 20261003 (same entry; downloaded on request, not shipped) | Python Software Foundation License 2.0; the builds bundle OpenSSL (Apache-2.0), SQLite (public domain) and other libraries listed in each build's licence files |
-| Khan Academy channels imported by Kolibri (downloaded on request, not shipped) | CC BY-NC-SA (Khan Academy): non-commercial use only |
+| Khan Academy channels imported by Kolibri (downloaded on request, not shipped) | CC BY-NC-SA (Khan Academy), exercises by permission to distribute through Kolibri: non-commercial use only |
+| Other Kolibri channels offered on the Classroom page (downloaded on request, not shipped) | Each channel's own licences, listed in docs/kolibri.md: CC BY, CC BY-SA, CC BY-NC, CC BY-NC-SA, CC BY-NC-ND, public domain, or the publisher's permission for Kolibri |
 | FDA drug labels (openFDA downloads; built into a reference on request, not shipped) | Public domain, CC0 1.0 (U.S. Food and Drug Administration); label text written by the manufacturers |
 | Map data downloaded through the maps provider (not shipped) | © OpenStreetMap contributors, ODbL 1.0; basemap by Protomaps; includes Natural Earth (public domain) and ESA WorldCover land cover (CC BY 4.0). The place-name index Arcana builds from it is a derivative database under the ODbL. |
 

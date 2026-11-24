@@ -1,6 +1,8 @@
 # ADR-0024: Kolibri built in, for Khan Academy classrooms
 
 - Status: Accepted (not yet tried on real hardware)
+- Amended by: [ADR-0025](0025-more-classroom-channels.md), which offers
+  60 channels instead of two
 - Date: 2026-11-24
 
 ## Context

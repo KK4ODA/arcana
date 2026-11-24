@@ -3,6 +3,31 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
+## Unreleased
+
+### Added
+- **Sixty channels in the classroom.** The *Classroom* page now offers,
+  besides Khan Academy in English (US curriculum) and Spanish: Khan
+  Academy's English channels for the Philippine and Indian (CBSE)
+  curricula, its archive of test preparation (SAT before 2024, MCAT,
+  NCLEX-RN, LSAT, GMAT, Praxis Core), Khan Academy in 25 other languages
+  (folded at the end), and 30 channels from other publishers for high
+  school, college and adults in English and Spanish, among them CK-12,
+  OpenStax, MIT Blossoms, PhET, EngageNY, BCcampus, Osmosis and Career
+  Girls. Each says who it is for, what it holds, its size and its licence;
+  many are for non-commercial use only. For AP courses missing from the
+  English Khan Academy channel, its Spanish channel has AP Physics 1 and 2
+  and AP Chemistry, and OpenStax has The AP Physics Collection. See
+  docs/kolibri.md and ADR-0025.
+- **Everything in a channel.** The topic picker can take a whole channel at
+  once, including resources kept outside its topics.
+
+### Fixed
+- **Settings on a phone.** The page no longer scrolls sideways on a narrow
+  screen: a list with long choices (*Where the model runs*) made the whole
+  page 520 pixels wide. The offline acceptance test now loads every page at
+  phone width and fails if one is wider than the screen.
+
 ## 0.9.0 — 2026-11-24
 
 Arcana can now run a classroom: Kolibri with Khan Academy in English or

@@ -26,3 +26,4 @@
 | [0022](0022-fda-drug-label-reference.md) | FDA drug label reference built on the user's computer | Accepted |
 | [0023](0023-offline-translation-in-the-browser.md) | Offline translation in the reader's browser (Bergamot WebAssembly) | Accepted |
 | [0024](0024-kolibri-built-in.md) | Kolibri built in, for Khan Academy classrooms | Accepted |
+| [0025](0025-more-classroom-channels.md) | More channels in the classroom | Accepted |

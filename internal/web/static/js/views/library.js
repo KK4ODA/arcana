@@ -29,8 +29,8 @@ export async function libraryView(main, params, ctx) {
   main.appendChild(dashboard(status));
   const tiles = [...(status?.links || [])];
   if (status?.kolibri?.builtIn) {
-    tiles.unshift({ title: 'Classroom (Khan Academy)', url: status.kolibri.url,
-      description: status.kolibri.running ? 'Lessons, exercises and quizzes in Kolibri. Students sign in with their username; teachers with a password.' : 'Kolibri is not running yet; see the Classroom page.' });
+    tiles.unshift({ title: 'Classroom (Kolibri)', url: status.kolibri.url,
+      description: status.kolibri.running ? 'Khan Academy and other courses, with lessons and quizzes. Students sign in with their username; teachers with a password.' : 'Kolibri is not running yet; see the Classroom page.' });
   } else if (status?.kolibri?.configured) tiles.unshift({ title: 'Kolibri courses', url: status.kolibri.url, description: 'Khan Academy and other courses, with progress for each learner.' });
   if (tiles.length) {
     main.appendChild(h('section', { class: 'panel' }, h('header', null, h('h2', null, 'On this network')),

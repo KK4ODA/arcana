@@ -112,8 +112,11 @@ not yet code-signed (see [Status](#status)).
 - **Raspberry Pi / Linux appliance.** An installer sets Arcana up as a
   service with its own Wi-Fi network and captive portal
   ([docs/appliance.md](docs/appliance.md); not yet run on hardware).
-- **Classroom** (optional): Kolibri built in, with Khan Academy in English
-  or Spanish chosen by grade and subject. Students sign in by username;
+- **Classroom** (optional): Kolibri built in, with courses chosen by grade
+  and subject from 60 channels: Khan Academy in English, Spanish and 25
+  other languages and its test preparation, and other publishers' courses
+  for high school, college and adults (CK-12, OpenStax, PhET, MIT Blossoms
+  and more). Students sign in by username;
   teachers make classes, lessons and quizzes and follow progress. Arcana
   downloads and runs Kolibri for Windows, macOS and Linux from the drive
   ([docs/kolibri.md](docs/kolibri.md)). A Kolibri server installed
