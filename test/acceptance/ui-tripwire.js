@@ -18,17 +18,34 @@ const { chromium } = require('playwright');
   });
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
-  const views = ['library', 'discover', 'maps', 'downloads', 'updates', 'server', 'settings', 'classroom', 'library?q=morse', 'read/arcana.sample'];
-  for (const v of views) {
-    await page.goto(`${base.href}#/${v}`, { waitUntil: 'networkidle' });
+
+  // A view has settled when no request but an event stream has been open
+  // for 500 ms. Playwright's 'networkidle' counts event streams too, and the
+  // GPS stream stays open while a receiver is connected (the acceptance test
+  // runs a simulated one), so 'networkidle' would never come.
+  const inflight = new Set();
+  page.on('request', (r) => { if (r.resourceType() !== 'eventsource') inflight.add(r); });
+  page.on('requestfinished', (r) => inflight.delete(r));
+  page.on('requestfailed', (r) => inflight.delete(r));
+  const open = async (v) => {
+    await page.goto(`${base.href}#/${v}`);
+    const deadline = Date.now() + 30000;
+    let quiet = Date.now();
+    while (Date.now() - quiet < 500) {
+      if (Date.now() > deadline) throw new Error(`#/${v} kept loading: ${[...inflight].map((r) => r.url()).join(', ')}`);
+      if (inflight.size) quiet = Date.now();
+      await page.waitForTimeout(50);
+    }
     await page.waitForTimeout(400);
-  }
+  };
+
+  const views = ['library', 'discover', 'maps', 'downloads', 'updates', 'server', 'settings', 'classroom', 'library?q=morse', 'read/arcana.sample'];
+  for (const v of views) await open(v);
   // On a phone: each view loaded at that width, with its folded sections
   // opened, must fit it.
   await page.setViewportSize({ width: 390, height: 844 });
   for (const v of views) {
-    await page.goto(`${base.href}#/${v}`, { waitUntil: 'networkidle' });
-    await page.waitForTimeout(400);
+    await open(v);
     const over = await page.evaluate(() => {
       for (const d of document.querySelectorAll('details')) d.open = true;
       const w = document.documentElement.clientWidth;
