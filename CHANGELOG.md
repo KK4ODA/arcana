@@ -22,6 +22,12 @@ the library format version is tracked separately (docs/design/09-storage-and-dat
 - **Everything in a channel.** The topic picker can take a whole channel at
   once, including resources kept outside its topics.
 
+### Fixed
+- **Settings on a phone.** The page no longer scrolls sideways on a narrow
+  screen: a list with long choices (*Where the model runs*) made the whole
+  page 520 pixels wide. The offline acceptance test now loads every page at
+  phone width and fails if one is wider than the screen.
+
 ## 0.9.0 — 2026-11-24
 
 Arcana can now run a classroom: Kolibri with Khan Academy in English or
