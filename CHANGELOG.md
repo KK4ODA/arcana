@@ -3,6 +3,19 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
+## Unreleased
+
+### Added
+- **Ask within chosen sources.** *Search in*, under the question in the
+  *Ask* view, limits a question to the archives and documents you tick
+  (and on the computer running Arcana, your own documents), instead of the
+  whole library. The answer says what it searched, and when the chosen
+  sources do not cover the question, *Ask the whole library* asks again.
+  The *Ask* button beside library search keeps its *Search in* choice, so
+  a question asked while searching one archive is answered from it. For
+  programs: `in=ID,ID` on the integration API's `GET /ask`; on the command
+  line, `arcana ask --in ID,ID`.
+
 ## 0.8.1 — 2026-11-24
 
 *Get a road network* and *Browse map regions* open their lists again: on

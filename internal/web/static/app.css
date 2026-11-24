@@ -430,6 +430,15 @@ a.cite { text-decoration: none; font-size: 0.82em; vertical-align: 0.25em; paddi
 .cite-num { font-family: var(--mono); font-size: 12px; color: var(--muted); }
 blockquote.passage { margin: 6px 0 0; padding: 0 0 0 10px; border-left: 2px solid var(--border-strong); font-size: 13px; color: var(--muted); white-space: pre-line; overflow-wrap: anywhere; }
 .ask-history { border-top: 1px solid var(--border); padding: 6px 0; }
+.ask-sources { margin: 6px 0; }
+.ask-sources > summary { cursor: pointer; font-size: 13px; }
+.ask-sources.off { opacity: 0.5; }
+.ask-sources-body { margin-top: 6px; }
+.ask-sources fieldset { border: 1px solid var(--border); border-radius: var(--radius); margin: 6px 0; padding: 6px 10px;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 2px 14px; }
+.ask-sources legend { font-size: 12px; color: var(--muted); padding: 0 4px; }
+.ask-sources label.inline { align-items: flex-start; min-width: 0; }
+.ask-within { margin: 4px 0 8px; }
 .ask-history summary { cursor: pointer; font-weight: 600; }
 .answer > h3 { text-transform: none; letter-spacing: 0; color: var(--text); font-size: 16px; }
 .passage-more { margin-top: 4px; }

@@ -220,6 +220,79 @@ func (ix *Index) SearchIn(ctx context.Context, query, resourceID string, offset,
 	return out, total, rows.Err()
 }
 
+// SearchAmong runs a full-text query limited to the documents of the given
+// installed resources and, with own, the person's own documents, best
+// first. With neither it finds nothing.
+func (ix *Index) SearchAmong(ctx context.Context, query string, resourceIDs []string, own bool, limit int) ([]Hit, error) {
+	q := ftsQuery(query)
+	if q == "" || (len(resourceIDs) == 0 && !own) {
+		return nil, nil
+	}
+	if limit <= 0 || limit > 100 {
+		limit = 25
+	}
+	var where []string
+	args := []any{q}
+	if len(resourceIDs) > 0 {
+		marks := strings.TrimSuffix(strings.Repeat("?,", len(resourceIDs)), ",")
+		where = append(where, "(d.source = 'resource' AND d.resource_id IN ("+marks+"))")
+		for _, id := range resourceIDs {
+			args = append(args, id)
+		}
+	}
+	if own {
+		where = append(where, "d.source = 'user'")
+	}
+	args = append(args, limit)
+	ix.mu.Lock()
+	defer ix.mu.Unlock()
+	rows, err := ix.db.QueryContext(ctx, `SELECT d.key, d.source, d.resource_id, d.name, d.url, d.title,
+		snippet(docs_fts, 2, char(1), char(2), '…', 14)
+		FROM docs_fts f JOIN docs d ON d.key = f.key
+		WHERE docs_fts MATCH ? AND (`+strings.Join(where, " OR ")+`)
+		ORDER BY bm25(docs_fts, 0, 8.0, 1.0) LIMIT ?`, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []Hit
+	for rows.Next() {
+		var h Hit
+		var snip string
+		if err := rows.Scan(&h.Key, &h.Source, &h.ResourceID, &h.Name, &h.URL, &h.Title, &snip); err != nil {
+			return nil, err
+		}
+		h.Snippet = highlight(snip)
+		out = append(out, h)
+	}
+	return out, rows.Err()
+}
+
+// Holders lists the installed resources that have indexed documents, and
+// reports whether the person has documents of their own.
+func (ix *Index) Holders(ctx context.Context) (resourceIDs []string, own bool, err error) {
+	ix.mu.Lock()
+	defer ix.mu.Unlock()
+	rows, err := ix.db.QueryContext(ctx, `SELECT DISTINCT source, resource_id FROM docs`)
+	if err != nil {
+		return nil, false, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var source, id string
+		if err := rows.Scan(&source, &id); err != nil {
+			return nil, false, err
+		}
+		switch source {
+		case "user":
+			own = true
+		case "resource":
+			resourceIDs = append(resourceIDs, id)
+		}
+	}
+	return resourceIDs, own, rows.Err()
+}
+
 // Text returns a document's extracted title and text (for previews).
 func (ix *Index) Text(ctx context.Context, key string, max int) (title, text, url string, err error) {
 	ix.mu.Lock()

@@ -53,6 +53,12 @@ flowchart LR
   FTS5 searches, passages along line breaks, coverage weighted by rarity,
   at most two passages per article, a character budget from the context
   window. Table rows are kept on one line ("QTH | Location of the station").
+- **Chosen sources**: a question can be limited to some installed archives
+  and document collections, and on the host to the person's own documents
+  (`assistant.Scope`; `in=ID,ID` on both ask endpoints, `arcana ask --in`,
+  *Search in* in the Ask view, carried over from library search). The
+  archives are searched with kiwix-serve's book filter and the documents in
+  one FTS5 query (`docs.SearchAmong`), so their passages rank together.
 - **Relevance floor**: below it the answer is "I could not find this in
   your library" and no model runs.
 - **Backends**: llamafile 0.10.6 as a supervised loopback sidecar (catalog

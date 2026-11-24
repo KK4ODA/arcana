@@ -151,6 +151,30 @@ func TestIndexSyncAndSearch(t *testing.T) {
 	if hits, n, _ := ix.SearchIn(context.Background(), "batteries", "", 1, 10); n != 1 || len(hits) != 0 {
 		t.Errorf("offset past the end: %d %+v", n, hits)
 	}
+	// Searching chosen sources: several resources, the person's own, both.
+	for _, c := range []struct {
+		query string
+		ids   []string
+		own   bool
+		want  string
+	}{
+		{"batteries", []string{"x.y"}, false, "res:x.y/solar.md"}, {"batteries", []string{"other", "x.y"}, false, "res:x.y/solar.md"},
+		{"batteries", []string{"other"}, false, ""}, {"iodine", []string{"x.y"}, false, ""},
+		{"iodine", nil, true, "user:water.txt"}, {"iodine", []string{"x.y"}, true, "user:water.txt"},
+		{"batteries", nil, true, ""}, {"batteries", nil, false, ""},
+	} {
+		hits, err := ix.SearchAmong(context.Background(), c.query, c.ids, c.own, 10)
+		got := ""
+		if len(hits) == 1 {
+			got = hits[0].Key
+		}
+		if err != nil || got != c.want || len(hits) > 1 {
+			t.Errorf("%q among %v (own %v): %+v %v, want %q", c.query, c.ids, c.own, hits, err, c.want)
+		}
+	}
+	if ids, own, err := ix.Holders(context.Background()); err != nil || !own || len(ids) != 1 || ids[0] != "x.y" {
+		t.Errorf("holders: %v %v %v", ids, own, err)
+	}
 	// Unchanged documents are not re-extracted; removed ones are dropped.
 	res, _ = ix.Sync(context.Background(), docs[1:], nil)
 	if res.Indexed != 0 || res.Removed != 1 {

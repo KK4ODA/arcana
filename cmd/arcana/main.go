@@ -55,8 +55,9 @@ Usage:
                                 Install a signed application update (offline)
   arcana hotspot start --ssid NAME --password PW [--device wlan0] | stop | status
                                 Wi-Fi hotspot for phones (Linux with NetworkManager)
-  arcana ask [--no-library] QUESTION
-                                Answer a question from the library (Settings → Assistant)
+  arcana ask [--no-library] [--in ID,ID] QUESTION
+                                Answer a question from the library (Settings → Assistant);
+                                --in limits it to those resources (@user: your documents)
   arcana ask --eval FILE [--with-model]
                                 Score retrieval (and answers) against a question set
   arcana volumes                List drives and their file systems
@@ -881,20 +882,52 @@ func cmdHotspot(args []string) error {
 	return fmt.Errorf("unknown hotspot action %q", args[0])
 }
 
+// askSourcesFlag reads --in: the resource IDs a question is limited to,
+// and @user for the person's own documents. A wrong ID is refused with the
+// list of sources there are.
+func askSourcesFlag(ctx context.Context, a *app.App, in string) ([]string, error) {
+	var ids []string
+	for _, id := range strings.Split(in, ",") {
+		if id = strings.TrimSpace(id); id != "" {
+			ids = append(ids, id)
+		}
+	}
+	if len(ids) == 0 {
+		return nil, nil
+	}
+	known := map[string]bool{assistant.OwnDocuments: true}
+	list := a.AskSources(ctx, true)
+	for _, src := range list {
+		known[src.ID] = true
+	}
+	for _, id := range ids {
+		if !known[id] {
+			var b strings.Builder
+			fmt.Fprintf(&b, "%q is not installed, or holds nothing that can be searched. Sources:", id)
+			for _, src := range list {
+				fmt.Fprintf(&b, "\n  %-40s %s", src.ID, src.Title)
+			}
+			return nil, errors.New(b.String())
+		}
+	}
+	return ids, nil
+}
+
 func cmdAsk(args []string) error {
 	var noLibrary, withModel bool
-	var evalFile string
+	var evalFile, in string
 	c, fs, err := parseFlags("ask", reorder(args), func(fs *flag.FlagSet) {
 		fs.BoolVar(&noLibrary, "no-library", false, "")
 		fs.BoolVar(&withModel, "with-model", false, "")
 		fs.StringVar(&evalFile, "eval", "", "")
+		fs.StringVar(&in, "in", "", "")
 	})
 	if err != nil {
 		return err
 	}
 	question := strings.TrimSpace(strings.Join(fs.Args(), " "))
 	if question == "" && evalFile == "" {
-		return errors.New("usage: arcana ask QUESTION   or   arcana ask --eval FILE [--with-model]")
+		return errors.New("usage: arcana ask [--in ID,ID] QUESTION   or   arcana ask --eval FILE [--with-model]")
 	}
 	root, err := requireLibrary(c)
 	if err != nil {
@@ -924,7 +957,11 @@ func cmdAsk(args []string) error {
 	if st := a.AssistantStatus(ctx); !st.Ready {
 		return errors.New(st.Problem)
 	}
-	res, err := a.Assistant.Ask(ctx, assistant.Request{Question: question, Retrieval: !noLibrary, IncludePrivate: true},
+	sources, err := askSourcesFlag(ctx, a, in)
+	if err != nil {
+		return err
+	}
+	res, err := a.Assistant.Ask(ctx, assistant.Request{Question: question, Retrieval: !noLibrary, IncludePrivate: true, Sources: sources},
 		func(e assistant.Event) {
 			switch e.Type {
 			case "status":

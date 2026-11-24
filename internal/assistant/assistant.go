@@ -66,8 +66,45 @@ type Request struct {
 	// Retrieval searches the library first (the normal case). Without it
 	// the model answers from general knowledge and the answer says so.
 	Retrieval bool
-	// IncludePrivate adds the person's own documents (only for the host).
+	// IncludePrivate allows the person's own documents (only for the
+	// host): searched with the whole library, or when Sources names them.
 	IncludePrivate bool
+	// Sources limits retrieval to these installed resources, by ID, and
+	// OwnDocuments for the person's own documents. Empty searches the
+	// whole library.
+	Sources []string
+}
+
+// ErrPrivateSource is returned when a question names the person's own
+// documents without access to them.
+var ErrPrivateSource = errors.New("your documents can only be searched on the computer running Arcana")
+
+// scope turns a request's sources into where retrieval looks, and the
+// sources named, each once.
+func (r Request) scope() (Scope, []string, error) {
+	named := []string{}
+	seen := map[string]bool{}
+	for _, id := range r.Sources {
+		if id = strings.TrimSpace(id); id != "" && !seen[id] {
+			seen[id] = true
+			named = append(named, id)
+		}
+	}
+	if len(named) == 0 {
+		return Scope{Own: r.IncludePrivate}, named, nil
+	}
+	sc := Scope{Only: true}
+	for _, id := range named {
+		if id == OwnDocuments {
+			if !r.IncludePrivate {
+				return Scope{}, nil, ErrPrivateSource
+			}
+			sc.Own = true
+			continue
+		}
+		sc.Resources = append(sc.Resources, id)
+	}
+	return sc, named, nil
 }
 
 // Event is streamed to the person while an answer is prepared.
@@ -91,6 +128,9 @@ type Result struct {
 	Check    Check     `json:"check"`
 	// FromLibrary is false when retrieval was switched off.
 	FromLibrary bool `json:"fromLibrary"`
+	// Sources are the sources searched, as the request named them; empty
+	// when the whole library was.
+	Sources []string `json:"sources"`
 	// Skipped is true when no passage was relevant enough to ask the
 	// model at all.
 	Skipped   bool  `json:"skipped"`
@@ -136,12 +176,21 @@ func (s *Service) Ask(ctx context.Context, req Request, emit func(Event)) (Resul
 	if len(q) > MaxQuestion {
 		return Result{}, errors.New("the question is too long")
 	}
+	scope, named, err := req.scope()
+	if err != nil {
+		return Result{}, err
+	}
 	cfg := s.Config()
 	cfg.defaults()
-	res := Result{Question: q, FromLibrary: req.Retrieval, Passages: []Passage{}, Keywords: []string{}}
+	res := Result{Question: q, FromLibrary: req.Retrieval, Passages: []Passage{}, Keywords: []string{}, Sources: []string{}}
 	if req.Retrieval {
-		emit(Event{Type: "status", Status: "searching", Message: "Searching your library…"})
-		ps, kws, err := Retrieve(ctx, s.Lib, q, RetrieveOptions{Passages: cfg.Passages, Budget: cfg.budget(), IncludePrivate: req.IncludePrivate})
+		res.Sources = named
+		msg := "Searching your library…"
+		if scope.Only {
+			msg = "Searching the chosen sources…"
+		}
+		emit(Event{Type: "status", Status: "searching", Message: msg})
+		ps, kws, err := Retrieve(ctx, s.Lib, q, RetrieveOptions{Passages: cfg.Passages, Budget: cfg.budget(), Scope: scope})
 		if ctx.Err() != nil {
 			return res, ctx.Err()
 		}

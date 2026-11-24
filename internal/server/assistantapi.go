@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -41,10 +42,50 @@ func (s *Server) canAsk(r *http.Request, a *app.App) (bool, string) {
 	return true, ""
 }
 
+// maxAskSources bounds how many sources one question names.
+const maxAskSources = 50
+
+// askSources reads the sources a question is limited to (in=ID,ID,…): the
+// installed archives and document collections AskSources lists, and @user,
+// the person's own documents, only on the computer running Arcana. None is
+// the whole library. A refusal comes with its HTTP status and message.
+func askSources(r *http.Request, a *app.App, private bool) ([]string, int, string) {
+	raw := strings.TrimSpace(r.URL.Query().Get("in"))
+	if raw == "" {
+		return nil, 0, ""
+	}
+	var ids []string
+	for _, id := range strings.Split(raw, ",") {
+		if id = strings.TrimSpace(id); id != "" && !slices.Contains(ids, id) {
+			ids = append(ids, id)
+		}
+	}
+	if len(ids) > maxAskSources {
+		return nil, http.StatusBadRequest, fmt.Sprintf("Choose at most %d sources.", maxAskSources)
+	}
+	known := map[string]bool{}
+	for _, src := range a.AskSources(r.Context(), false) {
+		known[src.ID] = true
+	}
+	for _, id := range ids {
+		switch {
+		case id == assistant.OwnDocuments && !private:
+			return nil, http.StatusForbidden, "Your documents can only be searched on the computer running Arcana."
+		case id == assistant.OwnDocuments:
+		case !known[id]:
+			return nil, http.StatusBadRequest, fmt.Sprintf("%q is not installed, or holds nothing that can be searched.", id)
+		}
+	}
+	return ids, 0, ""
+}
+
 func (s *Server) handleAssistantStatus(w http.ResponseWriter, r *http.Request, a *app.App) {
 	st := a.AssistantStatus(r.Context())
 	ok, why := s.canAsk(r, a)
-	resp := map[string]any{"status": st, "canAsk": ok && st.Ready, "private": isLocal(r)}
+	resp := map[string]any{"status": st, "canAsk": ok && st.Ready, "private": isLocal(r),
+		// What a question can be limited to; the host user's own
+		// documents only on the computer running Arcana.
+		"sources": a.AskSources(r.Context(), isLocal(r))}
 	if !ok {
 		resp["reason"] = why
 	} else if !st.Ready {
@@ -66,6 +107,11 @@ func (s *Server) handleAsk(w http.ResponseWriter, r *http.Request, a *app.App) {
 	q := strings.TrimSpace(r.URL.Query().Get("q"))
 	if q == "" || len(q) > assistant.MaxQuestion {
 		writeError(w, http.StatusBadRequest, "Ask a question of at most 1000 characters.")
+		return
+	}
+	sources, code, msg := askSources(r, a, isLocal(r))
+	if code != 0 {
+		writeError(w, code, msg)
 		return
 	}
 	if askRequests.Add(1) > maxAskRequests {
@@ -117,7 +163,7 @@ func (s *Server) handleAsk(w http.ResponseWriter, r *http.Request, a *app.App) {
 	}()
 	req := assistant.Request{Question: q, Retrieval: r.URL.Query().Get("retrieval") != "0",
 		// The host user's own documents never reach other devices.
-		IncludePrivate: isLocal(r)}
+		IncludePrivate: isLocal(r), Sources: sources}
 	_, err := a.Assistant.Ask(ctx, req, func(e assistant.Event) { send(e.Type, e) })
 	if err != nil && !errors.Is(err, context.Canceled) {
 		msg := err.Error()
@@ -166,6 +212,12 @@ func (s *Server) handleIntAsk(w http.ResponseWriter, r *http.Request, a *app.App
 		writeError(w, http.StatusBadRequest, "q is required (at most 1000 characters)")
 		return
 	}
+	// Programs never search the host user's own documents.
+	sources, code, msg := askSources(r, a, false)
+	if code != 0 {
+		writeError(w, code, msg)
+		return
+	}
 	if askRequests.Add(1) > maxAskRequests {
 		askRequests.Add(-1)
 		writeError(w, http.StatusTooManyRequests, "Several questions are already being answered. Try again in a minute.")
@@ -174,7 +226,7 @@ func (s *Server) handleIntAsk(w http.ResponseWriter, r *http.Request, a *app.App
 	defer askRequests.Add(-1)
 	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Minute)
 	defer cancel()
-	res, err := a.Assistant.Ask(ctx, assistant.Request{Question: q, Retrieval: true}, nil)
+	res, err := a.Assistant.Ask(ctx, assistant.Request{Question: q, Retrieval: true, Sources: sources}, nil)
 	if err != nil {
 		writeError(w, http.StatusServiceUnavailable, err.Error())
 		return
@@ -193,5 +245,6 @@ func (s *Server) handleIntAsk(w http.ResponseWriter, r *http.Request, a *app.App
 		ps = append(ps, pp)
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"question": res.Question, "answer": res.Answer, "notFound": res.Check.NotFound,
-		"unsupported": res.Check.Unsupported, "cited": res.Check.Cited, "passages": ps, "truncated": res.Truncated})
+		"unsupported": res.Check.Unsupported, "cited": res.Check.Cited, "passages": ps, "truncated": res.Truncated,
+		"sources": res.Sources})
 }

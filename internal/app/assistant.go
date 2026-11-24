@@ -275,35 +275,53 @@ func privateHost(host string) bool {
 // assistantLibrary gives the assistant Arcana's search, text and citations.
 type assistantLibrary struct{ a *App }
 
-func (l *assistantLibrary) Search(ctx context.Context, q string, limit int, private bool) ([]assistant.Hit, error) {
+func (l *assistantLibrary) Search(ctx context.Context, q string, limit int, scope assistant.Scope) ([]assistant.Hit, error) {
 	var out []assistant.Hit
 	var firstErr error
-	if k := l.a.Kiwix; k != nil && len(k.Books()) > 0 {
-		sctx, cancel := context.WithTimeout(ctx, 20*time.Second)
-		hits, _, err := k.Search(sctx, q, nil, limit)
-		cancel()
-		if err != nil {
-			firstErr = err
+	if k := l.a.Kiwix; k != nil {
+		books := k.Books()
+		// Only the chosen archives, when sources were chosen.
+		var only map[string]bool
+		if scope.Only {
+			only = map[string]bool{}
+			for _, id := range scope.Resources {
+				if _, ok := books[id]; ok {
+					only[id] = true
+				}
+			}
 		}
-		for _, h := range hits {
-			out = append(out, assistant.Hit{ResourceID: h.ResourceID, Path: h.Path, Title: h.Title, Kind: "archive"})
+		if len(books) > 0 && (only == nil || len(only) > 0) {
+			sctx, cancel := context.WithTimeout(ctx, 20*time.Second)
+			hits, _, err := k.Search(sctx, q, only, limit)
+			cancel()
+			if err != nil {
+				firstErr = err
+			}
+			for _, h := range hits {
+				out = append(out, assistant.Hit{ResourceID: h.ResourceID, Path: h.Path, Title: h.Title, Kind: "archive"})
+			}
 		}
 	}
 	if l.a.Docs != nil {
-		// Without private access, search only shared documents, so the
-		// person's own files neither appear nor crowd out the rest.
-		scope := docs.SharedDocuments
-		if private {
-			scope = ""
+		var hits []docs.Hit
+		var err error
+		switch {
+		case scope.Only:
+			hits, err = l.a.Docs.SearchAmong(ctx, q, scope.Resources, scope.Own, limit)
+		case scope.Own:
+			hits, _, err = l.a.Docs.SearchIn(ctx, q, "", 0, limit)
+		default:
+			// Without the person's own documents, search only shared
+			// ones, so private files neither appear nor crowd out the rest.
+			hits, _, err = l.a.Docs.SearchIn(ctx, q, docs.SharedDocuments, 0, limit)
 		}
-		hits, _, err := l.a.Docs.SearchIn(ctx, q, scope, 0, limit)
 		if err != nil && firstErr == nil {
 			firstErr = err
 		}
 		for _, h := range hits {
 			switch h.Source {
 			case "user":
-				if private {
+				if scope.Own {
 					out = append(out, assistant.Hit{ResourceID: "", Path: h.Key, Title: h.Title, Kind: "user"})
 				}
 			case "resource":
@@ -313,6 +331,64 @@ func (l *assistantLibrary) Search(ctx context.Context, q string, limit int, priv
 		}
 	}
 	return out, firstErr
+}
+
+// AskSource is a source a question can be limited to.
+type AskSource struct {
+	ID    string `json:"id"`
+	Title string `json:"title"`
+	// Kind is "archive", "documents" (an installed resource's documents)
+	// or "own" (the person's own documents).
+	Kind     string `json:"kind"`
+	Language string `json:"language,omitempty"`
+}
+
+// AskSources lists what a question can be limited to: installed archives,
+// installed resources with documents, and with private the person's own
+// documents (when there are some). Archives come first, then document
+// collections, each by title.
+func (a *App) AskSources(ctx context.Context, private bool) []AskSource {
+	out := []AskSource{}
+	installed, err := a.Store.ListInstalled(ctx)
+	if err != nil {
+		return out
+	}
+	holders := map[string]bool{}
+	own := false
+	if a.Docs != nil {
+		ids, hasOwn, err := a.Docs.Holders(ctx)
+		if err == nil {
+			for _, id := range ids {
+				holders[id] = true
+			}
+			own = hasOwn
+		}
+	}
+	var archives, collections []AskSource
+	for _, in := range installed {
+		src := AskSource{ID: in.ResourceID, Title: in.Resource.Title}
+		if len(in.Resource.Languages) > 0 {
+			src.Language = in.Resource.Languages[0]
+		}
+		switch {
+		case in.Resource.Format == "zim":
+			src.Kind = "archive"
+			archives = append(archives, src)
+		case holders[in.ResourceID]:
+			src.Kind = "documents"
+			collections = append(collections, src)
+		}
+	}
+	byTitle := func(list []AskSource) {
+		sort.SliceStable(list, func(i, j int) bool { return strings.ToLower(list[i].Title) < strings.ToLower(list[j].Title) })
+	}
+	byTitle(archives)
+	byTitle(collections)
+	out = append(append(out, archives...), collections...)
+	if private && own {
+		out = append(out, AskSource{ID: assistant.OwnDocuments, Title: "Your documents", Kind: "own"})
+	}
+	return out
 }
 
 func (l *assistantLibrary) Text(ctx context.Context, h assistant.Hit, max int) (string, string, error) {

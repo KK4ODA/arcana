@@ -957,6 +957,13 @@
           },
           "truncated": {
            "type": "boolean"
+          },
+          "sources": {
+           "type": "array",
+           "items": {
+            "type": "string"
+           },
+           "description": "The sources searched, as named in `in`; empty when the whole library was searched."
           }
          }
         }
@@ -970,13 +977,22 @@
       "$ref": "#/components/responses/Forbidden"
      }
     },
-    "description": "Uses this computer's processor; may take a minute. notFound means the library does not cover the question (no model runs). 429 when several questions are being answered; 503 when the assistant is off.",
+    "description": "Uses this computer's processor; may take a minute. notFound means the library (or the sources named in `in`) does not cover the question (no model runs). 429 when several questions are being answered; 503 when the assistant is off.",
     "parameters": [
      {
       "name": "q",
       "in": "query",
       "required": true,
       "description": "The question (at most 1000 characters)",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "in",
+      "in": "query",
+      "required": false,
+      "description": "Limit the question to these sources: comma-separated resource IDs, as search results' resourceId and GET /library give them (installed archives and resources with documents). Without it the whole library is searched. 400 for an ID that is not installed or holds nothing to search.",
       "schema": {
        "type": "string"
       }
