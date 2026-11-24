@@ -49,7 +49,7 @@ The release binaries are not yet code-signed.
 
 ## Sharing on a local network
 
-- Start with `--lan`, or turn on *Settings → Sharing* and restart.
+- Start with `--lan`, or turn on *Settings → Network sharing* and restart.
 - The Server tab lists the addresses that other devices on the same Wi-Fi
   or Ethernet network can open, e.g. `http://192.168.1.20:8470/`. The
   operating system may ask you to allow incoming connections.
@@ -67,10 +67,40 @@ The release binaries are not yet code-signed.
   `arcana hotspot start --ssid Arcana --password ...`) turns this computer's
   Wi-Fi into a hotspot, with a QR code to join it. On Windows, use
   *Settings → Network & internet → Mobile hotspot*.
-- Android may send traffic over mobile data when the Wi-Fi network has no
-  internet. If the page does not load, choose "stay connected" when the
-  phone asks, or turn off mobile data. VPNs can also block local
-  addresses.
+
+### When another device cannot connect
+
+If the library opens on this computer at its network address (for example
+`http://192.168.1.20:8470/`) but another device times out, the cause is
+usually one of these. The Server view lists them too.
+
+- **Windows treats the network as public.** Windows lets Arcana in only on
+  the kinds of network you allowed when it first asked, usually private
+  ones. If *Settings → Network & internet* shows the Wi-Fi as a *Public
+  network*, set its *Network profile type* to *Private network*, or tick
+  *Public* for Arcana under *Windows Defender Firewall → Allow an app or
+  feature*. In PowerShell, `Get-NetConnectionProfile` shows each network's
+  category.
+- **A Mac's browser has no Local Network permission** (macOS 15 and later).
+  Chrome, Firefox and other browsers time out until they are allowed under
+  *System Settings → Privacy & Security → Local Network*; quit and reopen
+  the browser afterwards. Safari needs no permission, so it makes a quick
+  test.
+- **Android** may send traffic over mobile data when the Wi-Fi network has
+  no internet. Choose "stay connected" when the phone asks, or turn off
+  mobile data.
+- **A VPN** on the device can send local addresses into the tunnel. On a
+  Mac, `route -n get <address>` names the interface used: `en0` is the
+  Wi-Fi, `utun…` a VPN. Tailscale with an exit node needs *Allow local
+  network access*.
+- **The network keeps devices apart.** Guest Wi-Fi and shared building
+  networks often do. Make a hotspot (above), or run a mesh VPN such as
+  Tailscale on both devices and open Arcana at this computer's Tailscale
+  address.
+
+To tell which side is at fault, try a phone on the same Wi-Fi: if it opens
+the library, the network and this computer are fine, and the cause is on
+the device that fails.
 
 ## Updating Arcana
 

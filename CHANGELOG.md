@@ -3,6 +3,19 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
+## Unreleased
+
+### Changed
+- **Help when another device cannot connect.** The Server view (*Another
+  device cannot connect?*) and the sharing guide (docs/portable-use.md)
+  now cover the causes that look like a network fault: Windows treating
+  the Wi-Fi as a public network, where Arcana is usually allowed only on
+  private ones; a Mac's browser without macOS's Local Network permission
+  (Chrome and Firefox time out, Safari works); Android on mobile data; a
+  VPN; and networks that keep devices apart.
+- *Settings → Integrations* no longer says that RadioPost and Aether HF
+  use the integration API already; they will in coming versions.
+
 ## 0.8.0 — 2026-11-23
 
 Ask questions of your library and get answers that cite their sources, a
