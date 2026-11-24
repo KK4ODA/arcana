@@ -1,8 +1,12 @@
 name: Release
 
 # Pushing a tag vX.Y.Z (or vX.Y.Z-suffix for a pre-release) builds and
-# publishes a release:
-#   1. the tag must match a finished CHANGELOG.md section;
+# publishes a release. So does starting this workflow by hand on main with
+# a version (Actions → Release → Run workflow, or the GitHub API): it
+# releases main as it is at that moment and creates the tag itself, last,
+# once everything has passed ("check only" runs everything but publishes
+# nothing). Either way:
+#   1. the version must match a finished CHANGELOG.md section;
 #   2. every CI check runs (lint, tests on Linux, Windows and macOS, the
 #      offline acceptance test, appliance checks);
 #   3. the release files are built, checked and given build provenance, and
@@ -21,6 +25,16 @@ name: Release
 on:
   push:
     tags: ['v[0-9]+.[0-9]+.[0-9]+*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to release from main, e.g. 0.9.1 (tagged v0.9.1); a suffix (0.9.1-rc.1) makes a pre-release
+        required: true
+        type: string
+      check_only:
+        description: Run every check and build, but create no tag and no release
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -34,14 +48,45 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.v.outputs.version }}
+      tag: ${{ steps.v.outputs.tag }}
+      publish: ${{ steps.v.outputs.publish }}
     steps:
       - uses: actions/checkout@v4
-      - name: Check the tag against CHANGELOG.md
+      - name: Check the version against CHANGELOG.md
         id: v
+        env:
+          # Inputs reach the script as variables, never as script text.
+          INPUT_VERSION: ${{ inputs.version }}
+          CHECK_ONLY: ${{ inputs.check_only }}
         run: |
-          v="${GITHUB_REF_NAME#v}"
+          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
+            if [ "$GITHUB_REF" != refs/heads/main ]; then
+              echo "::error::Start a release from main (this run is on $GITHUB_REF)."
+              exit 1
+            fi
+            v="${INPUT_VERSION#v}"
+            # A bash match, not a "| grep -q" pipeline (SIGPIPE under pipefail).
+            if ! [[ "$v" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+              echo "::error::Not a version: '$INPUT_VERSION' (expected X.Y.Z or X.Y.Z-suffix)."
+              exit 1
+            fi
+            if [ -n "$(git ls-remote --tags origin "refs/tags/v$v")" ]; then
+              echo "::error::Tag v$v already exists. Choose a new version; to finish a release that failed while publishing, re-run only the failed jobs of its run."
+              exit 1
+            fi
+            publish=true
+            [ "$CHECK_ONLY" = true ] && publish=false
+            echo "Releasing main at $GITHUB_SHA as v$v (publish: $publish)."
+          else
+            v="${GITHUB_REF_NAME#v}"
+            publish=true
+          fi
           scripts/release-notes.sh "$v" > /dev/null
-          echo "version=$v" >> "$GITHUB_OUTPUT"
+          {
+            echo "version=$v"
+            echo "tag=v$v"
+            echo "publish=$publish"
+          } >> "$GITHUB_OUTPUT"
 
   ci:
     needs: prepare
@@ -143,11 +188,13 @@ jobs:
 
   publish:
     needs: [prepare, build, check-windows]
+    if: ${{ needs.prepare.outputs.publish == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
     env:
       VERSION: ${{ needs.prepare.outputs.version }}
+      TAG: ${{ needs.prepare.outputs.tag }}
       GH_TOKEN: ${{ github.token }}
       PRIVATE_REPO: ${{ github.event.repository.private }}
     steps:
@@ -175,12 +222,27 @@ jobs:
           for f in dist/arcana-* dist/SHA256SUMS dist/release.json dist/release.json.sig; do
             if [ -f "$f" ]; then files="$files $f"; fi
           done
-          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+          # A pushed tag already exists. A run started by hand creates its
+          # tag here, on the commit it built, once everything has passed; a
+          # tag made with this run's token starts no second release run.
+          target="--verify-tag"
+          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
+            # The tag may have been pushed by hand since the run began: an
+            # annotated tag names its commit under ^{}, a plain one directly.
+            at=$(git ls-remote --tags origin "refs/tags/$TAG^{}" | awk '{print $1}')
+            [ -n "$at" ] || at=$(git ls-remote --tags origin "refs/tags/$TAG" | awk '{print $1}')
+            if [ -n "$at" ] && [ "$at" != "$GITHUB_SHA" ]; then
+              echo "::error::$TAG was created meanwhile on another commit ($at); nothing published."
+              exit 1
+            fi
+            target="--target $GITHUB_SHA"
+          fi
+          if gh release view "$TAG" >/dev/null 2>&1; then
             # Re-run of the same tag: refresh the files, keep the notes.
             # shellcheck disable=SC2086
-            gh release upload "$GITHUB_REF_NAME" $files --clobber
+            gh release upload "$TAG" $files --clobber
           else
             # shellcheck disable=SC2086
-            gh release create "$GITHUB_REF_NAME" $files --verify-tag --title "Arcana $VERSION" --notes-file notes.md $flags
+            gh release create "$TAG" $files $target --title "Arcana $VERSION" --notes-file notes.md $flags
           fi
-          gh release view "$GITHUB_REF_NAME" --json url,isDraft,isPrerelease,assets --jq '{url, isDraft, isPrerelease, assets: [.assets[].name]}'
+          gh release view "$TAG" --json url,isDraft,isPrerelease,assets --jq '{url, isDraft, isPrerelease, assets: [.assets[].name]}'

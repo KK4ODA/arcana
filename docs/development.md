@@ -160,13 +160,27 @@ user's documents, host only).
 1. Move the changes under a finished heading in `CHANGELOG.md`:
    `## X.Y.Z — YYYY-MM-DD` (the release notes are taken from it; a section
    still marked *Unreleased* is refused).
-2. Tag and push: `git tag -a vX.Y.Z -m "Arcana X.Y.Z" && git push origin vX.Y.Z`.
-   A tag with a suffix (`v0.7.0-rc.1`) makes a pre-release.
+2. Start the release, in either of two ways:
+   - **Push a tag**: `git tag -a vX.Y.Z -m "Arcana X.Y.Z" && git push origin vX.Y.Z`.
+   - **Start it on GitHub**, without a local clone: *Actions → Release →
+     Run workflow*, on `main`, with the version (`X.Y.Z`). This releases
+     `main` as it is when the run starts. The run creates the tag `vX.Y.Z` on
+     that commit itself, last, once every check has passed: a failed run
+     leaves no tag and no release. Tick *check only* to run everything
+     without publishing. The same start is available through the GitHub
+     API (`workflow_dispatch` with inputs `version` and `check_only`), which
+     is how a Claude Code session in the cloud, which cannot push tags,
+     starts one when asked.
+
+   A version with a suffix (`0.7.0-rc.1`) makes a pre-release, which
+   installed copies do not offer as an update.
 3. `.github/workflows/release.yml` then runs every CI check (Linux,
    Windows, macOS, offline acceptance test, appliance checks), builds the
    files with `scripts/package.sh`, verifies them, adds build provenance
    (public repositories), and creates the GitHub release with notes from
-   `scripts/release-notes.sh`.
+   `scripts/release-notes.sh`. A started run refuses a branch other than
+   `main`, a version that is not `X.Y.Z[-suffix]`, an existing tag, and a
+   version without a finished `CHANGELOG.md` section.
 
 Release files: one archive per platform, the all-platform portable zip (also
 the in-app update archive), `arcana-X.Y.Z-kiwix-sources.tar` (the complete
