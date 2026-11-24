@@ -3,6 +3,20 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
+## 0.10.1 — 2026-11-24
+
+Nothing in the program changes: this release makes a test of map
+downloads reliable on Windows, so that it no longer holds up releases at
+random. Arcana 0.6.0 to 0.10.0 offer this version as an update like any
+other; from 0.10.0 it changes only the version number.
+
+### Fixed
+- **A map download test on Windows** (development). The test that map
+  regions are fetched several ranges at a time timed the whole extraction,
+  including the disk syncs at each checkpoint, which can take over 100 ms
+  each on Windows CI disks. It now times the fetching alone, and still
+  fails if fetching stops being parallel.
+
 ## 0.10.0 — 2026-11-24
 
 The classroom now offers 60 Kolibri channels instead of two, for high
