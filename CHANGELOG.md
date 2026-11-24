@@ -135,6 +135,11 @@ on the drive untouched, and works again after updating.
   refused; the computer running Arcana still finds everything. The
   integration API and the assistant already left your documents out for
   other devices; they now also stop them from taking up result slots.
+- **Map region downloads no longer stall.** Since 0.6.2 a map region could
+  occasionally stop partway and wait forever when one part of the map
+  finished downloading a moment before the next part was asked for. It
+  now carries on; a stalled download picks up where it stopped after
+  updating.
 
 ## 0.7.0 — 2026-11-23
 

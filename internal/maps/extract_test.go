@@ -195,3 +195,36 @@ func TestExtractRequestsInParallel(t *testing.T) {
 		t.Fatalf("took %v for %d requests of %v each", time.Since(start), slow.calls.Load(), slow.delay)
 	}
 }
+
+type instantReader struct{}
+
+func (instantReader) ReadRange(ctx context.Context, off, n uint64) ([]byte, error) {
+	return []byte{byte(off)}, nil
+}
+
+// A range asked for while the request before it has delivered its data but
+// not yet given back its slot must still arrive (this hung: the reader
+// waited on a channel that was replaced when the range was launched).
+func TestPrefetchNextRangeAfterSlotFreed(t *testing.T) {
+	defer func(p int) { extractParallel = p }(extractParallel)
+	for _, parallel := range []int{1, 2, 8} {
+		extractParallel = parallel
+		ranges := make([]Range, 20000)
+		for i := range ranges {
+			ranges[i] = Range{Offset: uint64(i), Length: 1}
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		get, stop := prefetchRanges(ctx, instantReader{}, 0, ranges, 0)
+		for i := range ranges {
+			buf, err := get(i)
+			if err != nil {
+				t.Fatalf("parallel %d: range %d of %d: %v", parallel, i, len(ranges), err)
+			}
+			if buf[0] != byte(i) {
+				t.Fatalf("parallel %d: range %d returned the data of another range", parallel, i)
+			}
+		}
+		stop()
+		cancel()
+	}
+}

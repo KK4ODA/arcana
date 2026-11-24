@@ -496,17 +496,25 @@ func prefetchRanges(ctx context.Context, rr RangeReader, base uint64, ranges []R
 		inflight int
 		ahead    uint64
 		results  = make([]chan result, len(ranges))
+		parallel = extractParallel
 	)
+	// chanFor returns the channel range i is delivered on, made by whichever
+	// comes first: its launch, or the reader asking for it.
+	chanFor := func(i int) chan result { // with mu held
+		if results[i] == nil {
+			results[i] = make(chan result, 1)
+		}
+		return results[i]
+	}
 	var launch func()
 	launch = func() { // with mu held
-		for next < len(ranges) && inflight < extractParallel &&
+		for next < len(ranges) && inflight < parallel &&
 			(ahead == 0 || ahead+ranges[next].Length <= extractAhead) {
 			i := next
 			next++
 			inflight++
 			ahead += ranges[i].Length
-			ch := make(chan result, 1)
-			results[i] = ch
+			ch := chanFor(i)
 			go func() {
 				buf, err := rr.ReadRange(ctx, base+ranges[i].Offset, ranges[i].Length)
 				ch <- result{buf, err}
@@ -520,7 +528,10 @@ func prefetchRanges(ctx context.Context, rr RangeReader, base uint64, ranges []R
 	get = func(i int) ([]byte, error) {
 		mu.Lock()
 		launch()
-		ch := results[i]
+		// Range i may not be launched yet: the request before it can have
+		// delivered its data without yet giving back its slot. It is
+		// launched when that slot is freed, and delivered on this channel.
+		ch := chanFor(i)
 		mu.Unlock()
 		var r result
 		select {
