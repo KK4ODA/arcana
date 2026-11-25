@@ -3,7 +3,18 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
-## Unreleased
+## 0.10.2 — 2026-11-25
+
+The classroom works with Kolibri itself: it starts instead of staying on
+*Starting*, courses download into it, and students can watch and practise.
+Tested until now against a stand-in for Kolibri, it is now checked with
+Kolibri 0.19.5 on Linux (not yet on Windows or macOS). While Kolibri
+starts, the Classroom page shows how long it has been starting and what it
+is doing. A classroom set up with 0.9.0 to 0.10.1 starts once Arcana is
+updated, with the same administrator password. Arcana 0.6.0 to 0.10.1
+offer this version by themselves within a day of being online: choose
+*Update now* in the banner at the top of the page, or *Settings →
+Application updates → Check now* to look straight away.
 
 ### Fixed
 - **The classroom starts.** With Kolibri itself, rather than the stand-in
