@@ -3,6 +3,31 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
+## Unreleased
+
+### Fixed
+- **The classroom starts.** With Kolibri itself, rather than the stand-in
+  it had been tested with, the classroom never left *Starting*: Kolibri
+  answered every request with an error, because the zip port Arcana gives
+  it ended up in its Content-Security-Policy as a number its CSP library
+  could not handle. Arcana now runs Kolibri with settings that keep it as
+  text. A classroom set up with 0.9.0 to 0.10.1 starts once Arcana is
+  updated, with the same administrator password.
+- **Downloading courses into the classroom.** Two more faults showed with
+  Kolibri itself: the list of courses on the drive was asked for at an
+  address Kolibri does not have, and every download was refused because
+  Arcana sent Kolibri's security token under the wrong cookie name (after
+  which it could not sign in again until restarted). Both are fixed; a
+  course chosen on the Classroom page now downloads, and students can watch
+  its videos and do its exercises. Checked with Kolibri 0.19.5 on Linux.
+
+### Added
+- **Progress while the classroom starts.** The Classroom page shows how
+  long Kolibri has been starting and its latest message, so a long first
+  start (a slow drive, a Raspberry Pi) visibly makes progress. If Kolibri
+  runs but fails on every request, the page says so with Kolibri's error
+  after 30 seconds instead of waiting 15 minutes.
+
 ## 0.10.1 — 2026-11-24
 
 Nothing in the program changes: this release makes a test of map

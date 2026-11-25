@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -62,7 +63,8 @@ func TestServerRunsProvisionsAndStops(t *testing.T) {
 	env, _ := os.ReadFile(filepath.Join(opts.Home, "fake-env.txt"))
 	for _, want := range []string{"KOLIBRI_ZIP_CONTENT_ORIGIN=8471", "KOLIBRI_ZIP_CONTENT_URL_PATH_PREFIX=kolibri-zip",
 		"KOLIBRI_DISABLE_PING=true", "KOLIBRI_ZEROCONF_ENABLED=false", "KOLIBRI_HOME=" + opts.Home,
-		"ARCANA_KOLIBRI_APP=" + opts.Runtime.App, "KOLIBRI_AUTOMATIC_PROVISION_FILE=" + opts.ProvisionFile} {
+		"ARCANA_KOLIBRI_APP=" + opts.Runtime.App, "KOLIBRI_AUTOMATIC_PROVISION_FILE=" + opts.ProvisionFile,
+		"DJANGO_SETTINGS_MODULE=" + SettingsModule} {
 		if !strings.Contains(string(env), want+"\n") && !strings.HasSuffix(string(env), want) {
 			t.Errorf("environment lacks %s", want)
 		}
@@ -202,6 +204,135 @@ func TestServerReportsAFailedStart(t *testing.T) {
 	st := waitState(t, s, "failed")
 	if !strings.Contains(st.LastError, "Traceback: something broke") {
 		t.Fatalf("error %q", st.LastError)
+	}
+}
+
+// TestServerGivesUpOnABrokenKolibri: a Kolibri that runs but answers every
+// request with an internal error is reported as failed, with the error it
+// printed, instead of "starting" for the full ready timeout (15 minutes):
+// what the owner saw when Kolibri 0.19.5 could not build its CSP.
+func TestServerGivesUpOnABrokenKolibri(t *testing.T) {
+	opts, _ := fakeOptions(t)
+	t.Setenv("FAKE_KOLIBRI_BROKEN", "1")
+	s := NewServer(nil)
+	s.FailAfter = time.Second
+	defer s.Close()
+	start := time.Now()
+	s.Start(opts)
+	st := waitState(t, s, "failed")
+	if time.Since(start) > 10*time.Second {
+		t.Fatalf("took %v to give up", time.Since(start))
+	}
+	if !strings.Contains(st.LastError, "fails on every request") || !strings.Contains(st.LastError, "500") ||
+		!strings.Contains(st.LastError, "TypeError: sequence item 3: expected str instance, int found") {
+		t.Fatalf("error %q", st.LastError)
+	}
+}
+
+// TestServerReportsActivity: while Kolibri starts, its latest message shows,
+// so a long first start visibly makes progress.
+func TestServerReportsActivity(t *testing.T) {
+	opts, _ := fakeOptions(t)
+	t.Setenv("FAKE_KOLIBRI_SLOW", "2s")
+	s := NewServer(nil)
+	defer s.Close()
+	s.Start(opts)
+	deadline := time.Now().Add(10 * time.Second)
+	for time.Now().Before(deadline) {
+		st := s.Status()
+		if st.State == "starting" && st.Activity != "" {
+			if st.Activity != "Running update routines for new version..." {
+				t.Fatalf("activity %q", st.Activity)
+			}
+			waitState(t, s, "running")
+			if a := s.Status().Activity; a != "" {
+				t.Fatalf("activity %q once running", a)
+			}
+			return
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	t.Fatalf("no activity while starting: %+v", s.Status())
+}
+
+func TestActivityAndErrorLines(t *testing.T) {
+	const out = "INFO: Initialized plugins.json\n" +
+		"\x1b[37mINFO     2026-11-25 13:32:25,136 Running installation routines for kolibri.plugins.facility, installing 0.19.5\x1b[0m\n" +
+		"\x1b[37mINFO     2026-11-25 13:32:25,155 Starting Kolibri 0.19.5\x1b[0m\n" +
+		"\x1b[31mERROR    2026-11-25 13:16:23,944 Internal Server Error: /api/public/info/\x1b[0m\n" +
+		"Traceback (most recent call last):\n" +
+		"  File \"csp/utils.py\", line 92, in build_policy\n" +
+		"    policy_parts[key] = \" \".join(value)\n" +
+		"TypeError: sequence item 3: expected str instance, int found\n" +
+		"\x1b[37mINFO     2026-11-25 13:16:23,945 127.0.0.1 - - \"GET /api/public/info/\" 500 0 \"\" \"Go-http-client/1.1\"\x1b[0m\n"
+	for _, c := range []struct{ name, out, activity, err string }{
+		{"request log skipped", out, "Internal Server Error: /api/public/info/", "TypeError: sequence item 3: expected str instance, int found"},
+		{"progress", "\x1b[37mINFO     2026-11-25 13:32:25,136 Running update routines for new version...\x1b[0m\n", "Running update routines for new version...", "INFO     2026-11-25 13:32:25,136 Running update routines for new version..."},
+		{"no log lines", "INFO: Initialized plugins.json\n", "", "INFO: Initialized plugins.json"},
+		{"nothing", "", "", "no output"},
+	} {
+		if got := activityLine(c.out); got != c.activity {
+			t.Errorf("%s: activity %q, want %q", c.name, got, c.activity)
+		}
+		if got := errorLine(c.out); got != c.err {
+			t.Errorf("%s: error %q, want %q", c.name, got, c.err)
+		}
+	}
+}
+
+// TestBootstrapSettingsModule runs the real bootstrap with this system's
+// Python and a stand-in "kolibri" package whose settings hold the zip port
+// as a number, as Kolibri 0.19.5's do: the settings module Arcana provides
+// must turn every CSP source into text, keeping the rest.
+func TestBootstrapSettingsModule(t *testing.T) {
+	python, err := exec.LookPath("python3")
+	if err == nil {
+		// Windows may have only a stand-in that offers the Microsoft Store.
+		err = exec.Command(python, "-I", "-c", "import importlib.abc").Run()
+	}
+	if err != nil {
+		t.Skip("no working python3")
+	}
+	app := t.TempDir()
+	files := map[string]string{
+		"kolibri/__init__.py":                             "",
+		"kolibri/deployment/__init__.py":                  "",
+		"kolibri/deployment/default/__init__.py":          "",
+		"kolibri/deployment/default/settings/__init__.py": "",
+		"kolibri/deployment/default/settings/base.py": "CSP_DEFAULT_SRC = (\"'self'\", \"data:\")\n" +
+			"CSP_FRAME_SRC = CSP_DEFAULT_SRC + (8471,)\nCSP_MEDIA_SRC = list(CSP_FRAME_SRC)\nSESSION_COOKIE_NAME = \"kolibri\"\n",
+		"kolibri/__main__.py": "import importlib, json, os, sys\n" +
+			"s = importlib.import_module(os.environ[\"DJANGO_SETTINGS_MODULE\"])\n" +
+			"print(json.dumps({\"frame\": s.CSP_FRAME_SRC, \"media\": s.CSP_MEDIA_SRC, \"default\": s.CSP_DEFAULT_SRC,\n" +
+			"  \"cookie\": s.SESSION_COOKIE_NAME, \"argv\": sys.argv[1:]}))\n" +
+			// Kolibri never returns while its input is open; a stand-in that
+			// did would stop Python at exit, its input still being read.
+			"sys.stdout.flush()\nos._exit(0)\n",
+	}
+	for name, body := range files {
+		p := filepath.Join(app, filepath.FromSlash(name))
+		os.MkdirAll(filepath.Dir(p), 0o755)
+		if err := os.WriteFile(p, []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	cmd := command(Options{Runtime: Runtime{Python: python, App: app}, Home: t.TempDir(), ContentPort: 8471}, "start", "--foreground")
+	// Standard input stays open while it runs: its end tells Kolibri that
+	// Arcana is gone.
+	r, w, err := os.Pipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer w.Close()
+	cmd.Stdin = r
+	out, err := cmd.Output()
+	r.Close()
+	if err != nil {
+		t.Fatalf("%v: %s", err, out)
+	}
+	want := `{"frame": ["'self'", "data:", "8471"], "media": ["'self'", "data:", "8471"], "default": ["'self'", "data:"], "cookie": "kolibri", "argv": ["start", "--foreground"]}`
+	if got := strings.TrimSpace(string(out)); got != want {
+		t.Fatalf("got  %s\nwant %s", got, want)
 	}
 }
 

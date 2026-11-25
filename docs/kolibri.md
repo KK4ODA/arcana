@@ -21,7 +21,9 @@ page).
 3. On each computer, the first start unpacks Kolibri onto that computer's
    disk (about 340 MB in its cache folder, a few seconds), and the first
    start ever prepares Kolibri's database (about a minute, longer on a
-   Raspberry Pi). The Classroom page shows each step.
+   Raspberry Pi or a slow drive). The Classroom page shows each step;
+   while Kolibri starts it shows how long it has been starting and
+   Kolibri's latest message, which changes as it works.
 4. Find a channel under **Khan Academy**, **More courses for high
    school, college and adults** or **Khan Academy in other languages**
    (folded; open it to see them). Each says who it is for, what it holds,
@@ -176,6 +178,20 @@ describes each.
 again picks everything up. A library opened read-only does not start
 Kolibri. Arcana's *Library integrity* checks cover the packed runtime, not
 the courses Kolibri imports.
+
+## If the classroom does not start
+
+The Classroom page says why: Kolibri stopped (with the error it printed),
+it runs but answers every request with an error (Arcana gives up after 30
+seconds of that, with the error), or it did not answer within 15 minutes.
+*Try again* starts it once more. Kolibri's own log is
+`kolibri/logs/kolibri.txt` on the drive; include its last lines when you
+report a problem.
+
+Arcana 0.10.1 and earlier could not start the classroom at all: Kolibri
+answered every request with an error, so the page stayed on *Starting*.
+Later versions fix this; a classroom set up with an earlier version starts
+with them, keeping its administrator password.
 
 ## How it works
 

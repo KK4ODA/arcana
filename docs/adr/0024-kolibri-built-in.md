@@ -65,9 +65,15 @@ passwords and students sign in by username alone.
   untrusted material like archive pages. It goes to the content origin
   under `/kolibri-zip/` (`ZIP_CONTENT_ORIGIN` set to P+1,
   `ZIP_CONTENT_URL_PATH_PREFIX`), so it still runs apart from Kolibri.
-  Kolibri writes the zip port into its CSP as a bare number, which is not a
+  Kolibri puts the zip port into its CSP as a bare number, which is not a
   valid source. Arcana's proxy replaces it with the content origin in
-  `frame-src` and `media-src`.
+  `frame-src` and `media-src`. (Corrected 2026-11-25, after the first run
+  against Kolibri itself: Kolibri 0.19.5 puts the port in as an integer,
+  which its CSP library cannot join, so every response failed with HTTP 500
+  and the classroom never left "starting". Arcana runs Kolibri with its own
+  settings module, `arcana_kolibri_settings`, served by the bootstrap
+  without a file, which imports Kolibri's settings and turns every CSP
+  source into text.)
 - **Imports go through Kolibri.** Arcana fetches each channel's database
   from Kolibri Studio (`/content/databases/<id>.sqlite3`, 17 MB and 44 MB
   compressed), shows its first two levels with the size of each topic (the
@@ -90,6 +96,11 @@ passwords and students sign in by username alone.
   asks for the new one before it can import again.
 - Khan Academy is licensed CC BY-NC-SA: non-commercial use only. Kolibri
   shows each channel's licence.
-- Kolibri, its proxy and its CSP fix have been checked against Kolibri's
-  source and a stand-in in the tests, not yet against Kolibri running on
-  Windows, macOS and Linux.
+- Kolibri, its proxy and its CSP fix were first checked only against
+  Kolibri's source and a stand-in. Run against Kolibri 0.19.5 itself on
+  Linux (2026-11-25), three faults appeared that the stand-in hid: the CSP
+  above; the device plugin's API is under `/device/api/`, not
+  `/api/device/`; and Kolibri's CSRF cookie is `kolibri_csrftoken`, not
+  Django's `csrftoken`, so every administrator POST was refused. The
+  stand-in now behaves as Kolibri does in these. Windows and macOS are not
+  yet checked.
