@@ -77,10 +77,19 @@ func (c *Client) get(ctx context.Context, p string, v any) error {
 	case resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden:
 		return ErrSignIn
 	case resp.StatusCode != http.StatusOK:
-		return fmt.Errorf("Kolibri answered %s", resp.Status)
+		return &StatusError{Code: resp.StatusCode, Status: resp.Status}
 	}
 	return json.NewDecoder(io.LimitReader(resp.Body, 8<<20)).Decode(v)
 }
+
+// StatusError is an answer from Kolibri other than success: Kolibri is
+// running, unlike when it cannot be reached.
+type StatusError struct {
+	Code   int
+	Status string
+}
+
+func (e *StatusError) Error() string { return "Kolibri answered " + e.Status }
 
 // Info reads the server's public description (/api/public/info/).
 func (c *Client) Info(ctx context.Context) (Info, error) {
