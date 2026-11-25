@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -43,6 +44,9 @@ type Status struct {
 	LastError string    `json:"lastError,omitempty"`
 	Restarts  int       `json:"restarts"`
 	Version   string    `json:"version,omitempty"`
+	// Activity is Kolibri's latest message while it starts, to show that
+	// it is working and on what.
+	Activity string `json:"activity,omitempty"`
 }
 
 // Server runs and supervises one Kolibri process.
@@ -51,13 +55,18 @@ type Server struct {
 	// ReadyTimeout bounds the first start, which migrates Kolibri's
 	// database (about a minute; longer on a Raspberry Pi).
 	ReadyTimeout time.Duration
+	// FailAfter is how long Kolibri may answer with internal errors while
+	// starting before the start is given up: it runs, but is broken.
+	FailAfter time.Duration
 
-	mu     sync.Mutex
-	proc   *process
-	opts   Options
-	status Status
-	closed bool
-	gen    int
+	mu   sync.Mutex
+	proc *process
+	// starting is the output of the process being started, for Activity.
+	starting *tail
+	opts     Options
+	status   Status
+	closed   bool
+	gen      int
 	// slot is held from a process's start until it has exited, so a new
 	// Kolibri never shares KOLIBRI_HOME with one still shutting down.
 	slot chan struct{}
@@ -77,15 +86,19 @@ func NewServer(log *slog.Logger) *Server {
 	if log == nil {
 		log = slog.Default()
 	}
-	return &Server{Log: log, ReadyTimeout: 15 * time.Minute, status: Status{State: "stopped", Since: time.Now()},
-		slot: make(chan struct{}, 1)}
+	return &Server{Log: log, ReadyTimeout: 15 * time.Minute, FailAfter: 30 * time.Second,
+		status: Status{State: "stopped", Since: time.Now()}, slot: make(chan struct{}, 1)}
 }
 
 // Status returns the current status.
 func (s *Server) Status() Status {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	return s.status
+	st := s.status
+	if st.State == "starting" {
+		st.Activity = activityLine(s.starting.String())
+	}
+	return st
 }
 
 // Base returns Kolibri's loopback address while it is running.
@@ -162,6 +175,11 @@ func (s *Server) run(gen int, opts Options) {
 		return
 	}
 	p, version, err := s.launch(gen, opts)
+	s.mu.Lock()
+	if gen == s.gen {
+		s.starting = nil
+	}
+	s.mu.Unlock()
 	if err != nil {
 		<-s.slot
 		if !errors.Is(err, errSuperseded) {
@@ -201,9 +219,9 @@ func (s *Server) supervise(gen int, p *process, opts Options) {
 	s.status.Restarts++
 	restarts := s.status.Restarts
 	s.status.State = "failed"
-	s.status.LastError = "Kolibri stopped unexpectedly: " + lastLine(p.output.String())
+	s.status.LastError = "Kolibri stopped unexpectedly: " + errorLine(p.output.String())
 	s.mu.Unlock()
-	s.Log.Warn("kolibri exited unexpectedly", "restarts", restarts, "output", lastLine(p.output.String()))
+	s.Log.Warn("kolibri exited unexpectedly", "restarts", restarts, "output", errorLine(p.output.String()))
 	if restarts > 5 {
 		return
 	}
@@ -247,12 +265,41 @@ func (s *Server) Close() {
 	}
 }
 
+// SettingsModule is the Django settings module Kolibri runs with: Kolibri's
+// own, with one repair (see bootstrap). Kolibri uses DJANGO_SETTINGS_MODULE
+// when it is set.
+const SettingsModule = "arcana_kolibri_settings"
+
 // bootstrap runs Kolibri's command line, and ends Kolibri when its standard
 // input closes: Arcana holds the other end, so Kolibri stops with Arcana
 // even if Arcana is killed. Kolibri treats the interrupt as Ctrl-C and shuts
 // down cleanly; if it has not within 20 seconds, it exits.
-const bootstrap = `import os, sys, threading, _thread, runpy
+//
+// It also provides SettingsModule, without a file. With ZIP_CONTENT_ORIGIN
+// set to a port (which Arcana's proxy needs), Kolibri 0.19.5 puts that port
+// into its CSP_FRAME_SRC and CSP_MEDIA_SRC as a number, which django-csp
+// cannot join: every response, /api/public/info/ included, failed with
+// "TypeError: sequence item 3: expected str instance, int found". The module
+// turns every CSP source into text; Arcana's proxy then replaces the bare
+// port with the content origin (FixCSP).
+const bootstrap = `import os, sys, threading, _thread, runpy, importlib.abc, importlib.util
 sys.path.insert(0, os.environ["ARCANA_KOLIBRI_APP"])
+_SETTINGS = """
+from kolibri.deployment.default.settings.base import *  # noqa
+for _k in [k for k in list(globals()) if k.startswith("CSP_")]:
+    if isinstance(globals()[_k], (list, tuple)):
+        globals()[_k] = tuple(str(s) for s in globals()[_k])
+"""
+class _Settings(importlib.abc.MetaPathFinder, importlib.abc.Loader):
+    def find_spec(self, name, path=None, target=None):
+        if name == "` + SettingsModule + `":
+            return importlib.util.spec_from_loader(name, self)
+        return None
+    def create_module(self, spec):
+        return None
+    def exec_module(self, module):
+        exec(_SETTINGS, module.__dict__)
+sys.meta_path.insert(0, _Settings())
 def _watch():
     try:
         while sys.stdin.buffer.read(4096):
@@ -293,6 +340,7 @@ func environment(opts Options) []string {
 	}
 	env = append(env,
 		"ARCANA_KOLIBRI_APP="+opts.Runtime.App,
+		"DJANGO_SETTINGS_MODULE="+SettingsModule,
 		"KOLIBRI_HOME="+opts.Home,
 		"KOLIBRI_LISTEN_ADDRESS=127.0.0.1",
 		"KOLIBRI_ZIP_CONTENT_ORIGIN="+strconv.Itoa(opts.ContentPort),
@@ -339,13 +387,18 @@ func (s *Server) launch(gen int, opts Options) (*process, string, error) {
 		}
 		p := &process{cmd: cmd, port: port, zipPort: zipPort, stdin: stdin, done: make(chan struct{}), output: out}
 		go func() { _ = cmd.Wait(); close(p.done) }()
+		s.mu.Lock()
+		if gen == s.gen {
+			s.starting = out
+		}
+		s.mu.Unlock()
 		version, err := s.waitReady(gen, p)
 		if err == nil {
 			return p, version, nil
 		}
 		stopProcess(p)
 		lastErr = err
-		if errors.Is(err, errSuperseded) || errors.Is(err, errNotReady) {
+		if errors.Is(err, errSuperseded) || errors.Is(err, errNotReady) || errors.Is(err, errBroken) {
 			return nil, "", err
 		}
 	}
@@ -355,16 +408,18 @@ func (s *Server) launch(gen int, opts Options) (*process, string, error) {
 var (
 	errSuperseded = errors.New("superseded")
 	errNotReady   = errors.New("Kolibri did not become ready in time")
+	errBroken     = errors.New("Kolibri is running but fails on every request")
 )
 
 // waitReady polls Kolibri's public description until it answers.
 func (s *Server) waitReady(gen int, p *process) (string, error) {
 	client := &Client{BaseURL: "http://127.0.0.1:" + strconv.Itoa(p.port), HTTP: &http.Client{Timeout: 5 * time.Second}}
 	deadline := time.Now().Add(s.ReadyTimeout)
+	var failing time.Time // since when Kolibri answers with internal errors
 	for time.Now().Before(deadline) {
 		select {
 		case <-p.done:
-			return "", fmt.Errorf("Kolibri stopped while starting: %s", lastLine(p.output.String()))
+			return "", fmt.Errorf("Kolibri stopped while starting: %s", errorLine(p.output.String()))
 		case <-time.After(500 * time.Millisecond):
 		}
 		s.mu.Lock()
@@ -378,6 +433,19 @@ func (s *Server) waitReady(gen int, p *process) (string, error) {
 		cancel()
 		if err == nil {
 			return info.Version, nil
+		}
+		// Kolibri answers, but with an internal error: a fault in Kolibri
+		// or in how it is set up, which waiting will not mend.
+		var se *StatusError
+		if !errors.As(err, &se) || se.Code != http.StatusInternalServerError {
+			failing = time.Time{}
+			continue
+		}
+		if failing.IsZero() {
+			failing = time.Now()
+		}
+		if time.Since(failing) >= s.FailAfter {
+			return "", fmt.Errorf("%w (%s): %s", errBroken, se.Status, errorLine(p.output.String()))
 		}
 	}
 	return "", errNotReady
@@ -435,6 +503,53 @@ func (t *tail) String() string {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	return string(t.buf)
+}
+
+// Kolibri's console output: lines in colour (ANSI escapes), each
+// "LEVEL date time message"; the web server logs each request the same way,
+// as "127.0.0.1 - - "GET …"" (Arcana's own checks while it waits).
+var (
+	ansiCode  = regexp.MustCompile(`\x1b\[[0-9;]*m`)
+	logLine   = regexp.MustCompile(`^(?:DEBUG|INFO|WARNING|ERROR|CRITICAL)\s+\d{4}-\d{2}-\d{2}\s+[\d:,.]+\s+(.+)$`)
+	accessLog = regexp.MustCompile(`^\S+ - \S+ (?:\[[^\]]*\] )?"`)
+)
+
+// activityLine returns Kolibri's latest log message, without its level,
+// date and time, skipping the web server's request log.
+func activityLine(out string) string {
+	lines := strings.Split(strings.TrimSpace(ansiCode.ReplaceAllString(out, "")), "\n")
+	for i := len(lines) - 1; i >= 0; i-- {
+		m := logLine.FindStringSubmatch(strings.TrimSpace(lines[i]))
+		if m == nil || accessLog.MatchString(m[1]) {
+			continue
+		}
+		msg := m[1]
+		if len(msg) > 200 {
+			msg = msg[:200] + "…"
+		}
+		return msg
+	}
+	return ""
+}
+
+// pyError is the last line of a Python traceback: the exception and its
+// message.
+var pyError = regexp.MustCompile(`^[A-Za-z_][\w.]*(?:Error|Exception)\b`)
+
+// errorLine returns the exception that ended the last traceback in out, or
+// else its last line.
+func errorLine(out string) string {
+	out = ansiCode.ReplaceAllString(out, "")
+	lines := strings.Split(strings.TrimSpace(out), "\n")
+	for i := len(lines) - 1; i >= 0; i-- {
+		if l := strings.TrimSpace(lines[i]); pyError.MatchString(l) {
+			if len(l) > 300 {
+				l = l[:300] + "…"
+			}
+			return l
+		}
+	}
+	return lastLine(out)
 }
 
 // lastLine returns the last non-empty line of out, for messages.

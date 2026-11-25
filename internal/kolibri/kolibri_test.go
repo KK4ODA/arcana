@@ -62,3 +62,70 @@ func TestSearchAndInfo(t *testing.T) {
 		}
 	}
 }
+
+// TestAdminSignsInAfresh: Kolibri refuses a sign-in that carries a session
+// it still knows but no CSRF token, which left Arcana locked out of every
+// administrator request until it restarted. Arcana signs in again without
+// its old cookies, and sends the token from kolibri_csrftoken.
+func TestAdminSignsInAfresh(t *testing.T) {
+	var signIns, refused, tasksAsked int
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/api/auth/session/":
+			signIns++
+			if _, err := r.Cookie("kolibri"); err == nil && r.Header.Get("X-CSRFToken") != "tok" {
+				refused++
+				http.Error(w, "CSRF verification failed. Request aborted.", http.StatusForbidden)
+				return
+			}
+			http.SetCookie(w, &http.Cookie{Name: "kolibri", Value: "s", Path: "/", HttpOnly: true})
+			fmt.Fprint(w, `{"id":"current"}`)
+		case "/api/tasks/tasks/":
+			tasksAsked++
+			if tasksAsked == 1 {
+				// The session lapsed: Arcana signs in again, still holding a
+				// session cookie and, here, no CSRF cookie to echo.
+				http.Error(w, `{"detail":"not signed in"}`, http.StatusForbidden)
+				return
+			}
+			fmt.Fprint(w, `[]`)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+	a := &Admin{BaseURL: srv.URL, Username: "admin", Password: "pw"}
+	if _, err := a.Tasks(context.Background()); err != nil {
+		t.Fatalf("tasks: %v (sign-ins %d, refused %d)", err, signIns, refused)
+	}
+	if signIns != 3 || refused != 1 {
+		t.Fatalf("sign-ins %d, refused %d; want 3 and 1", signIns, refused)
+	}
+}
+
+// TestAdminSendsKolibriCSRFToken: Kolibri names its CSRF cookie
+// kolibri_csrftoken; a POST without it in X-CSRFToken is refused.
+func TestAdminSendsKolibriCSRFToken(t *testing.T) {
+	var got string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/api/auth/session/":
+			http.SetCookie(w, &http.Cookie{Name: "kolibri", Value: "s", Path: "/", HttpOnly: true})
+			http.SetCookie(w, &http.Cookie{Name: "kolibri_csrftoken", Value: "tok", Path: "/"})
+			fmt.Fprint(w, `{"id":"current"}`)
+		case "/api/tasks/tasks/1/cancel/":
+			got = r.Header.Get("X-CSRFToken")
+			fmt.Fprint(w, `{}`)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+	a := &Admin{BaseURL: srv.URL, Username: "admin", Password: "pw"}
+	if err := a.Cancel(context.Background(), "1"); err != nil {
+		t.Fatal(err)
+	}
+	if got != "tok" {
+		t.Fatalf("X-CSRFToken %q, want the kolibri_csrftoken cookie", got)
+	}
+}

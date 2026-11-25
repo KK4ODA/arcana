@@ -78,6 +78,15 @@ func (a *Admin) signIn(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	if resp.StatusCode == http.StatusForbidden {
+		// Kolibri refuses a sign-in from a session it still knows that
+		// lacks the CSRF token. Sign in afresh, without old cookies.
+		resp.Body.Close()
+		a.client = nil
+		if resp, err = a.do(ctx, http.MethodPost, "/api/auth/session/", body); err != nil {
+			return err
+		}
+	}
 	defer resp.Body.Close()
 	io.Copy(io.Discard, io.LimitReader(resp.Body, 1<<20))
 	switch {
@@ -90,8 +99,9 @@ func (a *Admin) signIn(ctx context.Context) error {
 	return nil
 }
 
-// do sends one request with Kolibri's CSRF token (Django's csrftoken cookie
-// echoed in X-CSRFToken), which Kolibri requires once signed in.
+// do sends one request with Kolibri's CSRF token, which Kolibri requires
+// once signed in: its CSRF cookie echoed in X-CSRFToken. Kolibri names the
+// cookie kolibri_csrftoken (CSRF_COOKIE_NAME), not Django's csrftoken.
 func (a *Admin) do(ctx context.Context, method, p string, body []byte) (*http.Response, error) {
 	var rd io.Reader
 	if body != nil {
@@ -108,7 +118,7 @@ func (a *Admin) do(ctx context.Context, method, p string, body []byte) (*http.Re
 	req.Header.Set("Referer", a.BaseURL+"/")
 	if u, err := url.Parse(a.BaseURL); err == nil {
 		for _, c := range a.http().Jar.Cookies(u) {
-			if c.Name == "csrftoken" {
+			if c.Name == "kolibri_csrftoken" || c.Name == "csrftoken" && req.Header.Get("X-CSRFToken") == "" {
 				req.Header.Set("X-CSRFToken", c.Value)
 			}
 		}

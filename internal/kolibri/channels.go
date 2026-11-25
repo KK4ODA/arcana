@@ -290,7 +290,8 @@ type OnDevice struct {
 }
 
 // Channels lists the channels on the device with what of each is
-// imported (as the administrator).
+// imported (as the administrator). The device plugin serves its API under
+// its own prefix, /device/api/, not /api/device/ (Kolibri 0.19.5).
 func (a *Admin) Channels(ctx context.Context) ([]OnDevice, error) {
 	var raw []struct {
 		ID        string      `json:"id"`
@@ -299,7 +300,7 @@ func (a *Admin) Channels(ctx context.Context) ([]OnDevice, error) {
 		Resources json.Number `json:"on_device_resources"`
 		Size      json.Number `json:"on_device_file_size"`
 	}
-	if err := a.call(ctx, http.MethodGet, "/api/device/device_channel/?include_fields=on_device_resources,on_device_file_size", nil, &raw); err != nil {
+	if err := a.call(ctx, http.MethodGet, "/device/api/device_channel/?include_fields=on_device_resources,on_device_file_size", nil, &raw); err != nil {
 		return nil, err
 	}
 	out := []OnDevice{}

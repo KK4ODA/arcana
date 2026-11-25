@@ -216,6 +216,11 @@ dialog.detail { border-top: 2px solid var(--accent); }
 /* ---------------------------------------------------------- downloads */
 .progress { height: 6px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 1px; overflow: hidden; min-width: 120px; }
 .progress > span { display: block; height: 100%; background: var(--accent); }
+/* Work under way of unknown length: a block sliding across. */
+.progress.indeterminate > span { width: 30%; animation: progress-slide 1.4s ease-in-out infinite; }
+@keyframes progress-slide { from { margin-left: -30%; } to { margin-left: 100%; } }
+@media (prefers-reduced-motion: reduce) { .progress.indeterminate > span { animation: none; width: 100%; opacity: .5; } }
+.activity { overflow-wrap: anywhere; }
 .state { font-size: 12.5px; font-weight: 600; }
 .state.failed { color: var(--err); } .state.completed { color: var(--ok); } .state.waiting, .state.paused { color: var(--warn); }
 

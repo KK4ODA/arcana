@@ -79,7 +79,7 @@ export async function classroomView(main) {
     if (c.state === 'read-only') parts.push(h('div', { class: 'banner warn' }, c.message));
     if (c.state === 'download') parts.push(downloadPart(c));
     if (c.state === 'preparing') parts.push(h('p', null, 'Unpacking Kolibri and Python onto this computer. This takes a few seconds, once per computer.'));
-    if (c.state === 'starting') parts.push(h('p', null, 'Kolibri is starting. Its first start prepares its database, which takes about a minute (longer on a Raspberry Pi).'));
+    if (c.state === 'starting') parts.push(startingPart(c));
     if (c.state === 'failed' || c.state === 'stopped') {
       parts.push(h('div', { class: 'banner err' }, c.message || 'Kolibri is not running.'));
       if (admin) parts.push(h('div', { class: 'row' }, h('button', { onclick: () => setUp(c.language) }, 'Try again')));
@@ -109,6 +109,21 @@ export async function classroomView(main) {
       h('div', { class: 'row' },
         h('label', null, 'Kolibri\'s language ', lang),
         h('button', { class: 'primary', onclick: () => setUp(lang.value) }, 'Set up the classroom')));
+  }
+
+  // While Kolibri starts: how long for, and its latest message, so a long
+  // first start (a slow drive, a Raspberry Pi) visibly makes progress.
+  function startingPart(c) {
+    const secs = c.stateSeconds || 0;
+    const took = secs < 60 ? `${secs} s` : `${Math.floor(secs / 60)} min ${secs % 60} s`;
+    return h('div', null,
+      h('p', null, 'Kolibri is starting. Its first start prepares its database, which takes about a minute (longer on a Raspberry Pi or a slow drive).'),
+      // The page is rebuilt every two seconds: the animation's phase follows
+      // the clock so the bar slides on instead of starting over.
+      h('div', { class: 'progress indeterminate', role: 'progressbar', 'aria-label': 'Kolibri is starting' },
+        h('span', { style: `animation-delay:-${(Date.now() % 1400) / 1000}s` })),
+      h('div', { class: 'small muted activity', style: 'margin-top:6px' }, `Starting for ${took}`,
+        c.activity ? ' · Kolibri: ' : '', c.activity ? h('code', null, c.activity) : null));
   }
 
   function downloadPart(c) {

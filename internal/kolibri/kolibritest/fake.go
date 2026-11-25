@@ -49,6 +49,9 @@ type state struct {
 	admin   admin
 	tasks   []map[string]any
 	started time.Time
+	// session is this process's session key: a restarted Kolibri does not
+	// know the sessions of the one before, as when they expire.
+	session string
 }
 
 func run(args []string) {
@@ -73,7 +76,13 @@ func run(args []string) {
 		fmt.Fprintln(os.Stderr, "Traceback: something broke")
 		os.Exit(1)
 	}
+	// Kolibri's console output: coloured "LEVEL date time message" lines.
+	logf := func(level, msg string) {
+		fmt.Fprintf(os.Stdout, "\x1b[37m%-8s %s %s\x1b[0m\n", level, time.Now().Format("2006-01-02 15:04:05,000"), msg)
+	}
+	logf("INFO", "Running update routines for new version...")
 	st := &state{home: os.Getenv("KOLIBRI_HOME"), started: time.Now()}
+	st.session = strconv.FormatInt(st.started.UnixNano(), 36)
 	adminFile := filepath.Join(st.home, "fake-admin.json")
 	if data, err := os.ReadFile(adminFile); err == nil {
 		_ = json.Unmarshal(data, &st.admin)
@@ -102,13 +111,42 @@ func run(args []string) {
 	prefix := "/" + strings.Trim(os.Getenv("KOLIBRI_ZIP_CONTENT_URL_PATH_PREFIX"), "/") + "/"
 	main := http.NewServeMux()
 	main.HandleFunc("/api/public/info/", func(w http.ResponseWriter, r *http.Request) {
+		if os.Getenv("FAKE_KOLIBRI_BROKEN") == "1" {
+			// As Kolibri 0.19.5 did with ZIP_CONTENT_ORIGIN set to a port
+			// and its own settings: every response failed.
+			logf("ERROR", "Internal Server Error: /api/public/info/")
+			fmt.Fprintln(os.Stdout, "Traceback (most recent call last):")
+			fmt.Fprintln(os.Stdout, `  File "csp/utils.py", line 92, in build_policy`)
+			fmt.Fprintln(os.Stdout, "TypeError: sequence item 3: expected str instance, int found")
+			logf("INFO", `127.0.0.1 - - "GET /api/public/info/" 500 0 "" "Go-http-client/1.1"`)
+			http.Error(w, "", http.StatusInternalServerError)
+			return
+		}
 		if d, _ := time.ParseDuration(os.Getenv("FAKE_KOLIBRI_SLOW")); time.Since(st.started) < d {
 			http.Error(w, "starting", http.StatusServiceUnavailable)
 			return
 		}
 		fmt.Fprintf(w, `{"application":"kolibri","kolibri_version":"0.19.5-fake","device_name":%q}`, st.admin.Facility)
 	})
+	// Cookies are named as Kolibri names them (SESSION_COOKIE_NAME and
+	// CSRF_COOKIE_NAME), not Django's defaults. As in Kolibri, the CSRF token
+	// is required of requests from a valid session (Django REST framework's
+	// SessionAuthentication), signing in again included; a request with no
+	// session or an expired one needs none.
+	csrfOK := func(r *http.Request) bool {
+		tok, err := r.Cookie("kolibri_csrftoken")
+		return err == nil && r.Header.Get("X-CSRFToken") == tok.Value
+	}
+	validSession := func(r *http.Request) bool {
+		c, err := r.Cookie("kolibri")
+		return err == nil && c.Value == "s-"+st.admin.Username+"-"+st.session
+	}
 	main.HandleFunc("/api/auth/session/", func(w http.ResponseWriter, r *http.Request) {
+		if validSession(r) && !csrfOK(r) {
+			w.WriteHeader(http.StatusForbidden)
+			fmt.Fprint(w, `<p>CSRF verification failed. Request aborted.</p>`)
+			return
+		}
 		var in admin
 		_ = json.NewDecoder(r.Body).Decode(&in)
 		if r.Method != http.MethodPost || in.Username != st.admin.Username || in.Password != st.admin.Password {
@@ -116,24 +154,20 @@ func run(args []string) {
 			fmt.Fprint(w, `[{"id":"INVALID_CREDENTIALS","metadata":{}}]`)
 			return
 		}
-		http.SetCookie(w, &http.Cookie{Name: "sessionid", Value: "s-" + in.Username, Path: "/", HttpOnly: true})
-		http.SetCookie(w, &http.Cookie{Name: "csrftoken", Value: "csrf-token", Path: "/"})
+		http.SetCookie(w, &http.Cookie{Name: "kolibri", Value: "s-" + in.Username + "-" + st.session, Path: "/", HttpOnly: true})
+		http.SetCookie(w, &http.Cookie{Name: "kolibri_csrftoken", Value: "csrf-token", Path: "/"})
 		fmt.Fprint(w, `{"id":"current","username":"`+in.Username+`","kind":["superuser"]}`)
 	})
 	signedIn := func(w http.ResponseWriter, r *http.Request) bool {
-		c, err := r.Cookie("sessionid")
-		if err != nil || c.Value != "s-"+st.admin.Username {
+		if !validSession(r) {
 			w.WriteHeader(http.StatusForbidden)
 			fmt.Fprint(w, `{"detail":"not signed in"}`)
 			return false
 		}
-		if r.Method == http.MethodPost {
-			tok, err := r.Cookie("csrftoken")
-			if err != nil || r.Header.Get("X-CSRFToken") != tok.Value {
-				w.WriteHeader(http.StatusForbidden)
-				fmt.Fprint(w, `{"detail":"CSRF Failed"}`)
-				return false
-			}
+		if r.Method == http.MethodPost && !csrfOK(r) {
+			w.WriteHeader(http.StatusForbidden)
+			fmt.Fprint(w, `<p>CSRF verification failed. Request aborted.</p>`)
+			return false
 		}
 		return true
 	}
@@ -183,7 +217,7 @@ func run(args []string) {
 			http.NotFound(w, r)
 		}
 	})
-	main.HandleFunc("/api/device/device_channel/", func(w http.ResponseWriter, r *http.Request) {
+	main.HandleFunc("/device/api/device_channel/", func(w http.ResponseWriter, r *http.Request) {
 		if !signedIn(w, r) {
 			return
 		}

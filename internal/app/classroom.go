@@ -238,6 +238,12 @@ type ClassroomStatus struct {
 	Port     int    `json:"port"`
 	Facility string `json:"facility,omitempty"`
 	Language string `json:"language,omitempty"`
+	// StateSeconds is how long Kolibri has been in its state (counted by
+	// Arcana, so a device with another clock shows it right), and Activity
+	// its latest message while it starts: together they show that a long
+	// start is working.
+	StateSeconds int    `json:"stateSeconds,omitempty"`
+	Activity     string `json:"activity,omitempty"`
 	// Download is the runtime's download, while there is one.
 	Download *download.View `json:"download,omitempty"`
 	// RuntimeSize is the runtime download's size.
@@ -298,6 +304,7 @@ func (a *App) ClassroomStatus(ctx context.Context, admin bool) ClassroomStatus {
 		st.State = "preparing"
 	default:
 		st.State, st.Message = ks.State, ks.LastError
+		st.StateSeconds, st.Activity = int(time.Since(ks.Since).Seconds()), ks.Activity
 	}
 	if admin && st.State == "running" {
 		if adm := a.kolibriAdmin(); adm != nil {
