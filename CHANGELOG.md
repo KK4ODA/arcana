@@ -3,7 +3,19 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
-## Unreleased
+## 0.11.0 — 2026-11-25
+
+Arcana can now find its position without a GPS receiver: from a Starlink
+dish on the local network, or from the location services of the phone or
+computer showing it. So directions from where you are can be worked out,
+saved and followed even with no GPS, or with one that is jammed or wrong.
+A second source can be shown beside the first, with a warning when the two
+disagree. Both network sources stay off until chosen in Settings. The
+Starlink source has been tested against a stand-in for the dish, not a
+real one, and some Starlink plans no longer share the dish's location at
+all. Arcana 0.6.0 to 0.10.1 offer this version by themselves within a day
+of being online: choose *Update now* in the banner at the top of the page,
+or *Settings → Application updates → Check now* to look straight away.
 
 ### Added
 - **Positions without a GPS receiver** (ADR-0026). *Settings → Maps and
