@@ -74,10 +74,19 @@ type Waypoint struct {
 	Created time.Time `json:"created"`
 }
 
-// GPX is the content of a GPX file.
+// GPX is the content of a GPX file. Routes are written only (reading
+// returns routes as tracks).
 type GPX struct {
 	Waypoints []Waypoint
+	Routes    []GPXRoute
 	Tracks    []Track
+}
+
+// GPXRoute is a GPX route: named points to pass in order (for a saved
+// route, its maneuvers).
+type GPXRoute struct {
+	Name   string
+	Points []Waypoint
 }
 
 // MaxGPXBytes bounds GPX input.
@@ -176,6 +185,15 @@ func WriteGPX(w io.Writer, g GPX) error {
 		p := fromPoint(Point{Lat: wp.Lat, Lon: wp.Lon, Ele: wp.Ele, Time: wp.Created})
 		p.Name, p.Desc, p.Sym = wp.Name, wp.Note, wp.Symbol
 		doc.Wpts = append(doc.Wpts, p)
+	}
+	for _, r := range g.Routes {
+		gr := gpxRoute{Name: r.Name}
+		for _, wp := range r.Points {
+			p := fromPoint(Point{Lat: wp.Lat, Lon: wp.Lon, Ele: wp.Ele})
+			p.Name, p.Desc = wp.Name, wp.Note
+			gr.Points = append(gr.Points, p)
+		}
+		doc.Rtes = append(doc.Rtes, gr)
 	}
 	for _, t := range g.Tracks {
 		gt := gpxTrack{Name: t.Name}

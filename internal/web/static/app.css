@@ -331,6 +331,9 @@ button.linkish:hover { text-decoration: underline; background: none; }
 button.icon { padding: 0 6px; line-height: 20px; min-width: 24px; }
 .track-row { display: flex; gap: 6px; align-items: center; font-weight: 500; }
 .pos-state { margin-bottom: 4px; }
+.pos-check { margin-top: 6px; }
+.pos-check .banner { margin: 6px 0 4px; font-size: 13px; }
+.pos-check .banner .row { margin-top: 6px; }
 .pos-state .dot { display: inline-block; margin-right: 6px; vertical-align: 1px; }
 .place-results { max-height: 260px; overflow-y: auto; }
 .pos-coords { font-size: 15px; margin-bottom: 4px; }
@@ -361,6 +364,9 @@ button[aria-pressed="true"] { background: var(--accent); border-color: var(--acc
 .end-results:empty { display: none; }
 .route-out:empty { display: none; }
 .route-out { margin-top: 8px; }
+.saved-routes:empty { display: none; }
+.saved-routes { margin-top: 10px; }
+.saved-routes h4 { margin: 0 0 4px; font-size: 13px; }
 .route-summary { display: flex; gap: 10px; align-items: baseline; }
 .route-time { font-size: 20px; font-weight: 600; }
 .route-warn { color: var(--warn); margin-top: 2px; }

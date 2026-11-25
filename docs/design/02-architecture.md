@@ -114,7 +114,7 @@ Planned modules use the same boundaries:
 | Package | Phase | Purpose |
 |---|---|---|
 | `internal/maps` | 3 | PMTiles reader/server, style/glyph/sprite assets, region catalog |
-| `internal/gps` | 3 | Sources (serial, UDP, TCP, gpsd, GPX playback, manual), NMEA parsing, fix state, SSE fan-out |
+| `internal/gps` | 3 | Sources (serial, UDP, TCP, gpsd, GPX playback, manual; Starlink dish and browser location from the network, ADR-0026), NMEA parsing, fix state, a second source to compare with, SSE fan-out, waypoints, tracks and saved routes |
 | `internal/userdata` | 2 | Bookmarks, notes and documents (`user/`), FTS5 index |
 | `internal/transfer` | 2 | Collection export/import between drives, portable manifest |
 | `internal/appupdate` | 2 | Signed release manifests, staged application updates |

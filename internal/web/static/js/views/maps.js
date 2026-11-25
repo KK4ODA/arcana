@@ -5,9 +5,10 @@
 // explicitly.
 import { api, getSession } from '../api.js';
 import { h, clear, fill, fmtBytes, fmtAgo, toast, debounce } from '../util.js';
-import { getUnits, setUnits, UNIT_SYSTEMS, fmtDistance, fmtSpeed, fmtAltitude, fmtArea } from '../units.js';
+import { getUnits, setUnits, UNIT_SYSTEMS, fmtDistance, fmtStepDistance, fmtSpeed, fmtAltitude, fmtArea } from '../units.js';
 import { distance, pathLength, bearing, compassPoint, area } from '../geo.js';
 import { createDirections } from './directions.js';
+import { geoState } from '../geolocate.js';
 
 let libPromise = null;
 
@@ -95,6 +96,22 @@ function coordLines(lat, lon) {
 const wrapLon = (lon) => ((((lon + 180) % 360) + 360) % 360) - 180;
 
 const STATE_DOT = { current: 'ok', stale: 'warn', lost: 'err', error: 'err', searching: 'info', waiting: 'info', connecting: 'info', manual: 'info' };
+// Names of the position sources (Settings → Maps and position).
+const SOURCE_NAME = {
+  serial: 'GPS receiver', udp: 'NMEA over UDP', tcp: 'NMEA over TCP', gpsd: 'gpsd', simulator: 'Simulator',
+  manual: 'Fixed position', starlink: 'Starlink dish', browser: 'Browser location',
+};
+const NETWORK_SOURCES = new Set(['starlink', 'browser']);
+
+function stateText(g) {
+  if (NETWORK_SOURCES.has(g.source)) {
+    if (g.state === 'searching' || g.state === 'waiting') return 'Waiting for a position';
+    if (g.state === 'lost') return 'Position lost';
+    if (g.state === 'error') return 'Source problem';
+  }
+  return STATE_TEXT[g.state] || g.state;
+}
+
 const STATE_TEXT = {
   off: 'No receiver', connecting: 'Connecting', waiting: 'Waiting for data', searching: 'Searching for satellites',
   current: 'Position current', stale: 'Position stale', lost: 'Signal lost', manual: 'Fixed position', error: 'Receiver problem',
@@ -148,6 +165,7 @@ export async function mapsView(main, params) {
     cssVar,
     follow: (on) => { follow = on; renderPosition(); },
     showMap: () => mapEl.scrollIntoView({ block: 'start', behavior: 'smooth' }),
+    canChange,
   });
   disposers.push(() => dirs.dispose());
   mapEl.appendChild(dirs.navEl);
@@ -257,7 +275,7 @@ export async function mapsView(main, params) {
     const surface = cssVar('--surface') || '#fff';
     const text = cssVar('--text') || '#111';
     const empty = { type: 'FeatureCollection', features: [] };
-    for (const id of ['arcana-area', 'arcana-tracks', 'arcana-waypoints', 'arcana-measure', 'arcana-position', 'arcana-mesh']) {
+    for (const id of ['arcana-area', 'arcana-tracks', 'arcana-waypoints', 'arcana-measure', 'arcana-position', 'arcana-position-check', 'arcana-mesh']) {
       if (!map.getSource(id)) map.addSource(id, { type: 'geojson', data: empty });
     }
     map.addLayer({ id: 'arcana-area-line', type: 'line', source: 'arcana-area',
@@ -290,11 +308,14 @@ export async function mapsView(main, params) {
       paint: { 'text-color': text, 'text-halo-color': surface, 'text-halo-width': 1.5 } });
     map.getSource('arcana-mesh').setData(meshData());
     dirs.addLayers(map);
+    map.addLayer({ id: 'arcana-pos-check', type: 'circle', source: 'arcana-position-check',
+      paint: { 'circle-radius': 8, 'circle-color': 'rgba(0,0,0,0)', 'circle-stroke-width': 3, 'circle-stroke-color': ['get', 'color'] } });
     map.addLayer({ id: 'arcana-pos-halo', type: 'circle', source: 'arcana-position',
       paint: { 'circle-radius': 15, 'circle-color': ['get', 'color'], 'circle-opacity': 0.18 } });
     map.addLayer({ id: 'arcana-pos-dot', type: 'circle', source: 'arcana-position',
       paint: { 'circle-radius': 6, 'circle-color': ['get', 'color'], 'circle-stroke-width': 2, 'circle-stroke-color': surface } });
     map.getSource('arcana-position').setData(positionData());
+    map.getSource('arcana-position-check').setData(checkData());
     map.getSource('arcana-waypoints').setData(waypointData());
     map.getSource('arcana-tracks').setData({ type: 'FeatureCollection', features: [...shownTracks.values()] });
     if (areaBox) drawArea(areaBox);
@@ -342,6 +363,15 @@ export async function mapsView(main, params) {
   }
 
   // ------------------------------------------------------------ position
+  // The second source's position ("Compare with" in Settings), drawn as a
+  // ring so it is not mistaken for the position that guides.
+  function checkData() {
+    const c = lastGPS && lastGPS.check;
+    if (!c || !c.fix || !lastGPS.fix) return { type: 'FeatureCollection', features: [] };
+    const color = lastGPS.disagree ? (cssVar('--warn') || '#9a6200') : (cssVar('--faint') || '#888');
+    return { type: 'FeatureCollection', features: [{ type: 'Feature', properties: { color }, geometry: { type: 'Point', coordinates: [c.fix.lon, c.fix.lat] } }] };
+  }
+
   function positionData() {
     const f = lastGPS && lastGPS.fix;
     if (!f) return { type: 'FeatureCollection', features: [] };
@@ -359,9 +389,11 @@ export async function mapsView(main, params) {
     }
     const f = g.fix;
     const rows = [];
+    const net = NETWORK_SOURCES.has(g.source);
     rows.push(h('div', { class: 'pos-state' }, h('span', { class: `dot ${STATE_DOT[g.state] || ''}` }),
-      h('b', null, STATE_TEXT[g.state] || g.state),
-      f && f.mode && g.state !== 'manual' ? h('span', { class: 'muted' }, ` · ${f.mode.toUpperCase()}`) : null,
+      h('b', null, stateText(g)),
+      g.source && g.state !== 'off' && g.state !== 'manual' ? h('span', { class: 'muted' }, ` · ${SOURCE_NAME[g.source] || g.source}`) : null,
+      f && f.mode && g.state !== 'manual' && !net ? h('span', { class: 'muted' }, ` · ${f.mode.toUpperCase()}`) : null,
       f && f.satellites ? h('span', { class: 'muted' }, ` · ${f.satellites} satellites`) : null));
     if (f) {
       const [a, b, c] = coordLines(f.lat, f.lon);
@@ -370,24 +402,65 @@ export async function mapsView(main, params) {
       if (f.alt != null) facts.push(`Altitude ${fmtAltitude(f.alt)}`);
       if (f.speed != null) facts.push(`Speed ${fmtSpeed(f.speed)}`);
       if (f.course != null) facts.push(`Course ${Math.round(f.course)}°`);
+      if (f.accuracy) facts.push(`within about ${fmtStepDistance(f.accuracy)}`);
       if (f.hdop) facts.push(`HDOP ${f.hdop.toFixed(1)}`);
       if (g.state !== 'manual' && g.age != null) facts.push(g.age < 2 ? 'just now' : `${Math.round(g.age)} s ago`);
       if (facts.length) rows.push(h('div', { class: 'small muted' }, facts.join(' · ')));
     } else if (g.state === 'off') {
       rows.push(h('p', { class: 'small muted' }, 'No position source is selected. ',
-        s.admin ? h('a', { href: '#/settings' }, 'Choose a GPS receiver or the simulator in Settings.') : null));
+        s.admin ? h('a', { href: '#/settings' }, 'Choose a GPS receiver, a Starlink dish or this browser’s location in Settings.') : null));
     }
+    if (g.basis) rows.push(h('div', { class: 'small muted' }, g.basis[0].toUpperCase() + g.basis.slice(1)));
     if (g.detail && g.state !== 'off') rows.push(h('div', { class: 'small muted' }, g.detail));
+    if (f && f.accuracy > 500) {
+      rows.push(h('div', { class: 'small', style: 'color:var(--warn)' }, `This position is only good to about ${fmtDistance(f.accuracy)}: fine to find the area, not to choose a road.`));
+    }
+    if ((g.source === 'browser' || (g.check && g.check.source === 'browser')) && geoState.problem) {
+      rows.push(h('div', { class: 'small', style: 'color:var(--warn)' }, `This browser: ${geoState.problem}`));
+    } else if (g.source === 'browser' && !f && geoState.active) {
+      rows.push(h('div', { class: 'small muted' }, 'If the browser asks, allow it to use your location.'));
+    }
     if (g.error) rows.push(h('div', { class: 'small', style: 'color:var(--err)' }, g.error));
     if (g.recording) rows.push(h('div', { class: 'small muted' }, `Recording ${g.track || 'track'} · ${g.points || 0} points`));
     if (g.state !== 'off' && g.sentences + g.rejected > 0 && g.rejected > g.sentences) {
       rows.push(h('div', { class: 'small', style: 'color:var(--warn)' }, `Most data from the receiver is unreadable (${g.rejected} rejected). Check the baud rate.`));
     }
+    if (g.check) rows.push(checkRows(g));
     rows.push(h('div', { class: 'row' },
       h('button', { disabled: !f || !map, onclick: () => { follow = false; flyTo(f.lon, f.lat, Math.max(map.getZoom(), 14)); } }, 'Center'),
       h('button', { disabled: !f || !map, 'aria-pressed': follow ? 'true' : 'false', onclick: () => { follow = !follow; renderPosition(); if (follow && f) map.easeTo({ center: [f.lon, f.lat] }); } }, follow ? 'Following' : 'Follow'),
-      canChange ? h('button', { disabled: !f, onclick: () => addWaypointAt(f.lat, f.lon) }, 'Save as waypoint') : null));
+      canChange ? h('button', { disabled: !f, onclick: () => addWaypointAt(f.lat, f.lon) }, 'Save as waypoint') : null,
+      f && dirs.hasNetworks() ? h('button', { onclick: () => dirs.fromMyPosition() }, 'Directions from here') : null));
     fill(posBox, rows);
+  }
+
+  // checkRows shows the second source and whether it agrees with the first.
+  function checkRows(g) {
+    const c = g.check;
+    const name = SOURCE_NAME[c.source] || c.source;
+    const facts = [stateText(c)];
+    if (c.fix && c.fix.accuracy) facts.push(`within about ${fmtStepDistance(c.fix.accuracy)}`);
+    if (g.apart && !g.disagree) facts.push(`${fmtDistance(g.apart)} apart`);
+    const out = [h('div', { class: 'small muted' }, `Compared with ${name} (ring on the map): ${facts.join(' · ')}`)];
+    if (c.basis) out.push(h('div', { class: 'small muted' }, c.basis[0].toUpperCase() + c.basis.slice(1)));
+    if (c.error) out.push(h('div', { class: 'small', style: 'color:var(--err)' }, `${name}: ${c.error}`));
+    if (g.disagree) {
+      out.push(h('div', { class: 'banner warn', role: 'alert' },
+        h('div', null, `${SOURCE_NAME[g.source] || g.source} and ${name} disagree by ${fmtDistance(g.apart)}. One of them may be jammed, spoofed or simply wrong; check against what you can see.`),
+        canChange ? h('div', { class: 'row' }, h('button', { onclick: () => swapSources(g) }, `Use ${name} instead`)) : null));
+    }
+    return h('div', { class: 'pos-check' }, out);
+  }
+
+  // swapSources makes the second source the one that guides.
+  async function swapSources() {
+    try {
+      const { settings } = await api.get('/api/settings');
+      const gs = settings.gps;
+      await api.put('/api/settings', { gps: { ...gs, source: gs.checkSource, checkSource: gs.source } });
+      toast(`Now using ${SOURCE_NAME[gs.checkSource] || gs.checkSource}; ${SOURCE_NAME[gs.source] || gs.source} is shown for comparison.`);
+      window.dispatchEvent(new Event('arcana-status'));
+    } catch (e) { toast(e.message); }
   }
 
   let hadFix = false;
@@ -397,6 +470,7 @@ export async function mapsView(main, params) {
     dirs.onGPS(g);
     if (!!(g && g.fix) !== hadFix) { hadFix = !!(g && g.fix); dirs.gpsChanged(); }
     setData('arcana-position', positionData());
+    setData('arcana-position-check', checkData());
     if (follow && g.fix && map) map.easeTo({ center: [g.fix.lon, g.fix.lat], duration: 400 });
   }
 
@@ -739,6 +813,10 @@ export async function mapsView(main, params) {
   };
   window.addEventListener('arcana-units', onUnits);
   disposers.push(() => window.removeEventListener('arcana-units', onUnits));
+  // This browser starting or failing to send its location.
+  const onGeo = () => renderPosition();
+  window.addEventListener('arcana-geo', onGeo);
+  disposers.push(() => window.removeEventListener('arcana-geo', onGeo));
 
   // ------------------------------------------------------------ custom area
   function drawArea(b) {

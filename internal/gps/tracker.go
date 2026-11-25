@@ -1,10 +1,14 @@
 // Package gps reads positions from GNSS receivers (NMEA 0183 over serial,
-// UDP or TCP, or gpsd), replays GPX files as a simulator, records tracks and
-// keeps waypoints. Arcana never transmits positions anywhere; LAN clients see
-// them only when the host enables sharing.
+// UDP or TCP, or gpsd), from network position sources (a Starlink dish, or
+// the location services of a browser showing Arcana), replays GPX files as a
+// simulator, records tracks and keeps waypoints and saved routes. Arcana
+// never transmits positions anywhere; LAN clients see them only when the
+// host enables sharing.
 package gps
 
 import (
+	"fmt"
+	"math"
 	"strings"
 	"sync"
 	"time"
@@ -14,17 +18,21 @@ import (
 
 // Fix is the latest position solution.
 type Fix struct {
-	Lat        float64   `json:"lat"`
-	Lon        float64   `json:"lon"`
-	Alt        *float64  `json:"alt,omitempty"`
-	Speed      *float64  `json:"speed,omitempty"`  // metres per second
-	Course     *float64  `json:"course,omitempty"` // degrees true
-	Mode       string    `json:"mode"`             // 2d, 3d, dgps, rtk, estimated, manual
-	Satellites int       `json:"satellites,omitempty"`
-	InView     int       `json:"inView,omitempty"`
-	HDOP       float64   `json:"hdop,omitempty"`
-	Time       time.Time `json:"time,omitempty"` // receiver UTC time
-	Received   time.Time `json:"received"`
+	Lat        float64  `json:"lat"`
+	Lon        float64  `json:"lon"`
+	Alt        *float64 `json:"alt,omitempty"`
+	Speed      *float64 `json:"speed,omitempty"`  // metres per second
+	Course     *float64 `json:"course,omitempty"` // degrees true
+	Mode       string   `json:"mode"`             // 2d, 3d, dgps, rtk, estimated, manual
+	Satellites int      `json:"satellites,omitempty"`
+	InView     int      `json:"inView,omitempty"`
+	HDOP       float64  `json:"hdop,omitempty"`
+	// Accuracy is the estimated horizontal error in metres (from GST
+	// sentences: the larger of the latitude and longitude errors), or 0
+	// when the source does not say.
+	Accuracy float64   `json:"accuracy,omitempty"`
+	Time     time.Time `json:"time,omitempty"` // receiver UTC time
+	Received time.Time `json:"received"`
 }
 
 // tracker turns NMEA sentences into a Fix. Sentences arrive in bursts per
@@ -40,6 +48,8 @@ type tracker struct {
 	sentences   int64
 	bad         int64
 	lastBadText string
+	accuracy    float64   // from the latest GST sentence
+	accuracyAt  time.Time // when it arrived
 	now         func() time.Time
 	onFix       func(Fix)
 }
@@ -85,11 +95,17 @@ func (t *tracker) handleLine(line string) {
 		case "E":
 			f.Mode = "estimated"
 		}
-		sp := v.Speed * knots
-		f.Speed = &sp
-		if v.Speed > 0.5 { // course is meaningless when stationary
-			c := v.Course
-			f.Course = &c
+		// An empty speed field means unknown (network sources that do not
+		// report one), not stopped.
+		if len(v.Fields) > 6 && v.Fields[6] != "" {
+			sp := v.Speed * knots
+			f.Speed = &sp
+			if v.Speed > 0.5 { // course is meaningless when stationary
+				c := v.Course
+				f.Course = &c
+			}
+		} else {
+			f.Speed, f.Course = nil, nil
 		}
 		if v.Date.Valid && v.Time.Valid {
 			f.Time = time.Date(2000+v.Date.YY, time.Month(v.Date.MM), v.Date.DD, v.Time.Hour, v.Time.Minute,
@@ -127,6 +143,17 @@ func (t *tracker) handleLine(line string) {
 				t.fix.Mode = "2d"
 			case "3":
 				t.fix.Mode = "3d"
+			}
+		}
+	case gst:
+		acc := math.Max(v.LatErr, v.LonErr)
+		if acc <= 0 {
+			acc = v.Major
+		}
+		if acc > 0 && !math.IsInf(acc, 0) && !math.IsNaN(acc) {
+			t.accuracy, t.accuracyAt = acc, now
+			if t.fix != nil && now.Sub(t.fix.Received) <= 2*time.Second {
+				t.fix.Accuracy = acc
 			}
 		}
 	case nmea.GSV:
@@ -167,6 +194,11 @@ func (t *tracker) next(now time.Time) *Fix {
 		t.fix = f
 	}
 	t.fix.Received = now
+	if !t.accuracyAt.IsZero() && now.Sub(t.accuracyAt) <= staleAfter {
+		t.fix.Accuracy = t.accuracy
+	} else {
+		t.fix.Accuracy = 0
+	}
 	return t.fix
 }
 
@@ -192,5 +224,30 @@ func (t *tracker) reset() {
 	t.lastNoFix = time.Time{}
 	t.sentences, t.bad = 0, 0
 	t.lastBadText = ""
+	t.accuracy, t.accuracyAt = 0, time.Time{}
 	t.mu.Unlock()
+}
+
+// gst is the GNSS pseudorange error statistics sentence (GST), which go-nmea
+// does not decode. Receivers that send it, and Arcana's network sources,
+// report their estimated error in metres with it.
+type gst struct {
+	nmea.BaseSentence
+	Major  float64 // semi-major axis of the error ellipse, metres
+	LatErr float64 // standard deviation of latitude error, metres
+	LonErr float64 // standard deviation of longitude error, metres
+}
+
+func init() {
+	nmea.MustRegisterParser("GST", func(s nmea.BaseSentence) (nmea.Sentence, error) {
+		p := nmea.NewParser(s)
+		g := gst{BaseSentence: s}
+		if len(s.Fields) < 8 {
+			return nil, fmt.Errorf("GST: %d fields, want 8", len(s.Fields))
+		}
+		g.Major = p.Float64(2, "semi-major error")
+		g.LatErr = p.Float64(5, "latitude error")
+		g.LonErr = p.Float64(6, "longitude error")
+		return g, p.Err()
+	})
 }

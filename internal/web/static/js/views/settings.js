@@ -3,6 +3,7 @@ import { h, clear, fill, fmtBytes, fmtDate, toast } from '../util.js';
 import { tasksPanel } from './tasks.js';
 import { integrationsPanel, peersPanel } from './integrations.js';
 import { getUnits, setUnits, UNIT_SYSTEMS } from '../units.js';
+import { browserID, insecureReason } from '../geolocate.js';
 
 const GB = 1e9;
 
@@ -85,9 +86,26 @@ export async function settingsView(main) {
   // Maps and position.
   const g = { source: '', baudRate: 4800, udpPort: 10110, simulatorSpeed: 1, ...(st.gps || {}) };
   const mapsOn = h('input', { type: 'checkbox', checked: st.maps ? st.maps.enabled : true, disabled: ro });
-  const gpsSource = h('select', { disabled: ro }, [['', 'Off'], ['serial', 'USB or serial receiver (NMEA)'], ['gpsd', 'gpsd'],
-    ['udp', 'NMEA over UDP (network multiplexer, phone app)'], ['tcp', 'NMEA over TCP'], ['simulator', 'Simulator (replays a GPX track)'],
+  const LIVE_SOURCES = [['serial', 'USB or serial receiver (NMEA)'], ['gpsd', 'gpsd'],
+    ['udp', 'NMEA over UDP (network multiplexer, phone app)'], ['tcp', 'NMEA over TCP'],
+    ['starlink', 'Starlink dish (local network)'], ['browser', 'This browser’s location services']];
+  const gpsSource = h('select', { disabled: ro }, [['', 'Off'], ...LIVE_SOURCES, ['simulator', 'Simulator (replays a GPX track)'],
     ['manual', 'Fixed position (entered by hand)']].map(([v, t]) => h('option', { value: v, selected: v === (g.source || '') }, t)));
+  const checkSource = h('select', { disabled: ro }, [['', 'Nothing'], ...LIVE_SOURCES]
+    .map(([v, t]) => h('option', { value: v, selected: v === (g.checkSource || '') }, t)));
+  const starlinkAddr = h('input', { type: 'text', value: g.starlinkAddress || '', placeholder: '192.168.100.1:9200', style: 'width:min(260px,100%)', disabled: ro });
+  // The browser source takes positions only from the browser chosen here.
+  let browserId = g.browserId || '';
+  const browserNote = h('div');
+  const renderBrowserNote = () => {
+    const mine = !browserId || browserId === browserID();
+    const why = insecureReason();
+    fill(browserNote, field('Browser', h('div', null,
+      h('div', { class: 'small' }, mine ? 'Positions will come from this browser, on this device.' : 'Positions come from another browser chosen earlier. ',
+        mine ? null : h('button', { disabled: ro, onclick: () => { browserId = browserID(); renderBrowserNote(); } }, 'Use this browser instead')),
+      mine && why ? h('div', { class: 'small', style: 'color:var(--warn)' }, why) : null),
+    'Uses the device’s own location services: its GPS if it has one, otherwise nearby Wi-Fi networks or the mobile network. The browser will ask for permission. To place you from Wi-Fi, the device’s system may ask its provider (for example Google or Apple) over the internet; Arcana itself sends nothing. Keep an Arcana page open on that device: when it closes, the position goes stale and then lost.'));
+  };
   const serialPort = h('select', { disabled: ro, style: 'min-width:200px' });
   const fillPorts = async () => {
     let ports = [];
@@ -107,23 +125,34 @@ export async function settingsView(main) {
   const shareGPS = h('input', { type: 'checkbox', checked: !!g.shareWithClients, disabled: ro });
   const sourceFields = h('div');
   const renderSource = () => {
-    const v = gpsSource.value;
+    const kinds = [gpsSource.value, checkSource.value];
+    const uses = (k) => kinds.includes(k);
+    const v = uses('tcp') ? 'tcp' : uses('gpsd') ? 'gpsd' : gpsSource.value;
+    if (uses('browser')) renderBrowserNote();
     fill(sourceFields,
-      v === 'serial' ? field('Port', h('span', { class: 'row' }, serialPort, baud, h('button', { onclick: fillPorts }, 'Rescan')),
+      uses('serial') ? field('Port', h('span', { class: 'row' }, serialPort, baud, h('button', { onclick: fillPorts }, 'Rescan')),
         'Most USB receivers use 4800 or 9600 baud. On Linux, your user may need to be in the dialout group.') : null,
-      v === 'udp' ? field('UDP port', udpPort, 'Arcana listens on this port on every network interface for NMEA sentences (10110 is the common default). It only reads; nothing is sent.') : null,
+      uses('udp') ? field('UDP port', udpPort, 'Arcana listens on this port on every network interface for NMEA sentences (10110 is the common default). It only reads; nothing is sent.') : null,
+      uses('starlink') ? field('Starlink dish', starlinkAddr,
+        'Leave empty for the dish’s usual address. Arcana asks the dish for its location every 2 seconds over the local network; no internet is needed. First turn on “Allow access on local network” for Starlink location in the Starlink app (with the debug data settings). Some Starlink service plans no longer share the location at all; Arcana then says so here and on the map.') : null,
+      uses('browser') ? browserNote : null,
       v === 'tcp' || v === 'gpsd' ? field('Address', address, v === 'gpsd' ? 'Leave empty for gpsd on this computer (127.0.0.1:2947).' : 'Arcana connects to this address and reads NMEA sentences.') : null,
-      v === 'simulator' ? field('Track', h('span', { class: 'row' }, simTrack, simSpeed),
+      gpsSource.value === 'simulator' ? field('Track', h('span', { class: 'row' }, simTrack, simSpeed),
         'Name of a GPX file in the user folder (tracks or documents). The simulator produces real NMEA sentences, so it tests the same path as a receiver. Positions are labelled as simulated.') : null,
-      v === 'manual' ? field('Position', h('span', { class: 'row' }, mLat, mLon), 'Decimal degrees; south and west are negative.') : null);
+      gpsSource.value === 'manual' ? field('Position', h('span', { class: 'row' }, mLat, mLon), 'Decimal degrees; south and west are negative.') : null);
   };
-  gpsSource.addEventListener('change', renderSource);
+  // Choosing the browser source here means this browser.
+  const onSourceChange = (e) => { if (e.target.value === 'browser') browserId = browserID(); renderSource(); };
+  gpsSource.addEventListener('change', onSourceChange);
+  checkSource.addEventListener('change', onSourceChange);
   renderSource();
   const gpsBody = () => ({
-    source: gpsSource.value, serialPort: (gpsSource.value === 'serial' && serialPort.value) || g.serialPort || '', baudRate: parseInt(baud.value, 10),
+    source: gpsSource.value, serialPort: ((gpsSource.value === 'serial' || checkSource.value === 'serial') && serialPort.value) || g.serialPort || '', baudRate: parseInt(baud.value, 10),
     udpPort: parseInt(udpPort.value, 10) || 10110, address: address.value.trim(), simulatorTrack: simTrack.value.trim(),
     simulatorSpeed: parseFloat(simSpeed.value), manualLat: parseFloat(mLat.value) || 0, manualLon: parseFloat(mLon.value) || 0,
     shareWithClients: shareGPS.checked, recordTrack: record.checked,
+    checkSource: checkSource.value === gpsSource.value ? '' : checkSource.value, starlinkAddress: starlinkAddr.value.trim(),
+    browserId: gpsSource.value === 'browser' || checkSource.value === 'browser' ? (browserId || browserID()) : browserId,
   });
   let gpsInitial = JSON.stringify(gpsBody());
 
@@ -159,6 +188,7 @@ export async function settingsView(main) {
     field('Map regions', h('label', { class: 'inline' }, mapsOn, 'Offer OpenStreetMap regions in Discover'),
       'Region sizes are bundled with Arcana. Downloading a region extracts it from the newest Protomaps planet build.'),
     field('Position source', gpsSource, 'Arcana only reads positions. It never transmits them; network clients see them only if you allow it below.'),
+    field('Compare with', checkSource, 'Optional. A second source shown beside the first and checked against it, so a GPS that is jammed, spoofed or simply wrong is noticed. Only the first source moves the map, records tracks and guides you; the map offers to switch them when they disagree.'),
     sourceFields,
     field('Track recording', h('label', { class: 'inline' }, record, 'Record a track while a position is available'),
       'Tracks are saved as GPX files in user/tracks on the drive.'),

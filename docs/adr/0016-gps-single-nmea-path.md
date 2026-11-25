@@ -1,6 +1,7 @@
 # ADR-0016: One NMEA parsing path for every position source
 
-- Status: Accepted
+- Status: Accepted; amended by [ADR-0026](0026-network-position-sources.md)
+  (network sources feed the same path as generated sentences)
 - Date: 2026-11-22
 
 ## Context

@@ -43,7 +43,7 @@ internal/store/        SQLite index
 internal/fsutil/       atomic writes, safe paths, OS locks
 internal/maps/         PMTiles reader/writer, region extraction, overzoom, gazetteer, maps provider
 internal/routing/      OSM PBF reader, road network builder and format, routing, turn-by-turn guidance, road network provider
-internal/gps/          NMEA tracker, position sources, simulator, tracks, waypoints, GPX
+internal/gps/          NMEA tracker, position sources (incl. Starlink dish and browser location), simulator, tracks, waypoints, saved routes, GPX
 internal/auth/         remote-administration password (Argon2id), sessions, sign-in throttling
 internal/mdns/         mDNS responder and DNS-SD advertisement
 internal/tlsutil/      self-signed and custom certificates, HTTP/HTTPS on one port

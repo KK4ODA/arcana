@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -26,6 +27,97 @@ func (s *Server) registerGPS(mux *http.ServeMux) {
 	mux.HandleFunc("DELETE /api/gps/tracks/{name}", s.withApp(s.handleDeleteTrack))
 	mux.HandleFunc("GET /api/gps/export", s.withApp(s.gpsVisible(s.handleGPXExport)))
 	mux.HandleFunc("POST /api/gps/import", s.withApp(s.handleGPXImport))
+	mux.HandleFunc("GET /api/gps/browser", s.adminOnly(s.withApp(s.handleBrowserWanted)))
+	mux.HandleFunc("POST /api/gps/browser", s.adminOnly(s.withApp(s.handleBrowserPosition)))
+	mux.HandleFunc("GET /api/gps/routes", s.withApp(s.gpsVisible(s.handleRoutes)))
+	mux.HandleFunc("POST /api/gps/routes", s.withApp(s.handleSaveRoute))
+	mux.HandleFunc("GET /api/gps/routes/{id}", s.withApp(s.gpsVisible(s.handleSavedRoute)))
+	mux.HandleFunc("GET /api/gps/routes/{id}/gpx", s.withApp(s.gpsVisible(s.handleRouteGPX)))
+	mux.HandleFunc("DELETE /api/gps/routes/{id}", s.withApp(s.handleDeleteRoute))
+}
+
+// browserIDPattern is the identifier a browser keeps for the "browser"
+// position source (empty when none was chosen).
+var browserIDPattern = regexp.MustCompile(`^[A-Za-z0-9-]{0,64}$`)
+
+// handleBrowserWanted tells a browser whether it should send its position
+// (it is the browser chosen in Settings for the "browser" source).
+func (s *Server) handleBrowserWanted(w http.ResponseWriter, r *http.Request, a *app.App) {
+	id := r.URL.Query().Get("id")
+	writeJSON(w, http.StatusOK, map[string]bool{"wanted": browserIDPattern.MatchString(id) && a.GPS.WantsBrowser(id)})
+}
+
+// handleBrowserPosition receives a position from the Geolocation API of
+// the chosen browser and feeds it to the "browser" source.
+func (s *Server) handleBrowserPosition(w http.ResponseWriter, r *http.Request, a *app.App) {
+	var req gps.BrowserFix
+	if err := readJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid request")
+		return
+	}
+	if err := a.GPS.PushBrowser(req); err != nil {
+		code := http.StatusBadRequest
+		if errors.Is(err, gps.ErrNoBrowserSource) || errors.Is(err, gps.ErrOtherBrowser) {
+			code = http.StatusConflict
+		}
+		writeError(w, code, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]bool{"ok": true})
+}
+
+func (s *Server) handleRoutes(w http.ResponseWriter, r *http.Request, a *app.App) {
+	rs, err := a.GPS.Routes()
+	if err != nil {
+		gpsErr(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"routes": rs})
+}
+
+func (s *Server) handleSavedRoute(w http.ResponseWriter, r *http.Request, a *app.App) {
+	rt, err := a.GPS.Route(r.PathValue("id"))
+	if err != nil {
+		gpsErr(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, rt)
+}
+
+func (s *Server) handleSaveRoute(w http.ResponseWriter, r *http.Request, a *app.App) {
+	var req gps.SavedRoute
+	dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, gps.MaxRouteBytes))
+	if err := dec.Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid request")
+		return
+	}
+	saved, err := a.GPS.SaveRoute(req)
+	if err != nil {
+		gpsErr(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, gps.RouteInfo{ID: saved.ID, Name: saved.Name, Created: saved.Created, Mode: saved.Mode,
+		From: saved.From, To: saved.To, Distance: saved.Distance, Duration: saved.Duration})
+}
+
+func (s *Server) handleRouteGPX(w http.ResponseWriter, r *http.Request, a *app.App) {
+	var buf strings.Builder
+	if err := a.GPS.RouteGPX(&buf, r.PathValue("id")); err != nil {
+		gpsErr(w, err)
+		return
+	}
+	w.Header().Set("Content-Type", "application/gpx+xml")
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%q", "arcana-route-"+r.PathValue("id")+".gpx"))
+	w.Header().Set("Cache-Control", "no-store")
+	io.WriteString(w, buf.String())
+}
+
+func (s *Server) handleDeleteRoute(w http.ResponseWriter, r *http.Request, a *app.App) {
+	if err := a.GPS.DeleteRoute(r.PathValue("id")); err != nil {
+		gpsErr(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]bool{"ok": true})
 }
 
 // gpsVisible limits position data to the host computer unless the host

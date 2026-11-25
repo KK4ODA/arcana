@@ -3,6 +3,41 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
+## Unreleased
+
+### Added
+- **Positions without a GPS receiver** (ADR-0026). *Settings → Maps and
+  position* offers two new position sources, both off until chosen:
+  - **Starlink dish**: Arcana asks the dish on the local network for its
+    location every 2 seconds. No internet is needed, but the owner must
+    first turn on "Allow access on local network" for Starlink location
+    in the Starlink app, and some service plans no longer share the
+    location at all (Arcana says so). The map shows whether the dish's
+    position comes from its GPS receiver or from Starlink satellites.
+  - **This browser's location services**: the phone, tablet or computer
+    showing Arcana sends the position its system knows (its own GPS, or
+    Wi-Fi and mobile networks). Browsers allow this only over HTTPS or on
+    the computer running Arcana.
+  Both go through the same path as a receiver, so the map, tracks,
+  waypoints and turn-by-turn guidance work as before. The position panel
+  shows where a position came from and how accurate it is ("within about
+  25 m"); receivers that send GST sentences now show it too.
+- **Compare with a second source.** A second position source can be shown
+  beside the first (a ring on the map). When the two disagree by more than
+  their accuracy allows, for example because the GPS is jammed or spoofed,
+  the map says so and offers to use the other one instead.
+- **Saved routes.** *Save route* in Directions keeps a route in the user
+  folder; *Saved routes* opens it later to look at or follow, even without
+  the road network, and exports it as GPX.
+- **Directions from here** work with any position source: the button under
+  Position, the ◎ button, and *Directions to here* on the map, which now
+  starts from your position when no start is chosen.
+
+### Changed
+- Guidance does not count a coarse position as leaving the route while it
+  is within its own accuracy (up to 300 m).
+- An empty speed field in NMEA is shown as unknown instead of 0.
+
 ## 0.10.1 — 2026-11-24
 
 Nothing in the program changes: this release makes a test of map

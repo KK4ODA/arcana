@@ -117,6 +117,10 @@ func TestSessionAndAccessPolicy(t *testing.T) {
 		{"lan cannot add waypoints", "POST", "/api/gps/waypoints", lanClient, "127.0.0.1:18470", map[string]string{"X-Arcana-Token": token}, 403},
 		{"lan cannot list serial ports", "GET", "/api/gps/ports", lanClient, "127.0.0.1:18470", nil, 403},
 		{"local reads position", "GET", "/api/gps", local, "127.0.0.1:18470", nil, 200},
+		{"lan cannot send a browser position", "POST", "/api/gps/browser", lanClient, "127.0.0.1:18470", map[string]string{"X-Arcana-Token": token}, 403},
+		{"lan cannot ask to send a browser position", "GET", "/api/gps/browser?id=x", lanClient, "127.0.0.1:18470", nil, 403},
+		{"lan cannot see private saved routes", "GET", "/api/gps/routes", lanClient, "127.0.0.1:18470", nil, 403},
+		{"lan cannot save routes", "POST", "/api/gps/routes", lanClient, "127.0.0.1:18470", map[string]string{"X-Arcana-Token": token}, 403},
 		{"bad tile coordinates", "GET", "/maps/tiles/3/99/2.mvt", local, "127.0.0.1:18470", nil, 204},
 	}
 	for _, c := range cases {

@@ -1,7 +1,10 @@
 // Directions and turn-by-turn guidance in the map view. Routes come from
 // the installed road networks (GET /api/route); guidance runs here, from
-// the GPS position, and asks for a new route when the traveller leaves this
-// one. Spoken instructions use the browser's own voices, when it has any.
+// the position (a GPS receiver, a Starlink dish, this browser's location or
+// any other source in Settings), and asks for a new route when the
+// traveller leaves this one. Routes can be saved in the user folder and
+// followed later. Spoken instructions use the browser's own voices, when it
+// has any.
 import { api } from '../api.js';
 import { h, clear, fill, toast, debounce } from '../util.js';
 import { getUnits, fmtDistance, fmtStepDistance, fmtTravelTime } from '../units.js';
@@ -43,9 +46,16 @@ function gpxFor(route, name) {
     `<trk><name>${esc(name)}</name><trkseg>${pts}</trkseg></trk></gpx>\n`;
 }
 
+// liveFix is the position to start from or follow: current, fixed, or at
+// most a minute old.
+function liveFix(g) {
+  return g && g.fix && (g.state === 'current' || g.state === 'manual' || g.state === 'stale') ? g.fix : null;
+}
+
 // createDirections builds the directions panel. ctx gives access to the
 // map view: map(), setData(id, data), gps() (the last GPS message),
-// flyTo(lon, lat, zoom), fitBounds(bounds), cssVar(name), follow(on).
+// flyTo(lon, lat, zoom), fitBounds(bounds), cssVar(name), follow(on),
+// canChange (may save routes).
 export function createDirections(ctx) {
   let mode = 'car';
   try { mode = localStorage.getItem('arcana-route-mode') || 'car'; } catch (_) { /* ignore */ }
@@ -60,6 +70,8 @@ export function createDirections(ctx) {
 
   const el = h('div', { class: 'directions' });
   const out = h('div', { class: 'route-out' });
+  const savedBox = h('div', { class: 'saved-routes' });
+  let saved = null; // null: not shared by the host
   const navEl = h('div', { class: 'nav-banner', hidden: true, role: 'status', 'aria-live': 'polite' });
 
   // ------------------------------------------------------------ inputs
@@ -121,11 +133,18 @@ export function createDirections(ctx) {
     else if (which === 'from' && !ends.to) toI.input.focus();
   }
 
+  function myPosition() {
+    const f = liveFix(ctx.gps());
+    return f ? { lat: f.lat, lon: f.lon, label: 'My position', mine: true } : null;
+  }
+
   function useMyPosition() {
-    const g = ctx.gps();
-    const f = g && g.fix;
-    if (!f) { toast('No position yet. Connect a GPS receiver in Settings.'); return; }
-    setEnd('from', { lat: f.lat, lon: f.lon, label: 'My position', mine: true });
+    const p = myPosition();
+    if (!p) { toast('No position yet. Choose a position source in Settings: a GPS receiver, a Starlink dish or this browser’s location.'); return false; }
+    const f = ctx.gps().fix;
+    if (f.accuracy > 500) toast(`Your position is only good to about ${fmtDistance(f.accuracy)}; check the start on the map.`);
+    setEnd('from', p);
+    return true;
   }
 
   function startPicking(which) {
@@ -253,8 +272,9 @@ export function createDirections(ctx) {
 
   function renderRoute() {
     if (!route) { clear(out); return; }
-    const gpsFix = ctx.gps() && ctx.gps().fix;
-    const navBtn = h('button', { class: 'primary', disabled: !gpsFix, title: gpsFix ? '' : 'Turn-by-turn guidance needs a position from a GPS receiver', onclick: () => startNav() }, 'Start navigation');
+    const gpsFix = liveFix(ctx.gps());
+    const navBtn = h('button', { class: 'primary', disabled: !gpsFix, title: gpsFix ? '' : 'Turn-by-turn guidance needs a live position', onclick: () => startNav() }, 'Start navigation');
+    const saveBtn = ctx.canChange && saved !== null ? h('button', { onclick: () => saveRoute() }, 'Save route') : null;
     const gpx = h('button', { onclick: () => {
       const name = `Route to ${ends.to.label || fmtLabel(ends.to)}`;
       const blob = new Blob([gpxFor(route, name)], { type: 'application/gpx+xml' });
@@ -269,8 +289,8 @@ export function createDirections(ctx) {
         h('span', { class: 'num' }, fmtDistance(route.distance))),
       h('div', { class: 'small muted' }, `${MODES.find(([m]) => m === route.mode)[1]} · ${network ? network.title.replace(/ — road network$/, '') : ''} · © OpenStreetMap contributors`),
       route.warnings.map((w) => h('div', { class: 'small route-warn' }, w)),
-      h('div', { class: 'row' }, navBtn, gpx),
-      gpsFix ? null : h('p', { class: 'small muted' }, 'Turn-by-turn guidance follows a GPS position; connect a receiver (or the simulator) in Settings.'),
+      h('div', { class: 'row' }, navBtn, saveBtn, gpx),
+      gpsFix ? null : h('p', { class: 'small muted' }, 'Turn-by-turn guidance follows your position: choose a GPS receiver, a Starlink dish or this browser’s location in Settings. You can save the route and follow it later.'),
       h('ol', { class: 'steps' }, route.steps.map(stepItem)),
       h('p', { class: 'small muted' }, 'Directions come from OpenStreetMap data and may be wrong or out of date. Follow road signs and traffic rules.'));
   }
@@ -393,11 +413,14 @@ export function createDirections(ctx) {
     const windowPts = r.geometry.slice(from, Math.min(r.geometry.length, nav.seg + 400));
     let near = windowPts.length >= 2 ? nearestOnPath(windowPts, p) : null;
     if (near) near = { ...near, index: near.index + from, along: nav.cum[from] + near.along };
-    if (!near || near.dist > OFF_ROUTE[r.mode]) {
+    // A coarse position (Wi-Fi, a dish on a roof) must not count as
+    // leaving the route while it is still within its own error.
+    const offRoute = Math.max(OFF_ROUTE[r.mode], Math.min(g.fix.accuracy || 0, 300));
+    if (!near || near.dist > offRoute) {
       const all = nearestOnPath(r.geometry, p);
       if (!near || all.dist < near.dist) near = all;
     }
-    if (near.dist > OFF_ROUTE[r.mode]) {
+    if (near.dist > offRoute) {
       nav.off++;
       if (nav.off >= 2) reroute(g.fix);
       renderNav();
@@ -440,16 +463,75 @@ export function createDirections(ctx) {
   function render() {
     if (!networks.length) {
       fill(el, h('p', { class: 'small muted' }, 'Directions need a road network for the area, built from OpenStreetMap. ',
-        h('a', { href: '#/discover?category=maps-navigation&lang=&q=road%20network' }, 'Get a road network'), '.'), out);
+        h('a', { href: '#/discover?category=maps-navigation&lang=&q=road%20network' }, 'Get a road network'), '.'), out, savedBox);
       return;
     }
     fill(el, modeBar, fromI.row, fromI.list, toI.row, toI.list, hint,
-      h('div', { class: 'row' }, goBtn, swapBtn, clearBtn), out);
+      h('div', { class: 'row' }, goBtn, swapBtn, clearBtn), out, savedBox);
+  }
+
+  // ------------------------------------------------------------ saved routes
+  async function loadSaved() {
+    try { saved = (await api.get('/api/gps/routes')).routes; } catch (_) { saved = null; }
+    renderSaved();
+  }
+
+  function renderSaved() {
+    if (!saved || !saved.length) {
+      fill(savedBox, saved && ctx.canChange ? h('p', { class: 'small muted' }, 'Saved routes appear here. They can be followed later, even without the road network.') : null);
+      return;
+    }
+    fill(savedBox, h('h4', null, 'Saved routes'), h('ul', { class: 'map-list' }, saved.map((r) => h('li', null,
+      h('button', { class: 'linkish', onclick: () => openSaved(r.id) }, r.name),
+      h('span', { class: 'sub' }, `${MODES.find(([m]) => m === r.mode)?.[1] || r.mode} · ${fmtDistance(r.distance)} · ${fmtTravelTime(r.duration)}`),
+      h('span', { class: 'row' },
+        h('a', { class: 'small', href: `/api/gps/routes/${encodeURIComponent(r.id)}/gpx`, download: `${r.name}.gpx` }, 'GPX'),
+        ctx.canChange ? h('button', { class: 'icon danger', title: `Delete ${r.name}`, 'aria-label': `Delete ${r.name}`, onclick: () => deleteSaved(r) }, '×') : null)))));
+  }
+
+  async function saveRoute() {
+    if (!route) return;
+    const name = prompt('Route name', `Route to ${ends.to.label || fmtLabel(ends.to)}`);
+    if (name === null) return;
+    const end = (p) => ({ lat: p.lat, lon: p.lon, label: p.label || '' });
+    try {
+      await api.post('/api/gps/routes', {
+        name, mode: route.mode, from: end(ends.from), to: end(ends.to), distance: route.distance, duration: route.duration,
+        network: network ? network.title : '', warnings: route.warnings, geometry: route.geometry, steps: route.steps,
+      });
+      toast('Route saved. Open it under Saved routes to follow it later.');
+      loadSaved();
+    } catch (e) { toast(e.message); }
+  }
+
+  async function openSaved(id) {
+    try {
+      const r = await api.get(`/api/gps/routes/${encodeURIComponent(id)}`);
+      stopNav();
+      stopPicking();
+      ends.from = { ...r.from };
+      ends.to = { ...r.to };
+      fromI.input.value = r.from.label || fmtLabel(r.from);
+      toI.input.value = r.to.label || fmtLabel(r.to);
+      if (MODES.some(([m]) => m === r.mode)) { mode = r.mode; renderModes(); }
+      route = { mode: r.mode, distance: r.distance, duration: r.duration, geometry: r.geometry, steps: r.steps, warnings: r.warnings || [] };
+      network = r.network ? { title: r.network } : null;
+      drawEnds();
+      drawRoute();
+      fitRoute();
+      renderRoute();
+    } catch (e) { toast(e.message); }
+  }
+
+  async function deleteSaved(r) {
+    if (!confirm(`Delete saved route “${r.name}”?`)) return;
+    try { await api.del(`/api/gps/routes/${encodeURIComponent(r.id)}`); loadSaved(); } catch (e) { toast(e.message); }
   }
 
   const onUnits = () => { renderRoute(); renderNav(); };
   window.addEventListener('arcana-units', onUnits);
   refreshNetworks();
+  loadSaved();
 
   return {
     el,
@@ -459,7 +541,13 @@ export function createDirections(ctx) {
     onGPS,
     // directionsFrom/To are offered in the map's point popup.
     setFrom: (lat, lon) => setEnd('from', { lat, lon, label: '' }),
-    setTo: (lat, lon) => setEnd('to', { lat, lon, label: '' }),
+    // Directions to a point start from the current position when no start
+    // was chosen.
+    setTo: (lat, lon) => {
+      if (!ends.from) { const p = myPosition(); if (p) { ends.from = p; fromI.input.value = p.label; } }
+      setEnd('to', { lat, lon, label: '' });
+    },
+    fromMyPosition: () => { if (useMyPosition() && !ends.to) toI.input.focus(); },
     hasNetworks: () => networks.length > 0,
     gpsChanged: () => { if (route && !nav) renderRoute(); },
     dispose: () => { stopNav(); window.removeEventListener('arcana-units', onUnits); },
