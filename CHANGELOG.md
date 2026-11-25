@@ -3,6 +3,53 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
+## 0.11.0 — 2026-11-25
+
+Arcana can now find its position without a GPS receiver: from a Starlink
+dish on the local network, or from the location services of the phone or
+computer showing it. So directions from where you are can be worked out,
+saved and followed even with no GPS, or with one that is jammed or wrong.
+A second source can be shown beside the first, with a warning when the two
+disagree. Both network sources stay off until chosen in Settings. The
+Starlink source has been tested against a stand-in for the dish, not a
+real one, and some Starlink plans no longer share the dish's location at
+all. Arcana 0.6.0 to 0.10.2 offer this version by themselves within a day
+of being online: choose *Update now* in the banner at the top of the page,
+or *Settings → Application updates → Check now* to look straight away.
+
+### Added
+- **Positions without a GPS receiver** (ADR-0026). *Settings → Maps and
+  position* offers two new position sources, both off until chosen:
+  - **Starlink dish**: Arcana asks the dish on the local network for its
+    location every 2 seconds. No internet is needed, but the owner must
+    first turn on "Allow access on local network" for Starlink location
+    in the Starlink app, and some service plans no longer share the
+    location at all (Arcana says so). The map shows whether the dish's
+    position comes from its GPS receiver or from Starlink satellites.
+  - **This browser's location services**: the phone, tablet or computer
+    showing Arcana sends the position its system knows (its own GPS, or
+    Wi-Fi and mobile networks). Browsers allow this only over HTTPS or on
+    the computer running Arcana.
+  Both go through the same path as a receiver, so the map, tracks,
+  waypoints and turn-by-turn guidance work as before. The position panel
+  shows where a position came from and how accurate it is ("within about
+  25 m"); receivers that send GST sentences now show it too.
+- **Compare with a second source.** A second position source can be shown
+  beside the first (a ring on the map). When the two disagree by more than
+  their accuracy allows, for example because the GPS is jammed or spoofed,
+  the map says so and offers to use the other one instead.
+- **Saved routes.** *Save route* in Directions keeps a route in the user
+  folder; *Saved routes* opens it later to look at or follow, even without
+  the road network, and exports it as GPX.
+- **Directions from here** work with any position source: the button under
+  Position, the ◎ button, and *Directions to here* on the map, which now
+  starts from your position when no start is chosen.
+
+### Changed
+- Guidance does not count a coarse position as leaving the route while it
+  is within its own accuracy (up to 300 m).
+- An empty speed field in NMEA is shown as unknown instead of 0.
+
 ## 0.10.2 — 2026-11-25
 
 The classroom works with Kolibri itself: it starts instead of staying on

@@ -243,6 +243,21 @@ func lanAddresses() []string {
 	return out
 }
 
+// sourceName names a position source in a sentence.
+func sourceName(src string) string {
+	switch src {
+	case "serial", "udp", "tcp":
+		return "the GPS receiver"
+	case "starlink":
+		return "the Starlink dish"
+	case "browser":
+		return "the browser's location"
+	case "manual":
+		return "the fixed position"
+	}
+	return src
+}
+
 // gpsSummary is the dashboard's position readout.
 func (s *Server) gpsSummary(r *http.Request, a *app.App) map[string]any {
 	if !s.isAdmin(r) && !a.Lib.Settings.Get().GPS.ShareWithClients {
@@ -263,6 +278,11 @@ func (s *Server) gpsSummary(r *http.Request, a *app.App) map[string]any {
 		out["sub"] = "choose a receiver in Settings"
 	case st.State == "error":
 		out["sub"] = st.Error
+	case st.Disagree && st.Check != nil:
+		out["sub"] = fmt.Sprintf("%s and %s disagree by %.1f km", sourceName(st.Source), sourceName(st.Check.Source), st.Apart/1000)
+		out["dot"] = "warn"
+		out["fix"] = st.Fix
+		out["age"] = st.Age
 	case st.Fix != nil:
 		out["sub"] = fmt.Sprintf("%.5f, %.5f", st.Fix.Lat, st.Fix.Lon)
 		out["fix"] = st.Fix

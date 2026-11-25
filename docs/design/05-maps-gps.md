@@ -25,6 +25,9 @@ rest of this document is the original design, kept for reference.
 | Terrain, contours, emergency overlays | Not implemented | |
 | Routing | Implemented, **differs** | Built into Arcana instead of a Valhalla or BRouter sidecar (ADR-0020): road networks are built on the user's computer from Geofabrik extracts (MD5-checked), edge-based A* for car, bicycle and foot with turn restrictions, turn-by-turn guidance with GPS following and rerouting in the map view. |
 | GPS sources | Implemented, **differs** | Serial (go.bug.st/serial), UDP listener, TCP client, gpsd, simulator, manual. gpsd is read in **NMEA watch mode** so every source shares one parser. The simulator generates real RMC/GGA sentences from a GPX track (or a 1 km loop on the installed map) and labels its fixes "simulated". Not implemented: TCP server mode, baud-rate autodetection, the UDP sender allow-list and rate limit; UDP listens on every interface once chosen (the help text says so). |
+| Network position sources | Implemented (ADR-0026) | A **Starlink dish** on the local network (`get_location` over gRPC on 192.168.100.1:9200, called with the standard library's unencrypted HTTP/2; the owner must allow location access in the Starlink app, and some plans no longer give it) and **the browser's Geolocation API** on the device chosen in Settings (needs HTTPS or localhost). Both are off by default and produce RMC/GGA/GST sentences for the same tracker. IP geolocation over the internet was rejected: city-level at best, and Starlink addresses geolocate to the ground station. Fixes carry `accuracy` in metres (from GST, which receivers may also send). Not tried with a real dish. |
+| Second source | Implemented (ADR-0026) | *Compare with* in Settings runs a second live source with its own tracker. It is drawn as a ring and listed under Position; when both are current and further apart than three times their combined error (at least 100 m) Arcana warns that they disagree and offers to swap them. It never drives the map, tracks or guidance. No automatic failover or averaging. |
+| Saved routes | Implemented | `user/routes/<id>.json` keeps a computed route (line, maneuvers, ends, mode) to open and follow later without the road network; GPX export writes the maneuvers as a `<rte>` and the line as a `<trk>`. Same privacy rule as waypoints. |
 | Fix states | Implemented | off, connecting, waiting (connected, no data), searching (data, no fix), current (≤ 5 s), stale (≤ 60 s), lost, manual, error. Sentences with status V, quality 0 or a bad checksum never move the position. An empty altitude field means unknown, not sea level. |
 | Live updates | Implemented | Server-sent events at `/api/gps/stream`, at most 2 per second plus a 5 s heartbeat so freshness changes are visible. |
 | Privacy | Implemented | Position, waypoints and tracks are visible to network clients only when "Share position" is on (off by default). Arcana never transmits positions. |
@@ -202,8 +205,10 @@ Events.
 - **One stream per tab**, multiplexing all GPS topics, which respects
   browsers' six-connection limit for HTTP/1.1.
 - **Read-only, rate-limited.** There is no write path from clients.
-- **Phones as GPS sources.** Browser geolocation is unavailable to LAN
-  clients over plain HTTP: the Geolocation API needs a secure context. A
+- **Phones as GPS sources.** (Implemented in ADR-0026 as the `browser`
+  source, for the one browser chosen in Settings.) Browser geolocation is
+  unavailable to LAN clients over plain HTTP: the Geolocation API needs a
+  secure context. A
   phone that should *provide* GPS runs an NMEA-sharing app that pushes to
   the server's UDP/TCP listener, or opens Arcana over `https://` once
   optional local TLS ships (Phase 4, self-signed or user-provided

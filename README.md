@@ -15,7 +15,7 @@ it with no internet connection.
   <img alt="The Arcana library: a dashboard with installed content, free space, offline readiness, network sharing and GPS status, above a drive usage bar, a full-text search box and the list of installed resources with their categories, editions, sizes and licenses." src="docs/screenshots/library.png">
 </picture>
 
-Status: **0.10.2** ([changelog](CHANGELOG.md)). It
+Status: **0.11.0** ([changelog](CHANGELOG.md)). It
 works end to end on Linux and is packaged for Windows and macOS, but **has
 not yet been run on real Windows or macOS hardware**, and the programs are
 not yet code-signed (see [Status](#status)).
@@ -83,9 +83,13 @@ not yet code-signed (see [Status](#status)).
   by car, bicycle or on foot, with turn-by-turn guidance that follows the
   GPS and finds a new route when you leave it, from road networks Arcana
   builds from OpenStreetMap extracts (countries and states up to about
-  1 GB of data). Position
+  1 GB of data); routes can be saved and followed later. Position
   from a USB or serial GPS receiver, gpsd, NMEA over UDP/TCP, a simulator
-  or a fixed point; waypoints, track recording and GPX import and export.
+  or a fixed point, or without a receiver from a Starlink dish on the
+  local network or the location services of the phone or computer showing
+  Arcana (both off until chosen). A second source can be shown beside the
+  first, with a warning when they disagree (a jammed or spoofed GPS).
+  Waypoints, track recording and GPX import and export.
   A Meshtastic radio (Wi-Fi or USB) puts the mesh's nodes on the map and
   lists its messages; Arcana only listens.
 - **Share on the local network** (`--lan`). Phones and other computers can
@@ -231,7 +235,7 @@ See [docs/development.md](docs/development.md).
 | **Implemented and tested** | Portable library layout; drive detection (Linux tested; Windows and macOS code compiled); capacity planning; catalog (bundled, Kiwix OPDS, feeds); recommender; verified resumable downloads; offline import; ZIM reading and search via kiwix-serve; web UI; read-only LAN sharing; integrity check; offline acceptance test |
 | **Built, not yet run on hardware** | Windows `Arcana.exe`, macOS binaries, Linux ARM64 |
 | **Implemented (Phase 2)** | Bookmarks, favorites, history and notes; your own documents with full-text search (PDF, EPUB, HTML, Markdown, text); drive-to-drive collection transfer; signed application updates with rollback; Project Gutenberg provider |
-| **Implemented (Phase 3)** | Offline vector maps: 541 OpenStreetMap regions (world, continents, countries, states) extracted on demand from Protomaps planet builds, custom areas, seamless merging of overlapping maps, offline place search; GPS from USB/serial receivers, gpsd, NMEA over UDP/TCP, a GPX simulator or a fixed position; waypoints, track recording, GPX import/export; distance and area measuring; offline directions and turn-by-turn navigation (car, bicycle, foot) from road networks built on the user's computer |
+| **Implemented (Phase 3)** | Offline vector maps: 541 OpenStreetMap regions (world, continents, countries, states) extracted on demand from Protomaps planet builds, custom areas, seamless merging of overlapping maps, offline place search; GPS from USB/serial receivers, gpsd, NMEA over UDP/TCP, a GPX simulator or a fixed position, and network positions from a Starlink dish or the browser's location services, with a second source compared against the first; waypoints, track recording, GPX import/export; distance and area measuring; offline directions and turn-by-turn navigation (car, bicycle, foot) from road networks built on the user's computer, with saved routes |
 | **Implemented (Phase 4)** | `arcana.local` on the network (built-in mDNS), QR codes and a printable connection card, optional HTTPS on the same port, password-protected remote administration (off by default), Wi-Fi hotspot control on Linux |
 | **Implemented (Phase 5), not yet run on hardware** | Raspberry Pi / Linux appliance: installer, confined systemd service with watchdog, Wi-Fi access point with captive portal ([docs/appliance.md](docs/appliance.md)) |
 | **Implemented (Phase 6)** | Integration API for other programs (RadioPost and Aether HF to come) with scoped, approved tokens and citations ([docs/integration-api.md](docs/integration-api.md)); copying between Arcana libraries on a LAN; signed community catalogs |

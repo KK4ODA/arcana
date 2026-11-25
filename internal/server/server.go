@@ -1055,9 +1055,28 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *ap
 		if req.GPS != nil {
 			g := *req.GPS
 			switch g.Source {
-			case "", "serial", "udp", "tcp", "gpsd", "simulator", "manual":
+			case "", "serial", "udp", "tcp", "gpsd", "simulator", "manual", "starlink", "browser":
 			default:
 				return fmt.Errorf("unknown position source %q", g.Source)
+			}
+			switch g.CheckSource {
+			case "", "serial", "udp", "tcp", "gpsd", "starlink", "browser":
+			default:
+				return errors.New("the second source must be a receiver, gpsd, a Starlink dish or a browser")
+			}
+			if g.CheckSource != "" && g.CheckSource == g.Source {
+				return errors.New("choose a different second source to compare with")
+			}
+			if (g.Source == "tcp" && g.CheckSource == "gpsd") || (g.Source == "gpsd" && g.CheckSource == "tcp") {
+				return errors.New("NMEA over TCP and gpsd share one address setting, so they cannot be compared")
+			}
+			if g.StarlinkAddress != "" {
+				if _, _, err := net.SplitHostPort(g.StarlinkAddress); err != nil {
+					return errors.New("the Starlink address must be host:port, e.g. 192.168.100.1:9200")
+				}
+			}
+			if !browserIDPattern.MatchString(g.BrowserID) {
+				return errors.New("invalid GPS settings")
 			}
 			if g.BaudRate < 0 || g.BaudRate > 921600 || g.UDPPort < 0 || g.UDPPort > 65535 ||
 				g.SimulatorSpeed < 0 || g.SimulatorSpeed > 100 {
@@ -1066,7 +1085,7 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *ap
 			if g.Source == "manual" && (g.ManualLat < -90 || g.ManualLat > 90 || g.ManualLon < -180 || g.ManualLon > 180) {
 				return errors.New("latitude must be -90..90 and longitude -180..180")
 			}
-			if len(g.SerialPort) > 200 || len(g.Address) > 200 || len(g.SimulatorTrack) > 200 {
+			if len(g.SerialPort) > 200 || len(g.Address) > 200 || len(g.SimulatorTrack) > 200 || len(g.StarlinkAddress) > 200 {
 				return errors.New("invalid GPS settings")
 			}
 			st.GPS = g

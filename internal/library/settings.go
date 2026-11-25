@@ -154,8 +154,21 @@ type MeshSettings struct {
 // GPSSettings select a position source. Arcana only reads positions; it
 // never sends them anywhere.
 type GPSSettings struct {
-	// Source is "", "serial", "udp", "tcp", "gpsd", "simulator" or "manual".
-	Source     string `json:"source"`
+	// Source is "", "serial", "udp", "tcp", "gpsd", "simulator", "manual",
+	// "starlink" (the dish's local API) or "browser" (the location
+	// services of a browser showing Arcana). Network sources are off
+	// until chosen here (ADR-0026).
+	Source string `json:"source"`
+	// CheckSource is a second source shown beside Source and compared
+	// with it (to notice a jammed or spoofed receiver); it never drives
+	// the map, tracks or guidance. Any live source other than Source.
+	CheckSource string `json:"checkSource,omitempty"`
+	// StarlinkAddress is the dish's gRPC address (default
+	// 192.168.100.1:9200).
+	StarlinkAddress string `json:"starlinkAddress,omitempty"`
+	// BrowserID is the random identifier of the browser whose location
+	// services feed "browser"; it is set when that browser chooses it.
+	BrowserID  string `json:"browserId,omitempty"`
 	SerialPort string `json:"serialPort,omitempty"`
 	BaudRate   int    `json:"baudRate,omitempty"`
 	// UDPPort listens for NMEA datagrams (default 10110).

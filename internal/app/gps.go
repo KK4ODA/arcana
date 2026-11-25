@@ -12,7 +12,7 @@ func gpsSettings(s library.GPSSettings) gps.Settings {
 	return gps.Settings{
 		Source: s.Source, SerialPort: s.SerialPort, BaudRate: s.BaudRate, UDPPort: s.UDPPort, Address: s.Address,
 		SimulatorTrack: s.SimulatorTrack, SimulatorSpeed: s.SimulatorSpeed, ManualLat: s.ManualLat, ManualLon: s.ManualLon,
-		RecordTrack: s.RecordTrack,
+		RecordTrack: s.RecordTrack, CheckSource: s.CheckSource, StarlinkAddress: s.StarlinkAddress, BrowserID: s.BrowserID,
 	}
 }
 

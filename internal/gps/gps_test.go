@@ -242,9 +242,9 @@ func TestStaleAndLost(t *testing.T) {
 	m := NewManager(t.TempDir(), false, nil)
 	clock := time.Now()
 	m.now = func() time.Time { return clock }
-	m.settings.Source = "udp"
-	m.connected = true
-	m.t.handleLine(rmcSentence(clock, 1, 1, 0, 0))
+	m.main.kind = "udp"
+	m.main.connected = true
+	m.main.t.handleLine(rmcSentence(clock, 1, 1, 0, 0))
 	if st := m.Status(); st.State != "current" {
 		t.Fatal(st.State)
 	}

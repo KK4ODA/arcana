@@ -1,6 +1,7 @@
 import { loadSession, getSession, api } from './api.js';
 import { h, clear } from './util.js';
 import { renderUpdateBanner } from './updatebanner.js';
+import { syncBrowserPosition } from './geolocate.js';
 import { libraryView } from './views/library.js';
 import { askView } from './views/ask.js';
 import { medicinesView } from './views/medicines.js';
@@ -185,9 +186,13 @@ async function start() {
   document.getElementById('library-label').textContent = s.libraryLabel || '';
   if (!s.setup) await refreshStatus();
   window.addEventListener('hashchange', route);
-  window.addEventListener('arcana-status', () => refreshStatus());
+  window.addEventListener('arcana-status', () => { refreshStatus(); syncBrowserPosition(); });
   await route();
   setInterval(() => { if (!getSession().setup && !document.hidden) refreshStatus(); }, 10000);
+  // This browser's location can be a position source (Settings → Maps and
+  // position); check now and then whether it is the one chosen.
+  syncBrowserPosition();
+  setInterval(syncBrowserPosition, 30000);
 }
 
 start();

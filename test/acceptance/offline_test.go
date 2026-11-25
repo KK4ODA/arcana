@@ -15,6 +15,7 @@ package acceptance
 
 import (
 	"context"
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -22,6 +23,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/cookiejar"
+	"net/http/httptest"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -580,6 +582,89 @@ func TestOfflineAcceptance(t *testing.T) {
 		wait("off", nil)
 	})
 
+	t.Run("06b-network-position-sources", func(t *testing.T) {
+		type gpsStatus struct {
+			State  string `json:"state"`
+			Source string `json:"source"`
+			Basis  string `json:"basis"`
+			Error  string `json:"error"`
+			Fix    *struct {
+				Lat      float64 `json:"lat"`
+				Accuracy float64 `json:"accuracy"`
+			} `json:"fix"`
+			Check *struct {
+				State string `json:"state"`
+			} `json:"check"`
+			Apart    float64 `json:"apart"`
+			Disagree bool    `json:"disagree"`
+		}
+		wait := func(what string, ok func(gpsStatus) bool) gpsStatus {
+			var st gpsStatus
+			for deadline := time.Now().Add(15 * time.Second); time.Now().Before(deadline); time.Sleep(200 * time.Millisecond) {
+				st = gpsStatus{}
+				if err := in.getJSON("/api/gps", &st); err != nil {
+					t.Fatal(err)
+				}
+				if ok(st) {
+					return st
+				}
+			}
+			t.Fatalf("%s: GPS state %+v", what, st)
+			return st
+		}
+		// A stand-in Starlink dish on the local network: gRPC over
+		// unencrypted HTTP/2, answering get_location.
+		dish := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path != "/SpaceX.API.Device.Device/Handle" || r.ProtoMajor != 2 {
+				http.NotFound(w, r)
+				return
+			}
+			w.Header().Set("Content-Type", "application/grpc")
+			w.Header().Set("Trailer", "Grpc-Status")
+			w.Write(starlinkLocationFrame(49.62, 6.14, 300, 9, 5))
+			w.Header().Set("Grpc-Status", "0")
+		}))
+		dish.Config.Protocols = new(http.Protocols)
+		dish.Config.Protocols.SetUnencryptedHTTP2(true)
+		dish.Start()
+		defer dish.Close()
+		addr := strings.TrimPrefix(dish.URL, "http://")
+		// The dish guides; the host's browser is compared with it.
+		if code, body := in.send("PUT", "/api/settings", fmt.Sprintf(`{"gps":{"source":"starlink","starlinkAddress":%q,"checkSource":"browser","browserId":"acceptance-browser"}}`, addr)); code != 200 {
+			t.Fatalf("settings: %d %s", code, body)
+		}
+		st := wait("Starlink position", func(s gpsStatus) bool { return s.State == "current" })
+		if math.Abs(st.Fix.Lat-49.62) > 1e-5 || st.Fix.Accuracy != 9 || !strings.Contains(st.Basis, "Starlink satellites") {
+			t.Fatalf("Starlink fix %+v", st)
+		}
+		// A browser 20 km away: the two sources disagree.
+		if code, body := in.send("POST", "/api/gps/browser", `{"lat":49.80,"lon":6.14,"accuracy":30,"clientId":"acceptance-browser"}`); code != 200 {
+			t.Fatalf("browser position: %d %s", code, body)
+		}
+		st = wait("disagreement", func(s gpsStatus) bool { return s.Check != nil && s.Check.State == "current" && s.Disagree })
+		if st.Apart < 19000 || st.Fix.Lat != 49.62 {
+			t.Fatalf("comparison %+v", st)
+		}
+		// A route is saved and comes back intact.
+		route := `{"mode":"car","from":{"lat":49.62,"lon":6.14,"label":"My position"},"to":{"lat":49.61,"lon":6.13,"label":"Spring"},
+			"distance":1500,"duration":120,"geometry":[[6.14,49.62],[6.13,49.61]],
+			"steps":[{"type":"depart","text":"Head southwest","location":[6.14,49.62],"index":0,"distance":1500,"duration":120},
+			         {"type":"arrive","text":"Arrive at Spring","location":[6.13,49.61],"index":1,"distance":0,"duration":0}]}`
+		if code, body := in.send("POST", "/api/gps/routes", route); code != 200 {
+			t.Fatalf("save route: %d %s", code, body)
+		}
+		var routes struct {
+			Routes []struct{ ID, Name string } `json:"routes"`
+		}
+		if err := in.getJSON("/api/gps/routes", &routes); err != nil || len(routes.Routes) != 1 || routes.Routes[0].Name != "Route to Spring" {
+			t.Fatalf("saved routes %+v %v", routes, err)
+		}
+		if code, body := in.send("PUT", "/api/settings", `{"gps":{"source":""}}`); code != 200 {
+			t.Fatalf("settings: %d %s", code, body)
+		}
+		wait("off", func(s gpsStatus) bool { return s.State == "off" && s.Check == nil })
+	})
+
 	t.Run("07-second-client-on-local-network", func(t *testing.T) {
 		dialer := &net.Dialer{LocalAddr: &net.TCPAddr{IP: net.ParseIP(lanClientIP)}}
 		client := &http.Client{Transport: &http.Transport{DialContext: dialer.DialContext}}
@@ -917,6 +1002,23 @@ func freeUDPPort(t *testing.T) int {
 	}
 	defer c.Close()
 	return c.LocalAddr().(*net.UDPAddr).Port
+}
+
+// starlinkLocationFrame is a gRPC frame holding the Starlink dish's
+// Response{get_location: {lla: {lat, lon, alt}, source, sigma_m}}.
+func starlinkLocationFrame(lat, lon, alt, sigma float64, source uint64) []byte {
+	key := func(b []byte, n uint64, wt int) []byte { return binary.AppendUvarint(b, n<<3|uint64(wt)) }
+	dbl := func(b []byte, n uint64, v float64) []byte {
+		return binary.LittleEndian.AppendUint64(key(b, n, 1), math.Float64bits(v))
+	}
+	msg := func(b []byte, n uint64, d []byte) []byte {
+		return append(binary.AppendUvarint(key(b, n, 2), uint64(len(d))), d...)
+	}
+	loc := msg(nil, 1, dbl(dbl(dbl(nil, 1, lat), 2, lon), 3, alt))
+	loc = binary.AppendUvarint(key(loc, 3, 0), source)
+	loc = dbl(loc, 4, sigma)
+	body := msg(nil, 1017, loc)
+	return append(binary.BigEndian.AppendUint32([]byte{0}, uint32(len(body))), body...)
 }
 
 func nmeaChecksum(body string) string {
