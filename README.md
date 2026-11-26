@@ -35,9 +35,9 @@ not yet code-signed (see [Status](#status)).
   curated catalog and signed community catalogs. Licenses, redistribution
   status, publication dates and medical or regulatory warnings are shown
   for every resource.
-- **Storage-aware selection.** Pick resources or start from nine
+- **Storage-aware selection.** Pick resources or start from twelve
   collections ("Family Emergency Preparedness", "Amateur Radio Operator",
-  …). Arcana recommends editions that fit your drive and explains each
+  "Food, Gardening and Homesteading", …). Arcana recommends editions that fit your drive and explains each
   choice. A new library starts with *Getting started*: topics, tools,
   your area and a size tier become one download plan.
 - **Downloads you can trust.**
@@ -76,7 +76,10 @@ not yet code-signed (see [Status](#status)).
   or ingredient, find non-prescription medicines by situation (fever,
   burns, diarrhea…), read a label's directions and warnings, and put two
   labels' warnings side by side. Arcana builds it on your computer from
-  1.8 GB of downloads into about 1 GB.
+  1.8 GB of downloads into about 1 GB. Built in, with nothing to download:
+  20 home-care measures and 18 herbs and supplements, each summarizing a
+  CDC, MedlinePlus, FDA or NCCIH page with its evidence and cautions, shown
+  by situation next to the medicines.
 - **Your own material.** Bookmarks, favorites, notes and reading history.
   Add your own PDF, EPUB, HTML, Markdown and text files; they are indexed
   and searched with everything else.
@@ -252,6 +255,7 @@ See [docs/development.md](docs/development.md).
 | **Implemented (Phase 5), not yet run on hardware** | Raspberry Pi / Linux appliance: installer, confined systemd service with watchdog, Wi-Fi access point with captive portal ([docs/appliance.md](docs/appliance.md)) |
 | **Implemented (Phase 6)** | Integration API for other programs (RadioPost and Aether HF to come) with scoped, approved tokens and citations ([docs/integration-api.md](docs/integration-api.md)); copying between Arcana libraries on a LAN; signed community catalogs |
 | **Implemented (0.8.0)** | Question answering over installed sources with citations, a relevance floor and an evaluation set; llamafile sidecar or an OpenAI-compatible server ([ADR-0021](docs/adr/0021-question-answering-over-the-library.md)). FDA drug label reference built on the user's computer ([ADR-0022](docs/adr/0022-fda-drug-label-reference.md)). Offline translation of archive pages in the reader's browser ([ADR-0023](docs/adr/0023-offline-translation-in-the-browser.md)). Getting started wizard; scheduled content updates; Meshtastic nodes on the map (listen only); optional Kolibri search ([docs/kolibri.md](docs/kolibri.md)); OpenAPI document for the integration API |
+| **Implemented (unreleased)** | Home care and herbs built into Medicines, five more medicine situations ([ADR-0028](docs/adr/0028-home-care-and-herbs-built-in.md)); every Kiwix archive Project NOMAD recommends now in a collection, with new Food, Gardening and Homesteading and Computing and Programming collections; collections fall back to Wikipedia's most-read articles when no full edition fits |
 | **Implemented (0.13.0)** | Entertainment page: seven built-in board games with a computer opponent, 13 hash-pinned public-domain films with an in-app player ([ADR-0027](docs/adr/0027-entertainment-board-games-and-films.md)) |
 | **Not yet verified** | Question answering on Windows, macOS, ARM64 and graphics cards (24 Ollama library models were run with llamafile on x86-64 Linux, ADR-0029), speed on a Raspberry Pi; Meshtastic with a real radio and Kolibri with a real server (tested against fakes); the built-in classroom with Kolibri itself on Windows and macOS (checked with Kolibri 0.19.5 on Linux: setup, imports, guest learning, [ADR-0024](docs/adr/0024-kolibri-built-in.md)) |
 | **Planned** | Ready-made Raspberry Pi SD image; hardware and power-loss tests. Terrain and contours; road networks for the largest countries; scheduled peer sync |

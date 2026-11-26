@@ -457,3 +457,77 @@ func TestBundledFilms(t *testing.T) {
 	}
 	t.Error("no entertainment preset")
 }
+
+// TestRecommendFallsBackToSmallerFamily: when no edition of the whole
+// encyclopedia fits, the item settles for the most-read articles, names
+// them, and never adds both.
+func TestRecommendFallsBackToSmallerFamily(t *testing.T) {
+	const GB = 1_000_000_000
+	mk := func(id, family, title, variant string, size int64) Resource {
+		return Resource{ID: id, Family: family, Variant: variant, VariantLabel: variant, Title: title, DownloadSize: size}
+	}
+	families := map[string][]Resource{
+		"kiwix.wikipedia_en_all": {
+			mk("all_maxi", "kiwix.wikipedia_en_all", "Wikipedia", "maxi", 127*GB),
+			mk("all_mini", "kiwix.wikipedia_en_all", "Wikipedia", "mini", 14*GB),
+		},
+		"kiwix.wikipedia_en_top": {
+			mk("top_maxi", "kiwix.wikipedia_en_top", "Best of Wikipedia", "maxi", 7*GB),
+			mk("top_nopic", "kiwix.wikipedia_en_top", "Best of Wikipedia", "nopic", 3*GB),
+			mk("top_mini", "kiwix.wikipedia_en_top", "Best of Wikipedia", "mini", GB/3),
+		},
+	}
+	preset := Preset{ID: "p", Items: []PresetItem{{
+		Family: "kiwix.wikipedia_{lang}_all", Variants: []string{"maxi", "mini"}, Priority: 1,
+		Fallbacks: []PresetFallback{{Family: "kiwix.wikipedia_{lang}_top", Variants: []string{"nopic", "mini"}}},
+	}}}
+	cases := []struct {
+		budget int64
+		want   string
+		title  string
+	}{
+		{8 * GB, "top_nopic", "Best of Wikipedia"}, // top_maxi is not among the fallback's variants
+		{2 * GB, "top_mini", "Best of Wikipedia"},
+		{20 * GB, "all_mini", "Wikipedia"},
+		{200 * GB, "all_maxi", "Wikipedia"},
+	}
+	for _, c := range cases {
+		rec := Recommend(RecommendInput{Preset: preset, Language: "en", Budget: c.budget, Families: families, Present: map[string]bool{}})
+		it := rec.Items[0]
+		if it.Status != "selected" || it.ResourceID != c.want || it.Title != c.title {
+			t.Errorf("budget %d GB: %s %s %q, want %s %q", c.budget/GB, it.Status, it.ResourceID, it.Title, c.want, c.title)
+		}
+		if len(rec.Items) != 1 || rec.TotalBytes != it.Size {
+			t.Errorf("budget %d GB: more than one edition chosen: %+v", c.budget/GB, rec.Items)
+		}
+		if c.want == "top_nopic" && !strings.Contains(it.Decision, "Best of Wikipedia, nopic") {
+			t.Errorf("decision does not name the fallback: %q", it.Decision)
+		}
+	}
+	// An installed fallback edition counts as present for the item.
+	rec := Recommend(RecommendInput{Preset: preset, Language: "en", Budget: 200 * GB, Families: families, Present: map[string]bool{"top_mini": true}})
+	if rec.Items[0].Status != "present" || rec.TotalBytes != 0 {
+		t.Errorf("fallback already installed: %+v", rec.Items[0])
+	}
+	// A language without its own fallback edition does not get the English one.
+	families["kiwix.wikipedia_fr_all"] = []Resource{mk("fr_mini", "kiwix.wikipedia_fr_all", "Wikipédia", "mini", 6*GB)}
+	rec = Recommend(RecommendInput{Preset: preset, Language: "fr", Budget: 2 * GB, Families: families, Present: map[string]bool{}})
+	if rec.Items[0].Status != "skipped" {
+		t.Errorf("French with 2 GB: %+v", rec.Items[0])
+	}
+}
+
+func TestKiwixLicenseReadyGov(t *testing.T) {
+	for _, name := range []string{"ready.gov_en_all", "ready.gov_es_all"} {
+		l := KiwixLicense(name, "other")
+		if l.ID != "LicenseRef-PD-USGov" || !l.Verified || l.Redistribution != RedistPermitted || l.URL == "" {
+			t.Errorf("%s: %+v", name, l)
+		}
+	}
+	if l := KiwixLicense("medlineplus.gov_en_all", "other"); l.Redistribution != RedistRestricted || !l.Verified {
+		t.Errorf("medlineplus: %+v", l)
+	}
+	if l := KiwixLicense("notready.gov_en_all", "other"); l.Verified {
+		t.Errorf("prefix matched too much: %+v", l)
+	}
+}

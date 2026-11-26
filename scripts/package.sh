@@ -79,6 +79,8 @@ chmod 755 "$OUT/appliance/install.sh"
 # Licenses and the source of the GPL programs shipped beside Arcana.
 cp "$ROOT/LICENSE" "$OUT/licenses/ARCANA-LICENSE.txt"
 cp "$ROOT/THIRD_PARTY_NOTICES.md" "$OUT/licenses/THIRD_PARTY_NOTICES.md"
+# Apache-2.0 text for Project NOMAD's remedies lists compiled into Arcana.
+cp "$ROOT/packaging/PROJECT-NOMAD-LICENSE.txt" "$OUT/licenses/PROJECT-NOMAD-LICENSE.txt"
 cp "$ROOT/packaging/SOURCES.txt" "$OUT/licenses/SOURCES.txt"
 "$ROOT/scripts/fetch-kiwix-sources.sh"
 SRC="$ROOT/third_party/kiwix-src"

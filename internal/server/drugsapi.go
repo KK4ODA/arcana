@@ -20,6 +20,10 @@ func (s *Server) registerDrugs(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/drugs/group", s.withApp(s.handleDrugsGroup))
 	mux.HandleFunc("GET /api/drugs/label/{id}", s.withApp(s.handleDrugsLabel))
 	mux.HandleFunc("GET /api/drugs/situations", s.withApp(s.handleDrugsSituations))
+	// Remedies are built in, so these answer before the label reference is
+	// installed (ADR-0028).
+	mux.HandleFunc("GET /api/drugs/remedies", s.withApp(s.handleRemedies))
+	mux.HandleFunc("GET /api/drugs/remedies/{slug}", s.withApp(s.handleRemedy))
 }
 
 func drugsReader(w http.ResponseWriter, a *app.App) *drugs.Reader {
@@ -42,6 +46,10 @@ func drugsOptions(r *http.Request) drugs.SearchOptions {
 
 func (s *Server) handleDrugsInfo(w http.ResponseWriter, r *http.Request, a *app.App) {
 	resp := map[string]any{"installed": false, "situations": drugs.Situations, "resourceId": drugs.ResourceID}
+	if set, err := drugs.Remedies(); err == nil {
+		resp["remedies"] = map[string]any{"count": len(set.Remedies), "version": set.Version, "compiledBy": set.CompiledBy,
+			"license": set.License, "sources": set.Sources}
+	}
 	if rd := a.Drugs(); rd != nil {
 		ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 		defer cancel()
@@ -139,4 +147,29 @@ func (s *Server) handleDrugsSituations(w http.ResponseWriter, r *http.Request, a
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"results": res})
+}
+
+// handleRemedies lists the built-in remedies for the situations in ?s=
+// (comma-separated, at most 5), or all of them.
+func (s *Server) handleRemedies(w http.ResponseWriter, r *http.Request, a *app.App) {
+	var slugs []string
+	for _, s := range strings.Split(r.URL.Query().Get("s"), ",") {
+		if s = strings.TrimSpace(s); s != "" && len(slugs) < 5 {
+			if _, ok := drugs.SituationBySlug(s); !ok {
+				writeError(w, http.StatusBadRequest, "unknown situation "+s)
+				return
+			}
+			slugs = append(slugs, s)
+		}
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"remedies": nonNil(drugs.RemediesFor(slugs))})
+}
+
+func (s *Server) handleRemedy(w http.ResponseWriter, r *http.Request, a *app.App) {
+	rem, ok := drugs.RemedyBySlug(r.PathValue("slug"))
+	if !ok {
+		writeError(w, http.StatusNotFound, "No such remedy.")
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"remedy": rem})
 }

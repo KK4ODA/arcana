@@ -653,7 +653,7 @@ func (a *App) recommendWithin(ctx context.Context, presetID, lang string, budget
 	}
 	var families []string
 	for _, it := range preset.Items {
-		families = append(families, strings.ReplaceAll(it.Family, "{lang}", lang), strings.ReplaceAll(it.Family, "{lang}", "en"))
+		families = append(families, it.FamilyIDs(lang)...)
 	}
 	fam, err := a.Store.FamilyVariants(ctx, families)
 	if err != nil {
