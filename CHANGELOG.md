@@ -66,10 +66,23 @@ care and herbs that Arcana lacked. Both gaps are closed.
   drawings and settings, and no app can contact anything outside its own
   address. Meshtastic Web needs Chrome or Edge, on the computer running
   Arcana or over its HTTPS address.
+- **Six programs as apps** (ADR-0030): File Browser 2.63.23, Homebox
+  0.26.2 (an inventory of what you own and store), Vaultwarden 1.36.0 (a
+  Bitwarden-compatible password manager; Linux only, and only over
+  Arcana's HTTPS), Jellyfin 10.11.11 (a media server), Calibre-Web 0.6.26
+  (an e-book library), Stirling PDF 2.13.1 and Flatnotes 5.5.4 (notes in
+  Markdown, each a file on the drive). Arcana keeps each program's
+  files for Windows, macOS and Linux on the drive, starts it when it is
+  first opened, on this computer only, and stops it after two idle hours
+  and when Arcana stops. Their data stays on the drive under `user/apps/`;
+  File Browser manages `user/files/`. Arcana sets random administrator
+  passwords for File Browser, Calibre-Web and Flatnotes and shows them on the Apps
+  page. Devices on the network may use the programs after signing in to
+  Arcana as administrators, or when the owner allows it for an app.
 - **Container image layers as downloads.** The downloader fetches the
   anonymous token container registries ask for, so a layer of an official
   image, pinned by its digest, downloads like any other file. Excalidraw's
-  site comes this way.
+  site and Vaultwarden come this way.
 - **MeshCore Web 1.45.0**, the MeshCore radio app for the browser. It is
   closed source and free to use, without a right to pass it on, so Arcana
   downloads it from its author's site for each library and marks it

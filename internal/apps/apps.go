@@ -60,6 +60,11 @@ type Spec struct {
 	// SecureContext explains, when set, why the app works only in a
 	// secure context: on the computer running Arcana, or over HTTPS.
 	SecureContext string
+	// NeedsHTTPS explains, when set, why the app works only over HTTPS,
+	// even on the computer running Arcana.
+	NeedsHTTPS string
+	// Service runs a native app; nil for web apps.
+	Service *ServiceSpec
 }
 
 // Part says how the files of one part unpack: archives are extracted
@@ -70,6 +75,9 @@ type Part struct {
 	// Gunzip decompresses every "name.gz" in the archive to "name", for
 	// sites published only as precompressed files.
 	Gunzip bool
+	// NotNeededOn lists platforms where the app runs without this part
+	// (Jellyfin's Windows build carries its own ffmpeg).
+	NotNeededOn []string
 }
 
 // Rewrite replaces Old with New in the site file Path ("/index.html") as

@@ -27,10 +27,13 @@
 
 ## Principles enforced in code
 
-- **No code execution from content.** Arcana never executes downloaded
-  files. The only executables it starts are `bin/<platform>/kiwix/kiwix-serve`
-  from its own library, or one given explicitly with `--kiwix`. A catalog
-  cannot place files in `bin/`: content is confined to
+- **No code execution from content.** Arcana never executes archive or
+  document content. Besides `bin/<platform>/kiwix/kiwix-serve` (or one
+  given with `--kiwix`), the only programs it starts are those of
+  resources it was built to run (llamafile, Kolibri's Python, the apps of
+  ADR-0030), from files verified against the SHA-256 in its bundled
+  catalog, at paths compiled into Arcana. A catalog cannot place files in
+  `bin/`: content is confined to
   `content/<validated-id>/<validated-version>/<validated-name>`.
 - **No arbitrary file serving.** The content origin serves kiwix-serve
   proxied pages and sidecar-listed files only.
@@ -75,6 +78,14 @@
   Arcana does not know is ignored. Files are verified against their
   SHA-256 before they are unpacked, and unpacking refuses paths and links
   that leave the app's folder.
+- **Programs.** Native apps listen on loopback only and are reached
+  through Arcana's proxy, which adds a CSP limiting their pages to their
+  own origin and refuses changes sent from other origins (except to the
+  token-authenticated APIs of Vaultwarden and Jellyfin). Devices on the
+  network may use them only after signing in to Arcana as administrators,
+  or when the owner allows it per app. Arcana gives File Browser,
+  Calibre-Web and Flatnotes random administrator passwords in place of
+  their defaults (a published password, or no sign-in).
 - **Registry tokens.** For container image layers the downloader fetches
   an anonymous, pull-only token over HTTPS from the realm the registry
   names, and only for blob URLs addressed by digest.

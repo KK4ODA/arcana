@@ -12,6 +12,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -27,20 +28,20 @@ type Packed struct {
 
 // Select returns the files of an app this platform needs: those for "any"
 // platform and those for this one. It fails with ErrNotForPlatform when a
-// part is published only for other platforms.
-func Select(files []Packed, platform string) ([]Packed, error) {
+// part this platform needs is published only for other platforms.
+func Select(files []Packed, platform string, parts map[string]Part) ([]Packed, error) {
 	type partFiles struct{ any, mine, other bool }
-	parts := map[string]*partFiles{}
+	found := map[string]*partFiles{}
 	var out []Packed
 	for _, f := range files {
 		n, err := ParseFileName(f.Name)
 		if err != nil {
 			return nil, err
 		}
-		pf := parts[n.Part]
+		pf := found[n.Part]
 		if pf == nil {
 			pf = &partFiles{}
-			parts[n.Part] = pf
+			found[n.Part] = pf
 		}
 		switch n.Platform {
 		case "any":
@@ -53,11 +54,11 @@ func Select(files []Packed, platform string) ([]Packed, error) {
 			pf.other = true
 		}
 	}
-	if len(parts) == 0 {
+	if len(found) == 0 {
 		return nil, errors.New("the app has no files")
 	}
-	for name, pf := range parts {
-		if !pf.any && !pf.mine {
+	for name, pf := range found {
+		if !pf.any && !pf.mine && !slices.Contains(parts[name].NotNeededOn, platform) {
 			return nil, fmt.Errorf("%w (%s has none for %s)", ErrNotForPlatform, name, platform)
 		}
 	}
@@ -67,7 +68,7 @@ func Select(files []Packed, platform string) ([]Packed, error) {
 
 // Platforms returns the platforms an app's files cover: nil when every
 // part is for any platform.
-func Platforms(files []Packed) []string {
+func Platforms(files []Packed, parts map[string]Part) []string {
 	seen := map[string]bool{}
 	for _, f := range files {
 		if n, err := ParseFileName(f.Name); err == nil && n.Platform != "any" {
@@ -76,7 +77,7 @@ func Platforms(files []Packed) []string {
 	}
 	var out []string
 	for p := range seen {
-		if _, err := Select(files, p); err == nil {
+		if _, err := Select(files, p, parts); err == nil {
 			out = append(out, p)
 		}
 	}

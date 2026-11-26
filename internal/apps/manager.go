@@ -31,7 +31,15 @@ type Status struct {
 	// Platforms the app's files cover; empty means any.
 	Platforms     []string `json:"platforms"`
 	SecureContext string   `json:"secureContext,omitempty"`
+	NeedsHTTPS    string   `json:"needsHttps,omitempty"`
 	Slot          int      `json:"-"`
+	// Service is the program's state, for native apps.
+	Service *ServiceStatus `json:"service,omitempty"`
+	// FirstUse tells people what to do at the first visit (native apps).
+	FirstUse string `json:"firstUse,omitempty"`
+	// Network says whether devices on the network may open the app
+	// (native apps; web apps are open to everyone who can reach Arcana).
+	Network bool `json:"network"`
 }
 
 // Manager prepares the installed apps on this computer and serves them.
@@ -46,10 +54,17 @@ type Manager struct {
 	ReadOnly bool
 	// Data returns the folder on the drive where an app keeps its data.
 	Data func(id string) string
+	// Files is the folder on the drive the apps share (user/files).
+	Files string
+	// StateFile keeps the administrator passwords Arcana set and which
+	// apps devices on the network may open.
+	StateFile string
 
-	mu     sync.Mutex
-	apps   map[string]*entry
-	closed bool
+	mu       sync.Mutex
+	apps     map[string]*entry
+	services map[string]*Supervisor
+	state    *appState
+	closed   bool
 	// onChange is called, without the lock, after a sync changed the set
 	// of installed apps.
 	onChange func()
@@ -101,9 +116,10 @@ func (m *Manager) Sync(installed []Installed) {
 			continue
 		}
 		changed = true
-		e = &entry{spec: spec, version: in.Version, key: key, platforms: Platforms(in.Files)}
+		e = &entry{spec: spec, version: in.Version, key: key, platforms: Platforms(in.Files, spec.Parts)}
 		m.apps[spec.ID] = e
-		files, err := Select(in.Files, m.Platform)
+		m.stopServiceLocked(spec.ID)
+		files, err := Select(in.Files, m.Platform, spec.Parts)
 		switch {
 		case errors.Is(err, ErrNotForPlatform):
 			e.state, e.problem = "unavailable", spec.Title+" publishes no build for this computer ("+m.Platform+")."
@@ -119,6 +135,7 @@ func (m *Manager) Sync(installed []Installed) {
 	for id := range m.apps {
 		if !seen[id] {
 			changed = true
+			m.stopServiceLocked(id)
 			delete(m.apps, id)
 		}
 	}
@@ -169,9 +186,17 @@ func (m *Manager) Status() []Status {
 	for _, e := range m.apps {
 		st := Status{ID: e.spec.ID, Title: e.spec.Title, Summary: e.spec.Summary, Kind: e.spec.Kind,
 			Version: e.version, State: e.state, Problem: e.problem, Platforms: e.platforms,
-			SecureContext: e.spec.SecureContext, Slot: e.spec.Slot}
+			SecureContext: e.spec.SecureContext, NeedsHTTPS: e.spec.NeedsHTTPS, Slot: e.spec.Slot}
 		if st.Platforms == nil {
 			st.Platforms = []string{}
+		}
+		if svc := e.spec.Service; svc != nil {
+			ss := ServiceStatus{State: "stopped"}
+			if sv := m.services[e.spec.ID]; sv != nil {
+				ss = sv.Status()
+			}
+			st.Service, st.FirstUse = &ss, svc.FirstUse
+			st.Network = m.loadStateLocked().Network[e.spec.ID]
 		}
 		out = append(out, st)
 	}
@@ -202,11 +227,22 @@ func (m *Manager) ready(id string) (dir string, st Status, ok bool) {
 	return e.dir, st, e.state == "ready"
 }
 
-// Close stops preparing apps.
+// Close stops every program and waits for them to end.
 func (m *Manager) Close() {
 	m.mu.Lock()
 	m.closed = true
+	var svs []*Supervisor
+	for id, sv := range m.services {
+		svs = append(svs, sv)
+		delete(m.services, id)
+	}
 	m.mu.Unlock()
+	var wg sync.WaitGroup
+	for _, sv := range svs {
+		wg.Add(1)
+		go func(sv *Supervisor) { defer wg.Done(); sv.Close() }(sv)
+	}
+	wg.Wait()
 }
 
 func (m *Manager) log() *slog.Logger {

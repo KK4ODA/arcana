@@ -25,6 +25,35 @@ import urllib.parse
 import urllib.request
 
 GH = "https://github.com/"
+PY = "https://github.com/astral-sh/python-build-standalone/releases/download/20261003/cpython-3.11.17%2B20261003-"
+PY_ASTRAL = "https://releases.astral.sh/github/python-build-standalone/releases/download/20261003/cpython-3.11.17%2B20261003-"
+PY_TRIPLES = {
+    "windows-amd64": ("x86_64-pc-windows-msvc", "861f9a03b0c4ca537da1754ed0556e0628dd2114a1be36e8aae6b1e2bb1304a0"),
+    "darwin-arm64": ("aarch64-apple-darwin", "0c9fbd0b2ddfbb6877493a650259bf379ee71a91b17f0f5f06dd2dcd52fbcade"),
+    "darwin-amd64": ("x86_64-apple-darwin", "ba62d0fb634c4e347341a4f3e29d7fb0b27920be6326c614d541c316e4da7693"),
+    "linux-amd64": ("x86_64-unknown-linux-gnu", "aadcba18994cb8f9ee752aceb31d61e04f75b5d900d76fb575c6fbfabadec434"),
+    "linux-arm64": ("aarch64-unknown-linux-gnu", "41f16793d33161dcd9bfa2622332b8af870cfdb4540bd1fdc477f9e6b7c58c26"),
+}
+JF = "https://repo.jellyfin.org/files/"
+JRE = GH + "adoptium/temurin25-binaries/releases/download/jdk-25.0.5.1%2B2/OpenJDK25U-jre_"
+TEMURIN = {  # SHA-256 from api.adoptium.net
+    "linux-amd64": ("x64_linux_hotspot_25.0.5.1_2.tar.gz", "2edef9e4f81ec5ee426d023336d4cfbd7b4644e99884e7a73a6a867b70b17acf"),
+    "linux-arm64": ("aarch64_linux_hotspot_25.0.5.1_2.tar.gz", "c6161dcfb365024fbfbcda265343d562d6f821c78dd8e7aeaeaf294893f6ff8b"),
+    "darwin-amd64": ("x64_mac_hotspot_25.0.5.1_2.tar.gz", "fac7e81bba96b45cfc3381dbc8bbca6ffd129e3e30aed70493245b61dde7d639"),
+    "darwin-arm64": ("aarch64_mac_hotspot_25.0.5.1_2.tar.gz", "70adbb3ce5cf924c8b60dd84272fdd5fba6d021014aa0c1f5cf66a198bd270c5"),
+    "windows-amd64": ("x64_windows_hotspot_25.0.5.1_2.zip", "3260a1b9899f30ac80d737daafc053042c525249f52d066101fbf81d78d73f25"),
+}
+HOMEBOX = {  # checksums.txt of the v0.26.2 release
+    "linux-amd64": ("Linux_x86_64.tar.gz", "078f50ee25de546483d84c0f9ccc587edac6039cde87142fbea39c9ca87dcb05"),
+    "linux-arm64": ("Linux_arm64.tar.gz", "a7197a54b830a21be0142c5b4b3dd3a730d5d6a0599aa680d089b4e128d82f12"),
+    "darwin-amd64": ("Darwin_x86_64.tar.gz", "ff171c0dc49e7aa86c1b075a6af083cb87a42b95736db2a394d419f12c93ba17"),
+    "darwin-arm64": ("Darwin_arm64.tar.gz", "12ffd3005afd2d5418077294d5440bc8dfdbd8386bd6001578399dcc7db4039a"),
+    "windows-amd64": ("Windows_x86_64.zip", "d063cf95cdbfd76323596d2d5b401e9b888676c46f09eaea30670e886adab0ff"),
+}
+FB_VERSION = "2.63.23"
+# Layers of dullage/flatnotes:v5.5.4, the same in its amd64 and arm64 images.
+FN_SERVER = "5efda017bbc6ce3c1921f6ddc789db34b01e3d63b6553f2a55a6ceec3b2bf811"
+FN_CLIENT = "1c44fb6084a553d6cabd6bb978333b54e2a311c66d40a0b35a2e3b55570b358b"
 
 
 def ext(url):
@@ -40,6 +69,16 @@ def f(part, platform, rest, urls, sha256=None):
 
 def blob(registry, repo, digest):
     return f"https://{registry}/v2/{repo}/blobs/{digest}"
+
+
+def wheels(lockfile):
+    """Python packages from PyPI's JSON API (which states each file's
+    SHA-256), per platform, as listed in a lock file beside this one."""
+    lock = json.load(open(os.path.join(os.path.dirname(__file__), lockfile)))
+    out = []
+    for item in lock:
+        out.append(f("pypi", item["platform"], item["filename"], item["url"], item["sha256"]))
+    return out
 
 
 APPS = [
@@ -93,6 +132,96 @@ APPS = [
         "files": [f("meshcore-web", "any", "1.45.0.zip", "https://files.liamcottle.net/MeshCore/v1.45.0/MeshCore-v1.45.0%2B71-dc3a209-web.zip"),
                   f("fonts", "any", "roboto-v32.woff2", "https://fonts.gstatic.com/s/roboto/v32/KFOmCnqEu92Fr1Me4GZLCzYlKw.woff2"),
                   f("fonts", "any", "notosanssymbols-v43.woff2", "https://fonts.gstatic.com/s/notosanssymbols/v43/rP2up3q65FkAtHfwd-eIS2brbDN6gxP34F9jRRCe4W3gfQ8gb_VFRkzrbQ.woff2")],
+    },
+    {
+        "id": "filebrowser", "title": "File Browser", "kind": "service", "version": FB_VERSION, "published": "2026-07-27",
+        "publisher": "File Browser", "sourceUrl": "https://github.com/filebrowser/filebrowser",
+        "description": f"File Browser {FB_VERSION}: upload, download, rename and share files in a folder on the drive (Arcana/user/files) from any browser. Arcana creates its administrator account and shows you the password.",
+        "license": {"id": "Apache-2.0", "name": "Apache License 2.0", "url": "https://github.com/filebrowser/filebrowser/blob/master/LICENSE"},
+        "tags": ["files", "upload", "share"],
+        "files": [f("filebrowser", p, FB_VERSION + e, GH + f"filebrowser/filebrowser/releases/download/v{FB_VERSION}/{p}-filebrowser{e}")
+                  for p, e in [("linux-amd64", ".tar.gz"), ("linux-arm64", ".tar.gz"), ("darwin-amd64", ".tar.gz"), ("darwin-arm64", ".tar.gz"), ("windows-amd64", ".zip")]],
+    },
+    {
+        "id": "homebox", "title": "Homebox", "kind": "service", "version": "0.26.2", "published": "2026-06-14",
+        "publisher": "Sysadmins Media", "sourceUrl": "https://github.com/sysadminsmedia/homebox",
+        "description": "Homebox 0.26.2: an inventory of what you own and store, with locations, labels, quantities, photos, warranties and maintenance. Its data stays on the drive.",
+        "license": {"id": "AGPL-3.0-only", "name": "GNU Affero General Public License v3.0", "url": "https://github.com/sysadminsmedia/homebox/blob/main/LICENSE"},
+        "agpl": True,
+        "tags": ["inventory", "supplies"],
+        "category": "preparedness",
+        "files": [f("homebox", p, "0.26.2" + ext(n), GH + f"sysadminsmedia/homebox/releases/download/v0.26.2/homebox_{n}", h) for p, (n, h) in HOMEBOX.items()],
+    },
+    {
+        "id": "vaultwarden", "title": "Vaultwarden", "kind": "service", "version": "1.36.0", "published": "2026-05-03",
+        "publisher": "Vaultwarden", "sourceUrl": "https://github.com/dani-garcia/vaultwarden",
+        "description": "Vaultwarden 1.36.0 with the Bitwarden web vault: a password manager that Bitwarden's apps and browser extensions can use, kept on the drive. Linux only: Vaultwarden publishes its server only as Linux container images. Its web vault works only over HTTPS, so it needs Arcana's HTTPS (Server page).",
+        "license": {"id": "AGPL-3.0-only", "name": "GNU Affero General Public License v3.0", "url": "https://github.com/dani-garcia/vaultwarden/blob/main/LICENSE.txt"},
+        "agpl": True,
+        "tags": ["passwords", "bitwarden"],
+        "category": "personal-community",
+        "notes": "Server and web vault are layers of the official image vaultwarden/server:1.36.0-alpine (ghcr.io/dani-garcia/vaultwarden), whose server is a static Linux program. The web vault (bw_web_builds) is GPL-3.0.",
+        "files": [
+            f("vaultwarden", "linux-amd64", "1.36.0.tar.gz", blob("ghcr.io", "dani-garcia/vaultwarden", "sha256:46d5b22765989415c2cfe4373ac4ffd39addde4c2b7823be79cc2701eb94b4a0"), "46d5b22765989415c2cfe4373ac4ffd39addde4c2b7823be79cc2701eb94b4a0"),
+            f("vaultwarden", "linux-arm64", "1.36.0.tar.gz", blob("ghcr.io", "dani-garcia/vaultwarden", "sha256:3225ae8e561acd57c642414a5cb371d111bb9b935756dcf0edc1d327e818d270"), "3225ae8e561acd57c642414a5cb371d111bb9b935756dcf0edc1d327e818d270"),
+            f("web-vault", "any", "1.36.0.tar.gz", blob("ghcr.io", "dani-garcia/vaultwarden", "sha256:d2faf6972ffe6bd3bf9467c9a4ac0b560c9cecad7d74b1aa0e5156c4b189588d"), "d2faf6972ffe6bd3bf9467c9a4ac0b560c9cecad7d74b1aa0e5156c4b189588d"),
+        ],
+    },
+    {
+        "id": "jellyfin", "title": "Jellyfin", "kind": "service", "version": "10.11.11", "published": "2026-06-06",
+        "publisher": "The Jellyfin Project", "sourceUrl": "https://jellyfin.org",
+        "description": "Jellyfin 10.11.11 with jellyfin-ffmpeg 7.1.4: a media server for your own films, series, music and photos, with apps for phones and televisions. Put media in Arcana/user/files/Media (File Browser can upload it) and add that folder as a library in Jellyfin.",
+        "license": {"id": "GPL-2.0-only", "name": "GNU General Public License v2.0", "url": "https://github.com/jellyfin/jellyfin/blob/master/LICENSE"},
+        "tags": ["media", "video", "music"],
+        "category": "entertainment",
+        "notes": "jellyfin-ffmpeg is GPL-3.0. Jellyfin's Windows build carries its own copy; the other platforms get the portable build.",
+        "files": [
+            f("jellyfin", "linux-amd64", "10.11.11.tar.gz", JF + "server/linux/stable/v10.11.11/amd64/jellyfin_10.11.11-amd64.tar.gz"),
+            f("jellyfin", "linux-arm64", "10.11.11.tar.gz", JF + "server/linux/stable/v10.11.11/arm64/jellyfin_10.11.11-arm64.tar.gz"),
+            f("jellyfin", "darwin-amd64", "10.11.11.tar.xz", JF + "server/macos/stable/v10.11.11/amd64/jellyfin_10.11.11-amd64.tar.xz"),
+            f("jellyfin", "darwin-arm64", "10.11.11.tar.xz", JF + "server/macos/stable/v10.11.11/arm64/jellyfin_10.11.11-arm64.tar.xz"),
+            f("jellyfin", "windows-amd64", "10.11.11.zip", JF + "server/windows/stable/v10.11.11/amd64/jellyfin_10.11.11-amd64.zip"),
+            f("ffmpeg", "linux-amd64", "7.1.4-3.tar.xz", JF + "ffmpeg/linux/7.x/7.1.4-3/amd64/jellyfin-ffmpeg_7.1.4-3_portable_linux64-gpl.tar.xz"),
+            f("ffmpeg", "linux-arm64", "7.1.4-3.tar.xz", JF + "ffmpeg/linux/7.x/7.1.4-3/arm64/jellyfin-ffmpeg_7.1.4-3_portable_linuxarm64-gpl.tar.xz"),
+            f("ffmpeg", "darwin-amd64", "7.1.4-3.tar.xz", JF + "ffmpeg/macos/7.x/7.1.4-3/x86_64/jellyfin-ffmpeg_7.1.4-3_portable_mac64-gpl.tar.xz"),
+            f("ffmpeg", "darwin-arm64", "7.1.4-3.tar.xz", JF + "ffmpeg/macos/7.x/7.1.4-3/arm64/jellyfin-ffmpeg_7.1.4-3_portable_macarm64-gpl.tar.xz"),
+        ],
+    },
+    {
+        "id": "calibre-web", "title": "Calibre-Web", "kind": "service", "version": "0.6.26", "published": "2026-02-06",
+        "publisher": "Calibre-Web", "sourceUrl": "https://github.com/janeczku/calibre-web",
+        "description": "Calibre-Web 0.6.26, with Python 3.11: an e-book library to upload, organize, read in the browser and send to readers, kept in a Calibre library on the drive (Arcana/user/apps/calibre-web/library). Arcana sets the administrator password at the first start and shows it on the Apps page.",
+        "license": {"id": "GPL-3.0-or-later", "name": "GNU General Public License v3.0 or later", "url": "https://github.com/janeczku/calibre-web/blob/master/LICENSE"},
+        "tags": ["ebooks", "calibre", "reading"],
+        "category": "history-culture",
+        "notes": "Its Python dependencies come from PyPI under their own licenses: BSD, MIT, Apache-2.0, PSF-2.0 and MPL-2.0, except chardet (LGPL-2.1), Unidecode (GPL-2.0-or-later) and iso-639 (AGPL-3.0). The empty Calibre library is Project NOMAD's (Apache-2.0).",
+        "files": [f("python", p, "3.11.17.tar.gz", [PY + t + "-install_only_stripped.tar.gz", PY_ASTRAL + t + "-install_only_stripped.tar.gz"], h) for p, (t, h) in PY_TRIPLES.items()]
+        + [f("library", "any", "metadata.db", "https://raw.githubusercontent.com/Crosstalk-Solutions/project-nomad/932d2a5de9a40108de74e97d3ccfcc52345ce30e/install/calibre-empty-library/metadata.db",
+             "ad8a3bc3612725ef761a089ccc820a91d6b228117403514837356a0b366b6af3")]
+        + ["wheels:calibre-web-lock.json"],
+    },
+    {
+        "id": "stirling-pdf", "title": "Stirling PDF", "kind": "service", "version": "2.13.1", "published": "2026-06-19",
+        "publisher": "Stirling PDF Inc.", "sourceUrl": "https://github.com/Stirling-Tools/Stirling-PDF",
+        "description": "Stirling PDF 2.13.1, with Eclipse Temurin Java 25: merge, split, rotate, compress, convert, sign and redact PDF files in the browser, on this computer. This is the openly licensed build (Stirling-PDF.jar), without the login and enterprise features.",
+        "license": {"id": "MIT", "name": "MIT License", "url": "https://github.com/Stirling-Tools/Stirling-PDF/blob/main/LICENSE"},
+        "tags": ["pdf", "documents"],
+        "notes": "Stirling-PDF.jar is built with DISABLE_ADDITIONAL_FEATURES and holds none of the proprietary app/proprietary code. Eclipse Temurin is GPL-2.0 with the Classpath Exception.",
+        "files": [f("stirling-pdf", "any", "2.13.1.jar", GH + "Stirling-Tools/Stirling-PDF/releases/download/v2.13.1/Stirling-PDF.jar")]
+        + [f("jre", p, "25.0.5.1-2" + ext(n), JRE + n, h) for p, (n, h) in TEMURIN.items()],
+    },
+    {
+        "id": "flatnotes", "title": "Flatnotes", "kind": "service", "version": "5.5.4", "published": "2025-10-20",
+        "publisher": "Adam Dullage", "sourceUrl": "https://github.com/dullage/flatnotes",
+        "description": "Flatnotes 5.5.4, with Python 3.11: notes in Markdown with full-text search, each note a plain file on the drive (Arcana/user/apps/flatnotes). Arcana sets its password and shows it on the Apps page.",
+        "license": {"id": "MIT", "name": "MIT License", "url": "https://github.com/dullage/flatnotes/blob/main/LICENSE"},
+        "tags": ["notes", "markdown"],
+        "category": "personal-community",
+        "notes": "Flatnotes publishes its built app only as the image dullage/flatnotes:v5.5.4; Arcana takes its server and web client layers, the same for every platform, by digest. Its Python dependencies (versions from its Pipfile.lock) come from PyPI under BSD, MIT, Apache-2.0 and PSF-2.0 licenses.",
+        "files": [f("python", p, "3.11.17.tar.gz", [PY + t + "-install_only_stripped.tar.gz", PY_ASTRAL + t + "-install_only_stripped.tar.gz"], h) for p, (t, h) in PY_TRIPLES.items()]
+        + [f("flatnotes", "any", "5.5.4-server.tar.gz", [blob("registry-1.docker.io", "dullage/flatnotes", "sha256:" + FN_SERVER), blob("mirror.gcr.io", "dullage/flatnotes", "sha256:" + FN_SERVER)], FN_SERVER),
+           f("flatnotes", "any", "5.5.4-client.tar.gz", [blob("registry-1.docker.io", "dullage/flatnotes", "sha256:" + FN_CLIENT), blob("mirror.gcr.io", "dullage/flatnotes", "sha256:" + FN_CLIENT)], FN_CLIENT)]
+        + ["wheels:flatnotes-lock.json"],
     },
 ]
 
@@ -153,6 +282,9 @@ def resource(app, cache):
     total = sum(fl["size"] for fl in files)
     lic = dict({"redistribution": "permitted"}, **app["license"], verified=True)
     notes = app.get("notes", "")
+    if app.get("agpl"):
+        notes = (notes + " " if notes else "") + ("AGPL-3.0: Arcana runs the publisher's unmodified program, so section 13 "
+                 "(offering source to network users) asks nothing more of Arcana; the source is at the publisher's repository.")
     if notes:
         lic["notes"] = notes
     return {
@@ -176,6 +308,8 @@ def main():
     os.makedirs(cache, exist_ok=True)
     out = []
     for app in APPS:
+        if app["files"] and isinstance(app["files"][-1], str):
+            app["files"] = app["files"][:-1] + wheels(app["files"][-1].split(":", 1)[1])
         out.append(resource(app, cache))
     if "--write" in sys.argv:
         path = "internal/catalog/bundled/catalog.json"
