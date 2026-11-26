@@ -3,13 +3,20 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
-## Unreleased
+## 0.14.0 — 2026-11-26
 
-Arcana now offers all the reference content Project NOMAD v1.35.2
-recommends. Running both on 2026-11-26 showed that every Kiwix archive and
-map region NOMAD offers was already in Arcana's catalog, but 38 of those
-archives were in no collection, and NOMAD's medicines reference had home
-care and herbs that Arcana lacked. Both gaps are closed.
+Arcana now offers what Project NOMAD v1.35.2 has and it lacked, found by
+running the two side by side: home care and herbs beside the medicine
+labels, every archive NOMAD recommends in a collection, 178 of the
+language models on NOMAD's list, and NOMAD's twelve apps, from CyberChef
+to Jellyfin, each on an address of its own. NOMAD's creator video packs
+are not included, because their license allows them to be passed on only
+through NOMAD. The models and apps were run on Linux x86-64 only; the
+Windows, macOS and ARM64 builds carry the same verified files but were not
+tried. Arcana 0.6.0 to 0.13.0 offer this version by themselves within a
+day of being online: choose *Update now* in the banner at the top of the
+page, or *Settings → Application updates → Check now* to look straight
+away.
 
 ### Added
 - **Home care and herbs** (ADR-0028). The Medicines page lists 20
