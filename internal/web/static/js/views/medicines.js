@@ -1,10 +1,12 @@
-// Medicines: the FDA drug label reference built from openFDA downloads.
-// Search by name, look up by situation, read a label, compare warnings.
+// Medicines: the FDA drug label reference built from openFDA downloads, and
+// the built-in home care and herbs (ADR-0028). Search by name, look up by
+// situation, read a label or a remedy, compare warnings.
 import { api } from '../api.js';
 import { h, clear, fill, fmtDate, debounce } from '../util.js';
 
 const ACK_KEY = 'arcana-medicines-ack';
 const KIND_LABEL = { otc: 'Non-prescription', rx: 'Prescription', homeopathic: 'Homeopathic', other: 'Other' };
+const REMEDY_KIND = { home: 'Home care', herbal: 'Herb or supplement' };
 const WARNING_KEYS = ['boxed_warning', 'contraindications', 'do_not_use', 'ask_doctor', 'ask_doctor_or_pharmacist', 'when_using',
   'stop_use', 'warnings', 'warnings_and_cautions', 'precautions', 'drug_interactions', 'pregnancy_or_breast_feeding', 'pregnancy',
   'keep_out_of_reach_of_children', 'overdosage'];
@@ -22,6 +24,25 @@ const notice = () => h('div', { class: 'banner err' },
   'Manufacturers’ label text, not medical advice. Follow the label of the product you actually have. ',
   'In an emergency, contact emergency services or a poison control center; otherwise ask a pharmacist, doctor or nurse when you can.');
 
+const remedyNotice = () => h('div', { class: 'banner err' },
+  'Summaries of US government health pages (CDC, MedlinePlus, FDA and NCCIH), not medical advice. Read the cautions before trying one. ',
+  'In an emergency, contact emergency services or a poison control center; otherwise ask a pharmacist, doctor or nurse when you can.');
+
+function remedyBadge(kind) {
+  return h('span', { class: `badge ${kind === 'herbal' ? 'info' : 'ok'}`,
+    title: kind === 'herbal' ? 'Herbs and supplements are not approved as medicines by the FDA. The page says what the evidence shows.' : null }, REMEDY_KIND[kind] || kind);
+}
+
+// firstSentence keeps result lists short; the remedy page has the full text.
+const firstSentence = (t) => (String(t).match(/^.*?[.!?](\s|$)/) || [t])[0].trim();
+
+function remedyItem(r, names) {
+  return h('li', null,
+    h('a', { href: `#/medicines/remedy/${encodeURIComponent(r.slug)}` }, h('b', null, r.name)), ' ', remedyBadge(r.kind),
+    h('div', { class: 'src' }, firstSentence(r.uses)),
+    names ? h('div', { class: 'src' }, `For: ${r.situations.map((s) => names[s] || s).join(', ')}`) : null);
+}
+
 function gate(main, onAccept) {
   const btn = h('button', { class: 'primary', onclick: () => {
     try { localStorage.setItem(ACK_KEY, '1'); } catch (_) { /* storage unavailable: ask again next time */ }
@@ -34,7 +55,8 @@ function gate(main, onAccept) {
         h('li', null, 'It is health information, not medical advice, and it cannot replace a pharmacist, doctor or nurse.'),
         h('li', null, 'Labels can be out of date, and products differ between countries. Always follow the label of the product you have.'),
         h('li', null, '"By situation" lists medicines whose labels mention the problem. It does not say which one is right or safe for a particular person.'),
-        h('li', null, 'Comparing two labels shows their warnings side by side; it does not check whether the medicines can be taken together.')),
+        h('li', null, 'Comparing two labels shows their warnings side by side; it does not check whether the medicines can be taken together.'),
+        h('li', null, 'Home care and herbs summarize US government health pages. Herbs and supplements are not approved as medicines, the evidence for most is weak, and some interact with medicines; each page says what is known.')),
       h('p', null, 'In an emergency, contact emergency services or a poison control center whenever possible.'),
       h('p', { class: 'small muted' }, 'Your answer is remembered in this browser only.'),
       btn)));
@@ -81,6 +103,7 @@ async function searchPanel(params) {
 }
 
 function situationsPanel(info, params) {
+  const installed = info.installed;
   const chosen = new Set((params.get('s') || '').split(',').filter(Boolean));
   const rx = h('input', { type: 'checkbox', checked: params.get('kind') === 'all' });
   const results = h('div');
@@ -100,26 +123,98 @@ function situationsPanel(info, params) {
     history.replaceState(null, '', `#/medicines?tab=situations&s=${s}${rx.checked ? '&kind=all' : ''}`);
     fill(results, h('p', { class: 'empty' }, 'Looking…'));
     try {
-      const r = await api.get(`/api/drugs/situations?s=${encodeURIComponent(s)}${rx.checked ? '&kind=all' : ''}`);
-      fill(results, r.results.map((res, i) => h('section', { class: 'search-sec' },
-        h('h3', null, res.situations.length > 1 ? `Covering all of: ${res.situations.map((x) => names[x]).join(', ')}` : names[res.situations[0]]),
-        res.groups.length ? h('ul', { class: 'results' }, res.groups.map((g) => groupCard(g, rx.checked ? '' : 'otc')))
-          : h('p', { class: 'small muted' }, i === 0 && res.situations.length > 1 ? 'No single medicine’s label mentions all of these. See each situation below.' : 'No label mentions this.'))));
+      const [r, rem] = await Promise.all([
+        installed ? api.get(`/api/drugs/situations?s=${encodeURIComponent(s)}${rx.checked ? '&kind=all' : ''}`) : null,
+        api.get(`/api/drugs/remedies?s=${encodeURIComponent(s)}`),
+      ]);
+      // Without the label reference, each situation gets a section of its own.
+      const sections = r ? r.results : s.split(',').map((x) => ({ situations: [x], groups: [] }));
+      fill(results, sections.map((res, i) => {
+        const single = res.situations.length === 1;
+        const rems = single ? rem.remedies.filter((x) => x.situations.includes(res.situations[0])) : [];
+        return h('section', { class: 'search-sec' },
+          h('h3', null, single ? names[res.situations[0]] : `Covering all of: ${res.situations.map((x) => names[x]).join(', ')}`),
+          !installed ? null : res.groups.length ? h('ul', { class: 'results' }, res.groups.map((g) => groupCard(g, rx.checked ? '' : 'otc')))
+            : h('p', { class: 'small muted' }, i === 0 && !single ? 'No single medicine’s label mentions all of these. See each situation below.' : 'No label mentions this.'),
+          rems.length ? [h('h4', null, 'Home care and herbs'), h('ul', { class: 'results' }, rems.map((x) => remedyItem(x)))]
+            : single && !installed ? h('p', { class: 'small muted' }, 'No home care or herb is listed for this.') : null);
+      }));
     } catch (e) { fill(results, h('div', { class: 'banner err' }, e.message)); }
   }
   if (chosen.size) run();
   return h('div', null,
-    h('p', { class: 'small muted' }, 'Medicines whose labels say they treat the problem, grouped by active ingredient, most products first. Several choices list medicines covering all of them first. Homeopathic products are left out.'),
+    installed
+      ? h('p', { class: 'small muted' }, 'Medicines whose labels say they treat the problem, grouped by active ingredient, most products first, then home care and herbs. Several choices list medicines covering all of them first. Homeopathic products are left out.')
+      : h('p', { class: 'small muted' }, 'Home care and herbs for each problem. Medicines appear here too once the FDA drug label reference is installed.'),
     boxes,
-    h('div', { class: 'row' }, h('label', { class: 'inline' }, rx, 'Include prescription medicines'), h('button', { class: 'primary', onclick: run }, 'Show medicines')),
+    h('div', { class: 'row' },
+      installed ? h('label', { class: 'inline' }, rx, 'Include prescription medicines') : null,
+      h('button', { class: 'primary', onclick: run }, installed ? 'Show medicines' : 'Show home care and herbs')),
     results);
 }
 
+function remediesPanel(info) {
+  const names = Object.fromEntries(info.situations.map((s) => [s.slug, s.label]));
+  const input = h('input', { type: 'search', placeholder: 'Remedy or problem, e.g. honey or sore throat', 'aria-label': 'Filter remedies' });
+  const list = h('div', null, h('p', { class: 'empty' }, 'Loading…'));
+  let all = [];
+  function render() {
+    const q = input.value.trim().toLowerCase();
+    const match = (r) => !q || [r.name, ...r.commonNames, ...r.situations.map((s) => names[s] || s)].join(' ').toLowerCase().includes(q);
+    fill(list, [['home', 'Home care'], ['herbal', 'Herbs and supplements']].map(([kind, title]) => {
+      const rs = all.filter((r) => r.kind === kind && match(r));
+      return h('section', { class: 'search-sec' }, h('h3', null, title),
+        rs.length ? h('ul', { class: 'results' }, rs.map((r) => remedyItem(r, names))) : h('p', { class: 'small muted' }, 'None match.'));
+    }));
+  }
+  api.get('/api/drugs/remedies').then((r) => { all = r.remedies; render(); })
+    .catch((e) => fill(list, h('div', { class: 'banner err' }, e.message)));
+  input.addEventListener('input', debounce(render, 150));
+  return h('div', null,
+    h('p', { class: 'small muted' }, 'Home care from CDC, MedlinePlus and FDA pages, and herbs from the NCCIH “Herbs at a Glance” pages, with the evidence and cautions for each. Built into Arcana: nothing to download.'),
+    h('form', { class: 'toolbar', role: 'search', onsubmit: (e) => e.preventDefault() }, h('div', { class: 'grow' }, input)),
+    list);
+}
+
+async function remedyView(main, slug) {
+  const [r, info] = await Promise.all([api.get(`/api/drugs/remedies/${encodeURIComponent(slug)}`), api.get('/api/drugs')]);
+  const m = r.remedy;
+  const names = Object.fromEntries(info.situations.map((s) => [s.slug, s.label]));
+  const sec = (title, text, cls = '') => (text ? h('section', { class: `label-sec ${cls}` }, h('h3', null, title), sectionBody(text)) : null);
+  main.appendChild(h('section', { class: 'panel' },
+    h('header', null, h('a', { href: '#/medicines?tab=remedies', class: 'small', onclick: (e) => { if (history.length > 1) { e.preventDefault(); history.back(); } } }, '← Back'),
+      h('h2', null, m.name), remedyBadge(m.kind)),
+    h('div', { class: 'body' },
+      m.commonNames.length ? h('div', { class: 'src' }, `Also called ${m.commonNames.join(', ')}`) : null,
+      h('div', { class: 'src' }, 'For: ', m.situations.map((s, i) => [i ? ', ' : '', h('a', { href: `#/medicines?tab=situations&s=${encodeURIComponent(s)}` }, names[s] || s)])),
+      remedyNotice(),
+      sec('Cautions', m.cautions, 'boxed'),
+      sec('What it is used for', m.uses),
+      sec('How it is used', m.how),
+      sec('What the evidence shows', m.evidence),
+      h('p', { class: 'small muted' }, 'Source: ', h('span', { class: 'mono' }, m.sourceUrl)),
+      info.remedies ? h('p', { class: 'small muted' }, `Summary of that page compiled by Project NOMAD (${info.remedies.license}), version ${info.remedies.version}.`) : null)));
+}
+
+function remediesAbout(info) {
+  const rm = info.remedies;
+  if (!rm) return null;
+  return [h('h3', null, 'Home care and herbs'),
+    h('dl', { class: 'meta' },
+      h('dt', null, 'Sources'), h('dd', null, rm.sources.map((s) => s.name).join('; ')),
+      h('dt', null, 'Remedies'), h('dd', null, String(rm.count)),
+      h('dt', null, 'Version'), h('dd', null, rm.version),
+      h('dt', null, 'Compiled by'), h('dd', null, `Project NOMAD, ${rm.license}. Each entry names the government page it summarizes.`)),
+    h('p', { class: 'small muted' }, 'Built into Arcana, so it is there before the label reference is installed. It changes only with Arcana updates.')];
+}
+
 function aboutPanel(info) {
+  if (!info.installed) return h('div', null, remediesAbout(info));
   const st = info.stats || {};
   const m = st.meta || {};
   const c = info.citation;
   return h('div', null,
+    h('h3', null, 'FDA drug labels'),
     h('dl', { class: 'meta' },
       h('dt', null, 'Source'), h('dd', null, 'U.S. Food and Drug Administration, openFDA drug label downloads'),
       h('dt', null, 'FDA export date'), h('dd', null, fmtDate(m.export)),
@@ -127,7 +222,8 @@ function aboutPanel(info) {
       h('dt', null, 'Labels'), h('dd', null, `${(st.labels || 0).toLocaleString()} (${(st.distinct || 0).toLocaleString()} distinct texts; ${Object.entries(st.byKind || {}).map(([k, n]) => `${KIND_LABEL[k] || k} ${n.toLocaleString()}`).join(', ')})`),
       h('dt', null, 'License'), h('dd', null, 'Public domain (CC0 1.0); label text is the manufacturers’')),
     c ? h('p', { class: 'small muted' }, `Installed as ${c.title}, edition ${c.edition}. Update it from the Updates view when the FDA publishes a newer export.`) : null,
-    h('p', { class: 'small muted' }, 'Arcana keeps the parts of each label a reader needs (uses, directions, warnings, interactions, overdose, side effects); clinical studies, pharmacology and package text are left out to keep the reference small.'));
+    h('p', { class: 'small muted' }, 'Arcana keeps the parts of each label a reader needs (uses, directions, warnings, interactions, overdose, side effects); clinical studies, pharmacology and package text are left out to keep the reference small.'),
+    remediesAbout(info));
 }
 
 async function groupView(main, params) {
@@ -197,22 +293,22 @@ export async function medicinesView(main, params, ctx, args = []) {
   if (args[0] === 'label' && args[1]) { await labelView(main, args[1]); return null; }
   if (args[0] === 'compare' && args[1] && args[2]) { await compareView(main, args[1], args[2]); return null; }
   if (args[0] === 'group') { await groupView(main, params); return null; }
+  if (args[0] === 'remedy' && args[1]) { await remedyView(main, args[1]); return null; }
 
   const info = await api.get('/api/drugs');
-  if (!info.installed) {
-    main.appendChild(h('section', { class: 'panel' }, h('header', null, h('h2', null, 'Medicines')),
-      h('div', { class: 'body' }, h('p', null, 'The FDA drug label reference is not installed.'),
-        h('p', null, h('a', { href: '#/discover?category=medicine&q=FDA%20drug%20labels' }, 'Find it in Discover'),
-          ' (refresh the catalog first). Arcana downloads about 1.8 GB from openFDA and builds a reference of about 1 GB on this computer.'))));
-    return null;
-  }
-  const tab = params.get('tab') || 'search';
+  const tabs = [...(info.installed ? [['search', 'By name']] : []), ['situations', 'By situation'], ['remedies', 'Home care and herbs'], ['about', 'About the data']];
+  const tab = tabs.some(([id]) => id === params.get('tab')) ? params.get('tab') : tabs[0][0];
   const body = h('div', { class: 'body' });
-  const tabs = [['search', 'By name'], ['situations', 'By situation'], ['about', 'About the data']];
   const nav = h('div', { class: 'subtabs', role: 'tablist' }, tabs.map(([id, t]) => h('a', { href: `#/medicines?tab=${id}`, role: 'tab', 'aria-selected': id === tab ? 'true' : 'false' }, t)));
   main.appendChild(h('section', { class: 'panel' }, h('header', null, h('h2', null, 'Medicines'), nav), body));
-  body.appendChild(notice());
+  if (!info.installed) {
+    body.appendChild(h('p', { class: 'small' }, 'The FDA drug label reference is not installed, so only the built-in home care and herbs are shown. ',
+      h('a', { href: '#/discover?category=medicine&q=FDA%20drug%20labels' }, 'Find it in Discover'),
+      ' (refresh the catalog first). Arcana downloads about 1.8 GB from openFDA and builds a reference of about 1 GB on this computer.'));
+  }
+  body.appendChild(tab === 'remedies' || !info.installed ? remedyNotice() : notice());
   if (tab === 'situations') body.appendChild(situationsPanel(info, params));
+  else if (tab === 'remedies') body.appendChild(remediesPanel(info));
   else if (tab === 'about') body.appendChild(aboutPanel(info));
   else body.appendChild(await searchPanel(params));
   return null;

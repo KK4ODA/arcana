@@ -22,7 +22,8 @@ import { playView } from './views/play.js';
 const views = {
   library: { title: 'Library', render: libraryView },
   ask: { title: 'Ask', render: askView, when: (st) => st?.assistant?.canAsk },
-  medicines: { title: 'Medicines', render: medicinesView, when: (st) => st?.drugs?.installed },
+  // Always offered: the home care and herbs are built in (ADR-0028).
+  medicines: { title: 'Medicines', render: medicinesView },
   // Offered to administrators (to set it up) and to everyone once it is.
   classroom: { title: 'Classroom', render: classroomView, when: (st) => st?.kolibri?.builtIn || getSession().admin },
   entertainment: { title: 'Entertainment', render: entertainmentView },

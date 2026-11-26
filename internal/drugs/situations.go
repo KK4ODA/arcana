@@ -35,6 +35,7 @@ var Situations = []Situation{
 	{"sore-throat", "Sore throat", "Cold, flu and allergy", []string{"sore throat", "throat irritation"}},
 	{"runny-nose", "Runny nose and sneezing", "Cold, flu and allergy", []string{"runny nose", "sneezing"}},
 	{"allergy", "Hay fever and allergies", "Cold, flu and allergy", []string{"hay fever", "upper respiratory allergies", "allergic rhinitis", "itchy watery eyes", "antihistamine"}},
+	{"cold", "Common cold or flu", "Cold, flu and allergy", []string{"common cold", "cold symptoms", "cold and flu", "flu symptoms"}},
 
 	{"heartburn", "Heartburn or acid indigestion", "Stomach and digestion", []string{"heartburn", "acid indigestion", "sour stomach", "acid reducer", "antacid"}},
 	{"upset-stomach", "Upset stomach", "Stomach and digestion", []string{"upset stomach", "indigestion"}},
@@ -53,11 +54,19 @@ var Situations = []Situation{
 	{"acne", "Acne", "Skin and first aid", []string{"acne", "pimples", "blemishes"}},
 	{"cold-sores", "Cold sores", "Skin and first aid", []string{"cold sores", "fever blisters"}},
 	{"diaper-rash", "Diaper rash", "Skin and first aid", []string{"diaper rash"}},
+	{"dry-skin", "Dry, chapped or cracked skin", "Skin and first aid", []string{"dry skin", "chapped skin", "cracked skin", "chapped lips"}},
 	{"sunscreen", "Preventing sunburn", "Skin and first aid", []string{"helps prevent sunburn", "sunscreen"}},
 	{"hand-hygiene", "Hand sanitizing", "Skin and first aid", []string{"hand sanitizer", "decrease bacteria on the skin", "hand sanitizing"}},
 
 	{"sleep", "Occasional sleeplessness", "Other", []string{"sleeplessness", "sleep aid", "difficulty falling asleep"}},
 	{"eyes", "Red or irritated eyes", "Other", []string{"redness of the eye", "eye irritation", "minor eye irritation", "dry eye"}},
+	// Non-prescription ear products treat earwax or water in the ear; labels
+	// that name earache are mostly homeopathic, which this search leaves out.
+	{"ears", "Earwax, water in the ear or earache", "Other", []string{"earwax", "ear wax", "water in the ears", "water-clogged ears", "swimmer's ear", "earache", "ear pain"}},
+	// Oral rehydration solutions are not drugs and have no label here; the
+	// remedies list covers them. Salt tablets name heat cramps.
+	{"dehydration", "Dehydration or heat cramps", "Other", []string{"dehydration", "heat cramps", "electrolyte replenisher"}},
+	{"pinworm", "Pinworm", "Other", []string{"pinworm"}},
 	{"smoking", "Quitting smoking", "Other", []string{"stop smoking", "quit smoking", "nicotine withdrawal"}},
 	{"lice", "Head lice", "Other", []string{"head lice", "lice"}},
 	{"yeast", "Vaginal yeast infection", "Other", []string{"vaginal yeast infection", "vaginal yeast"}},
