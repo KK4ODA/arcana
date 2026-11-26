@@ -2,7 +2,7 @@
   "format": "arcana-catalog",
   "formatVersion": 1,
   "title": "Arcana curated catalog",
-  "generated": "2026-11-22T00:00:00Z",
+  "generated": "2026-11-26T00:00:00Z",
   "resources": [
     {
       "id": "arcana.sample",
@@ -875,6 +875,908 @@
         }
       ],
       "popularity": 3
+    },
+    {
+      "id": "arcana.film-his-girl-friday",
+      "provider": "arcana",
+      "title": "His Girl Friday (1940)",
+      "description": "Howard Hawks's fast-talking newspaper comedy. Editor Walter Burns (Cary Grant) learns that his former wife and best reporter, Hildy Johnson (Rosalind Russell), is about to remarry, and talks her into covering one last story: the eve of a hanging. Columbia Pictures, black and white.",
+      "category": "entertainment",
+      "subcategory": "films",
+      "tags": [
+        "comedy",
+        "film"
+      ],
+      "family": "arcana.film-his-girl-friday",
+      "variant": "standard",
+      "variantLabel": "92 minutes, MP4 (H.264) 640×480",
+      "publisher": "Internet Archive (Feature Films collection)",
+      "creator": "Howard Hawks (director); Columbia Pictures",
+      "sourceUrl": "https://archive.org/details/his_girl_friday",
+      "version": "1940",
+      "published": "1940",
+      "lastVerified": "2026-11-26T00:00:00Z",
+      "languages": [
+        "en"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "video",
+      "files": [
+        {
+          "name": "his-girl-friday-1940.mp4",
+          "size": 575274912,
+          "hashes": {
+            "sha256": "1da7a6a00285d8a0c0942acda655c5b1287a200106759b6ae786479dcd8b57f3"
+          },
+          "mirrors": [
+            {
+              "url": "https://archive.org/download/his_girl_friday/his_girl_friday.mp4"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 575274912,
+      "installedSize": 575274912,
+      "license": {
+        "id": "LicenseRef-PD-US",
+        "name": "Public domain in the United States",
+        "url": "https://archive.org/details/his_girl_friday",
+        "redistribution": "permitted",
+        "verified": true,
+        "notes": "Public domain in the United States: the copyright was not renewed in its 28th year, as US law then required. The play it is based on, The Front Page (1928), entered the public domain in 2024. Copyright status in other countries differs."
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": true,
+        "videos": true,
+        "detail": "full"
+      },
+      "updateStrategy": "none",
+      "stats": {
+        "minutes": 92
+      },
+      "popularity": 9
+    },
+    {
+      "id": "arcana.film-the-little-princess",
+      "provider": "arcana",
+      "title": "The Little Princess (1939)",
+      "description": "Shirley Temple as Sara Crewe, left at a London boarding school while her father fights in the Boer War. When he is reported killed, the headmistress makes her a servant, but Sara refuses to believe he is dead. From the novel by Frances Hodgson Burnett. 20th Century Fox, in Technicolor.",
+      "category": "entertainment",
+      "subcategory": "films",
+      "tags": [
+        "drama",
+        "family",
+        "film"
+      ],
+      "family": "arcana.film-the-little-princess",
+      "variant": "standard",
+      "variantLabel": "93 minutes, MP4 (H.264) 640×480",
+      "publisher": "Internet Archive (Feature Films collection)",
+      "creator": "Walter Lang (director); 20th Century Fox",
+      "sourceUrl": "https://archive.org/details/little_princess",
+      "version": "1939",
+      "published": "1939",
+      "lastVerified": "2026-11-26T00:00:00Z",
+      "languages": [
+        "en"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "video",
+      "files": [
+        {
+          "name": "the-little-princess-1939.mp4",
+          "size": 580722077,
+          "hashes": {
+            "sha256": "5664a1df34dcb1d3c424e7666c34920c65bbe5d4eb65e4ad9d4aa5e31cff5358"
+          },
+          "mirrors": [
+            {
+              "url": "https://archive.org/download/little_princess/little_princess.mp4"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 580722077,
+      "installedSize": 580722077,
+      "license": {
+        "id": "LicenseRef-PD-US",
+        "name": "Public domain in the United States",
+        "url": "https://archive.org/details/little_princess",
+        "redistribution": "permitted",
+        "verified": true,
+        "notes": "Public domain in the United States: the copyright was not renewed in its 28th year, as US law then required. Copyright status in other countries differs."
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": true,
+        "videos": true,
+        "detail": "full"
+      },
+      "updateStrategy": "none",
+      "stats": {
+        "minutes": 93
+      },
+      "popularity": 8
+    },
+    {
+      "id": "arcana.film-gullivers-travels",
+      "provider": "arcana",
+      "title": "Gulliver's Travels (1939)",
+      "description": "Fleischer Studios' first animated feature. Shipwrecked Lemuel Gulliver wakes on the beach of Lilliput, a kingdom of tiny people about to go to war with its neighbour over the song for a royal wedding. Paramount Pictures, in Technicolor.",
+      "category": "entertainment",
+      "subcategory": "films",
+      "tags": [
+        "animation",
+        "family",
+        "film"
+      ],
+      "family": "arcana.film-gullivers-travels",
+      "variant": "standard",
+      "variantLabel": "73 minutes, MP4 (H.264) 640×480",
+      "publisher": "Internet Archive (Feature Films collection)",
+      "creator": "Dave Fleischer (director); Fleischer Studios",
+      "sourceUrl": "https://archive.org/details/gullivers_travels1939",
+      "version": "1939",
+      "published": "1939",
+      "lastVerified": "2026-11-26T00:00:00Z",
+      "languages": [
+        "en"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "video",
+      "files": [
+        {
+          "name": "gullivers-travels-1939.mp4",
+          "size": 454183111,
+          "hashes": {
+            "sha256": "a7d7d649dac288e9e80ceb64b41a29c2f7b8646e30a28fcbdf53c8d4a671d51a"
+          },
+          "mirrors": [
+            {
+              "url": "https://archive.org/download/gullivers_travels1939/gullivers_travels1939.mp4"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 454183111,
+      "installedSize": 454183111,
+      "license": {
+        "id": "LicenseRef-PD-US",
+        "name": "Public domain in the United States",
+        "url": "https://archive.org/details/gullivers_travels1939",
+        "redistribution": "permitted",
+        "verified": true,
+        "notes": "Public domain in the United States: the copyright was not renewed in its 28th year, as US law then required. Its songs were also published on their own; Arcana has not checked whether those copyrights were renewed. Copyright status in other countries differs."
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": true,
+        "videos": true,
+        "detail": "full"
+      },
+      "updateStrategy": "none",
+      "stats": {
+        "minutes": 73
+      },
+      "popularity": 9
+    },
+    {
+      "id": "arcana.film-meet-john-doe",
+      "provider": "arcana",
+      "title": "Meet John Doe (1941)",
+      "description": "Frank Capra's drama. A sacked columnist (Barbara Stanwyck) invents a letter from a “John Doe” who will jump from city hall in protest, and her paper hires a drifter (Gary Cooper) to play him, until the movement he inspires is taken up by a politician. Warner Bros., black and white.",
+      "category": "entertainment",
+      "subcategory": "films",
+      "tags": [
+        "drama",
+        "film"
+      ],
+      "family": "arcana.film-meet-john-doe",
+      "variant": "standard",
+      "variantLabel": "123 minutes, MP4 (H.264) 640×480",
+      "publisher": "Internet Archive (Feature Films collection)",
+      "creator": "Frank Capra (director)",
+      "sourceUrl": "https://archive.org/details/meet_john_doe",
+      "version": "1941",
+      "published": "1941",
+      "lastVerified": "2026-11-26T00:00:00Z",
+      "languages": [
+        "en"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "video",
+      "files": [
+        {
+          "name": "meet-john-doe-1941.mp4",
+          "size": 769066604,
+          "hashes": {
+            "sha256": "6a900f7fcad9de1eb3c4cc568072df12749c8a75c80e875a83b5c2461df71860"
+          },
+          "mirrors": [
+            {
+              "url": "https://archive.org/download/meet_john_doe/meet_john_doe.mp4"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 769066604,
+      "installedSize": 769066604,
+      "license": {
+        "id": "LicenseRef-PD-US",
+        "name": "Public domain in the United States",
+        "url": "https://archive.org/details/meet_john_doe",
+        "redistribution": "permitted",
+        "verified": true,
+        "notes": "Public domain in the United States: the copyright was not renewed in its 28th year, as US law then required. Copyright status in other countries differs."
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": true,
+        "videos": true,
+        "detail": "full"
+      },
+      "updateStrategy": "none",
+      "stats": {
+        "minutes": 123
+      },
+      "popularity": 6
+    },
+    {
+      "id": "arcana.film-detour",
+      "provider": "arcana",
+      "title": "Detour (1945)",
+      "description": "Edgar G. Ulmer's low-budget film noir. A nightclub pianist hitchhiking from New York to Los Angeles to join his girlfriend is caught up in a death he did not cause, and then in a stranger who knows about it. Producers Releasing Corporation, black and white.",
+      "category": "entertainment",
+      "subcategory": "films",
+      "tags": [
+        "crime",
+        "film",
+        "film noir"
+      ],
+      "family": "arcana.film-detour",
+      "variant": "standard",
+      "variantLabel": "68 minutes, MP4 (H.264) 640×480",
+      "publisher": "Internet Archive (Feature Films collection)",
+      "creator": "Edgar G. Ulmer (director); Producers Releasing Corporation",
+      "sourceUrl": "https://archive.org/details/Detour",
+      "version": "1945",
+      "published": "1945",
+      "lastVerified": "2026-11-26T00:00:00Z",
+      "languages": [
+        "en"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "video",
+      "files": [
+        {
+          "name": "detour-1945.mp4",
+          "size": 423770341,
+          "hashes": {
+            "sha256": "3d5c0858bb91891957cefb90960c5ae46fef16c33b837dfe3efd820daa0284b0"
+          },
+          "mirrors": [
+            {
+              "url": "https://archive.org/download/Detour/Detour.mp4"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 423770341,
+      "installedSize": 423770341,
+      "license": {
+        "id": "LicenseRef-PD-US",
+        "name": "Public domain in the United States",
+        "url": "https://archive.org/details/Detour",
+        "redistribution": "permitted",
+        "verified": true,
+        "notes": "Public domain in the United States, as the Internet Archive publishes it and film references record it. Copyright status in other countries differs."
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": true,
+        "videos": true,
+        "detail": "full"
+      },
+      "updateStrategy": "none",
+      "stats": {
+        "minutes": 68
+      },
+      "popularity": 5,
+      "warnings": [
+        {
+          "kind": "content",
+          "text": "Crime drama with deaths; for older viewers."
+        }
+      ]
+    },
+    {
+      "id": "arcana.film-the-stranger",
+      "provider": "arcana",
+      "title": "The Stranger (1946)",
+      "description": "Orson Welles directs and plays a Nazi war criminal living as a teacher in a Connecticut town, with Edward G. Robinson as the investigator who tracks him down and Loretta Young as his unsuspecting wife. RKO Radio Pictures, black and white.",
+      "category": "entertainment",
+      "subcategory": "films",
+      "tags": [
+        "film",
+        "film noir",
+        "thriller"
+      ],
+      "family": "arcana.film-the-stranger",
+      "variant": "standard",
+      "variantLabel": "91 minutes, MP4 (H.264) 640×480",
+      "publisher": "Internet Archive (Feature Films collection)",
+      "creator": "Orson Welles (director); International Pictures",
+      "sourceUrl": "https://archive.org/details/TheStranger_0",
+      "version": "1946",
+      "published": "1946",
+      "lastVerified": "2026-11-26T00:00:00Z",
+      "languages": [
+        "en"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "video",
+      "files": [
+        {
+          "name": "the-stranger-1946.mp4",
+          "size": 570456474,
+          "hashes": {
+            "sha256": "ae5e13978fed07b27cacf4a11524ce9a7030c35372d9278e02ad1bd030287bd8"
+          },
+          "mirrors": [
+            {
+              "url": "https://archive.org/download/TheStranger_0/The_Stranger.mp4"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 570456474,
+      "installedSize": 570456474,
+      "license": {
+        "id": "LicenseRef-PD-US",
+        "name": "Public domain in the United States",
+        "url": "https://archive.org/details/TheStranger_0",
+        "redistribution": "permitted",
+        "verified": true,
+        "notes": "Public domain in the United States: the copyright was not renewed in its 28th year, as US law then required. Copyright status in other countries differs."
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": true,
+        "videos": true,
+        "detail": "full"
+      },
+      "updateStrategy": "none",
+      "stats": {
+        "minutes": 91
+      },
+      "popularity": 6,
+      "warnings": [
+        {
+          "kind": "content",
+          "text": "Includes documentary footage of Nazi concentration camps."
+        }
+      ]
+    },
+    {
+      "id": "arcana.film-scarlet-street",
+      "provider": "arcana",
+      "title": "Scarlet Street (1945)",
+      "description": "Fritz Lang's film noir. A meek cashier and Sunday painter (Edward G. Robinson) falls for a young woman (Joan Bennett) whose boyfriend schemes to take his money and sell his paintings under her name. Universal Pictures, black and white.",
+      "category": "entertainment",
+      "subcategory": "films",
+      "tags": [
+        "crime",
+        "film",
+        "film noir"
+      ],
+      "family": "arcana.film-scarlet-street",
+      "variant": "standard",
+      "variantLabel": "101 minutes, MP4 (H.264) 640×480",
+      "publisher": "Internet Archive (Feature Films collection)",
+      "creator": "Fritz Lang (director); Diana Productions",
+      "sourceUrl": "https://archive.org/details/ScarletStreet",
+      "version": "1945",
+      "published": "1945",
+      "lastVerified": "2026-11-26T00:00:00Z",
+      "languages": [
+        "en"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "video",
+      "files": [
+        {
+          "name": "scarlet-street-1945.mp4",
+          "size": 633398173,
+          "hashes": {
+            "sha256": "d6ece337c723552ab4284187f3456d3e56cb565bc1a60a1458562157239407f4"
+          },
+          "mirrors": [
+            {
+              "url": "https://archive.org/download/ScarletStreet/Scarlet_Street.mp4"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 633398173,
+      "installedSize": 633398173,
+      "license": {
+        "id": "LicenseRef-PD-US",
+        "name": "Public domain in the United States",
+        "url": "https://archive.org/details/ScarletStreet",
+        "redistribution": "permitted",
+        "verified": true,
+        "notes": "Public domain in the United States, as the Internet Archive publishes it and film references record it. The French novel it is based on, La Chienne (1930), entered the US public domain in 2026. Copyright status in other countries differs."
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": true,
+        "videos": true,
+        "detail": "full"
+      },
+      "updateStrategy": "none",
+      "stats": {
+        "minutes": 101
+      },
+      "popularity": 5,
+      "warnings": [
+        {
+          "kind": "content",
+          "text": "Crime drama with a murder; for adults."
+        }
+      ]
+    },
+    {
+      "id": "arcana.film-carnival-of-souls",
+      "provider": "arcana",
+      "title": "Carnival of Souls (1962)",
+      "description": "Low-budget horror made in Kansas and Utah. After surviving a car accident, a church organist moves to Salt Lake City, where a pale man follows her and an abandoned lakeside pavilion draws her in. Directed by Herk Harvey, black and white.",
+      "category": "entertainment",
+      "subcategory": "films",
+      "tags": [
+        "film",
+        "horror"
+      ],
+      "family": "arcana.film-carnival-of-souls",
+      "variant": "standard",
+      "variantLabel": "83 minutes, MP4 (H.264) 640×480",
+      "publisher": "Internet Archive (Feature Films collection)",
+      "creator": "Herk Harvey (director); Harcourt Productions",
+      "sourceUrl": "https://archive.org/details/CarnivalofSouls",
+      "version": "1962",
+      "published": "1962",
+      "lastVerified": "2026-11-26T00:00:00Z",
+      "languages": [
+        "en"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "video",
+      "files": [
+        {
+          "name": "carnival-of-souls-1962.mp4",
+          "size": 518506661,
+          "hashes": {
+            "sha256": "b6f585159cc049196789f35d08f08750096090228373268a14e0925b68c1e380"
+          },
+          "mirrors": [
+            {
+              "url": "https://archive.org/download/CarnivalofSouls/CarnivalOfSouls.mp4"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 518506661,
+      "installedSize": 518506661,
+      "license": {
+        "id": "LicenseRef-PD-US",
+        "name": "Public domain in the United States",
+        "url": "https://archive.org/details/CarnivalofSouls",
+        "redistribution": "permitted",
+        "verified": true,
+        "notes": "Public domain in the United States: it was released without a valid copyright notice, which US law then required. A later director's cut is under copyright; this is the 1962 release. Copyright status in other countries differs."
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": true,
+        "videos": true,
+        "detail": "full"
+      },
+      "updateStrategy": "none",
+      "stats": {
+        "minutes": 83
+      },
+      "popularity": 5,
+      "warnings": [
+        {
+          "kind": "content",
+          "text": "Horror; not for young children."
+        }
+      ]
+    },
+    {
+      "id": "arcana.film-night-of-the-living-dead",
+      "provider": "arcana",
+      "title": "Night of the Living Dead (1968)",
+      "description": "George A. Romero's first feature. Strangers barricade themselves in a Pennsylvania farmhouse against the recently dead, who have come back to life and attack the living. Black and white.",
+      "category": "entertainment",
+      "subcategory": "films",
+      "tags": [
+        "film",
+        "horror"
+      ],
+      "family": "arcana.film-night-of-the-living-dead",
+      "variant": "standard",
+      "variantLabel": "96 minutes, MP4 (H.264) 640×480",
+      "publisher": "Internet Archive (Feature Films collection)",
+      "creator": "George A. Romero (director); Image Ten",
+      "sourceUrl": "https://archive.org/details/Night.Of.The.Living.Dead_1080p",
+      "version": "1968",
+      "published": "1968",
+      "lastVerified": "2026-11-26T00:00:00Z",
+      "languages": [
+        "en"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "video",
+      "files": [
+        {
+          "name": "night-of-the-living-dead-1968.mp4",
+          "size": 597585042,
+          "hashes": {
+            "sha256": "fcdc987967a83407e42f61fc4b2646687a37bf5d615cbb2230c8a4ee13b75c4a"
+          },
+          "mirrors": [
+            {
+              "url": "https://archive.org/download/Night.Of.The.Living.Dead_1080p/NightOfTheLivingDead_1080p.mp4"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 597585042,
+      "installedSize": 597585042,
+      "license": {
+        "id": "LicenseRef-PD-US",
+        "name": "Public domain in the United States",
+        "url": "https://archive.org/details/Night.Of.The.Living.Dead_1080p",
+        "redistribution": "permitted",
+        "verified": true,
+        "notes": "Public domain in the United States: it was released without a valid copyright notice, which US law then required. Copyright status in other countries differs."
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": true,
+        "videos": true,
+        "detail": "full"
+      },
+      "updateStrategy": "none",
+      "stats": {
+        "minutes": 96
+      },
+      "popularity": 7,
+      "warnings": [
+        {
+          "kind": "content",
+          "text": "Horror with graphic violence; not suitable for children."
+        }
+      ]
+    },
+    {
+      "id": "arcana.film-the-flying-deuces",
+      "provider": "arcana",
+      "title": "The Flying Deuces (1939)",
+      "description": "Laurel and Hardy join the French Foreign Legion so that Ollie can forget a woman in Paris, and soon want to leave it again. Directed by A. Edward Sutherland. RKO Radio Pictures, black and white.",
+      "category": "entertainment",
+      "subcategory": "films",
+      "tags": [
+        "comedy",
+        "family",
+        "film"
+      ],
+      "family": "arcana.film-the-flying-deuces",
+      "variant": "standard",
+      "variantLabel": "68 minutes, MP4 (H.264) 640×480",
+      "publisher": "Internet Archive (Feature Films collection)",
+      "creator": "A. Edward Sutherland (director); Boris Morros Productions",
+      "sourceUrl": "https://archive.org/details/TheFlyingDeuces",
+      "version": "1939",
+      "published": "1939",
+      "lastVerified": "2026-11-26T00:00:00Z",
+      "languages": [
+        "en"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "video",
+      "files": [
+        {
+          "name": "the-flying-deuces-1939.mp4",
+          "size": 425079141,
+          "hashes": {
+            "sha256": "85ad66c86192d3e38219b4c83274aa91f6eaac96015b4c77078104918cd16417"
+          },
+          "mirrors": [
+            {
+              "url": "https://archive.org/download/TheFlyingDeuces/The_Flying_Deuces.mp4"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 425079141,
+      "installedSize": 425079141,
+      "license": {
+        "id": "LicenseRef-PD-US",
+        "name": "Public domain in the United States",
+        "url": "https://archive.org/details/TheFlyingDeuces",
+        "redistribution": "permitted",
+        "verified": true,
+        "notes": "Public domain in the United States, as the Internet Archive publishes it and film references record it. Copyright status in other countries differs."
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": true,
+        "videos": true,
+        "detail": "full"
+      },
+      "updateStrategy": "none",
+      "stats": {
+        "minutes": 68
+      },
+      "popularity": 7
+    },
+    {
+      "id": "arcana.film-africa-screams",
+      "provider": "arcana",
+      "title": "Africa Screams (1949)",
+      "description": "Abbott and Costello comedy. A bookshop clerk who claims to remember a map to diamond country is hired to guide a safari into Africa. With Clyde Beatty, Frank Buck and Shemp Howard. United Artists, black and white.",
+      "category": "entertainment",
+      "subcategory": "films",
+      "tags": [
+        "comedy",
+        "film"
+      ],
+      "family": "arcana.film-africa-screams",
+      "variant": "standard",
+      "variantLabel": "79 minutes, MP4 (H.264) 640×480",
+      "publisher": "Internet Archive (Feature Films collection)",
+      "creator": "Charles Barton (director); Huntington Hartford Productions",
+      "sourceUrl": "https://archive.org/details/AfricaScreams",
+      "version": "1949",
+      "published": "1949",
+      "lastVerified": "2026-11-26T00:00:00Z",
+      "languages": [
+        "en"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "video",
+      "files": [
+        {
+          "name": "africa-screams-1949.mp4",
+          "size": 492202154,
+          "hashes": {
+            "sha256": "710f15f17b40012ccbb898d2066d7629f5d256e1c510b26168c37dbc5166670d"
+          },
+          "mirrors": [
+            {
+              "url": "https://archive.org/download/AfricaScreams/Africa_Screams.mp4"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 492202154,
+      "installedSize": 492202154,
+      "license": {
+        "id": "LicenseRef-PD-US",
+        "name": "Public domain in the United States",
+        "url": "https://archive.org/details/AfricaScreams",
+        "redistribution": "permitted",
+        "verified": true,
+        "notes": "Public domain in the United States: the copyright was not renewed in its 28th year, as US law then required. Copyright status in other countries differs."
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": true,
+        "videos": true,
+        "detail": "full"
+      },
+      "updateStrategy": "none",
+      "stats": {
+        "minutes": 79
+      },
+      "popularity": 5,
+      "warnings": [
+        {
+          "kind": "content",
+          "text": "Contains stereotyped portrayals of Africans that were common in films of its time."
+        }
+      ]
+    },
+    {
+      "id": "arcana.film-cyrano-de-bergerac",
+      "provider": "arcana",
+      "title": "Cyrano de Bergerac (1950)",
+      "description": "José Ferrer won the Academy Award for Best Actor as the swordsman and poet with an enormous nose who woos his cousin Roxane on behalf of a handsome, tongue-tied cadet. From Edmond Rostand's play in Brian Hooker's English translation. United Artists, black and white.",
+      "category": "entertainment",
+      "subcategory": "films",
+      "tags": [
+        "drama",
+        "film",
+        "romance"
+      ],
+      "family": "arcana.film-cyrano-de-bergerac",
+      "variant": "standard",
+      "variantLabel": "113 minutes, MP4 (H.264) 640×480",
+      "publisher": "Internet Archive (Feature Films collection)",
+      "creator": "Michael Gordon (director); Stanley Kramer Productions",
+      "sourceUrl": "https://archive.org/details/Cyrano_DeBergerac",
+      "version": "1950",
+      "published": "1950",
+      "lastVerified": "2026-11-26T00:00:00Z",
+      "languages": [
+        "en"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "video",
+      "files": [
+        {
+          "name": "cyrano-de-bergerac-1950.mp4",
+          "size": 703840279,
+          "hashes": {
+            "sha256": "4111b6a00edbab9170b0087ac55057634f53472de191df14a38960898bb936de"
+          },
+          "mirrors": [
+            {
+              "url": "https://archive.org/download/Cyrano_DeBergerac/Cyrano_De_Bergerac.mp4"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 703840279,
+      "installedSize": 703840279,
+      "license": {
+        "id": "LicenseRef-PD-US",
+        "name": "Public domain in the United States",
+        "url": "https://archive.org/details/Cyrano_DeBergerac",
+        "redistribution": "permitted",
+        "verified": true,
+        "notes": "Public domain in the United States, as the Internet Archive publishes it and film references record it. Copyright status in other countries differs."
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": true,
+        "videos": true,
+        "detail": "full"
+      },
+      "updateStrategy": "none",
+      "stats": {
+        "minutes": 113
+      },
+      "popularity": 6
+    },
+    {
+      "id": "arcana.film-jungle-book",
+      "provider": "arcana",
+      "title": "Jungle Book (1942)",
+      "description": "Sabu stars as Mowgli, a boy raised by wolves who returns to his village and leads its greedy men towards a treasure in the jungle, in Zoltan Korda's version of Rudyard Kipling's stories. United Artists, in Technicolor.",
+      "category": "entertainment",
+      "subcategory": "films",
+      "tags": [
+        "adventure",
+        "family",
+        "film"
+      ],
+      "family": "arcana.film-jungle-book",
+      "variant": "standard",
+      "variantLabel": "105 minutes, MP4 (H.264) 640×480",
+      "publisher": "Internet Archive (Feature Films collection)",
+      "creator": "Zoltan Korda (director); Alexander Korda Films",
+      "sourceUrl": "https://archive.org/details/JungleBook",
+      "version": "1942",
+      "published": "1942",
+      "lastVerified": "2026-11-26T00:00:00Z",
+      "languages": [
+        "en"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "video",
+      "files": [
+        {
+          "name": "jungle-book-1942.mp4",
+          "size": 655601430,
+          "hashes": {
+            "sha256": "69967bf862fad6ed9bbddadd7998c1a3e0743af2b6616a7e908f699cde8937f2"
+          },
+          "mirrors": [
+            {
+              "url": "https://archive.org/download/JungleBook/Jungle_Book.mp4"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 655601430,
+      "installedSize": 655601430,
+      "license": {
+        "id": "LicenseRef-PD-US",
+        "name": "Public domain in the United States",
+        "url": "https://archive.org/details/JungleBook",
+        "redistribution": "permitted",
+        "verified": true,
+        "notes": "Public domain in the United States, as the Internet Archive publishes it and film references record it. Miklós Rózsa's score was also published on its own; Arcana has not checked whether that copyright was renewed. Copyright status in other countries differs."
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": true,
+        "videos": true,
+        "detail": "full"
+      },
+      "updateStrategy": "none",
+      "stats": {
+        "minutes": 105
+      },
+      "popularity": 7
     }
   ]
 }

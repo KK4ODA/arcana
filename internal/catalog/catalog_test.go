@@ -189,7 +189,7 @@ func TestBundledCatalogIsValid(t *testing.T) {
 		}
 	}
 	presets, err := BundledPresets()
-	if err != nil || len(presets) < 9 {
+	if err != nil || len(presets) < 10 {
 		t.Fatalf("presets: %v (%d)", err, len(presets))
 	}
 }
@@ -326,4 +326,77 @@ func TestGutenbergCSV(t *testing.T) {
 	if len(all) != 3 {
 		t.Errorf("All should include non-practical texts: %d", len(all))
 	}
+}
+
+func TestKiwixEntertainmentCategories(t *testing.T) {
+	cases := []struct{ name, category, want string }{
+		{"boardgames.stackexchange.com_en_all", "stack_exchange", CategoryEntertainment},
+		{"chess.stackexchange.com_en_all", "stack_exchange", CategoryEntertainment},
+		{"movies.stackexchange.com_en_all", "stack_exchange", CategoryEntertainment},
+		{"wikipedia_en_movies", "wikipedia", CategoryEntertainment},
+		{"wikipedia_fr_football", "wikipedia", CategoryEntertainment},
+		{"studio.blender.org_en_open-movies", "", CategoryEntertainment},
+		// Not entertainment: game programming, and the general encyclopedia.
+		{"gamedev.stackexchange.com_en_all", "stack_exchange", CategoryReference},
+		{"wikipedia_en_all", "wikipedia", CategoryReference},
+		{"ham.stackexchange.com_en_all", "stack_exchange", CategoryRadio},
+	}
+	for _, c := range cases {
+		if got, _ := kiwixCategory(c.name, c.category); got != c.want {
+			t.Errorf("%s: category %q, want %q", c.name, got, c.want)
+		}
+	}
+}
+
+// Films in the bundled catalog are public domain in the US, pinned to the
+// SHA-256 measured when they were reviewed, and say how long they run.
+func TestBundledFilms(t *testing.T) {
+	res, err := Bundled().Fetch(context.Background(), mapFetcher{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	films := 0
+	for _, r := range res {
+		if r.Format != "video" {
+			continue
+		}
+		films++
+		if r.Category != CategoryEntertainment || r.Subcategory != "films" {
+			t.Errorf("%s: category %s/%s", r.ID, r.Category, r.Subcategory)
+		}
+		if r.License.ID != "LicenseRef-PD-US" || !r.License.Verified || !strings.Contains(r.License.Notes, "other countries") {
+			t.Errorf("%s: license %+v", r.ID, r.License)
+		}
+		if len(r.Files) != 1 || len(r.Files[0].Hashes["sha256"]) != 64 || !strings.HasSuffix(r.Files[0].Name, ".mp4") {
+			t.Errorf("%s: files %+v", r.ID, r.Files)
+		}
+		if !strings.HasPrefix(r.Files[0].Mirrors[0].URL, "https://archive.org/download/") || !strings.HasPrefix(r.SourceURL, "https://archive.org/details/") {
+			t.Errorf("%s: source %s", r.ID, r.SourceURL)
+		}
+		if r.Stats["minutes"] < 60 || r.UpdateStrategy != UpdateNone {
+			t.Errorf("%s: minutes %d, update %s", r.ID, r.Stats["minutes"], r.UpdateStrategy)
+		}
+	}
+	if films < 10 {
+		t.Errorf("%d films in the bundled catalog", films)
+	}
+	presets, _ := BundledPresets()
+	for _, p := range presets {
+		if p.ID != "entertainment" {
+			continue
+		}
+		for _, it := range p.Items {
+			if strings.HasPrefix(it.Family, "arcana.") {
+				found := false
+				for _, r := range res {
+					found = found || r.Family == it.Family
+				}
+				if !found {
+					t.Errorf("preset names %s, which is not in the catalog", it.Family)
+				}
+			}
+		}
+		return
+	}
+	t.Error("no entertainment preset")
 }
