@@ -3,7 +3,16 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
-## Unreleased
+## 0.12.0 — 2026-11-26
+
+The map shows where you are again, as an arrow pointing the way you are
+heading, and records a track at the press of a button. Since 0.8.0 the
+Maps view often left out your position and the directions route; that is
+fixed. Recording has been tried with the simulator, not yet with a GPS
+receiver on the move. Arcana 0.6.0 to 0.11.0 offer this version by
+themselves within a day of being online: choose *Update now* in the
+banner at the top of the page, or *Settings → Application updates → Check
+now* to look straight away.
 
 ### Added
 - **Position symbol.** Your position is an arrow pointing along your
