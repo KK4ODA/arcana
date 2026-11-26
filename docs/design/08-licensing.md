@@ -135,6 +135,9 @@ in the export manifest.
 | Practical Action | All rights reserved | Restricted | Excluded |
 | "Survivor Library" | Rights statement unverifiable; items after 1930 may be in copyright | High risk | **Excluded** |
 | OpenStreetMap | ODbL 1.0 | Permitted with attribution / share-alike for databases | Phase 3 |
+| Feature films from the Internet Archive (13 titles) | Public domain in the US (copyright not renewed, or no valid notice), per title; status elsewhere differs | Permitted in the US | Yes (bundled, hash-pinned; ADR-0027) |
+| Silent films on the Internet Archive | Film public domain in the US; scores added to the copies have unknown rights | Unknown | **Excluded** |
+| Blender Studio open films (Kiwix) | Creative Commons by film; not yet reviewed | Unknown | Yes (unverified) |
 
 ## Release checklist (maintainer action)
 

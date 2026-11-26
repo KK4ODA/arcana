@@ -15,6 +15,9 @@ import { serverView, connectView } from './views/server.js';
 import { settingsView } from './views/settings.js';
 import { setupView } from './views/setup.js';
 import { readerView, documentView } from './views/reader.js';
+import { entertainmentView } from './views/entertainment.js';
+import { watchView } from './views/watch.js';
+import { playView } from './views/play.js';
 
 const views = {
   library: { title: 'Library', render: libraryView },
@@ -22,6 +25,7 @@ const views = {
   medicines: { title: 'Medicines', render: medicinesView, when: (st) => st?.drugs?.installed },
   // Offered to administrators (to set it up) and to everyone once it is.
   classroom: { title: 'Classroom', render: classroomView, when: (st) => st?.kolibri?.builtIn || getSession().admin },
+  entertainment: { title: 'Entertainment', render: entertainmentView },
   discover: { title: 'Discover', render: discoverView },
   maps: { title: 'Maps', render: mapsView },
   downloads: { title: 'Downloads', render: downloadsView },
@@ -152,6 +156,15 @@ async function route() {
   if (r.name === 'connect') {
     renderTabs('server');
     cleanup = await connectView(main);
+    return;
+  }
+  if (r.name === 'play' || r.name === 'watch') {
+    renderTabs('entertainment');
+    try {
+      cleanup = await (r.name === 'play' ? playView(main, r.args[0]) : watchView(main, r.args[0]));
+    } catch (e) {
+      main.appendChild(h('div', { class: 'banner err' }, e.message));
+    }
     return;
   }
   if (r.name === 'doc') {

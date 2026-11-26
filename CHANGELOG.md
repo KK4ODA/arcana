@@ -3,6 +3,48 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
+## Unreleased
+
+Arcana now has an Entertainment page. Seven board games are built in and
+need no download: chess, checkers, backgammon, reversi, four in a row,
+mancala and Go, for two players on one device or against the computer.
+Thirteen classic feature films that are in the public domain in the United
+States can be downloaded from the Internet Archive and watched in Arcana,
+on the computer running it or on any phone or tablet on the network.
+
+### Added
+- **Board games** (ADR-0027). *Entertainment* lists chess, checkers
+  (English draughts), backgammon (without the doubling cube), reversi, four
+  in a row, mancala (Kalah) and Go (9×9, 13×13 or 19×19, scored by area
+  with 7.5 komi). Each can be played by two people taking turns on one
+  device, and all but Go against the computer at three levels. The squares
+  a chosen piece can reach are marked, *How to play* explains the rules,
+  *Undo* takes back a move, and a game in progress survives closing the
+  page. Games run in the browser showing them, so network visitors play
+  them too, and nothing is stored on the drive.
+- **Films** (ADR-0027). Thirteen feature films from 1939 to 1968, among
+  them His Girl Friday, The Little Princess, Gulliver's Travels, Jungle
+  Book, Meet John Doe, The Stranger and Night of the Living Dead (7.4 GB
+  together). Each film's licence record says why it is in the US public
+  domain and that the status differs elsewhere; horror, violence, Nazi
+  camp footage and stereotyped portrayals carry content notes. Downloads
+  are checked against the SHA-256 recorded when each film was reviewed.
+  The administrator can download them from the Entertainment page or from
+  *Discover → Films, games and entertainment*.
+- **Film player.** Films play inside Arcana with their source, licence and
+  download check shown below, and each device is offered to continue where
+  it stopped.
+- **Films and Games** collection and a *Films and games* topic in Getting
+  started: the films by suitability for families, and the Board & Card
+  Games and Chess question-and-answer archives.
+
+### Changed
+- Kiwix archives about board games, chess, puzzles, role-playing games,
+  films, television, comics and sports, and Blender Studio's open films,
+  are now in the new category *Films, games and entertainment* instead of
+  *Encyclopedias and reference*.
+- WebM files are served as video rather than as downloads.
+
 ## 0.12.0 — 2026-11-26
 
 The map shows where you are again, as an arrow pointing the way you are

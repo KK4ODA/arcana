@@ -11,6 +11,7 @@ const TOPICS = [
   { id: 'field-technician', title: 'Repair and technical work', text: 'Repair manuals, electronics, mechanics and energy.' },
   { id: 'remote-expedition', title: 'Travel and the outdoors', text: 'Travel guides, outdoor skills, knots and the World Factbook.' },
   { id: 'education', title: 'Education', text: 'Textbooks, courses and simulations for learners.' },
+  { id: 'entertainment', title: 'Films and games', text: 'Classic public-domain films to watch offline, and rules questions for board games. The board games are built in.' },
 ];
 
 const EXTRAS = [

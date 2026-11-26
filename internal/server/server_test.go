@@ -142,7 +142,7 @@ func TestSessionAndAccessPolicy(t *testing.T) {
 	if rec := e.do(e.content, "GET", "/kiwix/", local, "evil.example", nil, nil); rec.Code != 421 {
 		t.Errorf("content host check: %d", rec.Code)
 	}
-	if csp := e.do(e.appH, "GET", "/", local, "127.0.0.1:18470", nil, nil).Header().Get("Content-Security-Policy"); !strings.Contains(csp, "frame-src http://127.0.0.1:18471") {
+	if csp := e.do(e.appH, "GET", "/", local, "127.0.0.1:18470", nil, nil).Header().Get("Content-Security-Policy"); !strings.Contains(csp, "frame-src http://127.0.0.1:18471") || !strings.Contains(csp, "media-src http://127.0.0.1:18471;") {
 		t.Errorf("CSP: %q", csp)
 	}
 }

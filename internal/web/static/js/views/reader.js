@@ -20,7 +20,12 @@ export async function readerView(main, id, params) {
     main.appendChild(h('div', { class: 'banner err' }, `This resource cannot be opened. ${r.openError || 'The archive reader is not available on this computer.'}`));
     return null;
   }
-  // Documents (PDF and others) open in the document view.
+  // Films play in the player; documents (PDF and others) open in the
+  // document view.
+  if (r.format === 'video') {
+    location.replace(`#/watch/${encodeURIComponent(id)}`);
+    return null;
+  }
   if (r.openPath.startsWith('/files/')) {
     location.replace(`#/doc?key=${encodeURIComponent(`res:${r.resourceId}/${r.openPath.split('/').pop()}`)}&resource=${encodeURIComponent(id)}`);
     return null;

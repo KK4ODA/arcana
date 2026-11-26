@@ -454,7 +454,8 @@ func serveDocument(w http.ResponseWriter, r *http.Request, p string) {
 	case strings.HasPrefix(ctype, "application/pdf"), strings.HasPrefix(ctype, "application/epub+zip"),
 		strings.HasPrefix(ctype, "text/plain"), strings.HasPrefix(ctype, "image/png"), strings.HasPrefix(ctype, "image/jpeg"),
 		strings.HasPrefix(ctype, "image/gif"), strings.HasPrefix(ctype, "image/webp"), strings.HasPrefix(ctype, "audio/"),
-		strings.HasPrefix(ctype, "video/mp4"), strings.HasPrefix(ctype, "text/csv"), strings.HasPrefix(ctype, "text/markdown"):
+		strings.HasPrefix(ctype, "video/mp4"), strings.HasPrefix(ctype, "video/webm"), strings.HasPrefix(ctype, "text/csv"),
+		strings.HasPrefix(ctype, "text/markdown"):
 	case strings.HasSuffix(strings.ToLower(p), ".md"):
 		ctype = "text/plain; charset=utf-8"
 	default:

@@ -54,7 +54,7 @@ Status: ✅ implemented and tested · 🟡 partial · ⏳ planned (phase).
 | FR-U1 | Browse by category, search, filter by language, sort by size/date/relevance | ✅ (popularity: provider data not available from Kiwix) |
 | FR-U2 | Region filter | ⏳ (3, with map regions) |
 | FR-U3 | Compare alternative editions; see total selection vs. space | ✅ |
-| FR-U4 | Curated presets; wizard with goals, language, capacity | ✅ 9 presets, saved custom collections; ⏳ geography step (3) |
+| FR-U4 | Curated presets; wizard with goals, language, capacity | ✅ 10 presets, saved custom collections; ⏳ geography step (3) |
 | FR-U5 | Select entire categories | ✅ "Select all shown" (filter by category first) |
 
 ## Downloads

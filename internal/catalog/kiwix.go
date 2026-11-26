@@ -335,6 +335,14 @@ func kiwixCategory(name, category string) (string, string) {
 		return CategoryComputing, ""
 	case has("maps_", "openstreetmap"):
 		return CategoryMaps, ""
+	case has("boardgames.stackexchange", "chess.stackexchange", "puzzling.stackexchange", "rpg.stackexchange"):
+		return CategoryEntertainment, "games and puzzles"
+	case has("movies.stackexchange", "scifi.stackexchange", "anime.stackexchange", "_movies", "indian-cinema", "open-movies"):
+		return CategoryEntertainment, "films and television"
+	case has("_comics", "smbc-comics"):
+		return CategoryEntertainment, "comics"
+	case has("sports.stackexchange", "football", "martialarts.stackexchange"):
+		return CategoryEntertainment, "sports"
 	case has("wikivoyage", "worldfactbook"):
 		return CategoryReference, "travel and geography"
 	case has("libretexts", "physics", "chemistry", "biology", "math", "astronomy"):

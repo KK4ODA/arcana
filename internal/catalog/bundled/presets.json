@@ -523,6 +523,102 @@
           "reason": "Travel guides."
         }
       ]
+    },
+    {
+      "id": "entertainment",
+      "title": "Films and Games",
+      "description": "Classic films in the US public domain to watch without a connection, and questions and answers about board games, chess and puzzles. The board games themselves are built into Arcana and need no download.",
+      "items": [
+        {
+          "family": "arcana.film-gullivers-travels",
+          "priority": 1,
+          "reason": "Animated feature for all ages."
+        },
+        {
+          "family": "arcana.film-the-little-princess",
+          "priority": 1,
+          "reason": "Family drama with Shirley Temple."
+        },
+        {
+          "family": "arcana.film-jungle-book",
+          "priority": 1,
+          "reason": "Family adventure, in colour."
+        },
+        {
+          "family": "arcana.film-the-flying-deuces",
+          "priority": 1,
+          "reason": "Laurel and Hardy comedy."
+        },
+        {
+          "family": "arcana.film-his-girl-friday",
+          "priority": 1,
+          "reason": "Comedy with Cary Grant and Rosalind Russell."
+        },
+        {
+          "family": "kiwix.boardgames.stackexchange.com_en_all",
+          "priority": 1,
+          "reason": "Answers to rules questions about board and card games."
+        },
+        {
+          "family": "arcana.film-meet-john-doe",
+          "priority": 2,
+          "reason": "Frank Capra drama with Gary Cooper."
+        },
+        {
+          "family": "arcana.film-cyrano-de-bergerac",
+          "priority": 2,
+          "reason": "Oscar-winning adaptation of Rostand's play."
+        },
+        {
+          "family": "arcana.film-africa-screams",
+          "priority": 2,
+          "reason": "Abbott and Costello comedy."
+        },
+        {
+          "family": "arcana.film-the-stranger",
+          "priority": 2,
+          "reason": "Orson Welles thriller."
+        },
+        {
+          "family": "kiwix.chess.stackexchange.com_en_all",
+          "priority": 2,
+          "reason": "Chess questions and answers."
+        },
+        {
+          "family": "arcana.film-scarlet-street",
+          "priority": 3,
+          "reason": "Fritz Lang film noir."
+        },
+        {
+          "family": "arcana.film-detour",
+          "priority": 3,
+          "reason": "Film noir."
+        },
+        {
+          "family": "arcana.film-night-of-the-living-dead",
+          "priority": 3,
+          "reason": "Horror classic; not for children."
+        },
+        {
+          "family": "arcana.film-carnival-of-souls",
+          "priority": 3,
+          "reason": "Horror; not for children."
+        },
+        {
+          "family": "kiwix.puzzling.stackexchange.com_en_all",
+          "priority": 3,
+          "reason": "Puzzles with their solutions."
+        },
+        {
+          "family": "kiwix.wikipedia_{lang}_movies",
+          "variants": [
+            "nopic",
+            "maxi"
+          ],
+          "priority": 3,
+          "reason": "Encyclopedia articles about films."
+        }
+      ]
     }
   ]
 }

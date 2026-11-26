@@ -19,8 +19,11 @@ const (
 	CategoryComputing    = "computing"
 	CategoryScience      = "science-technical"
 	CategoryHistory      = "history-culture"
-	CategoryPersonal     = "personal-community"
-	CategoryAssistant    = "assistant"
+	// CategoryEntertainment holds films and references for games and
+	// pastimes. The board games themselves are built in (see ADR-0027).
+	CategoryEntertainment = "entertainment"
+	CategoryPersonal      = "personal-community"
+	CategoryAssistant     = "assistant"
 )
 
 // CategoryInfo describes a category for the UI.
@@ -46,6 +49,7 @@ var Categories = []CategoryInfo{
 	{CategoryComputing, "Computing and programming"},
 	{CategoryScience, "Scientific and technical reference"},
 	{CategoryHistory, "History, culture and literature"},
+	{CategoryEntertainment, "Films, games and entertainment"},
 	{CategoryPersonal, "Personal and community documents"},
 	{CategoryAssistant, "Question answering (local AI models)"},
 }
