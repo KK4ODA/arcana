@@ -7,8 +7,9 @@
 Project NOMAD (v1.35.2, `admin/database/seeders/service_seeder.ts`) installs
 eleven applications as Docker containers besides its library: CyberChef, IT
 Tools, Excalidraw, Meshtastic Web, MeshCore Web, File Browser, Homebox,
-Vaultwarden, Jellyfin, Calibre-Web and Stirling PDF. The owner asked for
-all of them in Arcana (2026-11-26).
+Vaultwarden, Jellyfin, Calibre-Web and Stirling PDF, and Flatnotes beside
+them. The owner asked for all of them in Arcana (2026-11-26), MeshCore Web
+included once it turned out to be closed source.
 
 Arcana is one portable Go program without Docker (ADR-0002) that runs from
 a drive on Windows, macOS and Linux, on x86-64 and ARM64. It already runs
@@ -44,7 +45,8 @@ scheme, host and port.
 - **Each app gets an origin of its own: port P+3 onwards.** The application
   origin is P, the content origin P+1 and the classroom P+2 (ADR-0013,
   ADR-0024). Each app has a fixed slot: CyberChef 8473, IT Tools 8474,
-  Excalidraw 8475 and Meshtastic Web 8476 with the default port 8470. A
+  Excalidraw 8475, Meshtastic Web 8476 and MeshCore Web 8483 with the
+  default port 8470. A
   fixed port keeps an app's saved data, which belongs to the origin, across
   restarts. A separate origin per app keeps an app's scripts away from
   Arcana's session, from archive pages and from every other app's data.
@@ -56,7 +58,11 @@ scheme, host and port.
   some compiled at run time) but limits every load and connection to the
   app's own origin: an app cannot reach the internet, so it works the same
   offline and sends nothing anywhere. Apps that route in the browser get
-  their index page for paths that name no file.
+  their index page for paths that name no file. Where an app's own
+  start-up code fetches from the internet what its build already carries,
+  Arcana changes that code as it serves it (exact text replacements
+  compiled into the app's spec); the files on the drive stay as published
+  and verified.
 - **Native programs are supervised as sidecars**: started on demand, on
   loopback, reached through a proxy on the app's port, stopped with
   Arcana. Each keeps its data under `user/apps/<id>/` on the drive, which
@@ -89,11 +95,32 @@ scheme, host and port.
 | IT Tools 2024.10.22 | `it-tools-2024.10.22-7ca5933.zip` from the GitHub release | GPL-3.0 |
 | Excalidraw `sha-4bfc5bb` | the site layer of `excalidraw/excalidraw:sha-4bfc5bb` on Docker Hub, the image NOMAD pins (built November 2021; Excalidraw publishes no other build of the app) | MIT |
 | Meshtastic Web 2.7.1 | `build.tar` from the GitHub release; every file is gzip-compressed, and Arcana decompresses them as it unpacks | GPL-3.0 |
+| MeshCore Web 1.45.0 | the author's own web build, `MeshCore-v1.45.0+71-dc3a209-web.zip` from files.liamcottle.net, with Roboto and Noto Sans Symbols from Google Fonts | closed source, free to use; fonts SIL OFL 1.1 |
 
-**MeshCore Web is left out.** The MeshCore companion app is closed source:
-its README says it is "free for anyone to use", and neither Liam Cottle's
-builds nor aXistem's image grant a license to redistribute it. Arcana's
-rule is to list only what may be redistributed (CONTRIBUTING.md).
+**MeshCore Web is downloaded from its author, not shipped.** The MeshCore
+companion app is closed source; its author's statement is that it is
+"free for anyone to use", and no license grants a right to redistribute
+it. Arcana's rule is to list content only after its redistribution terms
+are confirmed (CONTRIBUTING.md); the owner asked for MeshCore Web anyway
+(2026-11-26). It is offered the way the catalog already offers Kiwix
+archives whose terms forbid passing them on: the entry is marked
+`restricted`, with a license warning, and each library downloads the
+build from the author's site, files.liamcottle.net, the source NOMAD's
+image is made from. Arcana never ships it, and the warning asks the owner
+to remove it before copying the library for someone else; `arcana
+export` and copying between libraries do not yet enforce that.
+
+The build loads Flutter's rendering engine from www.gstatic.com and its
+default font, Roboto, from fonts.gstatic.com, although it carries the
+engine itself: offline it stops at its splash screen, and under the CSP
+it shows no text. Arcana serves its `index.html` and
+`flutter_bootstrap.js` with `useLocalCanvasKit` set and
+`window.flutterConfiguration.fontFallbackBaseUrl` pointing at the app's
+own origin, where it serves Roboto and Noto Sans Symbols (the two fonts
+the app asked for in testing), downloaded and pinned with the app. Text in
+scripts those fonts do not cover (Cyrillic, CJK, emoji) has no font
+offline. The map tab draws OpenStreetMap tiles from the internet and is
+blank offline.
 
 ## Consequences
 - Four more ports for the web apps, ten when all apps are installed. The
@@ -111,7 +138,8 @@ rule is to list only what may be redistributed (CONTRIBUTING.md).
   does not contain (404s that nginx would give too); it falls back to its
   English text and a system font.
 - Tested on Linux x86-64 in Chromium through Arcana (2026-11-26): every web
-  app opened from the Apps page; CyberChef converted text to Base64,
+  app opened from the Apps page; MeshCore Web drew its contacts page with
+  text in a secure context with Web Serial present; CyberChef converted text to Base64,
   IT Tools generated a UUID on a page reached by its own route, Excalidraw
   saved a drawn rectangle in the browser, and Meshtastic Web loaded in a
   secure context with Web Serial available. No request left the computer.

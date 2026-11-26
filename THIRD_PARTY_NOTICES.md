@@ -74,6 +74,8 @@ against the SHA-256 in the bundled catalog and serves them (ADR-0030).
 | IT Tools | 2024.10.22-7ca5933 | GPL-3.0 | https://github.com/CorentinTh/it-tools |
 | Excalidraw (image `excalidraw/excalidraw:sha-4bfc5bb`, site layer only) | sha-4bfc5bb | MIT | https://github.com/excalidraw/excalidraw |
 | Meshtastic Web | 2.7.1 | GPL-3.0 | https://github.com/meshtastic/web |
+| MeshCore Web (closed source; downloaded from its author for each library, never shipped) | 1.45.0 | Proprietary: free to use, no right to redistribute | https://meshcore.io, https://files.liamcottle.net/MeshCore/ |
+| Roboto and Noto Sans Symbols fonts (served to MeshCore Web) | Google Fonts v32, v43 | SIL OFL 1.1 | https://fonts.google.com |
 
 ## Content
 

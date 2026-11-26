@@ -78,6 +78,21 @@ APPS = [
         "category": "radio-communications",
         "files": [f("meshtastic-web", "any", "2.7.1.tar", GH + "meshtastic/web/releases/download/v2.7.1/build.tar")],
     },
+    {
+        "id": "meshcore-web", "title": "MeshCore Web", "kind": "web", "version": "1.45.0", "published": "2026-06-14",
+        "publisher": "Liam Cottle", "sourceUrl": "https://meshcore.io",
+        "description": "The MeshCore companion app 1.45.0 for the browser: connect to a MeshCore radio over USB or Bluetooth to send messages and manage contacts, channels and repeaters. Needs Chrome or Edge, opened on the computer running Arcana or over Arcana's HTTPS address. Arcana downloads it from its author's site.",
+        "license": {"id": "LicenseRef-MeshCore-App", "name": "MeshCore companion app: closed source, free to use",
+                    "url": "https://github.com/aXistem-dev/meshcore-web#license--privacy",
+                    "redistribution": "restricted"},
+        "notes": "The author publishes the app as closed source and free for anyone to use, with no license to redistribute it. Arcana does not ship it: each library downloads it from files.liamcottle.net. The two fonts (Roboto, Noto Sans Symbols; SIL OFL 1.1) come from Google Fonts, from which the app would otherwise load them at run time.",
+        "warnings": [{"kind": "license", "text": "Closed source. Its author lets anyone use it but grants no right to pass it on, so Arcana downloads it from the author's site for this library. Remove it before copying this library for someone else."}],
+        "tags": ["meshcore", "lora", "mesh", "radio"],
+        "category": "radio-communications",
+        "files": [f("meshcore-web", "any", "1.45.0.zip", "https://files.liamcottle.net/MeshCore/v1.45.0/MeshCore-v1.45.0%2B71-dc3a209-web.zip"),
+                  f("fonts", "any", "roboto-v32.woff2", "https://fonts.gstatic.com/s/roboto/v32/KFOmCnqEu92Fr1Me4GZLCzYlKw.woff2"),
+                  f("fonts", "any", "notosanssymbols-v43.woff2", "https://fonts.gstatic.com/s/notosanssymbols/v43/rP2up3q65FkAtHfwd-eIS2brbDN6gxP34F9jRRCe4W3gfQ8gb_VFRkzrbQ.woff2")],
+    },
 ]
 
 PLATFORMS = ["windows-amd64", "darwin-arm64", "darwin-amd64", "linux-amd64", "linux-arm64"]
@@ -135,7 +150,7 @@ def resource(app, cache):
                       "mirrors": [{"url": u} for u in spec["urls"]]})
     plats = sorted({fl["name"].split("_")[1] for fl in files} - {"any"}, key=PLATFORMS.index)
     total = sum(fl["size"] for fl in files)
-    lic = dict(app["license"], redistribution="permitted", verified=True)
+    lic = dict({"redistribution": "permitted"}, **app["license"], verified=True)
     notes = app.get("notes", "")
     if notes:
         lic["notes"] = notes
@@ -151,6 +166,7 @@ def resource(app, cache):
         "media": {"pictures": False, "videos": False}, "updateStrategy": "snapshot-replace",
         "providerRef": {"kind": app["kind"], "platforms": " ".join(plats) if plats else "any"},
         "popularity": 5,
+        **({"warnings": app["warnings"]} if "warnings" in app else {}),
     }
 
 

@@ -42,6 +42,10 @@ func (m *Manager) WebHandler(spec *Spec) http.Handler {
 		if name == "/" {
 			name = "/" + index(spec)
 		}
+		if extra, ok := spec.Extra[name]; ok {
+			http.ServeFile(w, r, filepath.Join(dir, filepath.FromSlash(extra)))
+			return
+		}
 		file, ok := siteFile(root, name)
 		if !ok && spec.SPA && !strings.Contains(path.Base(name), ".") {
 			file, ok = siteFile(root, "/"+index(spec))
@@ -55,8 +59,39 @@ func (m *Manager) WebHandler(spec *Spec) http.Handler {
 			// them so an updated app is seen at once.
 			h.Set("Cache-Control", "no-cache")
 		}
+		if serveRewritten(w, r, spec, name, file) {
+			return
+		}
 		http.ServeFile(w, r, file)
 	})
+}
+
+// serveRewritten serves a file with the spec's rewrites for its path
+// applied, and reports whether it did.
+func serveRewritten(w http.ResponseWriter, r *http.Request, spec *Spec, name, file string) bool {
+	var rw []Rewrite
+	for _, x := range spec.Rewrites {
+		if x.Path == name || (name == "/"+index(spec) && x.Path == "/") {
+			rw = append(rw, x)
+		}
+	}
+	if len(rw) == 0 {
+		return false
+	}
+	data, err := os.ReadFile(file)
+	if err != nil {
+		return false
+	}
+	st, err := os.Stat(file)
+	if err != nil {
+		return false
+	}
+	s := string(data)
+	for _, x := range rw {
+		s = strings.Replace(s, x.Old, x.New, 1)
+	}
+	http.ServeContent(w, r, path.Base(name), st.ModTime(), strings.NewReader(s))
+	return true
 }
 
 func index(spec *Spec) string {

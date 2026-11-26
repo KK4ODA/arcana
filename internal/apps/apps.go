@@ -51,6 +51,12 @@ type Spec struct {
 	// SPA (web apps) serves the index page for paths that name no file,
 	// for apps that route in the browser.
 	SPA bool
+	// Extra (web apps) serves files from outside the site at fixed paths:
+	// URL path to a path in the unpacked folder.
+	Extra map[string]string
+	// Rewrites (web apps) change the text of a site's files as they are
+	// served; the files on the drive stay as published and verified.
+	Rewrites []Rewrite
 	// SecureContext explains, when set, why the app works only in a
 	// secure context: on the computer running Arcana, or over HTTPS.
 	SecureContext string
@@ -64,6 +70,12 @@ type Part struct {
 	// Gunzip decompresses every "name.gz" in the archive to "name", for
 	// sites published only as precompressed files.
 	Gunzip bool
+}
+
+// Rewrite replaces Old with New in the site file Path ("/index.html") as
+// it is served. A file without Old is served as it is.
+type Rewrite struct {
+	Path, Old, New string
 }
 
 // ResourceID returns the catalog ID of the app.

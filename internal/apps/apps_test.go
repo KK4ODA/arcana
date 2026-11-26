@@ -307,3 +307,24 @@ func TestRegistry(t *testing.T) {
 		}
 	}
 }
+
+func TestWebHandlerRewritesAndExtraFiles(t *testing.T) {
+	spec := &Spec{ID: "rewritetest", Title: "Rewrite test", Kind: KindWeb, Slot: 97, Parts: map[string]Part{"site": {}},
+		Root:     "site/web",
+		Rewrites: []Rewrite{{Path: "/index.html", Old: "cdn.example", New: "/local"}},
+		Extra:    map[string]string{"/fonts/a.woff2": "site/font.woff2"}}
+	m := newReadyManager(t, spec, map[string]string{"web/index.html": "<script src=cdn.example/x.js>", "font.woff2": "font"})
+	h := m.WebHandler(spec)
+	for p, want := range map[string]string{"/": "<script src=/local/x.js>", "/index.html": "<script src=/local/x.js>", "/fonts/a.woff2": "font"} {
+		rec := httptest.NewRecorder()
+		h.ServeHTTP(rec, httptest.NewRequest("GET", p, nil))
+		if rec.Code != 200 || rec.Body.String() != want {
+			t.Errorf("%s: %d %q", p, rec.Code, rec.Body.String())
+		}
+	}
+	// The file on disk is unchanged.
+	dir, _, _ := m.ready(spec.ID)
+	if b, _ := os.ReadFile(filepath.Join(dir, "site", "web", "index.html")); !strings.Contains(string(b), "cdn.example") {
+		t.Error("file on disk was changed")
+	}
+}

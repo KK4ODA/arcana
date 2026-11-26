@@ -1823,10 +1823,10 @@
       "downloadSize": 74982747,
       "installedSize": 74982747,
       "license": {
+        "redistribution": "permitted",
         "id": "Apache-2.0",
         "name": "Apache License 2.0",
         "url": "https://github.com/gchq/CyberChef/blob/master/LICENSE",
-        "redistribution": "permitted",
         "verified": true
       },
       "capabilities": {
@@ -1888,10 +1888,10 @@
       "downloadSize": 4071978,
       "installedSize": 4071978,
       "license": {
+        "redistribution": "permitted",
         "id": "GPL-3.0-only",
         "name": "GNU General Public License v3.0",
         "url": "https://github.com/CorentinTh/it-tools/blob/main/LICENSE",
-        "redistribution": "permitted",
         "verified": true
       },
       "capabilities": {
@@ -1953,10 +1953,10 @@
       "downloadSize": 2997441,
       "installedSize": 2997441,
       "license": {
+        "redistribution": "permitted",
         "id": "MIT",
         "name": "MIT License",
         "url": "https://github.com/excalidraw/excalidraw/blob/master/LICENSE",
-        "redistribution": "permitted",
         "verified": true,
         "notes": "The site is one layer of Excalidraw's official image excalidraw/excalidraw:sha-4bfc5bb on Docker Hub (Excalidraw publishes no other build of the app)."
       },
@@ -2020,10 +2020,10 @@
       "downloadSize": 1832960,
       "installedSize": 1832960,
       "license": {
+        "redistribution": "permitted",
         "id": "GPL-3.0-only",
         "name": "GNU General Public License v3.0",
         "url": "https://github.com/meshtastic/web/blob/main/LICENSE",
-        "redistribution": "permitted",
         "verified": true
       },
       "capabilities": {
@@ -2040,6 +2040,103 @@
         "platforms": "any"
       },
       "popularity": 5
+    },
+    {
+      "id": "arcana.app.meshcore-web",
+      "provider": "arcana",
+      "title": "MeshCore Web",
+      "description": "The MeshCore companion app 1.45.0 for the browser: connect to a MeshCore radio over USB or Bluetooth to send messages and manage contacts, channels and repeaters. Needs Chrome or Edge, opened on the computer running Arcana or over Arcana's HTTPS address. Arcana downloads it from its author's site.",
+      "category": "radio-communications",
+      "subcategory": "apps",
+      "tags": [
+        "app",
+        "meshcore",
+        "lora",
+        "mesh",
+        "radio"
+      ],
+      "family": "arcana.app.meshcore-web",
+      "variant": "standard",
+      "publisher": "Liam Cottle",
+      "sourceUrl": "https://meshcore.io",
+      "version": "1.45.0",
+      "published": "2026-06-14",
+      "lastVerified": "2026-11-26T00:00:00Z",
+      "languages": [
+        "mul"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "app",
+      "files": [
+        {
+          "name": "meshcore-web_any_1.45.0.zip",
+          "size": 12188651,
+          "hashes": {
+            "sha256": "2fcd1731efa548eb861f793d4be1a53ebea377df1b2b6354dc3b570e4f5f23df"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.liamcottle.net/MeshCore/v1.45.0/MeshCore-v1.45.0%2B71-dc3a209-web.zip"
+            }
+          ]
+        },
+        {
+          "name": "fonts_any_roboto-v32.woff2",
+          "size": 63464,
+          "hashes": {
+            "sha256": "35b02ca266b79eb4996590f15817425a1ce9ebf48f84471843233ff614656bf2"
+          },
+          "mirrors": [
+            {
+              "url": "https://fonts.gstatic.com/s/roboto/v32/KFOmCnqEu92Fr1Me4GZLCzYlKw.woff2"
+            }
+          ]
+        },
+        {
+          "name": "fonts_any_notosanssymbols-v43.woff2",
+          "size": 69116,
+          "hashes": {
+            "sha256": "08202e258ea583254c036cff46a7077bb5af4f82c41a6c0a6775f6e44d99f1aa"
+          },
+          "mirrors": [
+            {
+              "url": "https://fonts.gstatic.com/s/notosanssymbols/v43/rP2up3q65FkAtHfwd-eIS2brbDN6gxP34F9jRRCe4W3gfQ8gb_VFRkzrbQ.woff2"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 12321231,
+      "installedSize": 12321231,
+      "license": {
+        "redistribution": "restricted",
+        "id": "LicenseRef-MeshCore-App",
+        "name": "MeshCore companion app: closed source, free to use",
+        "url": "https://github.com/aXistem-dev/meshcore-web#license--privacy",
+        "verified": true,
+        "notes": "The author publishes the app as closed source and free for anyone to use, with no license to redistribute it. Arcana does not ship it: each library downloads it from files.liamcottle.net. The two fonts (Roboto, Noto Sans Symbols; SIL OFL 1.1) come from Google Fonts, from which the app would otherwise load them at run time."
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": false,
+        "videos": false
+      },
+      "updateStrategy": "snapshot-replace",
+      "providerRef": {
+        "kind": "web",
+        "platforms": "any"
+      },
+      "popularity": 5,
+      "warnings": [
+        {
+          "kind": "license",
+          "text": "Closed source. Its author lets anyone use it but grants no right to pass it on, so Arcana downloads it from the author's site for this library. Remove it before copying this library for someone else."
+        }
+      ]
     }
   ]
 }

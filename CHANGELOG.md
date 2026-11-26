@@ -11,7 +11,7 @@ the library format version is tracked separately (docs/design/09-storage-and-dat
   data toolkit), IT Tools 2024.10.22, Excalidraw (the whiteboard, in the
   build Project NOMAD ships) and Meshtastic Web 2.7.1, which configures a
   Meshtastic radio and sends messages through it over USB or Bluetooth.
-  Arcana serves each app itself on a port of its own (8473 to 8476 by
+  Arcana serves each app itself on a port of its own (8473 and up by
   default), so an app cannot read Arcana's session or another app's saved
   drawings and settings, and no app can contact anything outside its own
   address. Meshtastic Web needs Chrome or Edge, on the computer running
@@ -20,10 +20,12 @@ the library format version is tracked separately (docs/design/09-storage-and-dat
   anonymous token container registries ask for, so a layer of an official
   image, pinned by its digest, downloads like any other file. Excalidraw's
   site comes this way.
-
-### Not included
-- **MeshCore Web**, which Project NOMAD offers: the MeshCore app is closed
-  source and published without a license to redistribute it.
+- **MeshCore Web 1.45.0**, the MeshCore radio app for the browser. It is
+  closed source and free to use, without a right to pass it on, so Arcana
+  downloads it from its author's site for each library and marks it
+  restricted; remove it before copying the library for someone else.
+  Arcana serves it with its own rendering engine and two fonts from the
+  drive, which it otherwise loads from Google's servers.
 
 ## 0.13.0 — 2026-11-26
 
