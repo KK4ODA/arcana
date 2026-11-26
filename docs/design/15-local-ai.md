@@ -64,6 +64,14 @@ flowchart LR
 - **Backends**: llamafile 0.10.6 as a supervised loopback sidecar (catalog
   resources `arcana.llamafile` and three Apache-2.0 models: Qwen2.5 0.5B,
   Granite 3.3 2B, Qwen3 4B), or any OpenAI-compatible server.
+- **Ollama library models** ([ADR-0028](../adr/0028-ollama-registry-models.md)):
+  the models on Project NOMAD's list that llamafile loads, as the built-in
+  provider `ollama`. Each entry is one GGUF file from the Ollama registry,
+  pinned to its SHA-256 digest, with its memory need in the description and
+  in `stats.memoryBytes`. `tools/ollama-models` generates the list and
+  [docs/ollama-models.md](../ollama-models.md) records what was left out
+  and why. Discover filters the *Question answering* category by source and
+  by memory need; Settings groups installed models by source.
 - **Checks**: invalid citations removed, uncited sentences counted, an
   answer without citations flagged, source warnings shown with the answer.
 - **Evaluation**: `internal/assistant/testdata/sample-golden.json` (nine

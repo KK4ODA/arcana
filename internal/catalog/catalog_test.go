@@ -194,6 +194,63 @@ func TestBundledCatalogIsValid(t *testing.T) {
 	}
 }
 
+// TestBundledModelsAreValid checks the generated Ollama model list: every
+// entry downloads one content-addressed registry blob whose digest is the
+// SHA-256 Arcana verifies, needs the engine, and states its memory need.
+func TestBundledModelsAreValid(t *testing.T) {
+	p := BundledModels()
+	res, err := p.Fetch(context.Background(), mapFetcher{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	valid, errs := ValidateAll(p.ID(), res)
+	if len(errs) > 0 {
+		t.Fatalf("bundled model list has invalid entries: %v", errs)
+	}
+	if len(valid) < 100 {
+		t.Fatalf("only %d models", len(valid))
+	}
+	curated, _ := Bundled().Fetch(context.Background(), mapFetcher{})
+	engine := false
+	for _, r := range curated {
+		engine = engine || r.ID == "arcana.llamafile"
+	}
+	if !engine {
+		t.Fatal("the curated catalog lacks the engine the models depend on")
+	}
+	files := map[string]string{}
+	for _, r := range valid {
+		if r.Format != "gguf" || r.Category != CategoryAssistant || !strings.HasPrefix(r.Family, "ollama.") {
+			t.Errorf("%s: format %q, category %q, family %q", r.ID, r.Format, r.Category, r.Family)
+		}
+		if len(r.Dependencies) != 1 || r.Dependencies[0] != "arcana.llamafile" {
+			t.Errorf("%s: dependencies %v", r.ID, r.Dependencies)
+		}
+		if len(r.Files) != 1 || len(r.Files[0].Mirrors) != 1 {
+			t.Fatalf("%s: want one file with one mirror", r.ID)
+		}
+		f := r.Files[0]
+		sum := f.Hashes["sha256"]
+		if sum == "" || !strings.HasPrefix(f.Mirrors[0].URL, "https://registry.ollama.ai/v2/library/") ||
+			!strings.HasSuffix(f.Mirrors[0].URL, "/blobs/sha256:"+sum) {
+			t.Errorf("%s: mirror %s does not name the file's digest %s", r.ID, f.Mirrors[0].URL, sum)
+		}
+		if other, ok := files[f.Name]; ok {
+			t.Errorf("%s and %s share the file name %s", r.ID, other, f.Name)
+		}
+		files[f.Name] = r.ID
+		if r.Stats["memoryBytes"] <= r.DownloadSize {
+			t.Errorf("%s: memory need %d is not above the file size %d", r.ID, r.Stats["memoryBytes"], r.DownloadSize)
+		}
+		if !r.License.Verified && r.License.Redistribution != RedistUnknown {
+			t.Errorf("%s: unconfirmed license claims %q", r.ID, r.License.Redistribution)
+		}
+		if r.License.Notes == "" {
+			t.Errorf("%s: the license record does not say where it comes from", r.ID)
+		}
+	}
+}
+
 func TestCompareVersions(t *testing.T) {
 	cases := []struct {
 		a, b string

@@ -64,6 +64,43 @@ func TestCatalogSearch(t *testing.T) {
 	}
 }
 
+func TestModelFilterAndOrder(t *testing.T) {
+	s, err := Open(filepath.Join(t.TempDir(), "a.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	ctx := context.Background()
+	model := func(id, title string, mem int64, pop int) catalog.Resource {
+		return catalog.Resource{ID: id, Provider: "ollama", Title: title, Category: "assistant", Version: "1",
+			Languages: []string{"mul"}, Format: "gguf", DownloadSize: mem / 2, Popularity: pop,
+			Stats: map[string]int64{"memoryBytes": mem}, Files: []catalog.File{{Name: "m.gguf", MetalinkURL: "https://x/x.meta4"}}}
+	}
+	rs := []catalog.Resource{
+		model("ollama.a-70b", "a:70b", 48<<30, 1),
+		model("ollama.b-1b", "b:1b", 1<<30, 1),
+		model("ollama.c-7b", "c:7b", 6<<30, 5),
+	}
+	engine := model("ollama.engine", "engine", 0, 0)
+	engine.Stats = nil
+	rs = append(rs, engine)
+	if err := s.ReplaceProviderResources(ctx, "ollama", "Ollama", rs, time.Now()); err != nil {
+		t.Fatal(err)
+	}
+	got, n, err := s.SearchResources(ctx, Query{Category: "assistant", MaxMemory: 8 << 30})
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Entries that state no memory need (the engine) stay listed.
+	if n != 3 {
+		t.Fatalf("memory filter kept %d entries, want 3", n)
+	}
+	// Without search words, a provider's rank orders the list before titles.
+	if got[0].ID != "ollama.c-7b" || got[1].ID != "ollama.b-1b" {
+		t.Fatalf("order %s, %s", got[0].ID, got[1].ID)
+	}
+}
+
 func TestJobsPersistAcrossReopen(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "a.db")
 	s, err := Open(path)

@@ -741,10 +741,11 @@ func (s *Server) handleCatalog(w http.ResponseWriter, r *http.Request, a *app.Ap
 	qv := r.URL.Query()
 	limit, _ := strconv.Atoi(qv.Get("limit"))
 	offset, _ := strconv.Atoi(qv.Get("offset"))
+	maxMemory, _ := strconv.ParseInt(qv.Get("maxMemory"), 10, 64)
 	rs, total, err := a.Store.SearchResources(r.Context(), store.Query{
 		Text: qv.Get("q"), Category: qv.Get("category"), Language: qv.Get("lang"),
 		Provider: qv.Get("provider"), Format: qv.Get("format"), Sort: qv.Get("sort"),
-		Limit: limit, Offset: offset,
+		MaxMemory: maxMemory, Limit: limit, Offset: offset,
 	})
 	if err != nil {
 		writeError(w, 500, err.Error())
@@ -1023,7 +1024,7 @@ func (s *Server) handlePutSettings(w http.ResponseWriter, r *http.Request, a *ap
 			st.Updates.AutoCheck = *req.AutoUpdateCheck
 		}
 		if req.Feeds != nil {
-			seen := map[string]bool{"arcana": true, "kiwix": true, "gutenberg": true, "maps": true, "local": true, "roads": true, "openfda": true}
+			seen := map[string]bool{"arcana": true, "ollama": true, "kiwix": true, "gutenberg": true, "maps": true, "local": true, "roads": true, "openfda": true}
 			for _, f := range *req.Feeds {
 				probe := catalog.Resource{ID: f.ID + ".x", Provider: f.ID, Title: "x", Version: "1", Format: "pdf",
 					Files: []catalog.File{{Name: "x.pdf", Mirrors: []catalog.Mirror{{URL: f.URL}}}}}

@@ -142,6 +142,9 @@ largest community of the projects here.
     frozen-corpus evaluation harness. Embedding a large ZIM "can take
     several hours"; the UI asks for confirmation when the vectors would
     use more than 10% of free disk.
+    Models come from a list NOMAD's own service publishes (272 on
+    2026-11-26, pulled from the Ollama registry); Arcana offers the 197
+    of them that llamafile runs (ADR-0028).
   - *Drug Reference:* openFDA drug labels (about 1.7 GB download, 8–10 GB
     indexed in MySQL); search grouped by active ingredient, "by situation"
     lookup from a curated condition list, side-by-side label warnings, a

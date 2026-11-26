@@ -29,3 +29,4 @@
 | [0025](0025-more-classroom-channels.md) | More channels in the classroom | Accepted |
 | [0026](0026-network-position-sources.md) | Positions from the network: a Starlink dish and the browser | Accepted |
 | [0027](0027-entertainment-board-games-and-films.md) | Entertainment: built-in board games and public-domain films | Accepted |
+| [0028](0028-ollama-registry-models.md) | Models from the Ollama registry, as many as llamafile runs | Accepted |
