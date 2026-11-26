@@ -87,7 +87,7 @@ func TestModelFilterAndOrder(t *testing.T) {
 	if err := s.ReplaceProviderResources(ctx, "ollama", "Ollama", rs, time.Now()); err != nil {
 		t.Fatal(err)
 	}
-	got, n, err := s.SearchResources(ctx, Query{Category: "assistant", MaxMemory: 8 << 30})
+	got, n, err := s.SearchResources(ctx, Query{Category: "assistant", MaxMemory: 8 << 30, RankFirst: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -95,7 +95,8 @@ func TestModelFilterAndOrder(t *testing.T) {
 	if n != 3 {
 		t.Fatalf("memory filter kept %d entries, want 3", n)
 	}
-	// Without search words, a provider's rank orders the list before titles.
+	// With RankFirst and no search words, a provider's rank orders the list
+	// before titles.
 	if got[0].ID != "ollama.c-7b" || got[1].ID != "ollama.b-1b" {
 		t.Fatalf("order %s, %s", got[0].ID, got[1].ID)
 	}

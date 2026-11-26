@@ -1,7 +1,7 @@
 // Command ollama-models builds internal/catalog/bundled/ollama-models.json:
 // the models on Project NOMAD's list that Arcana's engine (llamafile) can
 // run, each pinned to the SHA-256 digest of its GGUF file in the Ollama
-// registry (ADR-0028).
+// registry (ADR-0029).
 //
 // For every model on the list it reads the registry manifests of the
 // "latest" tag and of each plain size tag ("7b", "e4b", "30b-a3b"), keeps one

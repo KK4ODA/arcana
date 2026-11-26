@@ -1,4 +1,4 @@
-# ADR-0028: Models from the Ollama registry, as many as llamafile runs
+# ADR-0029: Models from the Ollama registry, as many as llamafile runs
 
 - Status: Accepted
 - Date: 2026-11-26
@@ -63,9 +63,16 @@ Two sources could supply the files:
 - **Excluded**, with the counts in [docs/ollama-models.md](../ollama-models.md):
   cloud-only models; tags stored only in Ollama's own tensor format (MLX,
   MXFP8), which is not GGUF; embedding models, which cannot write answers
-  and which Arcana's lexical retrieval does not use (ADR-0021); and files
-  llamafile cannot load: architectures llama.cpp lacks, or GGUF files with
-  vision or audio tensors that only Ollama's engine reads.
+  and which Arcana's lexical retrieval does not use (ADR-0021); models that
+  cannot answer questions for the same reason: safety classifiers
+  (granite3-guardian, granite4.1-guardian, llama-guard3, shieldgemma), the
+  OCR model glm-ocr and the text-to-SQL models duckdb-nsql and sqlcoder;
+  code models whose file has no chat template, which continue the prompt
+  instead of answering; and files llamafile cannot load: architectures
+  llama.cpp lacks, or GGUF files with vision or audio tensors that only
+  Ollama's engine reads.
+- **Code models with a chat template are offered** with a second warning:
+  made for programming, they answer general questions poorly.
 - **Image-and-text models whose image part is a separate projector are
   offered for text.** The owner's brief expected these to be unloadable.
   The load test showed that llamafile loads their text model, and Arcana
@@ -84,25 +91,29 @@ Two sources could supply the files:
   Everything else is recorded with redistribution "unknown" and a note
   saying what the registry's copy reads and that it is unconfirmed.
 - **Choosers.** In Discover, *Question answering* gains a source filter
-  (tested with Arcana, Ollama library) and a memory filter, and the list
-  shows providers' ranks first when no words are searched, so the three
-  tested models stay at the top. A model's detail lists its memory need,
+  (tested with Arcana, Ollama library) and a memory filter. With no search
+  words this category alone is ordered by the providers' ranks before
+  titles, so the engine and the three tested models stay at the top; the
+  library models have rank 0. Everywhere else Discover keeps title order,
+  so the models do not crowd the Kiwix library off the first page. A model's detail lists its memory need,
   parameters and longest context, and its other sizes as editions.
   Settings → Assistant lists installed models only, grouped by source.
 
 ## Consequences
-- 197 of NOMAD's 272 models can be downloaded, as
-  379 entries, each verified by digest and run by the engine Arcana
+- 178 of NOMAD's 272 models can be downloaded, as
+  345 entries, each verified by digest and run by the engine Arcana
   already ships.
 - The registry is Ollama's service. If it moves or drops a blob, that entry
   fails to download until the list is regenerated; the digest guarantees
   that nothing else is installed in its place.
 - The load test proves that llamafile loads a file, not that the model
-  answers well with Arcana's prompt. 95 entries' files have no chat
+  answers well with Arcana's prompt. 69 offered entries' files have no chat
   template; llama.cpp's server falls back to ChatML, and their descriptions
-  say so. Two of them failed the real test below.
+  say so.
 - Excluded, of 272: 19 cloud-only, 4 with no GGUF file, 13 embedding
-  models, 39 that llamafile cannot load. Seven further files of offered
+  models, 19 that cannot answer questions (7 safety classifiers, OCR and
+  text-to-SQL models; 12 code models without a chat template), 39 that
+  llamafile cannot load. Seven further files of offered
   models were left out (Qwen3-VL 2B, 30B, 32B and 235B, Qwen3.5 122B,
   Nemotron 3.5 Bolt 74B, d1 2B).
 - Many licenses stay unconfirmed until someone adds the publisher's
@@ -139,16 +150,16 @@ over the sample archive. Seconds include starting the engine.
 | olmo2:7b | olmo2 | 28 | "I could not find this" |
 | phi3:3.8b | phi3 | 25 | Correct, cited |
 | gemma:2b | gemma | 13 | Correct, cited nothing (flagged) |
-| starcoder:1b | starcoder | 44 | Echoed the prompt (code model, no chat template) |
+| starcoder:1b | starcoder | 44 | Echoed the prompt (code model, no chat template; now excluded) |
 | qwen3-vl:4b | qwen3vl | 72 | Correct, cited |
 | nemotron-mini:4b | nemotron | 12 | No answer |
 | d1:3b | lfm2 | 17 | Correct, cited |
-| glm-ocr | glm4 | 39 | Looped on the question (no chat template) |
+| glm-ocr | glm4 | 39 | Looped on the question (OCR model, no chat template; now excluded) |
 
-Architectures run for real: 22 of the 40 offered (gemma, gemma2, gemma3,
-gemma4, glm4, granite, granitemoe, exaone, internlm2, lfm2, llama,
-nemotron, nemotron_h, olmo2, phi2, phi3, qwen2, qwen3, qwen35, qwen3vl,
-stablelm, starcoder). Only load-tested: chatglm, cohere2, cohere2moe,
-command-r, dbrx, deepseek2, falcon, gemma3n, gpt-oss, laguna, lfm2moe,
-mistral3, muse-glimmer, nemotron_h_moe, qwen35moe, qwen3moe, qwen3next,
-starcoder2. Nothing was run on Windows, macOS, ARM64 or a graphics card.
+Of the 38 architectures still offered, 21 were run for real (gemma,
+gemma2, gemma3, gemma4, granite, granitemoe, exaone, internlm2, lfm2,
+llama, nemotron, nemotron_h, olmo2, phi2, phi3, qwen2, qwen3, qwen35,
+qwen3vl, stablelm, starcoder) and 17 only load-tested (chatglm, cohere2,
+cohere2moe, command-r, dbrx, deepseek2, falcon, gemma3n, gpt-oss, laguna,
+lfm2moe, muse-glimmer, nemotron_h_moe, qwen35moe, qwen3moe, qwen3next,
+starcoder2). Nothing was run on Windows, macOS, ARM64 or a graphics card.

@@ -745,7 +745,7 @@ func (s *Server) handleCatalog(w http.ResponseWriter, r *http.Request, a *app.Ap
 	rs, total, err := a.Store.SearchResources(r.Context(), store.Query{
 		Text: qv.Get("q"), Category: qv.Get("category"), Language: qv.Get("lang"),
 		Provider: qv.Get("provider"), Format: qv.Get("format"), Sort: qv.Get("sort"),
-		MaxMemory: maxMemory, Limit: limit, Offset: offset,
+		MaxMemory: maxMemory, RankFirst: qv.Get("category") == catalog.CategoryAssistant, Limit: limit, Offset: offset,
 	})
 	if err != nil {
 		writeError(w, 500, err.Error())

@@ -241,7 +241,7 @@ glyphs, sprites and MapLibre are refreshed with `tools/fetch-map-assets.sh`
 ## Ollama library models
 
 `internal/catalog/bundled/ollama-models.json` lists the models on Project
-NOMAD's list that llamafile loads (ADR-0028). To regenerate it:
+NOMAD's list that llamafile loads (ADR-0029). To regenerate it:
 
 ```sh
 go build -o /tmp/ollama-models ./tools/ollama-models

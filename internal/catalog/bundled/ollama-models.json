@@ -2,7 +2,7 @@
  "format": "arcana-catalog",
  "formatVersion": 1,
  "title": "Models on Project NOMAD's list that llamafile runs, from the Ollama registry",
- "generated": "2026-11-26T17:41:12Z",
+ "generated": "2026-11-26T17:55:46Z",
  "resources": [
   {
    "id": "ollama.alfred-40b",
@@ -76,7 +76,6 @@
     "memoryBytes": 25816774934,
     "parameters": 41835970560
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "falcon",
     "chatTemplate": "none",
@@ -159,7 +158,6 @@
     "memoryBytes": 51443250972,
     "parameters": 72706203648
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "athene-v2:72b",
@@ -241,7 +239,6 @@
     "memoryBytes": 26924191904,
     "parameters": 34980831232
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "command-r",
     "ollama": "aya:35b",
@@ -323,7 +320,6 @@
     "memoryBytes": 5888775972,
     "parameters": 8028033024
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "command-r",
     "ollama": "aya:8b",
@@ -405,7 +401,6 @@
     "memoryBytes": 21776536350,
     "parameters": 32296476672
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "command-r",
     "ollama": "aya-expanse:32b",
@@ -487,7 +482,6 @@
     "memoryBytes": 6161275299,
     "parameters": 8028033024
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "command-r",
     "ollama": "aya-expanse:8b",
@@ -566,7 +560,6 @@
     "memoryBytes": 5165805915,
     "parameters": 7241732096
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -648,7 +641,6 @@
     "memoryBytes": 5799886668,
     "parameters": 7737757696
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "internlm2",
     "ollama": "bespoke-minicheck:7b",
@@ -729,7 +721,6 @@
     "memoryBytes": 9395623998,
     "parameters": 26895998464
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen35",
     "ollama": "bonsai-2:27b",
@@ -811,7 +802,6 @@
     "memoryBytes": 1089923371,
     "parameters": 1881825088
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen35",
     "ollama": "bonsai-2:2b",
@@ -893,7 +883,6 @@
     "memoryBytes": 2124152408,
     "parameters": 4205751296
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen35",
     "ollama": "bonsai-2:4b",
@@ -975,673 +964,11 @@
     "memoryBytes": 3535915846,
     "parameters": 8953803264
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen35",
     "ollama": "bonsai-2:9b",
     "quantization": "type 41",
     "textOnly": "true"
-   }
-  },
-  {
-   "id": "ollama.codebooga-34b",
-   "provider": "ollama",
-   "title": "codebooga:34b",
-   "description": "A high-performing code instruct model created by merging two existing code models. This file: 34B parameters, Q4_0, 19 GB. Needs about 22 GB of memory with Arcana's default 4,096-token context; longer contexts need more. The file has no chat template, so llamafile falls back to a generic one and answers may be poorer.",
-   "category": "assistant",
-   "subcategory": "model",
-   "tags": [
-    "ai",
-    "assistant",
-    "gguf",
-    "llama",
-    "ollama"
-   ],
-   "family": "ollama.codebooga",
-   "variant": "34b",
-   "variantLabel": "34b: 19 GB file, about 22 GB memory",
-   "sourceUrl": "https://ollama.com/library/codebooga",
-   "version": "2026-11-26",
-   "lastVerified": "2026-11-26T00:00:00Z",
-   "languages": [
-    "mul"
-   ],
-   "coverage": {
-    "scope": "none"
-   },
-   "format": "gguf",
-   "files": [
-    {
-     "name": "codebooga-34b-Q4_0.gguf",
-     "size": 19052048576,
-     "hashes": {
-      "sha256": "362afdd3a3127f6349aa624ed9f3a516aec6f3a6545d81872fb99f193c59b6cb"
-     },
-     "mirrors": [
-      {
-       "url": "https://registry.ollama.ai/v2/library/codebooga/blobs/sha256:362afdd3a3127f6349aa624ed9f3a516aec6f3a6545d81872fb99f193c59b6cb"
-      }
-     ]
-    }
-   ],
-   "downloadSize": 19052048576,
-   "installedSize": 19052048576,
-   "license": {
-    "id": "unknown",
-    "redistribution": "unknown",
-    "verified": false,
-    "notes": "The Ollama registry entry carries no license text. Not yet confirmed against the publisher's own statement."
-   },
-   "capabilities": {
-    "fullTextSearch": false,
-    "titleSearch": false
-   },
-   "media": {
-    "pictures": false,
-    "videos": false
-   },
-   "dependencies": [
-    "arcana.llamafile"
-   ],
-   "updateStrategy": "snapshot-replace",
-   "warnings": [
-    {
-     "kind": "content",
-     "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
-    }
-   ],
-   "stats": {
-    "contextLength": 16384,
-    "memoryBytes": 21124530172,
-    "parameters": 33743970304
-   },
-   "popularity": 1,
-   "providerRef": {
-    "architecture": "llama",
-    "chatTemplate": "none",
-    "ollama": "codebooga:34b",
-    "quantization": "Q4_0"
-   }
-  },
-  {
-   "id": "ollama.codegeex4-9b",
-   "provider": "ollama",
-   "title": "codegeex4:9b",
-   "description": "A versatile model for AI software development scenarios, including code completion. This file: 9B parameters, Q4_0, 5.5 GB. Needs about 7 GB of memory with Arcana's default 4,096-token context; longer contexts need more. The file has no chat template, so llamafile falls back to a generic one and answers may be poorer.",
-   "category": "assistant",
-   "subcategory": "model",
-   "tags": [
-    "ai",
-    "assistant",
-    "chatglm",
-    "gguf",
-    "ollama"
-   ],
-   "family": "ollama.codegeex4",
-   "variant": "9b",
-   "variantLabel": "9b: 5.5 GB file, about 7 GB memory",
-   "publisher": "Zhipu AI (THUDM)",
-   "sourceUrl": "https://ollama.com/library/codegeex4",
-   "version": "2026-11-26",
-   "lastVerified": "2026-11-26T00:00:00Z",
-   "languages": [
-    "mul"
-   ],
-   "coverage": {
-    "scope": "none"
-   },
-   "format": "gguf",
-   "files": [
-    {
-     "name": "codegeex4-9b-Q4_0.gguf",
-     "size": 5455316096,
-     "hashes": {
-      "sha256": "816441b33390807d429fbdb1de7e33bb4d569ac68e2203bdbca5d8d79b5c7266"
-     },
-     "mirrors": [
-      {
-       "url": "https://registry.ollama.ai/v2/library/codegeex4/blobs/sha256:816441b33390807d429fbdb1de7e33bb4d569ac68e2203bdbca5d8d79b5c7266"
-      }
-     ]
-    }
-   ],
-   "downloadSize": 5455316096,
-   "installedSize": 5455316096,
-   "license": {
-    "id": "LicenseRef-GLM-4",
-    "name": "GLM-4-9B License",
-    "url": "https://huggingface.co/THUDM/glm-4-9b-chat/blob/main/LICENSE",
-    "redistribution": "unknown",
-    "verified": false,
-    "notes": "The license text in the Ollama registry is the GLM-4-9B License. The publisher (Zhipu AI (THUDM)) states \"codegeex4\" on https://huggingface.co/THUDM/codegeex4-all-9b; Arcana has not confirmed that they match."
-   },
-   "capabilities": {
-    "fullTextSearch": false,
-    "titleSearch": false
-   },
-   "media": {
-    "pictures": false,
-    "videos": false
-   },
-   "dependencies": [
-    "arcana.llamafile"
-   ],
-   "updateStrategy": "snapshot-replace",
-   "warnings": [
-    {
-     "kind": "content",
-     "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
-    }
-   ],
-   "stats": {
-    "contextLength": 131072,
-    "memoryBytes": 6210426860,
-    "parameters": 9399951360
-   },
-   "popularity": 1,
-   "providerRef": {
-    "architecture": "chatglm",
-    "chatTemplate": "none",
-    "ollama": "codegeex4:9b",
-    "quantization": "Q4_0"
-   }
-  },
-  {
-   "id": "ollama.codegemma-2b",
-   "provider": "ollama",
-   "title": "codegemma:2b",
-   "description": "CodeGemma is a collection of powerful, lightweight models that can perform a variety of coding tasks like fill-in-the-middle code completion, code generation, natural language understanding, mathematical reasoning, and instruction following. This file: 2B parameters, Q4_0, 1.6 GB. Needs about 2.5 GB of memory with Arcana's default 4,096-token context; longer contexts need more. The file has no chat template, so llamafile falls back to a generic one and answers may be poorer.",
-   "category": "assistant",
-   "subcategory": "model",
-   "tags": [
-    "ai",
-    "assistant",
-    "gemma",
-    "gguf",
-    "ollama"
-   ],
-   "family": "ollama.codegemma",
-   "variant": "2b",
-   "variantLabel": "2b: 1.6 GB file, about 2.5 GB memory",
-   "publisher": "Google",
-   "sourceUrl": "https://ollama.com/library/codegemma",
-   "version": "2026-11-26",
-   "lastVerified": "2026-11-26T00:00:00Z",
-   "languages": [
-    "mul"
-   ],
-   "coverage": {
-    "scope": "none"
-   },
-   "format": "gguf",
-   "files": [
-    {
-     "name": "codegemma-2b-Q4_0.gguf",
-     "size": 1551189312,
-     "hashes": {
-      "sha256": "dd0c6f2ea876e4c433325df3398386f24e00d321abf6cec197c1bc1fcf1e0025"
-     },
-     "mirrors": [
-      {
-       "url": "https://registry.ollama.ai/v2/library/codegemma/blobs/sha256:dd0c6f2ea876e4c433325df3398386f24e00d321abf6cec197c1bc1fcf1e0025"
-      }
-     ]
-    }
-   ],
-   "downloadSize": 1551189312,
-   "installedSize": 1551189312,
-   "license": {
-    "id": "LicenseRef-Gemma",
-    "name": "Gemma Terms of Use",
-    "url": "https://ai.google.dev/gemma/terms",
-    "redistribution": "restricted",
-    "verified": true,
-    "notes": "The publisher (Google) states this license on https://huggingface.co/google/codegemma-2b; the Ollama registry's copy of the license agrees."
-   },
-   "capabilities": {
-    "fullTextSearch": false,
-    "titleSearch": false
-   },
-   "media": {
-    "pictures": false,
-    "videos": false
-   },
-   "dependencies": [
-    "arcana.llamafile"
-   ],
-   "updateStrategy": "snapshot-replace",
-   "warnings": [
-    {
-     "kind": "content",
-     "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
-    }
-   ],
-   "stats": {
-    "contextLength": 8192,
-    "memoryBytes": 2018819049,
-    "parameters": 2506172416
-   },
-   "popularity": 1,
-   "providerRef": {
-    "architecture": "gemma",
-    "chatTemplate": "none",
-    "ollama": "codegemma:2b",
-    "quantization": "Q4_0"
-   }
-  },
-  {
-   "id": "ollama.codegemma-7b",
-   "provider": "ollama",
-   "title": "codegemma:7b",
-   "description": "CodeGemma is a collection of powerful, lightweight models that can perform a variety of coding tasks like fill-in-the-middle code completion, code generation, natural language understanding, mathematical reasoning, and instruction following. This file: 7B parameters, Q4_0, 5.0 GB. Needs about 8 GB of memory with Arcana's default 4,096-token context; longer contexts need more. The file has no chat template, so llamafile falls back to a generic one and answers may be poorer.",
-   "category": "assistant",
-   "subcategory": "model",
-   "tags": [
-    "ai",
-    "assistant",
-    "gemma",
-    "gguf",
-    "ollama"
-   ],
-   "family": "ollama.codegemma",
-   "variant": "7b",
-   "variantLabel": "7b: 5.0 GB file, about 8 GB memory",
-   "publisher": "Google",
-   "sourceUrl": "https://ollama.com/library/codegemma",
-   "version": "2026-11-26",
-   "lastVerified": "2026-11-26T00:00:00Z",
-   "languages": [
-    "mul"
-   ],
-   "coverage": {
-    "scope": "none"
-   },
-   "format": "gguf",
-   "files": [
-    {
-     "name": "codegemma-7b-Q4_0.gguf",
-     "size": 5011843648,
-     "hashes": {
-      "sha256": "392f2ba7a9bea371a2e27b547cbed87eb3964ac722b26d847b66fa90e5b8c49e"
-     },
-     "mirrors": [
-      {
-       "url": "https://registry.ollama.ai/v2/library/codegemma/blobs/sha256:392f2ba7a9bea371a2e27b547cbed87eb3964ac722b26d847b66fa90e5b8c49e"
-      }
-     ]
-    }
-   ],
-   "downloadSize": 5011843648,
-   "installedSize": 5011843648,
-   "license": {
-    "id": "LicenseRef-Gemma",
-    "name": "Gemma Terms of Use",
-    "url": "https://ai.google.dev/gemma/terms",
-    "redistribution": "restricted",
-    "verified": true,
-    "notes": "The publisher (Google) states this license on https://huggingface.co/google/codegemma-7b-it; the Ollama registry's copy of the license agrees."
-   },
-   "capabilities": {
-    "fullTextSearch": false,
-    "titleSearch": false
-   },
-   "media": {
-    "pictures": false,
-    "videos": false
-   },
-   "dependencies": [
-    "arcana.llamafile"
-   ],
-   "updateStrategy": "snapshot-replace",
-   "warnings": [
-    {
-     "kind": "content",
-     "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
-    }
-   ],
-   "stats": {
-    "contextLength": 8192,
-    "memoryBytes": 7456056822,
-    "parameters": 8537680896
-   },
-   "popularity": 1,
-   "providerRef": {
-    "architecture": "gemma",
-    "chatTemplate": "none",
-    "ollama": "codegemma:7b",
-    "quantization": "Q4_0"
-   }
-  },
-  {
-   "id": "ollama.codellama-13b",
-   "provider": "ollama",
-   "title": "codellama:13b",
-   "description": "A large language model that can use text prompts to generate and discuss code. This file: 13B parameters, Q4_0, 7.4 GB. Needs about 12 GB of memory with Arcana's default 4,096-token context; longer contexts need more. The file has no chat template, so llamafile falls back to a generic one and answers may be poorer.",
-   "category": "assistant",
-   "subcategory": "model",
-   "tags": [
-    "ai",
-    "assistant",
-    "gguf",
-    "llama",
-    "ollama"
-   ],
-   "family": "ollama.codellama",
-   "variant": "13b",
-   "variantLabel": "13b: 7.4 GB file, about 12 GB memory",
-   "publisher": "Meta",
-   "sourceUrl": "https://ollama.com/library/codellama",
-   "version": "2026-11-26",
-   "lastVerified": "2026-11-26T00:00:00Z",
-   "languages": [
-    "mul"
-   ],
-   "coverage": {
-    "scope": "none"
-   },
-   "format": "gguf",
-   "files": [
-    {
-     "name": "codellama-13b-Q4_0.gguf",
-     "size": 7365948416,
-     "hashes": {
-      "sha256": "e73cc17c718156e5ad34b119eb363e2c10389a503673f9c36144c42dfde8334c"
-     },
-     "mirrors": [
-      {
-       "url": "https://registry.ollama.ai/v2/library/codellama/blobs/sha256:e73cc17c718156e5ad34b119eb363e2c10389a503673f9c36144c42dfde8334c"
-      }
-     ]
-    }
-   ],
-   "downloadSize": 7365948416,
-   "installedSize": 7365948416,
-   "license": {
-    "id": "LicenseRef-Llama-2",
-    "name": "Llama 2 Community License",
-    "url": "https://ai.meta.com/llama/license/",
-    "redistribution": "restricted",
-    "verified": true,
-    "notes": "The publisher (Meta) states this license on https://huggingface.co/meta-llama/CodeLlama-13b-Instruct-hf; the Ollama registry's copy of the license agrees."
-   },
-   "capabilities": {
-    "fullTextSearch": false,
-    "titleSearch": false
-   },
-   "media": {
-    "pictures": false,
-    "videos": false
-   },
-   "dependencies": [
-    "arcana.llamafile"
-   ],
-   "updateStrategy": "snapshot-replace",
-   "warnings": [
-    {
-     "kind": "content",
-     "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
-    }
-   ],
-   "stats": {
-    "contextLength": 16384,
-    "memoryBytes": 11404261836,
-    "parameters": 13016028160
-   },
-   "popularity": 1,
-   "providerRef": {
-    "architecture": "llama",
-    "chatTemplate": "none",
-    "ollama": "codellama:13b",
-    "quantization": "Q4_0"
-   }
-  },
-  {
-   "id": "ollama.codellama-34b",
-   "provider": "ollama",
-   "title": "codellama:34b",
-   "description": "A large language model that can use text prompts to generate and discuss code. This file: 34B parameters, Q4_0, 19 GB. Needs about 22 GB of memory with Arcana's default 4,096-token context; longer contexts need more. The file has no chat template, so llamafile falls back to a generic one and answers may be poorer.",
-   "category": "assistant",
-   "subcategory": "model",
-   "tags": [
-    "ai",
-    "assistant",
-    "gguf",
-    "llama",
-    "ollama"
-   ],
-   "family": "ollama.codellama",
-   "variant": "34b",
-   "variantLabel": "34b: 19 GB file, about 22 GB memory",
-   "publisher": "Meta",
-   "sourceUrl": "https://ollama.com/library/codellama",
-   "version": "2026-11-26",
-   "lastVerified": "2026-11-26T00:00:00Z",
-   "languages": [
-    "mul"
-   ],
-   "coverage": {
-    "scope": "none"
-   },
-   "format": "gguf",
-   "files": [
-    {
-     "name": "codellama-34b-Q4_0.gguf",
-     "size": 19052048512,
-     "hashes": {
-      "sha256": "f36b668ebcd329357fac22db35f6414a1c9309307f33d08fe217bbf84b0496cc"
-     },
-     "mirrors": [
-      {
-       "url": "https://registry.ollama.ai/v2/library/codellama/blobs/sha256:f36b668ebcd329357fac22db35f6414a1c9309307f33d08fe217bbf84b0496cc"
-      }
-     ]
-    }
-   ],
-   "downloadSize": 19052048512,
-   "installedSize": 19052048512,
-   "license": {
-    "id": "LicenseRef-Llama-2",
-    "name": "Llama 2 Community License",
-    "url": "https://ai.meta.com/llama/license/",
-    "redistribution": "restricted",
-    "verified": true,
-    "notes": "The publisher (Meta) states this license on https://huggingface.co/meta-llama/CodeLlama-34b-Instruct-hf. The Ollama registry entry carries no license text."
-   },
-   "capabilities": {
-    "fullTextSearch": false,
-    "titleSearch": false
-   },
-   "media": {
-    "pictures": false,
-    "videos": false
-   },
-   "dependencies": [
-    "arcana.llamafile"
-   ],
-   "updateStrategy": "snapshot-replace",
-   "warnings": [
-    {
-     "kind": "content",
-     "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
-    }
-   ],
-   "stats": {
-    "contextLength": 16384,
-    "memoryBytes": 21124530105,
-    "parameters": 33743970304
-   },
-   "popularity": 1,
-   "providerRef": {
-    "architecture": "llama",
-    "chatTemplate": "none",
-    "ollama": "codellama:34b",
-    "quantization": "Q4_0"
-   }
-  },
-  {
-   "id": "ollama.codellama-70b",
-   "provider": "ollama",
-   "title": "codellama:70b",
-   "description": "A large language model that can use text prompts to generate and discuss code. This file: 70B parameters, Q4_0, 39 GB. Needs about 43 GB of memory with Arcana's default 4,096-token context; longer contexts need more. The file has no chat template, so llamafile falls back to a generic one and answers may be poorer.",
-   "category": "assistant",
-   "subcategory": "model",
-   "tags": [
-    "ai",
-    "assistant",
-    "gguf",
-    "llama",
-    "ollama"
-   ],
-   "family": "ollama.codellama",
-   "variant": "70b",
-   "variantLabel": "70b: 39 GB file, about 43 GB memory",
-   "publisher": "Meta",
-   "sourceUrl": "https://ollama.com/library/codellama",
-   "version": "2026-11-26",
-   "lastVerified": "2026-11-26T00:00:00Z",
-   "languages": [
-    "mul"
-   ],
-   "coverage": {
-    "scope": "none"
-   },
-   "format": "gguf",
-   "files": [
-    {
-     "name": "codellama-70b-Q4_0.gguf",
-     "size": 38872431040,
-     "hashes": {
-      "sha256": "1436d66b69757a245f02d000874c670507949d11ad5c188a623652052c6aa508"
-     },
-     "mirrors": [
-      {
-       "url": "https://registry.ollama.ai/v2/library/codellama/blobs/sha256:1436d66b69757a245f02d000874c670507949d11ad5c188a623652052c6aa508"
-      }
-     ]
-    }
-   ],
-   "downloadSize": 38872431040,
-   "installedSize": 38872431040,
-   "license": {
-    "id": "LicenseRef-Llama-2",
-    "name": "Llama 2 Community License",
-    "url": "https://ai.meta.com/llama/license/",
-    "redistribution": "restricted",
-    "verified": true,
-    "notes": "The publisher (Meta) states this license on https://huggingface.co/meta-llama/CodeLlama-70b-Instruct-hf. The Ollama registry entry carries no license text."
-   },
-   "capabilities": {
-    "fullTextSearch": false,
-    "titleSearch": false
-   },
-   "media": {
-    "pictures": false,
-    "videos": false
-   },
-   "dependencies": [
-    "arcana.llamafile"
-   ],
-   "updateStrategy": "snapshot-replace",
-   "warnings": [
-    {
-     "kind": "content",
-     "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
-    }
-   ],
-   "stats": {
-    "contextLength": 2048,
-    "memoryBytes": 42472802672,
-    "parameters": 68976910336
-   },
-   "popularity": 1,
-   "providerRef": {
-    "architecture": "llama",
-    "chatTemplate": "none",
-    "ollama": "codellama:70b",
-    "quantization": "Q4_0"
-   }
-  },
-  {
-   "id": "ollama.codellama-7b",
-   "provider": "ollama",
-   "title": "codellama:7b",
-   "description": "A large language model that can use text prompts to generate and discuss code. This file: 7B parameters, Q4_0, 3.8 GB. Needs about 7 GB of memory with Arcana's default 4,096-token context; longer contexts need more. The file has no chat template, so llamafile falls back to a generic one and answers may be poorer.",
-   "category": "assistant",
-   "subcategory": "model",
-   "tags": [
-    "ai",
-    "assistant",
-    "gguf",
-    "llama",
-    "ollama"
-   ],
-   "family": "ollama.codellama",
-   "variant": "7b",
-   "variantLabel": "7b: 3.8 GB file, about 7 GB memory",
-   "publisher": "Meta",
-   "sourceUrl": "https://ollama.com/library/codellama",
-   "version": "2026-11-26",
-   "lastVerified": "2026-11-26T00:00:00Z",
-   "languages": [
-    "mul"
-   ],
-   "coverage": {
-    "scope": "none"
-   },
-   "format": "gguf",
-   "files": [
-    {
-     "name": "codellama-7b-Q4_0.gguf",
-     "size": 3825898144,
-     "hashes": {
-      "sha256": "3a43f93b78ec50f7c4e4dc8bd1cb3fff5a900e7d574c51a6f7495e48486e0dac"
-     },
-     "mirrors": [
-      {
-       "url": "https://registry.ollama.ai/v2/library/codellama/blobs/sha256:3a43f93b78ec50f7c4e4dc8bd1cb3fff5a900e7d574c51a6f7495e48486e0dac"
-      }
-     ]
-    }
-   ],
-   "downloadSize": 3825898144,
-   "installedSize": 3825898144,
-   "license": {
-    "id": "LicenseRef-Llama-2",
-    "name": "Llama 2 Community License",
-    "url": "https://ai.meta.com/llama/license/",
-    "redistribution": "restricted",
-    "verified": true,
-    "notes": "The publisher (Meta) states this license on https://huggingface.co/meta-llama/CodeLlama-7b-Instruct-hf; the Ollama registry's copy of the license agrees."
-   },
-   "capabilities": {
-    "fullTextSearch": false,
-    "titleSearch": false
-   },
-   "media": {
-    "pictures": false,
-    "videos": false
-   },
-   "dependencies": [
-    "arcana.llamafile"
-   ],
-   "updateStrategy": "snapshot-replace",
-   "warnings": [
-    {
-     "kind": "content",
-     "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
-    }
-   ],
-   "stats": {
-    "contextLength": 16384,
-    "memoryBytes": 6479249499,
-    "parameters": 6738546688
-   },
-   "popularity": 1,
-   "providerRef": {
-    "architecture": "llama",
-    "chatTemplate": "none",
-    "ollama": "codellama:7b",
-    "quantization": "Q4_0"
    }
   },
   {
@@ -1709,6 +1036,10 @@
     {
      "kind": "content",
      "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
+    },
+    {
+     "kind": "content",
+     "text": "Made for programming: it answers general questions poorly."
     }
    ],
    "stats": {
@@ -1716,173 +1047,9 @@
     "memoryBytes": 4971417803,
     "parameters": 7250284544
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "codeqwen:7b",
-    "quantization": "Q4_0"
-   }
-  },
-  {
-   "id": "ollama.codestral-22b",
-   "provider": "ollama",
-   "title": "codestral:22b",
-   "description": "Codestral is Mistral AI’s first-ever code model designed for code generation tasks. This file: 22B parameters, Q4_0, 13 GB. Needs about 15 GB of memory with Arcana's default 4,096-token context; longer contexts need more. The file has no chat template, so llamafile falls back to a generic one and answers may be poorer.",
-   "category": "assistant",
-   "subcategory": "model",
-   "tags": [
-    "ai",
-    "assistant",
-    "gguf",
-    "llama",
-    "ollama"
-   ],
-   "family": "ollama.codestral",
-   "variant": "22b",
-   "variantLabel": "22b: 13 GB file, about 15 GB memory",
-   "publisher": "Mistral AI",
-   "sourceUrl": "https://ollama.com/library/codestral",
-   "version": "2026-11-26",
-   "lastVerified": "2026-11-26T00:00:00Z",
-   "languages": [
-    "mul"
-   ],
-   "coverage": {
-    "scope": "none"
-   },
-   "format": "gguf",
-   "files": [
-    {
-     "name": "codestral-22b-Q4_0.gguf",
-     "size": 12569157728,
-     "hashes": {
-      "sha256": "22a849aafe3ded20e9b6551b02684d8fa911537c35895dd2a1bf9eb70da8f69e"
-     },
-     "mirrors": [
-      {
-       "url": "https://registry.ollama.ai/v2/library/codestral/blobs/sha256:22a849aafe3ded20e9b6551b02684d8fa911537c35895dd2a1bf9eb70da8f69e"
-      }
-     ]
-    }
-   ],
-   "downloadSize": 12569157728,
-   "installedSize": 12569157728,
-   "license": {
-    "id": "LicenseRef-MNPL",
-    "name": "Mistral AI Non-Production License",
-    "url": "https://mistral.ai/licenses/MNPL-0.1.md",
-    "redistribution": "noncommercial",
-    "verified": true,
-    "notes": "The publisher (Mistral AI) states this license on https://huggingface.co/mistralai/Codestral-22B-v0.1; the Ollama registry's copy of the license agrees."
-   },
-   "capabilities": {
-    "fullTextSearch": false,
-    "titleSearch": false
-   },
-   "media": {
-    "pictures": false,
-    "videos": false
-   },
-   "dependencies": [
-    "arcana.llamafile"
-   ],
-   "updateStrategy": "snapshot-replace",
-   "warnings": [
-    {
-     "kind": "content",
-     "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
-    }
-   ],
-   "stats": {
-    "contextLength": 32768,
-    "memoryBytes": 14451712510,
-    "parameters": 22247282688
-   },
-   "popularity": 1,
-   "providerRef": {
-    "architecture": "llama",
-    "chatTemplate": "none",
-    "ollama": "codestral:22b",
-    "quantization": "Q4_0"
-   }
-  },
-  {
-   "id": "ollama.codeup-13b",
-   "provider": "ollama",
-   "title": "codeup:13b",
-   "description": "Great code generation model based on Llama2. This file: 13B parameters, Q4_0, 7.4 GB. Needs about 12 GB of memory with Arcana's default 4,096-token context; longer contexts need more. The file has no chat template, so llamafile falls back to a generic one and answers may be poorer.",
-   "category": "assistant",
-   "subcategory": "model",
-   "tags": [
-    "ai",
-    "assistant",
-    "gguf",
-    "llama",
-    "ollama"
-   ],
-   "family": "ollama.codeup",
-   "variant": "13b",
-   "variantLabel": "13b: 7.4 GB file, about 12 GB memory",
-   "sourceUrl": "https://ollama.com/library/codeup",
-   "version": "2026-11-26",
-   "lastVerified": "2026-11-26T00:00:00Z",
-   "languages": [
-    "mul"
-   ],
-   "coverage": {
-    "scope": "none"
-   },
-   "format": "gguf",
-   "files": [
-    {
-     "name": "codeup-13b-Q4_0.gguf",
-     "size": 7365834624,
-     "hashes": {
-      "sha256": "780d31d1e3e818fe45e5c3391892909c7b085ec19ea0f213d314a2506d91da61"
-     },
-     "mirrors": [
-      {
-       "url": "https://registry.ollama.ai/v2/library/codeup/blobs/sha256:780d31d1e3e818fe45e5c3391892909c7b085ec19ea0f213d314a2506d91da61"
-      }
-     ]
-    }
-   ],
-   "downloadSize": 7365834624,
-   "installedSize": 7365834624,
-   "license": {
-    "id": "unknown",
-    "redistribution": "unknown",
-    "verified": false,
-    "notes": "The Ollama registry entry carries no license text. Not yet confirmed against the publisher's own statement."
-   },
-   "capabilities": {
-    "fullTextSearch": false,
-    "titleSearch": false
-   },
-   "media": {
-    "pictures": false,
-    "videos": false
-   },
-   "dependencies": [
-    "arcana.llamafile"
-   ],
-   "updateStrategy": "snapshot-replace",
-   "warnings": [
-    {
-     "kind": "content",
-     "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
-    }
-   ],
-   "stats": {
-    "contextLength": 4096,
-    "memoryBytes": 11404142355,
-    "parameters": 13015864320
-   },
-   "popularity": 1,
-   "providerRef": {
-    "architecture": "llama",
-    "chatTemplate": "none",
-    "ollama": "codeup:13b",
     "quantization": "Q4_0"
    }
   },
@@ -1960,7 +1127,6 @@
     "memoryBytes": 10554421051,
     "parameters": 14765947904
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "cogito:14b",
@@ -2041,7 +1207,6 @@
     "memoryBytes": 1410262935331,
     "parameters": 671019752960
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "deepseek2",
     "ollama": "cogito-2.1:671b",
@@ -2122,7 +1287,6 @@
     "memoryBytes": 22229243387,
     "parameters": 32759790592
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "cogito:32b",
@@ -2203,7 +1367,6 @@
     "memoryBytes": 3137389518,
     "parameters": 3606752320
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "cogito:3b",
@@ -2284,7 +1447,6 @@
     "memoryBytes": 46303168097,
     "parameters": 70553706560
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "cogito:70b",
@@ -2365,7 +1527,6 @@
     "memoryBytes": 6018219502,
     "parameters": 8030261312
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "cogito:8b",
@@ -2447,7 +1608,6 @@
     "memoryBytes": 71880599200,
     "parameters": 111057580032
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "cohere2",
     "ollama": "command-a:111b",
@@ -2529,7 +1689,6 @@
     "memoryBytes": 20641125083,
     "parameters": 32296476672
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "command-r",
     "ollama": "command-r:35b",
@@ -2611,7 +1770,6 @@
     "memoryBytes": 63570470766,
     "parameters": 103810674688
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "command-r",
     "ollama": "command-r-plus:104b",
@@ -2693,7 +1851,6 @@
     "memoryBytes": 6161303691,
     "parameters": 8028033024
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "cohere2",
     "ollama": "command-r7b:7b",
@@ -2775,7 +1932,6 @@
     "memoryBytes": 6161303825,
     "parameters": 8028033024
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "cohere2",
     "ollama": "command-r7b-arabic:7b",
@@ -2854,7 +2010,6 @@
     "memoryBytes": 3584751384,
     "parameters": 2697198592
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "lfm2",
     "ollama": "d1:3b",
@@ -2936,7 +2091,6 @@
     "memoryBytes": 31413868403,
     "parameters": 26895998464
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen35",
     "ollama": "d3:27b",
@@ -3018,7 +2172,6 @@
     "memoryBytes": 3195875779,
     "parameters": 2390384448
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen35",
     "ollama": "d3:2b",
@@ -3100,7 +2253,6 @@
     "memoryBytes": 6267170806,
     "parameters": 4841450496
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen35",
     "ollama": "d3:4b",
@@ -3182,7 +2334,6 @@
     "memoryBytes": 10855322206,
     "parameters": 8953803264
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen35",
     "ollama": "d3:9b",
@@ -3263,7 +2414,6 @@
     "memoryBytes": 78888236444,
     "parameters": 131596523520
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "dbrx",
     "ollama": "dbrx:132b",
@@ -3338,6 +2488,10 @@
     {
      "kind": "content",
      "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
+    },
+    {
+     "kind": "content",
+     "text": "Made for programming: it answers general questions poorly."
     }
    ],
    "stats": {
@@ -3345,7 +2499,6 @@
     "memoryBytes": 1605201126,
     "parameters": 1777088000
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "deepcoder:1.5b",
@@ -3420,6 +2573,10 @@
     {
      "kind": "content",
      "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
+    },
+    {
+     "kind": "content",
+     "text": "Made for programming: it answers general questions poorly."
     }
    ],
    "stats": {
@@ -3427,7 +2584,6 @@
     "memoryBytes": 10557395894,
     "parameters": 14770033664
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "deepcoder:14b",
@@ -3509,7 +2665,6 @@
     "memoryBytes": 4170451556,
     "parameters": 1777088000
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "deepscaler:1.5b",
@@ -3584,6 +2739,10 @@
     {
      "kind": "content",
      "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
+    },
+    {
+     "kind": "content",
+     "text": "Made for programming: it answers general questions poorly."
     }
    ],
    "stats": {
@@ -3591,7 +2750,6 @@
     "memoryBytes": 1934748720,
     "parameters": 1346471936
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "deepseek-coder:1.3b",
@@ -3666,6 +2824,10 @@
     {
      "kind": "content",
      "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
+    },
+    {
+     "kind": "content",
+     "text": "Made for programming: it answers general questions poorly."
     }
    ],
    "stats": {
@@ -3673,7 +2835,6 @@
     "memoryBytes": 21115174107,
     "parameters": 33342991360
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "deepseek-coder:33b",
@@ -3748,6 +2909,10 @@
     {
      "kind": "content",
      "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
+    },
+    {
+     "kind": "content",
+     "text": "Made for programming: it answers general questions poorly."
     }
    ],
    "stats": {
@@ -3755,7 +2920,6 @@
     "memoryBytes": 6481267347,
     "parameters": 6740512768
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "deepseek-coder:6.7b",
@@ -3830,6 +2994,10 @@
     {
      "kind": "content",
      "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
+    },
+    {
+     "kind": "content",
+     "text": "Made for programming: it answers general questions poorly."
     }
    ],
    "stats": {
@@ -3837,7 +3005,6 @@
     "memoryBytes": 11023892779,
     "parameters": 15706484224
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "deepseek2",
     "ollama": "deepseek-coder-v2:16b",
@@ -3912,6 +3079,10 @@
     {
      "kind": "content",
      "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
+    },
+    {
+     "kind": "content",
+     "text": "Made for programming: it answers general questions poorly."
     }
    ],
    "stats": {
@@ -3919,7 +3090,6 @@
     "memoryBytes": 164031841430,
     "parameters": 235741434880
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "deepseek2",
     "ollama": "deepseek-coder-v2:236b",
@@ -4001,7 +3171,6 @@
     "memoryBytes": 41968685091,
     "parameters": 67425001472
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "deepseek-llm:67b",
@@ -4083,7 +3252,6 @@
     "memoryBytes": 6528335227,
     "parameters": 6910365696
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "deepseek-llm:7b",
@@ -4165,7 +3333,6 @@
     "memoryBytes": 1605199849,
     "parameters": 1777088000
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "deepseek-r1:1.5b",
@@ -4247,7 +3414,6 @@
     "memoryBytes": 10557394617,
     "parameters": 14770033664
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "deepseek-r1:14b",
@@ -4329,7 +3495,6 @@
     "memoryBytes": 22232216953,
     "parameters": 32763876352
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "deepseek-r1:32b",
@@ -4411,7 +3576,6 @@
     "memoryBytes": 449528113214,
     "parameters": 671026419200
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "deepseek2",
     "ollama": "deepseek-r1:671b",
@@ -4493,7 +3657,6 @@
     "memoryBytes": 46303165476,
     "parameters": 70553706560
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "deepseek-r1:70b",
@@ -4575,7 +3738,6 @@
     "memoryBytes": 5466680667,
     "parameters": 7615616512
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "deepseek-r1:7b",
@@ -4657,7 +3819,6 @@
     "memoryBytes": 6405195024,
     "parameters": 8190735360
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen3",
     "ollama": "deepseek-r1:8b",
@@ -4739,7 +3900,6 @@
     "memoryBytes": 11023892611,
     "parameters": 15706484224
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "deepseek2",
     "ollama": "deepseek-v2:16b",
@@ -4821,7 +3981,6 @@
     "memoryBytes": 164031841228,
     "parameters": 235741434880
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "deepseek2",
     "ollama": "deepseek-v2:236b",
@@ -4903,7 +4062,6 @@
     "memoryBytes": 164031843748,
     "parameters": 235741434880
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "deepseek2",
     "ollama": "deepseek-v2.5:236b",
@@ -4985,7 +4143,6 @@
     "memoryBytes": 449528112340,
     "parameters": 671026419200
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "deepseek2",
     "ollama": "deepseek-v3:671b",
@@ -5067,90 +4224,9 @@
     "memoryBytes": 425609103244,
     "parameters": 671026419200
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "deepseek2",
     "ollama": "deepseek-v3.1:671b",
-    "quantization": "Q4_K_M"
-   }
-  },
-  {
-   "id": "ollama.devstral-2-123b",
-   "provider": "ollama",
-   "title": "devstral-2:123b",
-   "description": "123B model that excels at using tools to explore codebases, editing multiple files and power software engineering agents. This file: 123B parameters, Q4_K_M, 75 GB. Needs about 81 GB of memory with Arcana's default 4,096-token context; longer contexts need more. The file has no chat template, so llamafile falls back to a generic one and answers may be poorer.",
-   "category": "assistant",
-   "subcategory": "model",
-   "tags": [
-    "ai",
-    "assistant",
-    "gguf",
-    "mistral3",
-    "ollama"
-   ],
-   "family": "ollama.devstral-2",
-   "variant": "123b",
-   "variantLabel": "123b: 75 GB file, about 81 GB memory",
-   "sourceUrl": "https://ollama.com/library/devstral-2",
-   "version": "2026-11-26",
-   "lastVerified": "2026-11-26T00:00:00Z",
-   "languages": [
-    "mul"
-   ],
-   "coverage": {
-    "scope": "none"
-   },
-   "format": "gguf",
-   "files": [
-    {
-     "name": "devstral-2-123b-Q4_K_M.gguf",
-     "size": 74897647584,
-     "hashes": {
-      "sha256": "bd6c22cad19a402cea476d148800ec28704e6de55a34ca5da2d1b924df90945e"
-     },
-     "mirrors": [
-      {
-       "url": "https://registry.ollama.ai/v2/library/devstral-2/blobs/sha256:bd6c22cad19a402cea476d148800ec28704e6de55a34ca5da2d1b924df90945e"
-      }
-     ]
-    }
-   ],
-   "downloadSize": 74897647584,
-   "installedSize": 74897647584,
-   "license": {
-    "id": "unknown",
-    "redistribution": "unknown",
-    "verified": false,
-    "notes": "The Ollama registry entry carries no license text. Not yet confirmed against the publisher's own statement."
-   },
-   "capabilities": {
-    "fullTextSearch": false,
-    "titleSearch": false
-   },
-   "media": {
-    "pictures": false,
-    "videos": false
-   },
-   "dependencies": [
-    "arcana.llamafile"
-   ],
-   "updateStrategy": "snapshot-replace",
-   "warnings": [
-    {
-     "kind": "content",
-     "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
-    }
-   ],
-   "stats": {
-    "contextLength": 262144,
-    "memoryBytes": 80433497771,
-    "parameters": 125025988608
-   },
-   "popularity": 1,
-   "providerRef": {
-    "architecture": "mistral3",
-    "chatTemplate": "none",
-    "ollama": "devstral-2:123b",
     "quantization": "Q4_K_M"
    }
   },
@@ -5222,6 +4298,10 @@
     {
      "kind": "content",
      "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
+    },
+    {
+     "kind": "content",
+     "text": "Made for programming: it answers general questions poorly."
     }
    ],
    "stats": {
@@ -5229,7 +4309,6 @@
     "memoryBytes": 16036266654,
     "parameters": 23572403200
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "devstral:24b",
@@ -5310,7 +4389,6 @@
     "memoryBytes": 43624992502,
     "parameters": 70553739264
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "dolphin-llama3:70b",
@@ -5391,7 +4469,6 @@
     "memoryBytes": 5745727601,
     "parameters": 8030277632
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "dolphin-llama3:8b",
@@ -5472,7 +4549,6 @@
     "memoryBytes": 5165818246,
     "parameters": 7241748480
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "dolphin-mistral:7b",
@@ -5553,7 +4629,6 @@
     "memoryBytes": 84738789118,
     "parameters": 140620658688
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "dolphin-mixtral:8x22b",
@@ -5634,7 +4709,6 @@
     "memoryBytes": 28617226030,
     "parameters": 46702809088
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "dolphin-mixtral:8x7b",
@@ -5715,7 +4789,6 @@
     "memoryBytes": 3339336238,
     "parameters": 2779683840
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "phi2",
     "ollama": "dolphin-phi:2.7b",
@@ -5797,7 +4870,6 @@
     "memoryBytes": 6018230355,
     "parameters": 8030277696
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "dolphin3:8b",
@@ -5871,6 +4943,10 @@
     {
      "kind": "content",
      "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
+    },
+    {
+     "kind": "content",
+     "text": "Made for programming: it answers general questions poorly."
     }
    ],
    "stats": {
@@ -5878,7 +4954,6 @@
     "memoryBytes": 10168805969,
     "parameters": 15957913600
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "starcoder2",
     "ollama": "dolphincoder:15b",
@@ -5952,6 +5027,10 @@
     {
      "kind": "content",
      "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
+    },
+    {
+     "kind": "content",
+     "text": "Made for programming: it answers general questions poorly."
     }
    ],
    "stats": {
@@ -5959,93 +5038,9 @@
     "memoryBytes": 5023046756,
     "parameters": 7400434688
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "starcoder2",
     "ollama": "dolphincoder:7b",
-    "quantization": "Q4_0"
-   }
-  },
-  {
-   "id": "ollama.duckdb-nsql-7b",
-   "provider": "ollama",
-   "title": "duckdb-nsql:7b",
-   "description": "7B parameter text-to-SQL model made by MotherDuck and Numbers Station. This file: 7B parameters, Q4_0, 3.8 GB. Needs about 7 GB of memory with Arcana's default 4,096-token context; longer contexts need more. The file has no chat template, so llamafile falls back to a generic one and answers may be poorer.",
-   "category": "assistant",
-   "subcategory": "model",
-   "tags": [
-    "ai",
-    "assistant",
-    "gguf",
-    "llama",
-    "ollama"
-   ],
-   "family": "ollama.duckdb-nsql",
-   "variant": "7b",
-   "variantLabel": "7b: 3.8 GB file, about 7 GB memory",
-   "publisher": "MotherDuck",
-   "sourceUrl": "https://ollama.com/library/duckdb-nsql",
-   "version": "2026-11-26",
-   "lastVerified": "2026-11-26T00:00:00Z",
-   "languages": [
-    "mul"
-   ],
-   "coverage": {
-    "scope": "none"
-   },
-   "format": "gguf",
-   "files": [
-    {
-     "name": "duckdb-nsql-7b-Q4_0.gguf",
-     "size": 3825898272,
-     "hashes": {
-      "sha256": "08a9f55588ead7f58d99876afc3ac45c756ce4461e440d839fad08d381d5a8a4"
-     },
-     "mirrors": [
-      {
-       "url": "https://registry.ollama.ai/v2/library/duckdb-nsql/blobs/sha256:08a9f55588ead7f58d99876afc3ac45c756ce4461e440d839fad08d381d5a8a4"
-      }
-     ]
-    }
-   ],
-   "downloadSize": 3825898272,
-   "installedSize": 3825898272,
-   "license": {
-    "id": "LicenseRef-Llama-2",
-    "name": "Llama 2 Community License",
-    "url": "https://ai.meta.com/llama/license/",
-    "redistribution": "restricted",
-    "verified": true,
-    "notes": "The publisher (MotherDuck) states this license on https://huggingface.co/motherduckdb/DuckDB-NSQL-7B-v0.1. The Ollama registry entry carries no license text."
-   },
-   "capabilities": {
-    "fullTextSearch": false,
-    "titleSearch": false
-   },
-   "media": {
-    "pictures": false,
-    "videos": false
-   },
-   "dependencies": [
-    "arcana.llamafile"
-   ],
-   "updateStrategy": "snapshot-replace",
-   "warnings": [
-    {
-     "kind": "content",
-     "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
-    }
-   ],
-   "stats": {
-    "contextLength": 16384,
-    "memoryBytes": 6479249633,
-    "parameters": 6738546688
-   },
-   "popularity": 1,
-   "providerRef": {
-    "architecture": "llama",
-    "chatTemplate": "none",
-    "ollama": "duckdb-nsql:7b",
     "quantization": "Q4_0"
    }
   },
@@ -6123,7 +5118,6 @@
     "memoryBytes": 11405164500,
     "parameters": 13015864320
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -6206,7 +5200,6 @@
     "memoryBytes": 2356310491,
     "parameters": 2667471400
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "exaone",
     "ollama": "exaone-deep:2.4b",
@@ -6288,7 +5281,6 @@
     "memoryBytes": 21699250259,
     "parameters": 32003200064
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "exaone",
     "ollama": "exaone-deep:32b",
@@ -6370,7 +5362,6 @@
     "memoryBytes": 5860626665,
     "parameters": 7818448960
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "exaone",
     "ollama": "exaone-deep:7.8b",
@@ -6452,7 +5443,6 @@
     "memoryBytes": 2356310088,
     "parameters": 2667471400
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "exaone",
     "ollama": "exaone3.5:2.4b",
@@ -6534,7 +5524,6 @@
     "memoryBytes": 21699249822,
     "parameters": 32003200064
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "exaone",
     "ollama": "exaone3.5:32b",
@@ -6616,7 +5605,6 @@
     "memoryBytes": 5860626228,
     "parameters": 7818448960
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "exaone",
     "ollama": "exaone3.5:7.8b",
@@ -6697,7 +5685,6 @@
     "memoryBytes": 107543022952,
     "parameters": 179522565120
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "falcon",
     "chatTemplate": "none",
@@ -6777,7 +5764,6 @@
     "memoryBytes": 25816774968,
     "parameters": 41835970560
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "falcon",
     "chatTemplate": "none",
@@ -6857,7 +5843,6 @@
     "memoryBytes": 4769671049,
     "parameters": 7217189760
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "falcon",
     "chatTemplate": "none",
@@ -6940,7 +5925,6 @@
     "memoryBytes": 8022866779,
     "parameters": 11102822400
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "falcon",
     "ollama": "falcon2:11b",
@@ -7022,7 +6006,6 @@
     "memoryBytes": 7587557238,
     "parameters": 10305653760
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "falcon3:10b",
@@ -7104,7 +6087,6 @@
     "memoryBytes": 2484207196,
     "parameters": 1669408768
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "falcon3:1b",
@@ -7186,7 +6168,6 @@
     "memoryBytes": 2789638542,
     "parameters": 3227655168
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "falcon3:3b",
@@ -7268,7 +6249,6 @@
     "memoryBytes": 5582545854,
     "parameters": 7455550464
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "falcon3:7b",
@@ -7350,7 +6330,6 @@
     "memoryBytes": 2152440168,
     "parameters": 2506434560
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "gemma",
     "chatTemplate": "none",
@@ -7433,7 +6412,6 @@
     "memoryBytes": 7456057259,
     "parameters": 8537680896
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "gemma",
     "ollama": "gemma:7b",
@@ -7515,7 +6493,6 @@
     "memoryBytes": 18267873924,
     "parameters": 27227128320
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "gemma2",
     "ollama": "gemma2:27b",
@@ -7597,7 +6574,6 @@
     "memoryBytes": 2461765025,
     "parameters": 2614341888
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "gemma2",
     "ollama": "gemma2:2b",
@@ -7679,7 +6655,6 @@
     "memoryBytes": 7439159404,
     "parameters": 9241705984
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "gemma2",
     "ollama": "gemma2:9b",
@@ -7761,7 +6736,6 @@
     "memoryBytes": 9600507556,
     "parameters": 11765792256
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "gemma3",
     "ollama": "gemma3:12b",
@@ -7844,7 +6818,6 @@
     "memoryBytes": 1269986024,
     "parameters": 999885952
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "gemma3",
     "ollama": "gemma3:1b",
@@ -7926,7 +6899,6 @@
     "memoryBytes": 696193017,
     "parameters": 268098176
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "gemma3",
     "ollama": "gemma3:270m",
@@ -8008,7 +6980,6 @@
     "memoryBytes": 19778392129,
     "parameters": 27009007616
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "gemma3",
     "ollama": "gemma3:27b",
@@ -8091,7 +7062,6 @@
     "memoryBytes": 3508961046,
     "parameters": 3880101888
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "gemma3",
     "ollama": "gemma3:4b",
@@ -8174,7 +7144,6 @@
     "memoryBytes": 6546497505,
     "parameters": 4458122848
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "gemma3n",
     "chatTemplate": "none",
@@ -8258,7 +7227,6 @@
     "memoryBytes": 8617310723,
     "parameters": 6868990448
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "gemma3n",
     "chatTemplate": "none",
@@ -8341,7 +7309,6 @@
     "memoryBytes": 11286251136,
     "parameters": 11907350576
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "gemma4",
     "ollama": "gemma4:12b",
@@ -8423,7 +7390,6 @@
     "memoryBytes": 20255978745,
     "parameters": 25233142046
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "gemma4",
     "ollama": "gemma4:26b",
@@ -8505,7 +7471,6 @@
     "memoryBytes": 27971171256,
     "parameters": 30697345596
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "gemma4",
     "ollama": "gemma4:31b",
@@ -8587,7 +7552,6 @@
     "memoryBytes": 4285792225,
     "parameters": 4647450147
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "gemma4",
     "ollama": "gemma4:e2b",
@@ -8669,92 +7633,10 @@
     "memoryBytes": 6787327132,
     "parameters": 7518069290
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "gemma4",
     "ollama": "gemma4:e4b",
     "quantization": "Q4_K_M",
-    "textOnly": "true"
-   }
-  },
-  {
-   "id": "ollama.glm-ocr",
-   "provider": "ollama",
-   "title": "glm-ocr:latest",
-   "description": "GLM-OCR is a multimodal OCR model for complex document understanding, built on the GLM-V encoder–decoder architecture. This file: F16, 1.8 GB. Needs about 2.5 GB of memory with Arcana's default 4,096-token context; longer contexts need more. Ollama also offers image input for this model; Arcana asks text questions only and does not download the image part. The file has no chat template, so llamafile falls back to a generic one and answers may be poorer.",
-   "category": "assistant",
-   "subcategory": "model",
-   "tags": [
-    "ai",
-    "assistant",
-    "gguf",
-    "glm4",
-    "ollama"
-   ],
-   "family": "ollama.glm-ocr",
-   "variant": "latest",
-   "variantLabel": "latest: 1.8 GB file, about 2.5 GB memory",
-   "sourceUrl": "https://ollama.com/library/glm-ocr",
-   "version": "2026-11-26",
-   "lastVerified": "2026-11-26T00:00:00Z",
-   "languages": [
-    "mul"
-   ],
-   "coverage": {
-    "scope": "none"
-   },
-   "format": "gguf",
-   "files": [
-    {
-     "name": "glm-ocr-latest-F16.gguf",
-     "size": 1786007360,
-     "hashes": {
-      "sha256": "33a72e292f125d9fb0e5b6aeb049fb35f6529d250059385ecf50d843e0e08809"
-     },
-     "mirrors": [
-      {
-       "url": "https://registry.ollama.ai/v2/library/glm-ocr/blobs/sha256:33a72e292f125d9fb0e5b6aeb049fb35f6529d250059385ecf50d843e0e08809"
-      }
-     ]
-    }
-   ],
-   "downloadSize": 1786007360,
-   "installedSize": 1786007360,
-   "license": {
-    "id": "unknown",
-    "redistribution": "unknown",
-    "verified": false,
-    "notes": "The Ollama registry entry carries no license text. Not yet confirmed against the publisher's own statement."
-   },
-   "capabilities": {
-    "fullTextSearch": false,
-    "titleSearch": false
-   },
-   "media": {
-    "pictures": false,
-    "videos": false
-   },
-   "dependencies": [
-    "arcana.llamafile"
-   ],
-   "updateStrategy": "snapshot-replace",
-   "warnings": [
-    {
-     "kind": "content",
-     "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
-    }
-   ],
-   "stats": {
-    "contextLength": 131072,
-    "memoryBytes": 2475093200,
-    "parameters": 891138048
-   },
-   "popularity": 1,
-   "providerRef": {
-    "architecture": "glm4",
-    "chatTemplate": "none",
-    "ollama": "glm-ocr:latest",
-    "quantization": "F16",
     "textOnly": "true"
    }
   },
@@ -8833,7 +7715,6 @@
     "memoryBytes": 6210429952,
     "parameters": 9399951360
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "chatglm",
     "ollama": "glm4:9b",
@@ -8912,7 +7793,6 @@
     "memoryBytes": 72238456606,
     "parameters": 117748948992
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -8995,7 +7875,6 @@
     "memoryBytes": 69254853561,
     "parameters": 116829156672
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "gpt-oss",
     "chatTemplate": "none",
@@ -9078,7 +7957,6 @@
     "memoryBytes": 14998993348,
     "parameters": 20914757184
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "gpt-oss",
     "chatTemplate": "none",
@@ -9154,6 +8032,10 @@
     {
      "kind": "content",
      "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
+    },
+    {
+     "kind": "content",
+     "text": "Made for programming: it answers general questions poorly."
     }
    ],
    "stats": {
@@ -9161,7 +8043,6 @@
     "memoryBytes": 12553728603,
     "parameters": 20066993152
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "starcoder",
     "ollama": "granite-code:20b",
@@ -9236,6 +8117,10 @@
     {
      "kind": "content",
      "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
+    },
+    {
+     "kind": "content",
+     "text": "Made for programming: it answers general questions poorly."
     }
    ],
    "stats": {
@@ -9243,7 +8128,6 @@
     "memoryBytes": 20699275923,
     "parameters": 33715603456
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "starcoder",
     "ollama": "granite-code:34b",
@@ -9318,6 +8202,10 @@
     {
      "kind": "content",
      "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
+    },
+    {
+     "kind": "content",
+     "text": "Made for programming: it answers general questions poorly."
     }
    ],
    "stats": {
@@ -9325,7 +8213,6 @@
     "memoryBytes": 3753947403,
     "parameters": 3482503680
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "granite-code:3b",
@@ -9400,6 +8287,10 @@
     {
      "kind": "content",
      "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
+    },
+    {
+     "kind": "content",
+     "text": "Made for programming: it answers general questions poorly."
     }
    ],
    "stats": {
@@ -9407,7 +8298,6 @@
     "memoryBytes": 5738992267,
     "parameters": 8054910976
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "granite-code:8b",
@@ -9489,7 +8379,6 @@
     "memoryBytes": 2332132481,
     "parameters": 2634201088
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "granite",
     "ollama": "granite3-dense:2b",
@@ -9571,175 +8460,10 @@
     "memoryBytes": 6175660307,
     "parameters": 8170848256
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "granite",
     "ollama": "granite3-dense:8b",
     "quantization": "Q4_K_M"
-   }
-  },
-  {
-   "id": "ollama.granite3-guardian-2b",
-   "provider": "ollama",
-   "title": "granite3-guardian:2b",
-   "description": "The IBM Granite Guardian 3.0 2B and 8B models are designed to detect risks in prompts and/or responses. This file: 2B parameters, Q8_0, 2.7 GB. Needs about 3.5 GB of memory with Arcana's default 4,096-token context; longer contexts need more.",
-   "category": "assistant",
-   "subcategory": "model",
-   "tags": [
-    "ai",
-    "assistant",
-    "gguf",
-    "granite",
-    "ollama"
-   ],
-   "family": "ollama.granite3-guardian",
-   "variant": "2b",
-   "variantLabel": "2b: 2.7 GB file, about 3.5 GB memory",
-   "publisher": "IBM",
-   "sourceUrl": "https://ollama.com/library/granite3-guardian",
-   "version": "2026-11-26",
-   "lastVerified": "2026-11-26T00:00:00Z",
-   "languages": [
-    "mul"
-   ],
-   "coverage": {
-    "scope": "none"
-   },
-   "format": "gguf",
-   "files": [
-    {
-     "name": "granite3-guardian-2b-Q8_0.gguf",
-     "size": 2694116160,
-     "hashes": {
-      "sha256": "ded6c5f885f542875cd549c05852a23fa75060aa36772854e3a7f20d099937f7"
-     },
-     "mirrors": [
-      {
-       "url": "https://registry.ollama.ai/v2/library/granite3-guardian/blobs/sha256:ded6c5f885f542875cd549c05852a23fa75060aa36772854e3a7f20d099937f7"
-      }
-     ]
-    }
-   ],
-   "downloadSize": 2694116160,
-   "installedSize": 2694116160,
-   "license": {
-    "id": "Apache-2.0",
-    "name": "Apache License 2.0",
-    "url": "https://www.apache.org/licenses/LICENSE-2.0",
-    "redistribution": "permitted",
-    "verified": true,
-    "notes": "The publisher (IBM) states this license on https://huggingface.co/ibm-granite/granite-guardian-3.0-2b; the Ollama registry's copy of the license agrees."
-   },
-   "capabilities": {
-    "fullTextSearch": false,
-    "titleSearch": false
-   },
-   "media": {
-    "pictures": false,
-    "videos": false
-   },
-   "dependencies": [
-    "arcana.llamafile"
-   ],
-   "updateStrategy": "snapshot-replace",
-   "warnings": [
-    {
-     "kind": "content",
-     "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
-    }
-   ],
-   "stats": {
-    "contextLength": 8192,
-    "memoryBytes": 3478939088,
-    "parameters": 2533531648
-   },
-   "popularity": 1,
-   "providerRef": {
-    "architecture": "granite",
-    "ollama": "granite3-guardian:2b",
-    "quantization": "Q8_0"
-   }
-  },
-  {
-   "id": "ollama.granite3-guardian-8b",
-   "provider": "ollama",
-   "title": "granite3-guardian:8b",
-   "description": "The IBM Granite Guardian 3.0 2B and 8B models are designed to detect risks in prompts and/or responses. This file: 8B parameters, Q5_K_M, 5.8 GB. Needs about 8 GB of memory with Arcana's default 4,096-token context; longer contexts need more.",
-   "category": "assistant",
-   "subcategory": "model",
-   "tags": [
-    "ai",
-    "assistant",
-    "gguf",
-    "granite",
-    "ollama"
-   ],
-   "family": "ollama.granite3-guardian",
-   "variant": "8b",
-   "variantLabel": "8b: 5.8 GB file, about 8 GB memory",
-   "publisher": "IBM",
-   "sourceUrl": "https://ollama.com/library/granite3-guardian",
-   "version": "2026-11-26",
-   "lastVerified": "2026-11-26T00:00:00Z",
-   "languages": [
-    "mul"
-   ],
-   "coverage": {
-    "scope": "none"
-   },
-   "format": "gguf",
-   "files": [
-    {
-     "name": "granite3-guardian-8b-Q5_K_M.gguf",
-     "size": 5797454112,
-     "hashes": {
-      "sha256": "fc93e012ac809ee2e55858a9104ee9e2ad49139aefff5a372cb5101f4d3a1db4"
-     },
-     "mirrors": [
-      {
-       "url": "https://registry.ollama.ai/v2/library/granite3-guardian/blobs/sha256:fc93e012ac809ee2e55858a9104ee9e2ad49139aefff5a372cb5101f4d3a1db4"
-      }
-     ]
-    }
-   ],
-   "downloadSize": 5797454112,
-   "installedSize": 5797454112,
-   "license": {
-    "id": "Apache-2.0",
-    "name": "Apache License 2.0",
-    "url": "https://www.apache.org/licenses/LICENSE-2.0",
-    "redistribution": "permitted",
-    "verified": true,
-    "notes": "The publisher (IBM) states this license on https://huggingface.co/ibm-granite/granite-guardian-3.0-8b; the Ollama registry's copy of the license agrees."
-   },
-   "capabilities": {
-    "fullTextSearch": false,
-    "titleSearch": false
-   },
-   "media": {
-    "pictures": false,
-    "videos": false
-   },
-   "dependencies": [
-    "arcana.llamafile"
-   ],
-   "updateStrategy": "snapshot-replace",
-   "warnings": [
-    {
-     "kind": "content",
-     "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
-    }
-   ],
-   "stats": {
-    "contextLength": 8192,
-    "memoryBytes": 7072988257,
-    "parameters": 8170848256
-   },
-   "popularity": 1,
-   "providerRef": {
-    "architecture": "granite",
-    "ollama": "granite3-guardian:8b",
-    "quantization": "Q5_K_M"
    }
   },
   {
@@ -9817,7 +8541,6 @@
     "memoryBytes": 1378836297,
     "parameters": 1334628352
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "granitemoe",
     "ollama": "granite3-moe:1b",
@@ -9899,7 +8622,6 @@
     "memoryBytes": 2745331753,
     "parameters": 3374295552
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "granitemoe",
     "ollama": "granite3-moe:3b",
@@ -9981,7 +8703,6 @@
     "memoryBytes": 2298277256,
     "parameters": 2533531648
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "granite",
     "ollama": "granite3.1-dense:2b",
@@ -10063,7 +8784,6 @@
     "memoryBytes": 6226862977,
     "parameters": 8170848256
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "granite",
     "ollama": "granite3.1-dense:8b",
@@ -10145,7 +8865,6 @@
     "memoryBytes": 2009251156,
     "parameters": 1334628352
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "granitemoe",
     "ollama": "granite3.1-moe:1b",
@@ -10227,7 +8946,6 @@
     "memoryBytes": 2719941006,
     "parameters": 3298793472
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "granitemoe",
     "ollama": "granite3.1-moe:3b",
@@ -10309,7 +9027,6 @@
     "memoryBytes": 2272678188,
     "parameters": 2533531648
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "granite",
     "ollama": "granite3.2:2b",
@@ -10391,7 +9108,6 @@
     "memoryBytes": 6175663969,
     "parameters": 8170848256
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "granite",
     "ollama": "granite3.2:8b",
@@ -10472,7 +9188,6 @@
     "memoryBytes": 2272676240,
     "parameters": 2533533696
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "granite",
     "ollama": "granite3.2-vision:2b",
@@ -10555,7 +9270,6 @@
     "memoryBytes": 2272685614,
     "parameters": 2533539840
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "granite",
     "ollama": "granite3.3:2b",
@@ -10637,7 +9351,6 @@
     "memoryBytes": 6175678451,
     "parameters": 8170864640
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "granite",
     "ollama": "granite3.3:8b",
@@ -10718,7 +9431,6 @@
     "memoryBytes": 2854594438,
     "parameters": 3402836480
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "granite",
     "ollama": "granite4:latest",
@@ -10799,7 +9511,6 @@
     "memoryBytes": 4080888665,
     "parameters": 1631750144
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "granite",
     "ollama": "granite4:1b",
@@ -10880,7 +9591,6 @@
     "memoryBytes": 1175874740,
     "parameters": 352379904
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "granite",
     "ollama": "granite4:350m",
@@ -10961,7 +9671,6 @@
     "memoryBytes": 2854594774,
     "parameters": 3402836480
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "granite",
     "ollama": "granite4:3b",
@@ -11042,7 +9751,6 @@
     "memoryBytes": 19753067396,
     "parameters": 28865728512
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "granite",
     "ollama": "granite4.1:30b",
@@ -11123,7 +9831,6 @@
     "memoryBytes": 2854593867,
     "parameters": 3402836480
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "granite",
     "ollama": "granite4.1:3b",
@@ -11204,92 +9911,10 @@
     "memoryBytes": 6600971560,
     "parameters": 8791592960
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "granite",
     "ollama": "granite4.1:8b",
     "quantization": "Q4_K_M"
-   }
-  },
-  {
-   "id": "ollama.granite4.1-guardian-8b",
-   "provider": "ollama",
-   "title": "granite4.1-guardian:8b",
-   "description": "Granite Guardian 4.1 is a specialized safety and judging model from IBM Research that evaluates whether LLM prompts and responses meet specified harm criteria. This file: 8B parameters, Q6_K, 6.9 GB. Needs about 9 GB of memory with Arcana's default 4,096-token context; longer contexts need more.",
-   "category": "assistant",
-   "subcategory": "model",
-   "tags": [
-    "ai",
-    "assistant",
-    "gguf",
-    "granite",
-    "ollama"
-   ],
-   "family": "ollama.granite4.1-guardian",
-   "variant": "8b",
-   "variantLabel": "8b: 6.9 GB file, about 9 GB memory",
-   "sourceUrl": "https://ollama.com/library/granite4.1-guardian",
-   "version": "2026-11-26",
-   "lastVerified": "2026-11-26T00:00:00Z",
-   "languages": [
-    "mul"
-   ],
-   "coverage": {
-    "scope": "none"
-   },
-   "format": "gguf",
-   "files": [
-    {
-     "name": "granite4.1-guardian-8b-Q6_K.gguf",
-     "size": 6879294528,
-     "hashes": {
-      "sha256": "0061355a4ef83a8f2bd1c39012b6c013c7679ab658b3845a64f39b5c52ada488"
-     },
-     "mirrors": [
-      {
-       "url": "https://registry.ollama.ai/v2/library/granite4.1-guardian/blobs/sha256:0061355a4ef83a8f2bd1c39012b6c013c7679ab658b3845a64f39b5c52ada488"
-      }
-     ]
-    }
-   ],
-   "downloadSize": 6879294528,
-   "installedSize": 6879294528,
-   "license": {
-    "id": "Apache-2.0",
-    "name": "Apache License 2.0",
-    "url": "https://www.apache.org/licenses/LICENSE-2.0",
-    "redistribution": "unknown",
-    "verified": false,
-    "notes": "The license text in the Ollama registry is the Apache License 2.0. Not yet confirmed against the publisher's own statement."
-   },
-   "capabilities": {
-    "fullTextSearch": false,
-    "titleSearch": false
-   },
-   "media": {
-    "pictures": false,
-    "videos": false
-   },
-   "dependencies": [
-    "arcana.llamafile"
-   ],
-   "updateStrategy": "snapshot-replace",
-   "warnings": [
-    {
-     "kind": "content",
-     "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
-    }
-   ],
-   "stats": {
-    "contextLength": 131072,
-    "memoryBytes": 8208920694,
-    "parameters": 8380551168
-   },
-   "popularity": 1,
-   "providerRef": {
-    "architecture": "granite",
-    "ollama": "granite4.1-guardian:8b",
-    "quantization": "Q6_K"
    }
   },
   {
@@ -11366,7 +9991,6 @@
     "memoryBytes": 19995842718,
     "parameters": 29276770304
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "granite",
     "ollama": "granite4.2:30b",
@@ -11447,7 +10071,6 @@
     "memoryBytes": 3006329888,
     "parameters": 3659737600
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "granite",
     "ollama": "granite4.2:3b",
@@ -11528,7 +10151,6 @@
     "memoryBytes": 6600975289,
     "parameters": 8791592960
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "granite",
     "ollama": "granite4.2:8b",
@@ -11610,7 +10232,6 @@
     "memoryBytes": 2904677430,
     "parameters": 3212749888
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "hermes3:3b",
@@ -11692,7 +10313,6 @@
     "memoryBytes": 242727749164,
     "parameters": 405853388864
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "hermes3:405b",
@@ -11774,7 +10394,6 @@
     "memoryBytes": 43624974593,
     "parameters": 70553706560
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "hermes3:70b",
@@ -11856,7 +10475,6 @@
     "memoryBytes": 5745721587,
     "parameters": 8030261312
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "hermes3:8b",
@@ -11938,7 +10556,6 @@
     "memoryBytes": 1886896147,
     "parameters": 1889110016
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "internlm2",
     "ollama": "internlm2:1.8b",
@@ -12020,7 +10637,6 @@
     "memoryBytes": 5527352062,
     "parameters": 7737708544
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "internlm2",
     "ollama": "internlm2:1m",
@@ -12102,7 +10718,6 @@
     "memoryBytes": 13008700492,
     "parameters": 19861149696
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "internlm2",
     "ollama": "internlm2:20b",
@@ -12184,7 +10799,6 @@
     "memoryBytes": 5527351793,
     "parameters": 7737708544
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "internlm2",
     "ollama": "internlm2:7b",
@@ -12265,7 +10879,6 @@
     "memoryBytes": 101953300416,
     "parameters": 117561977600
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "laguna",
     "ollama": "laguna-s-2.1:latest",
@@ -12346,7 +10959,6 @@
     "memoryBytes": 22273676473,
     "parameters": 33442617088
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "laguna",
     "ollama": "laguna-xs-2.1:latest",
@@ -12427,7 +11039,6 @@
     "memoryBytes": 15786635014,
     "parameters": 23843661440
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "lfm2moe",
     "chatTemplate": "none",
@@ -12509,7 +11120,6 @@
     "memoryBytes": 15902688507,
     "parameters": 23971587712
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "lfm2moe",
     "ollama": "lfm2.5:24b",
@@ -12590,175 +11200,10 @@
     "memoryBytes": 5929767028,
     "parameters": 8467856832
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "lfm2moe",
     "chatTemplate": "none",
     "ollama": "lfm2.5:8b",
-    "quantization": "Q4_K_M"
-   }
-  },
-  {
-   "id": "ollama.llama-guard3-1b",
-   "provider": "ollama",
-   "title": "llama-guard3:1b",
-   "description": "Llama Guard 3 is a series of models fine-tuned for content safety classification of LLM inputs and responses. This file: 1B parameters, Q8_0, 1.6 GB. Needs about 2.5 GB of memory with Arcana's default 4,096-token context; longer contexts need more.",
-   "category": "assistant",
-   "subcategory": "model",
-   "tags": [
-    "ai",
-    "assistant",
-    "gguf",
-    "llama",
-    "ollama"
-   ],
-   "family": "ollama.llama-guard3",
-   "variant": "1b",
-   "variantLabel": "1b: 1.6 GB file, about 2.5 GB memory",
-   "publisher": "Meta",
-   "sourceUrl": "https://ollama.com/library/llama-guard3",
-   "version": "2026-11-26",
-   "lastVerified": "2026-11-26T00:00:00Z",
-   "languages": [
-    "mul"
-   ],
-   "coverage": {
-    "scope": "none"
-   },
-   "format": "gguf",
-   "files": [
-    {
-     "name": "llama-guard3-1b-Q8_0.gguf",
-     "size": 1600166464,
-     "hashes": {
-      "sha256": "f2380ab40b82d64d967cf72371d75148736573895fe93d935bdd05c783667a83"
-     },
-     "mirrors": [
-      {
-       "url": "https://registry.ollama.ai/v2/library/llama-guard3/blobs/sha256:f2380ab40b82d64d967cf72371d75148736573895fe93d935bdd05c783667a83"
-      }
-     ]
-    }
-   ],
-   "downloadSize": 1600166464,
-   "installedSize": 1600166464,
-   "license": {
-    "id": "LicenseRef-Llama-3.2",
-    "name": "Llama 3.2 Community License",
-    "url": "https://www.llama.com/llama3_2/license/",
-    "redistribution": "restricted",
-    "verified": true,
-    "notes": "The publisher (Meta) states this license on https://huggingface.co/meta-llama/Llama-Guard-3-1B; the Ollama registry's copy of the license agrees."
-   },
-   "capabilities": {
-    "fullTextSearch": false,
-    "titleSearch": false
-   },
-   "media": {
-    "pictures": false,
-    "videos": false
-   },
-   "dependencies": [
-    "arcana.llamafile"
-   ],
-   "updateStrategy": "snapshot-replace",
-   "warnings": [
-    {
-     "kind": "content",
-     "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
-    }
-   ],
-   "stats": {
-    "contextLength": 131072,
-    "memoryBytes": 2128965315,
-    "parameters": 1498482720
-   },
-   "popularity": 1,
-   "providerRef": {
-    "architecture": "llama",
-    "ollama": "llama-guard3:1b",
-    "quantization": "Q8_0"
-   }
-  },
-  {
-   "id": "ollama.llama-guard3-8b",
-   "provider": "ollama",
-   "title": "llama-guard3:8b",
-   "description": "Llama Guard 3 is a series of models fine-tuned for content safety classification of LLM inputs and responses. This file: 8B parameters, Q4_K_M, 4.9 GB. Needs about 7 GB of memory with Arcana's default 4,096-token context; longer contexts need more.",
-   "category": "assistant",
-   "subcategory": "model",
-   "tags": [
-    "ai",
-    "assistant",
-    "gguf",
-    "llama",
-    "ollama"
-   ],
-   "family": "ollama.llama-guard3",
-   "variant": "8b",
-   "variantLabel": "8b: 4.9 GB file, about 7 GB memory",
-   "publisher": "Meta",
-   "sourceUrl": "https://ollama.com/library/llama-guard3",
-   "version": "2026-11-26",
-   "lastVerified": "2026-11-26T00:00:00Z",
-   "languages": [
-    "mul"
-   ],
-   "coverage": {
-    "scope": "none"
-   },
-   "format": "gguf",
-   "files": [
-    {
-     "name": "llama-guard3-8b-Q4_K_M.gguf",
-     "size": 4920735872,
-     "hashes": {
-      "sha256": "883f1adfefb2622b3b8b226e45c52d45551f97304cd77b7e2a8009fea106d926"
-     },
-     "mirrors": [
-      {
-       "url": "https://registry.ollama.ai/v2/library/llama-guard3/blobs/sha256:883f1adfefb2622b3b8b226e45c52d45551f97304cd77b7e2a8009fea106d926"
-      }
-     ]
-    }
-   ],
-   "downloadSize": 4920735872,
-   "installedSize": 4920735872,
-   "license": {
-    "id": "LicenseRef-Llama-3.1",
-    "name": "Llama 3.1 Community License",
-    "url": "https://www.llama.com/llama3_1/license/",
-    "redistribution": "restricted",
-    "verified": true,
-    "notes": "The publisher (Meta) states this license on https://huggingface.co/meta-llama/Llama-Guard-3-8B; the Ollama registry's copy of the license agrees."
-   },
-   "capabilities": {
-    "fullTextSearch": false,
-    "titleSearch": false
-   },
-   "media": {
-    "pictures": false,
-    "videos": false
-   },
-   "dependencies": [
-    "arcana.llamafile"
-   ],
-   "updateStrategy": "snapshot-replace",
-   "warnings": [
-    {
-     "kind": "content",
-     "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
-    }
-   ],
-   "stats": {
-    "contextLength": 131072,
-    "memoryBytes": 6018216377,
-    "parameters": 8030261312
-   },
-   "popularity": 1,
-   "providerRef": {
-    "architecture": "llama",
-    "ollama": "llama-guard3:8b",
     "quantization": "Q4_K_M"
    }
   },
@@ -12834,7 +11279,6 @@
     "memoryBytes": 7972527644,
     "parameters": 8357482496
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "llama-pro:latest",
@@ -12916,7 +11360,6 @@
     "memoryBytes": 11405165240,
     "parameters": 13015864320
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "llama2:13b",
@@ -12998,7 +11441,6 @@
     "memoryBytes": 42473634641,
     "parameters": 68976648192
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "llama2:70b",
@@ -13080,7 +11522,6 @@
     "memoryBytes": 6480176691,
     "parameters": 6738415616
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "llama2:7b",
@@ -13159,7 +11600,6 @@
     "memoryBytes": 11404142355,
     "parameters": 13015864320
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -13239,7 +11679,6 @@
     "memoryBytes": 6479153840,
     "parameters": 6738415616
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -13321,7 +11760,6 @@
     "memoryBytes": 42472611790,
     "parameters": 68976648192
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -13403,7 +11841,6 @@
     "memoryBytes": 6479153840,
     "parameters": 6738415616
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -13486,7 +11923,6 @@
     "memoryBytes": 43624968780,
     "parameters": 70553706496
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "llama3:70b",
@@ -13568,7 +12004,6 @@
     "memoryBytes": 5745715707,
     "parameters": 8030261248
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "llama3:8b",
@@ -13650,7 +12085,6 @@
     "memoryBytes": 43624968310,
     "parameters": 70553706496
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -13733,7 +12167,6 @@
     "memoryBytes": 5745715236,
     "parameters": 8030261248
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -13816,7 +12249,6 @@
     "memoryBytes": 43624968780,
     "parameters": 70553706496
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "llama3-gradient:70b",
@@ -13898,7 +12330,6 @@
     "memoryBytes": 5745715673,
     "parameters": 8030261248
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "llama3-gradient:8b",
@@ -13979,7 +12410,6 @@
     "memoryBytes": 43625040382,
     "parameters": 70553804800
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "llama3-groq-tool-use:70b",
@@ -14060,7 +12490,6 @@
     "memoryBytes": 5745751625,
     "parameters": 8030310400
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "llama3-groq-tool-use:8b",
@@ -14142,7 +12571,6 @@
     "memoryBytes": 257651593272,
     "parameters": 405853388864
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "llama3.1:405b",
@@ -14224,7 +12652,6 @@
     "memoryBytes": 46303168164,
     "parameters": 70553706560
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "llama3.1:70b",
@@ -14306,7 +12733,6 @@
     "memoryBytes": 6018219603,
     "parameters": 8030261312
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "llama3.1:8b",
@@ -14388,7 +12814,6 @@
     "memoryBytes": 1835927350,
     "parameters": 1235814432
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "llama3.2:1b",
@@ -14470,7 +12895,6 @@
     "memoryBytes": 2904681092,
     "parameters": 3212749888
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "llama3.2:3b",
@@ -14552,7 +12976,6 @@
     "memoryBytes": 46303168534,
     "parameters": 70553706560
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "llama3.3:70b",
@@ -14633,7 +13056,6 @@
     "memoryBytes": 11404142489,
     "parameters": 13015864320
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -14716,7 +13138,6 @@
     "memoryBytes": 21761061235,
     "parameters": 34388917248
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "llava:34b",
@@ -14798,7 +13219,6 @@
     "memoryBytes": 5165806553,
     "parameters": 7241732096
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "llava:7b",
@@ -14878,7 +13298,6 @@
     "memoryBytes": 6018753003,
     "parameters": 8030261248
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "llava-llama3:8b",
@@ -14958,95 +13377,11 @@
     "memoryBytes": 4360050696,
     "parameters": 3821079552
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "llava-phi3:3.8b",
     "quantization": "Q4_K_M",
     "textOnly": "true"
-   }
-  },
-  {
-   "id": "ollama.magicoder-7b",
-   "provider": "ollama",
-   "title": "magicoder:7b",
-   "description": "🎩 Magicoder is a family of 7B parameter models trained on 75K synthetic instruction data using OSS-Instruct, a novel approach to enlightening LLMs with open-source code snippets. This file: 7B parameters, Q4_0, 3.8 GB. Needs about 7 GB of memory with Arcana's default 4,096-token context; longer contexts need more. The file has no chat template, so llamafile falls back to a generic one and answers may be poorer.",
-   "category": "assistant",
-   "subcategory": "model",
-   "tags": [
-    "ai",
-    "assistant",
-    "gguf",
-    "llama",
-    "ollama"
-   ],
-   "family": "ollama.magicoder",
-   "variant": "7b",
-   "variantLabel": "7b: 3.8 GB file, about 7 GB memory",
-   "publisher": "ISE UIUC",
-   "sourceUrl": "https://ollama.com/library/magicoder",
-   "version": "2026-11-26",
-   "lastVerified": "2026-11-26T00:00:00Z",
-   "languages": [
-    "mul"
-   ],
-   "coverage": {
-    "scope": "none"
-   },
-   "format": "gguf",
-   "files": [
-    {
-     "name": "magicoder-7b-Q4_0.gguf",
-     "size": 3825807168,
-     "hashes": {
-      "sha256": "4a501ed4ce55e5611922b3ee422501ff7cc773b472d196c3c416859b6d375273"
-     },
-     "mirrors": [
-      {
-       "url": "https://registry.ollama.ai/v2/library/magicoder/blobs/sha256:4a501ed4ce55e5611922b3ee422501ff7cc773b472d196c3c416859b6d375273"
-      }
-     ]
-    }
-   ],
-   "downloadSize": 3825807168,
-   "installedSize": 3825807168,
-   "license": {
-    "id": "LicenseRef-Llama-2",
-    "name": "Llama 2 Community License",
-    "url": "https://ai.meta.com/llama/license/",
-    "redistribution": "restricted",
-    "verified": true,
-    "notes": "The publisher (ISE UIUC) states this license on https://huggingface.co/ise-uiuc/Magicoder-S-CL-7B. The Ollama registry entry carries no license text."
-   },
-   "capabilities": {
-    "fullTextSearch": false,
-    "titleSearch": false
-   },
-   "media": {
-    "pictures": false,
-    "videos": false
-   },
-   "dependencies": [
-    "arcana.llamafile"
-   ],
-   "updateStrategy": "snapshot-replace",
-   "warnings": [
-    {
-     "kind": "content",
-     "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
-    }
-   ],
-   "stats": {
-    "contextLength": 16384,
-    "memoryBytes": 6479153974,
-    "parameters": 6738415616
-   },
-   "popularity": 1,
-   "providerRef": {
-    "architecture": "llama",
-    "chatTemplate": "none",
-    "ollama": "magicoder:7b",
-    "quantization": "Q4_0"
    }
   },
   {
@@ -15124,7 +13459,6 @@
     "memoryBytes": 16036264302,
     "parameters": 23572403200
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -15207,7 +13541,6 @@
     "memoryBytes": 5466679054,
     "parameters": 7615616512
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "marco-o1:7b",
@@ -15289,7 +13622,6 @@
     "memoryBytes": 5170396918,
     "parameters": 7248023552
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -15369,7 +13701,6 @@
     "memoryBytes": 42472611824,
     "parameters": 68976648192
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -15449,7 +13780,6 @@
     "memoryBytes": 6479153873,
     "parameters": 6738415616
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -15529,7 +13859,6 @@
     "memoryBytes": 6479153840,
     "parameters": 6738415616
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -15611,7 +13940,6 @@
     "memoryBytes": 73806126219,
     "parameters": 120315944960
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "megadolphin:120b",
@@ -15690,7 +14018,6 @@
     "memoryBytes": 6762004558,
     "parameters": 8953803264
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen35",
     "ollama": "mimo-v2.6:9b",
@@ -15772,7 +14099,6 @@
     "memoryBytes": 5200330678,
     "parameters": 7612763648
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "minicpm-v:8b",
@@ -15852,7 +14178,6 @@
     "memoryBytes": 6196602628,
     "parameters": 8189195264
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen3",
     "ollama": "minicpm-v4.5:8b",
@@ -15932,7 +14257,6 @@
     "memoryBytes": 1071455971,
     "parameters": 752161600
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen35",
     "ollama": "minicpm-v4.6:1b",
@@ -16015,7 +14339,6 @@
     "memoryBytes": 5442896009,
     "parameters": 7248023552
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "mistral:7b",
@@ -16097,7 +14420,6 @@
     "memoryBytes": 78671571865,
     "parameters": 122610069504
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "mistral-large:123b",
@@ -16179,7 +14501,6 @@
     "memoryBytes": 8410947145,
     "parameters": 12247782400
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "mistral-nemo:12b",
@@ -16261,7 +14582,6 @@
     "memoryBytes": 5165817776,
     "parameters": 7241748480
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -16344,7 +14664,6 @@
     "memoryBytes": 14451714425,
     "parameters": 22247282688
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "mistral-small:22b",
@@ -16426,7 +14745,6 @@
     "memoryBytes": 16036265243,
     "parameters": 23572403200
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "mistral-small:24b",
@@ -16505,7 +14823,6 @@
     "memoryBytes": 5165823824,
     "parameters": 7241756672
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -16588,7 +14905,6 @@
     "memoryBytes": 84751426918,
     "parameters": 140630071296
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "mixtral:8x22b",
@@ -16670,7 +14986,6 @@
     "memoryBytes": 28617213800,
     "parameters": 46702792704
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "mixtral:8x7b",
@@ -16751,7 +15066,6 @@
     "memoryBytes": 1989973377,
     "parameters": 1418270720
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "phi2",
     "chatTemplate": "none",
@@ -16832,7 +15146,6 @@
     "memoryBytes": 18127191716,
     "parameters": 27854794240
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "muse-glimmer",
     "ollama": "muse-glimmer:30b",
@@ -16914,7 +15227,6 @@
     "memoryBytes": 26018197043,
     "parameters": 31577940288
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "nemotron_h_moe",
     "ollama": "nemotron-3-nano:30b",
@@ -16995,7 +15307,6 @@
     "memoryBytes": 3998681692,
     "parameters": 3973556832
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "nemotron_h",
     "chatTemplate": "none",
@@ -17077,7 +15388,6 @@
     "memoryBytes": 7508684390,
     "parameters": 7518069290
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "gemma4",
     "ollama": "nemotron-3.5-bolt:e4b",
@@ -17159,7 +15469,6 @@
     "memoryBytes": 27239146803,
     "parameters": 32913266240
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "nemotron_h_moe",
     "ollama": "nemotron-3.5-lightning:30b",
@@ -17241,7 +15550,6 @@
     "memoryBytes": 46303168433,
     "parameters": 70553706560
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "nemotron:70b",
@@ -17322,7 +15630,6 @@
     "memoryBytes": 26018731316,
     "parameters": 31577940288
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "nemotron_h_moe",
     "chatTemplate": "none",
@@ -17405,7 +15712,6 @@
     "memoryBytes": 3683699835,
     "parameters": 4190509056
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "nemotron",
     "ollama": "nemotron-mini:4b",
@@ -17487,7 +15793,6 @@
     "memoryBytes": 5166789017,
     "parameters": 7241732096
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -17570,7 +15875,6 @@
     "memoryBytes": 11405343588,
     "parameters": 13016110080
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -17652,7 +15956,6 @@
     "memoryBytes": 10855322542,
     "parameters": 8953803264
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen35",
     "ollama": "nimble:9b",
@@ -17733,7 +16036,6 @@
     "memoryBytes": 10855322273,
     "parameters": 8953803264
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen35",
     "ollama": "nimble-v3:9b",
@@ -17807,6 +16109,10 @@
     {
      "kind": "content",
      "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
+    },
+    {
+     "kind": "content",
+     "text": "Made for programming: it answers general questions poorly."
     }
    ],
    "stats": {
@@ -17814,7 +16120,6 @@
     "memoryBytes": 20249267484,
     "parameters": 30484303872
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "cohere2moe",
     "ollama": "north-mini-code-1.0:latest",
@@ -17896,7 +16201,6 @@
     "memoryBytes": 5166789521,
     "parameters": 7241732096
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "notus:7b",
@@ -17975,7 +16279,6 @@
     "memoryBytes": 11404381016,
     "parameters": 13016192000
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -18055,7 +16358,6 @@
     "memoryBytes": 6479153840,
     "parameters": 6738415616
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -18137,7 +16439,6 @@
     "memoryBytes": 7495893859,
     "parameters": 10731540480
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -18219,7 +16520,6 @@
     "memoryBytes": 21761061201,
     "parameters": 34388917248
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "nous-hermes2:34b",
@@ -18300,7 +16600,6 @@
     "memoryBytes": 28617225324,
     "parameters": 46702809088
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "nous-hermes2-mixtral:8x7b",
@@ -18382,7 +16681,6 @@
     "memoryBytes": 4210170604,
     "parameters": 3821079552
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "phi3",
     "ollama": "nuextract:3.8b",
@@ -18464,7 +16762,6 @@
     "memoryBytes": 12442083012,
     "parameters": 13716198400
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "olmo2",
     "ollama": "olmo2:13b",
@@ -18546,7 +16843,6 @@
     "memoryBytes": 7157677716,
     "parameters": 7298617344
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "olmo2",
     "ollama": "olmo2:7b",
@@ -18625,7 +16921,6 @@
     "memoryBytes": 11404157307,
     "parameters": 13015884800
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -18708,7 +17003,6 @@
     "memoryBytes": 5166801315,
     "parameters": 7241748480
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "openchat:7b",
@@ -18781,6 +17075,10 @@
     {
      "kind": "content",
      "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
+    },
+    {
+     "kind": "content",
+     "text": "Made for programming: it answers general questions poorly."
     }
    ],
    "stats": {
@@ -18788,7 +17086,6 @@
     "memoryBytes": 2684040667,
     "parameters": 1905650880
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "opencoder:1.5b",
@@ -18861,6 +17158,10 @@
     {
      "kind": "content",
      "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
+    },
+    {
+     "kind": "content",
+     "text": "Made for programming: it answers general questions poorly."
     }
    ],
    "stats": {
@@ -18868,7 +17169,6 @@
     "memoryBytes": 5824305636,
     "parameters": 7771262976
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "opencoder:8b",
@@ -18947,7 +17247,6 @@
     "memoryBytes": 5165818112,
     "parameters": 7241748480
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "openhermes:latest",
@@ -19029,7 +17328,6 @@
     "memoryBytes": 22232217827,
     "parameters": 32763876352
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "openthinker:32b",
@@ -19111,7 +17409,6 @@
     "memoryBytes": 5466681675,
     "parameters": 7615616512
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "openthinker:7b",
@@ -19190,7 +17487,6 @@
     "memoryBytes": 11404142355,
     "parameters": 13015864320
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -19270,7 +17566,6 @@
     "memoryBytes": 3756665689,
     "parameters": 3426473600
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -19350,7 +17645,6 @@
     "memoryBytes": 42472611790,
     "parameters": 68976648192
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -19430,7 +17724,6 @@
     "memoryBytes": 6479153840,
     "parameters": 6738415616
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -19513,7 +17806,6 @@
     "memoryBytes": 11404164800,
     "parameters": 13015895040
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -19596,7 +17888,6 @@
     "memoryBytes": 6479171748,
     "parameters": 6738440192
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -19676,7 +17967,6 @@
     "memoryBytes": 80361721822,
     "parameters": 124635206144
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen35moe",
     "ollama": "ornith-1.5:122b",
@@ -19756,7 +18046,6 @@
     "memoryBytes": 23457641718,
     "parameters": 35505251456
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen35moe",
     "ollama": "ornith-1.5:35b",
@@ -19836,7 +18125,6 @@
     "memoryBytes": 253453071542,
     "parameters": 396346350336
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen35moe",
     "ollama": "ornith-1.5:397b",
@@ -19916,7 +18204,6 @@
     "memoryBytes": 6762008220,
     "parameters": 8953803264
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen35",
     "ollama": "ornith-1.5:9b",
@@ -19998,7 +18285,6 @@
     "memoryBytes": 22875212667,
     "parameters": 34660610688
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen35moe",
     "ollama": "ornith:35b",
@@ -20079,7 +18365,6 @@
     "memoryBytes": 6762007784,
     "parameters": 8953803264
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen35",
     "ollama": "ornith:9b",
@@ -20161,7 +18446,6 @@
     "memoryBytes": 3339334692,
     "parameters": 2779683840
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "phi2",
     "chatTemplate": "none",
@@ -20244,7 +18528,6 @@
     "memoryBytes": 9445415547,
     "parameters": 13960238208
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "phi3",
     "ollama": "phi3:14b",
@@ -20326,7 +18609,6 @@
     "memoryBytes": 4210171512,
     "parameters": 3821079648
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "phi3",
     "ollama": "phi3:3.8b",
@@ -20408,7 +18690,6 @@
     "memoryBytes": 4210171545,
     "parameters": 3821079648
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "phi3",
     "ollama": "phi3.5:3.8b",
@@ -20490,7 +18771,6 @@
     "memoryBytes": 10659203787,
     "parameters": 14659507200
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "phi3",
     "ollama": "phi4:14b",
@@ -20572,7 +18852,6 @@
     "memoryBytes": 3467912067,
     "parameters": 3836021856
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "phi3",
     "ollama": "phi4-mini:3.8b",
@@ -20654,7 +18933,6 @@
     "memoryBytes": 4161545024,
     "parameters": 3836021856
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "phi3",
     "ollama": "phi4-mini-reasoning:3.8b",
@@ -20736,93 +19014,10 @@
     "memoryBytes": 12826808600,
     "parameters": 14659507200
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "phi3",
     "ollama": "phi4-reasoning:14b",
     "quantization": "Q4_K_M"
-   }
-  },
-  {
-   "id": "ollama.phind-codellama-34b",
-   "provider": "ollama",
-   "title": "phind-codellama:34b",
-   "description": "Code generation model based on Code Llama. This file: 34B parameters, Q4_0, 19 GB. Needs about 22 GB of memory with Arcana's default 4,096-token context; longer contexts need more. The file has no chat template, so llamafile falls back to a generic one and answers may be poorer.",
-   "category": "assistant",
-   "subcategory": "model",
-   "tags": [
-    "ai",
-    "assistant",
-    "gguf",
-    "llama",
-    "ollama"
-   ],
-   "family": "ollama.phind-codellama",
-   "variant": "34b",
-   "variantLabel": "34b: 19 GB file, about 22 GB memory",
-   "sourceUrl": "https://ollama.com/library/phind-codellama",
-   "version": "2026-11-26",
-   "lastVerified": "2026-11-26T00:00:00Z",
-   "languages": [
-    "mul"
-   ],
-   "coverage": {
-    "scope": "none"
-   },
-   "format": "gguf",
-   "files": [
-    {
-     "name": "phind-codellama-34b-Q4_0.gguf",
-     "size": 19052048544,
-     "hashes": {
-      "sha256": "45488384ce7a0a42ed3afa01b759df504b9d994f896aacbea64e5b1414d38ba2"
-     },
-     "mirrors": [
-      {
-       "url": "https://registry.ollama.ai/v2/library/phind-codellama/blobs/sha256:45488384ce7a0a42ed3afa01b759df504b9d994f896aacbea64e5b1414d38ba2"
-      }
-     ]
-    }
-   ],
-   "downloadSize": 19052048544,
-   "installedSize": 19052048544,
-   "license": {
-    "id": "LicenseRef-Llama-2",
-    "name": "Llama 2 Community License",
-    "url": "https://ai.meta.com/llama/license/",
-    "redistribution": "unknown",
-    "verified": false,
-    "notes": "The license text in the Ollama registry is the Llama 2 Community License. Not yet confirmed against the publisher's own statement."
-   },
-   "capabilities": {
-    "fullTextSearch": false,
-    "titleSearch": false
-   },
-   "media": {
-    "pictures": false,
-    "videos": false
-   },
-   "dependencies": [
-    "arcana.llamafile"
-   ],
-   "updateStrategy": "snapshot-replace",
-   "warnings": [
-    {
-     "kind": "content",
-     "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
-    }
-   ],
-   "stats": {
-    "contextLength": 16384,
-    "memoryBytes": 21124530139,
-    "parameters": 33743970304
-   },
-   "popularity": 1,
-   "providerRef": {
-    "architecture": "llama",
-    "chatTemplate": "none",
-    "ollama": "phind-codellama:34b",
-    "quantization": "Q4_0"
    }
   },
   {
@@ -20897,7 +19092,6 @@
     "memoryBytes": 18763086606,
     "parameters": 26895998464
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen35",
     "ollama": "pplx-decider:27b",
@@ -20980,7 +19174,6 @@
     "memoryBytes": 1131966139,
     "parameters": 619570176
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "qwen:0.5b",
@@ -21062,7 +19255,6 @@
     "memoryBytes": 2296126262,
     "parameters": 1836828672
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "qwen:1.8b",
@@ -21144,7 +19336,6 @@
     "memoryBytes": 67691326184,
     "parameters": 111209914368
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "qwen:110b",
@@ -21226,7 +19417,6 @@
     "memoryBytes": 12258304419,
     "parameters": 14167290880
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "qwen:14b",
@@ -21308,7 +19498,6 @@
     "memoryBytes": 20811918376,
     "parameters": 32512218112
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "qwen:32b",
@@ -21390,7 +19579,6 @@
     "memoryBytes": 4438884078,
     "parameters": 3950369280
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "qwen:4b",
@@ -21472,7 +19660,6 @@
     "memoryBytes": 54102403715,
     "parameters": 72287920128
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "qwen:72b",
@@ -21554,7 +19741,6 @@
     "memoryBytes": 7199558772,
     "parameters": 7721324544
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "qwen:7b",
@@ -21636,7 +19822,6 @@
     "memoryBytes": 734664014,
     "parameters": 494032768
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "qwen2:0.5b",
@@ -21718,7 +19903,6 @@
     "memoryBytes": 1413712945,
     "parameters": 1543714304
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "qwen2:1.5b",
@@ -21800,7 +19984,6 @@
     "memoryBytes": 44950072107,
     "parameters": 72706203648
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "qwen2:72b",
@@ -21882,7 +20065,6 @@
     "memoryBytes": 5202411425,
     "parameters": 7615616512
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "qwen2:7b",
@@ -21964,7 +20146,6 @@
     "memoryBytes": 1413713315,
     "parameters": 1543714304
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "qwen2-math:1.5b",
@@ -22046,7 +20227,6 @@
     "memoryBytes": 44950072611,
     "parameters": 72706203648
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "qwen2-math:72b",
@@ -22128,7 +20308,6 @@
     "memoryBytes": 5202411761,
     "parameters": 7615616512
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "qwen2-math:7b",
@@ -22210,7 +20389,6 @@
     "memoryBytes": 782602780,
     "parameters": 494032768
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "qwen2.5:0.5b",
@@ -22292,7 +20470,6 @@
     "memoryBytes": 1467364249,
     "parameters": 1543714304
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "qwen2.5:1.5b",
@@ -22374,7 +20551,6 @@
     "memoryBytes": 10557395390,
     "parameters": 14770033664
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "qwen2.5:14b",
@@ -22456,7 +20632,6 @@
     "memoryBytes": 22232217726,
     "parameters": 32763876352
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "qwen2.5:32b",
@@ -22538,7 +20713,6 @@
     "memoryBytes": 2491965902,
     "parameters": 3085938688
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "qwen2.5:3b",
@@ -22620,7 +20794,6 @@
     "memoryBytes": 51443251040,
     "parameters": 72706203648
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "qwen2.5:72b",
@@ -22702,7 +20875,6 @@
     "memoryBytes": 5466681473,
     "parameters": 7615616512
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "qwen2.5:7b",
@@ -22777,6 +20949,10 @@
     {
      "kind": "content",
      "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
+    },
+    {
+     "kind": "content",
+     "text": "Made for programming: it answers general questions poorly."
     }
    ],
    "stats": {
@@ -22784,7 +20960,6 @@
     "memoryBytes": 782602848,
     "parameters": 494032768
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "qwen2.5-coder:0.5b",
@@ -22859,6 +21034,10 @@
     {
      "kind": "content",
      "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
+    },
+    {
+     "kind": "content",
+     "text": "Made for programming: it answers general questions poorly."
     }
    ],
    "stats": {
@@ -22866,7 +21045,6 @@
     "memoryBytes": 1467364316,
     "parameters": 1543714304
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "qwen2.5-coder:1.5b",
@@ -22941,6 +21119,10 @@
     {
      "kind": "content",
      "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
+    },
+    {
+     "kind": "content",
+     "text": "Made for programming: it answers general questions poorly."
     }
    ],
    "stats": {
@@ -22948,7 +21130,6 @@
     "memoryBytes": 10557395491,
     "parameters": 14770033664
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "qwen2.5-coder:14b",
@@ -23023,6 +21204,10 @@
     {
      "kind": "content",
      "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
+    },
+    {
+     "kind": "content",
+     "text": "Made for programming: it answers general questions poorly."
     }
    ],
    "stats": {
@@ -23030,7 +21215,6 @@
     "memoryBytes": 22232217827,
     "parameters": 32763876352
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "qwen2.5-coder:32b",
@@ -23105,6 +21289,10 @@
     {
      "kind": "content",
      "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
+    },
+    {
+     "kind": "content",
+     "text": "Made for programming: it answers general questions poorly."
     }
    ],
    "stats": {
@@ -23112,7 +21300,6 @@
     "memoryBytes": 2491965969,
     "parameters": 3085938688
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "qwen2.5-coder:3b",
@@ -23187,6 +21374,10 @@
     {
      "kind": "content",
      "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
+    },
+    {
+     "kind": "content",
+     "text": "Made for programming: it answers general questions poorly."
     }
    ],
    "stats": {
@@ -23194,7 +21385,6 @@
     "memoryBytes": 5466681574,
     "parameters": 7615616512
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "qwen2.5-coder:7b",
@@ -23276,7 +21466,6 @@
     "memoryBytes": 1333106948,
     "parameters": 751632384
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen3",
     "ollama": "qwen3:0.6b",
@@ -23358,7 +21547,6 @@
     "memoryBytes": 2211578612,
     "parameters": 2031739904
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen3",
     "ollama": "qwen3:1.7b",
@@ -23440,7 +21628,6 @@
     "memoryBytes": 10725655580,
     "parameters": 14768307200
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen3",
     "ollama": "qwen3:14b",
@@ -23522,7 +21709,6 @@
     "memoryBytes": 150364879299,
     "parameters": 235093634560
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen3moe",
     "ollama": "qwen3:235b",
@@ -23604,7 +21790,6 @@
     "memoryBytes": 20201746132,
     "parameters": 30532122624
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen3moe",
     "ollama": "qwen3:30b",
@@ -23686,7 +21871,6 @@
     "memoryBytes": 22599616792,
     "parameters": 32762123264
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen3",
     "ollama": "qwen3:32b",
@@ -23768,7 +21952,6 @@
     "memoryBytes": 3540697080,
     "parameters": 4022468096
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen3",
     "ollama": "qwen3:4b",
@@ -23850,7 +22033,6 @@
     "memoryBytes": 6405195796,
     "parameters": 8190735360
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen3",
     "ollama": "qwen3:8b",
@@ -23925,6 +22107,10 @@
     {
      "kind": "content",
      "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
+    },
+    {
+     "kind": "content",
+     "text": "Made for programming: it answers general questions poorly."
     }
    ],
    "stats": {
@@ -23932,7 +22118,6 @@
     "memoryBytes": 20201749156,
     "parameters": 30532122624
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen3moe",
     "ollama": "qwen3-coder:30b",
@@ -24007,6 +22192,10 @@
     {
      "kind": "content",
      "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
+    },
+    {
+     "kind": "content",
+     "text": "Made for programming: it answers general questions poorly."
     }
    ],
    "stats": {
@@ -24014,7 +22203,6 @@
     "memoryBytes": 305916525828,
     "parameters": 480154875392
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen3moe",
     "ollama": "qwen3-coder:480b",
@@ -24096,7 +22284,6 @@
     "memoryBytes": 53586112756,
     "parameters": 79674391296
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen3next",
     "ollama": "qwen3-next:80b",
@@ -24177,7 +22364,6 @@
     "memoryBytes": 3540698256,
     "parameters": 4022468096
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen3vl",
     "ollama": "qwen3-vl:4b",
@@ -24259,7 +22445,6 @@
     "memoryBytes": 6198363571,
     "parameters": 8190735360
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen3vl",
     "ollama": "qwen3-vl:8b",
@@ -24341,7 +22526,6 @@
     "memoryBytes": 1368335088,
     "parameters": 752393024
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen35",
     "ollama": "qwen3.5:0.8b",
@@ -24423,7 +22607,6 @@
     "memoryBytes": 18763083582,
     "parameters": 26895998464
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen35",
     "ollama": "qwen3.5:27b",
@@ -24505,7 +22688,6 @@
     "memoryBytes": 2628512462,
     "parameters": 1881825088
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen35",
     "ollama": "qwen3.5:2b",
@@ -24587,7 +22769,6 @@
     "memoryBytes": 22875213204,
     "parameters": 34660610688
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen35moe",
     "ollama": "qwen3.5:35b",
@@ -24669,7 +22850,6 @@
     "memoryBytes": 3632466588,
     "parameters": 4205751296
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen35",
     "ollama": "qwen3.5:4b",
@@ -24751,7 +22931,6 @@
     "memoryBytes": 6762008288,
     "parameters": 8953803264
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen35",
     "ollama": "qwen3.5:9b",
@@ -24833,7 +23012,6 @@
     "memoryBytes": 19084907504,
     "parameters": 27320697856
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen35",
     "ollama": "qwen3.6:27b",
@@ -24915,7 +23093,6 @@
     "memoryBytes": 23462910736,
     "parameters": 35505251456
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen35moe",
     "ollama": "qwen3.6:35b",
@@ -24997,7 +23174,6 @@
     "memoryBytes": 19056342027,
     "parameters": 27320697856
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen35",
     "ollama": "qwen3.8:27b",
@@ -25080,7 +23256,6 @@
     "memoryBytes": 22232217928,
     "parameters": 32763876352
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "qwq:32b",
@@ -25162,7 +23337,6 @@
     "memoryBytes": 449528113180,
     "parameters": 671026419200
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "deepseek2",
     "ollama": "r1-1776:671b",
@@ -25244,7 +23418,6 @@
     "memoryBytes": 46303165947,
     "parameters": 70553706560
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "r1-1776:70b",
@@ -25326,7 +23499,6 @@
     "memoryBytes": 734664417,
     "parameters": 494032768
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "reader-lm:0.5b",
@@ -25408,7 +23580,6 @@
     "memoryBytes": 1413713348,
     "parameters": 1543714304
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "reader-lm:1.5b",
@@ -25489,7 +23660,6 @@
     "memoryBytes": 43625045691,
     "parameters": 70553804864
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "reflection:70b",
@@ -25570,7 +23740,6 @@
     "memoryBytes": 6221592406,
     "parameters": 8310501376
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "gemma3",
     "ollama": "rnj-1:8b",
@@ -25652,7 +23821,6 @@
     "memoryBytes": 1524245457,
     "parameters": 988064640
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "sailor2:1b",
@@ -25734,7 +23902,6 @@
     "memoryBytes": 13591814161,
     "parameters": 19173020672
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "sailor2:20b",
@@ -25816,7 +23983,6 @@
     "memoryBytes": 6088089208,
     "parameters": 8546930176
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "sailor2:8b",
@@ -25895,258 +24061,11 @@
     "memoryBytes": 5165817776,
     "parameters": 7241748480
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
     "ollama": "samantha-mistral:7b",
     "quantization": "Q4_0"
-   }
-  },
-  {
-   "id": "ollama.shieldgemma-27b",
-   "provider": "ollama",
-   "title": "shieldgemma:27b",
-   "description": "ShieldGemma is set of instruction tuned models for evaluating the safety of text prompt input and text output responses against a set of defined safety policies. This file: 27B parameters, Q4_K_M, 17 GB. Needs about 20 GB of memory with Arcana's default 4,096-token context; longer contexts need more.",
-   "category": "assistant",
-   "subcategory": "model",
-   "tags": [
-    "ai",
-    "assistant",
-    "gemma2",
-    "gguf",
-    "ollama"
-   ],
-   "family": "ollama.shieldgemma",
-   "variant": "27b",
-   "variantLabel": "27b: 17 GB file, about 20 GB memory",
-   "publisher": "Google",
-   "sourceUrl": "https://ollama.com/library/shieldgemma",
-   "version": "2026-11-26",
-   "lastVerified": "2026-11-26T00:00:00Z",
-   "languages": [
-    "mul"
-   ],
-   "coverage": {
-    "scope": "none"
-   },
-   "format": "gguf",
-   "files": [
-    {
-     "name": "shieldgemma-27b-Q4_K_M.gguf",
-     "size": 16645382496,
-     "hashes": {
-      "sha256": "208c1d78ecb965ddd634943419cd90a43a90d6f314a83037c031f0d157afd5da"
-     },
-     "mirrors": [
-      {
-       "url": "https://registry.ollama.ai/v2/library/shieldgemma/blobs/sha256:208c1d78ecb965ddd634943419cd90a43a90d6f314a83037c031f0d157afd5da"
-      }
-     ]
-    }
-   ],
-   "downloadSize": 16645382496,
-   "installedSize": 16645382496,
-   "license": {
-    "id": "LicenseRef-Gemma",
-    "name": "Gemma Terms of Use",
-    "url": "https://ai.google.dev/gemma/terms",
-    "redistribution": "restricted",
-    "verified": true,
-    "notes": "The publisher (Google) states this license on https://huggingface.co/google/shieldgemma-27b; the Ollama registry's copy of the license agrees."
-   },
-   "capabilities": {
-    "fullTextSearch": false,
-    "titleSearch": false
-   },
-   "media": {
-    "pictures": false,
-    "videos": false
-   },
-   "dependencies": [
-    "arcana.llamafile"
-   ],
-   "updateStrategy": "snapshot-replace",
-   "warnings": [
-    {
-     "kind": "content",
-     "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
-    }
-   ],
-   "stats": {
-    "contextLength": 8192,
-    "memoryBytes": 19335728292,
-    "parameters": 27227128320
-   },
-   "popularity": 1,
-   "providerRef": {
-    "architecture": "gemma2",
-    "ollama": "shieldgemma:27b",
-    "quantization": "Q4_K_M"
-   }
-  },
-  {
-   "id": "ollama.shieldgemma-2b",
-   "provider": "ollama",
-   "title": "shieldgemma:2b",
-   "description": "ShieldGemma is set of instruction tuned models for evaluating the safety of text prompt input and text output responses against a set of defined safety policies. This file: 2B parameters, Q4_K_M, 1.7 GB. Needs about 3 GB of memory with Arcana's default 4,096-token context; longer contexts need more.",
-   "category": "assistant",
-   "subcategory": "model",
-   "tags": [
-    "ai",
-    "assistant",
-    "gemma2",
-    "gguf",
-    "ollama"
-   ],
-   "family": "ollama.shieldgemma",
-   "variant": "2b",
-   "variantLabel": "2b: 1.7 GB file, about 3 GB memory",
-   "publisher": "Google",
-   "sourceUrl": "https://ollama.com/library/shieldgemma",
-   "version": "2026-11-26",
-   "lastVerified": "2026-11-26T00:00:00Z",
-   "languages": [
-    "mul"
-   ],
-   "coverage": {
-    "scope": "none"
-   },
-   "format": "gguf",
-   "files": [
-    {
-     "name": "shieldgemma-2b-Q4_K_M.gguf",
-     "size": 1708583328,
-     "hashes": {
-      "sha256": "76d0eef081fa3855b6667be5957b85fe132672165efca631347a8c03ea69b85a"
-     },
-     "mirrors": [
-      {
-       "url": "https://registry.ollama.ai/v2/library/shieldgemma/blobs/sha256:76d0eef081fa3855b6667be5957b85fe132672165efca631347a8c03ea69b85a"
-      }
-     ]
-    }
-   ],
-   "downloadSize": 1708583328,
-   "installedSize": 1708583328,
-   "license": {
-    "id": "LicenseRef-Gemma",
-    "name": "Gemma Terms of Use",
-    "url": "https://ai.google.dev/gemma/terms",
-    "redistribution": "restricted",
-    "verified": true,
-    "notes": "The publisher (Google) states this license on https://huggingface.co/google/shieldgemma-2b; the Ollama registry's copy of the license agrees."
-   },
-   "capabilities": {
-    "fullTextSearch": false,
-    "titleSearch": false
-   },
-   "media": {
-    "pictures": false,
-    "videos": false
-   },
-   "dependencies": [
-    "arcana.llamafile"
-   ],
-   "updateStrategy": "snapshot-replace",
-   "warnings": [
-    {
-     "kind": "content",
-     "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
-    }
-   ],
-   "stats": {
-    "contextLength": 8192,
-    "memoryBytes": 2544792910,
-    "parameters": 2614341888
-   },
-   "popularity": 1,
-   "providerRef": {
-    "architecture": "gemma2",
-    "ollama": "shieldgemma:2b",
-    "quantization": "Q4_K_M"
-   }
-  },
-  {
-   "id": "ollama.shieldgemma-9b",
-   "provider": "ollama",
-   "title": "shieldgemma:9b",
-   "description": "ShieldGemma is set of instruction tuned models for evaluating the safety of text prompt input and text output responses against a set of defined safety policies. This file: 9B parameters, Q4_K_M, 5.8 GB. Needs about 8 GB of memory with Arcana's default 4,096-token context; longer contexts need more.",
-   "category": "assistant",
-   "subcategory": "model",
-   "tags": [
-    "ai",
-    "assistant",
-    "gemma2",
-    "gguf",
-    "ollama"
-   ],
-   "family": "ollama.shieldgemma",
-   "variant": "9b",
-   "variantLabel": "9b: 5.8 GB file, about 8 GB memory",
-   "publisher": "Google",
-   "sourceUrl": "https://ollama.com/library/shieldgemma",
-   "version": "2026-11-26",
-   "lastVerified": "2026-11-26T00:00:00Z",
-   "languages": [
-    "mul"
-   ],
-   "coverage": {
-    "scope": "none"
-   },
-   "format": "gguf",
-   "files": [
-    {
-     "name": "shieldgemma-9b-Q4_K_M.gguf",
-     "size": 5761058560,
-     "hashes": {
-      "sha256": "0461c50bb48f654268b4beb6ea6161871b0a52f6576eb5969b4b620345d8dcad"
-     },
-     "mirrors": [
-      {
-       "url": "https://registry.ollama.ai/v2/library/shieldgemma/blobs/sha256:0461c50bb48f654268b4beb6ea6161871b0a52f6576eb5969b4b620345d8dcad"
-      }
-     ]
-    }
-   ],
-   "downloadSize": 5761058560,
-   "installedSize": 5761058560,
-   "license": {
-    "id": "LicenseRef-Gemma",
-    "name": "Gemma Terms of Use",
-    "url": "https://ai.google.dev/gemma/terms",
-    "redistribution": "restricted",
-    "verified": true,
-    "notes": "The publisher (Google) states this license on https://huggingface.co/google/shieldgemma-9b; the Ollama registry's copy of the license agrees."
-   },
-   "capabilities": {
-    "fullTextSearch": false,
-    "titleSearch": false
-   },
-   "media": {
-    "pictures": false,
-    "videos": false
-   },
-   "dependencies": [
-    "arcana.llamafile"
-   ],
-   "updateStrategy": "snapshot-replace",
-   "warnings": [
-    {
-     "kind": "content",
-     "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
-    }
-   ],
-   "stats": {
-    "contextLength": 8192,
-    "memoryBytes": 7772970432,
-    "parameters": 9241705984
-   },
-   "popularity": 1,
-   "providerRef": {
-    "architecture": "gemma2",
-    "ollama": "shieldgemma:9b",
-    "quantization": "Q4_K_M"
    }
   },
   {
@@ -26224,7 +24143,6 @@
     "memoryBytes": 4262459203,
     "parameters": 3397103616
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen2",
     "ollama": "smallthinker:3b",
@@ -26306,7 +24224,6 @@
     "memoryBytes": 2160144878,
     "parameters": 1711376384
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "smollm:1.7b",
@@ -26388,7 +24305,6 @@
     "memoryBytes": 505258300,
     "parameters": 134515008
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "smollm:135m",
@@ -26470,7 +24386,6 @@
     "memoryBytes": 722919851,
     "parameters": 361821120
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "smollm:360m",
@@ -26552,7 +24467,6 @@
     "memoryBytes": 3031314556,
     "parameters": 1711376384
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "smollm2:1.7b",
@@ -26634,7 +24548,6 @@
     "memoryBytes": 693374889,
     "parameters": 134515008
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "smollm2:135m",
@@ -26716,7 +24629,6 @@
     "memoryBytes": 1244176441,
     "parameters": 361821120
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "smollm2:360m",
@@ -26798,173 +24710,10 @@
     "memoryBytes": 7495881998,
     "parameters": 10731524096
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
     "ollama": "solar:10.7b",
-    "quantization": "Q4_0"
-   }
-  },
-  {
-   "id": "ollama.sqlcoder-15b",
-   "provider": "ollama",
-   "title": "sqlcoder:15b",
-   "description": "SQLCoder is a code completion model fined-tuned on StarCoder for SQL generation tasks. This file: 15B parameters, Q4_0, 9.0 GB. Needs about 10 GB of memory with Arcana's default 4,096-token context; longer contexts need more. The file has no chat template, so llamafile falls back to a generic one and answers may be poorer.",
-   "category": "assistant",
-   "subcategory": "model",
-   "tags": [
-    "ai",
-    "assistant",
-    "gguf",
-    "ollama",
-    "starcoder"
-   ],
-   "family": "ollama.sqlcoder",
-   "variant": "15b",
-   "variantLabel": "15b: 9.0 GB file, about 10 GB memory",
-   "sourceUrl": "https://ollama.com/library/sqlcoder",
-   "version": "2026-11-26",
-   "lastVerified": "2026-11-26T00:00:00Z",
-   "languages": [
-    "mul"
-   ],
-   "coverage": {
-    "scope": "none"
-   },
-   "format": "gguf",
-   "files": [
-    {
-     "name": "sqlcoder-15b-Q4_0.gguf",
-     "size": 8987608544,
-     "hashes": {
-      "sha256": "c632104c01f3a66f0766c2c253b9b713cc4aae936490aa2b446e00f21a822290"
-     },
-     "mirrors": [
-      {
-       "url": "https://registry.ollama.ai/v2/library/sqlcoder/blobs/sha256:c632104c01f3a66f0766c2c253b9b713cc4aae936490aa2b446e00f21a822290"
-      }
-     ]
-    }
-   ],
-   "downloadSize": 8987608544,
-   "installedSize": 8987608544,
-   "license": {
-    "id": "CC-BY-SA-4.0",
-    "name": "Creative Commons Attribution-ShareAlike 4.0",
-    "url": "https://creativecommons.org/licenses/by-sa/4.0/",
-    "redistribution": "unknown",
-    "verified": false,
-    "notes": "The license text in the Ollama registry is the Creative Commons Attribution-ShareAlike 4.0. Not yet confirmed against the publisher's own statement."
-   },
-   "capabilities": {
-    "fullTextSearch": false,
-    "titleSearch": false
-   },
-   "media": {
-    "pictures": false,
-    "videos": false
-   },
-   "dependencies": [
-    "arcana.llamafile"
-   ],
-   "updateStrategy": "snapshot-replace",
-   "warnings": [
-    {
-     "kind": "content",
-     "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
-    }
-   ],
-   "stats": {
-    "contextLength": 8192,
-    "memoryBytes": 9835447851,
-    "parameters": 15819446272
-   },
-   "popularity": 1,
-   "providerRef": {
-    "architecture": "starcoder",
-    "chatTemplate": "none",
-    "ollama": "sqlcoder:15b",
-    "quantization": "Q4_0"
-   }
-  },
-  {
-   "id": "ollama.sqlcoder-7b",
-   "provider": "ollama",
-   "title": "sqlcoder:7b",
-   "description": "SQLCoder is a code completion model fined-tuned on StarCoder for SQL generation tasks. This file: 7B parameters, Q4_0, 4.1 GB. Needs about 6 GB of memory with Arcana's default 4,096-token context; longer contexts need more. The file has no chat template, so llamafile falls back to a generic one and answers may be poorer.",
-   "category": "assistant",
-   "subcategory": "model",
-   "tags": [
-    "ai",
-    "assistant",
-    "gguf",
-    "llama",
-    "ollama"
-   ],
-   "family": "ollama.sqlcoder",
-   "variant": "7b",
-   "variantLabel": "7b: 4.1 GB file, about 6 GB memory",
-   "sourceUrl": "https://ollama.com/library/sqlcoder",
-   "version": "2026-11-26",
-   "lastVerified": "2026-11-26T00:00:00Z",
-   "languages": [
-    "mul"
-   ],
-   "coverage": {
-    "scope": "none"
-   },
-   "format": "gguf",
-   "files": [
-    {
-     "name": "sqlcoder-7b-Q4_0.gguf",
-     "size": 4108916352,
-     "hashes": {
-      "sha256": "bd9d5f911cb214dba65cc678b115d022b042da77507429bd24c5082262209a20"
-     },
-     "mirrors": [
-      {
-       "url": "https://registry.ollama.ai/v2/library/sqlcoder/blobs/sha256:bd9d5f911cb214dba65cc678b115d022b042da77507429bd24c5082262209a20"
-      }
-     ]
-    }
-   ],
-   "downloadSize": 4108916352,
-   "installedSize": 4108916352,
-   "license": {
-    "id": "unknown",
-    "redistribution": "unknown",
-    "verified": false,
-    "notes": "The Ollama registry entry carries no license text. Not yet confirmed against the publisher's own statement."
-   },
-   "capabilities": {
-    "fullTextSearch": false,
-    "titleSearch": false
-   },
-   "media": {
-    "pictures": false,
-    "videos": false
-   },
-   "dependencies": [
-    "arcana.llamafile"
-   ],
-   "updateStrategy": "snapshot-replace",
-   "warnings": [
-    {
-     "kind": "content",
-     "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
-    }
-   ],
-   "stats": {
-    "contextLength": 32768,
-    "memoryBytes": 5165805881,
-    "parameters": 7241732096
-   },
-   "popularity": 1,
-   "providerRef": {
-    "architecture": "llama",
-    "chatTemplate": "none",
-    "ollama": "sqlcoder:7b",
     "quantization": "Q4_0"
    }
   },
@@ -27042,7 +24791,6 @@
     "memoryBytes": 11404142355,
     "parameters": 13015864320
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -27124,7 +24872,6 @@
     "memoryBytes": 42472611790,
     "parameters": 68976648192
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -27206,7 +24953,6 @@
     "memoryBytes": 6479153840,
     "parameters": 6738415616
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -27281,6 +25027,10 @@
     {
      "kind": "content",
      "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
+    },
+    {
+     "kind": "content",
+     "text": "Made for programming: it answers general questions poorly."
     }
    ],
    "stats": {
@@ -27288,7 +25038,6 @@
     "memoryBytes": 3345750276,
     "parameters": 2795443200
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "stablelm",
     "ollama": "stable-code:3b",
@@ -27370,7 +25119,6 @@
     "memoryBytes": 3345749974,
     "parameters": 2795443200
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "stablelm",
     "ollama": "stablelm-zephyr:3b",
@@ -27452,7 +25200,6 @@
     "memoryBytes": 2151800486,
     "parameters": 1644515328
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "stablelm",
     "ollama": "stablelm2:1.6b",
@@ -27534,579 +25281,9 @@
     "memoryBytes": 8470775844,
     "parameters": 12143185920
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "stablelm",
     "ollama": "stablelm2:12b",
-    "quantization": "Q4_0"
-   }
-  },
-  {
-   "id": "ollama.starcoder-15b",
-   "provider": "ollama",
-   "title": "starcoder:15b",
-   "description": "StarCoder is a code generation model trained on 80+ programming languages. This file: 15B parameters, Q4_0, 9.0 GB. Needs about 10 GB of memory with Arcana's default 4,096-token context; longer contexts need more. The file has no chat template, so llamafile falls back to a generic one and answers may be poorer.",
-   "category": "assistant",
-   "subcategory": "model",
-   "tags": [
-    "ai",
-    "assistant",
-    "gguf",
-    "ollama",
-    "starcoder"
-   ],
-   "family": "ollama.starcoder",
-   "variant": "15b",
-   "variantLabel": "15b: 9.0 GB file, about 10 GB memory",
-   "sourceUrl": "https://ollama.com/library/starcoder",
-   "version": "2026-11-26",
-   "lastVerified": "2026-11-26T00:00:00Z",
-   "languages": [
-    "mul"
-   ],
-   "coverage": {
-    "scope": "none"
-   },
-   "format": "gguf",
-   "files": [
-    {
-     "name": "starcoder-15b-Q4_0.gguf",
-     "size": 8987608544,
-     "hashes": {
-      "sha256": "5f0c96a0687463495a4d0815300ec6fffd5f0b7fb49db3c2fad4d8cff85960e2"
-     },
-     "mirrors": [
-      {
-       "url": "https://registry.ollama.ai/v2/library/starcoder/blobs/sha256:5f0c96a0687463495a4d0815300ec6fffd5f0b7fb49db3c2fad4d8cff85960e2"
-      }
-     ]
-    }
-   ],
-   "downloadSize": 8987608544,
-   "installedSize": 8987608544,
-   "license": {
-    "id": "unknown",
-    "redistribution": "unknown",
-    "verified": false,
-    "notes": "The Ollama registry entry carries no license text. Not yet confirmed against the publisher's own statement."
-   },
-   "capabilities": {
-    "fullTextSearch": false,
-    "titleSearch": false
-   },
-   "media": {
-    "pictures": false,
-    "videos": false
-   },
-   "dependencies": [
-    "arcana.llamafile"
-   ],
-   "updateStrategy": "snapshot-replace",
-   "warnings": [
-    {
-     "kind": "content",
-     "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
-    }
-   ],
-   "stats": {
-    "contextLength": 8192,
-    "memoryBytes": 9835447851,
-    "parameters": 15819446272
-   },
-   "popularity": 1,
-   "providerRef": {
-    "architecture": "starcoder",
-    "chatTemplate": "none",
-    "ollama": "starcoder:15b",
-    "quantization": "Q4_0"
-   }
-  },
-  {
-   "id": "ollama.starcoder-1b",
-   "provider": "ollama",
-   "title": "starcoder:1b",
-   "description": "StarCoder is a code generation model trained on 80+ programming languages. This file: 1B parameters, Q4_0, 726 MB. Needs about 1.5 GB of memory with Arcana's default 4,096-token context; longer contexts need more. The file has no chat template, so llamafile falls back to a generic one and answers may be poorer.",
-   "category": "assistant",
-   "subcategory": "model",
-   "tags": [
-    "ai",
-    "assistant",
-    "gguf",
-    "ollama",
-    "starcoder"
-   ],
-   "family": "ollama.starcoder",
-   "variant": "1b",
-   "variantLabel": "1b: 726 MB file, about 1.5 GB memory",
-   "sourceUrl": "https://ollama.com/library/starcoder",
-   "version": "2026-11-26",
-   "lastVerified": "2026-11-26T00:00:00Z",
-   "languages": [
-    "mul"
-   ],
-   "coverage": {
-    "scope": "none"
-   },
-   "format": "gguf",
-   "files": [
-    {
-     "name": "starcoder-1b-Q4_0.gguf",
-     "size": 726080480,
-     "hashes": {
-      "sha256": "397f02a8d32c293bcb63e2578a03a3d8430d8ec744f5b3180cc677e702fcd2cf"
-     },
-     "mirrors": [
-      {
-       "url": "https://registry.ollama.ai/v2/library/starcoder/blobs/sha256:397f02a8d32c293bcb63e2578a03a3d8430d8ec744f5b3180cc677e702fcd2cf"
-      }
-     ]
-    }
-   ],
-   "downloadSize": 726080480,
-   "installedSize": 726080480,
-   "license": {
-    "id": "unknown",
-    "redistribution": "unknown",
-    "verified": false,
-    "notes": "The Ollama registry entry carries no license text. Not yet confirmed against the publisher's own statement."
-   },
-   "capabilities": {
-    "fullTextSearch": false,
-    "titleSearch": false
-   },
-   "media": {
-    "pictures": false,
-    "videos": false
-   },
-   "dependencies": [
-    "arcana.llamafile"
-   ],
-   "updateStrategy": "snapshot-replace",
-   "warnings": [
-    {
-     "kind": "content",
-     "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
-    }
-   ],
-   "stats": {
-    "contextLength": 8192,
-    "memoryBytes": 1127288952,
-    "parameters": 1237870592
-   },
-   "popularity": 1,
-   "providerRef": {
-    "architecture": "starcoder",
-    "chatTemplate": "none",
-    "ollama": "starcoder:1b",
-    "quantization": "Q4_0"
-   }
-  },
-  {
-   "id": "ollama.starcoder-3b",
-   "provider": "ollama",
-   "title": "starcoder:3b",
-   "description": "StarCoder is a code generation model trained on 80+ programming languages. This file: 3B parameters, Q4_0, 1.8 GB. Needs about 2.5 GB of memory with Arcana's default 4,096-token context; longer contexts need more. The file has no chat template, so llamafile falls back to a generic one and answers may be poorer.",
-   "category": "assistant",
-   "subcategory": "model",
-   "tags": [
-    "ai",
-    "assistant",
-    "gguf",
-    "ollama",
-    "starcoder"
-   ],
-   "family": "ollama.starcoder",
-   "variant": "3b",
-   "variantLabel": "3b: 1.8 GB file, about 2.5 GB memory",
-   "sourceUrl": "https://ollama.com/library/starcoder",
-   "version": "2026-11-26",
-   "lastVerified": "2026-11-26T00:00:00Z",
-   "languages": [
-    "mul"
-   ],
-   "coverage": {
-    "scope": "none"
-   },
-   "format": "gguf",
-   "files": [
-    {
-     "name": "starcoder-3b-Q4_0.gguf",
-     "size": 1831228256,
-     "hashes": {
-      "sha256": "b4a4eea1f5d801ddec62c03266ef18be14fca16332cf82ff332782d4f14dc21f"
-     },
-     "mirrors": [
-      {
-       "url": "https://registry.ollama.ai/v2/library/starcoder/blobs/sha256:b4a4eea1f5d801ddec62c03266ef18be14fca16332cf82ff332782d4f14dc21f"
-      }
-     ]
-    }
-   ],
-   "downloadSize": 1831228256,
-   "installedSize": 1831228256,
-   "license": {
-    "id": "unknown",
-    "redistribution": "unknown",
-    "verified": false,
-    "notes": "The Ollama registry entry carries no license text. Not yet confirmed against the publisher's own statement."
-   },
-   "capabilities": {
-    "fullTextSearch": false,
-    "titleSearch": false
-   },
-   "media": {
-    "pictures": false,
-    "videos": false
-   },
-   "dependencies": [
-    "arcana.llamafile"
-   ],
-   "updateStrategy": "snapshot-replace",
-   "warnings": [
-    {
-     "kind": "content",
-     "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
-    }
-   ],
-   "stats": {
-    "contextLength": 8192,
-    "memoryBytes": 2312859940,
-    "parameters": 3181723136
-   },
-   "popularity": 1,
-   "providerRef": {
-    "architecture": "starcoder",
-    "chatTemplate": "none",
-    "ollama": "starcoder:3b",
-    "quantization": "Q4_0"
-   }
-  },
-  {
-   "id": "ollama.starcoder-7b",
-   "provider": "ollama",
-   "title": "starcoder:7b",
-   "description": "StarCoder is a code generation model trained on 80+ programming languages. This file: 7B parameters, Q4_0, 4.3 GB. Needs about 5 GB of memory with Arcana's default 4,096-token context; longer contexts need more. The file has no chat template, so llamafile falls back to a generic one and answers may be poorer.",
-   "category": "assistant",
-   "subcategory": "model",
-   "tags": [
-    "ai",
-    "assistant",
-    "gguf",
-    "ollama",
-    "starcoder"
-   ],
-   "family": "ollama.starcoder",
-   "variant": "7b",
-   "variantLabel": "7b: 4.3 GB file, about 5 GB memory",
-   "sourceUrl": "https://ollama.com/library/starcoder",
-   "version": "2026-11-26",
-   "lastVerified": "2026-11-26T00:00:00Z",
-   "languages": [
-    "mul"
-   ],
-   "coverage": {
-    "scope": "none"
-   },
-   "format": "gguf",
-   "files": [
-    {
-     "name": "starcoder-7b-Q4_0.gguf",
-     "size": 4295250720,
-     "hashes": {
-      "sha256": "1f8634674678569060a61caa4ed6f967bbe3ffbdbde2d3edd0055ff160d1fdd9"
-     },
-     "mirrors": [
-      {
-       "url": "https://registry.ollama.ai/v2/library/starcoder/blobs/sha256:1f8634674678569060a61caa4ed6f967bbe3ffbdbde2d3edd0055ff160d1fdd9"
-      }
-     ]
-    }
-   ],
-   "downloadSize": 4295250720,
-   "installedSize": 4295250720,
-   "license": {
-    "id": "unknown",
-    "redistribution": "unknown",
-    "verified": false,
-    "notes": "The Ollama registry entry carries no license text. Not yet confirmed against the publisher's own statement."
-   },
-   "capabilities": {
-    "fullTextSearch": false,
-    "titleSearch": false
-   },
-   "media": {
-    "pictures": false,
-    "videos": false
-   },
-   "dependencies": [
-    "arcana.llamafile"
-   ],
-   "updateStrategy": "snapshot-replace",
-   "warnings": [
-    {
-     "kind": "content",
-     "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
-    }
-   ],
-   "stats": {
-    "contextLength": 8192,
-    "memoryBytes": 4912666440,
-    "parameters": 7528589824
-   },
-   "popularity": 1,
-   "providerRef": {
-    "architecture": "starcoder",
-    "chatTemplate": "none",
-    "ollama": "starcoder:7b",
-    "quantization": "Q4_0"
-   }
-  },
-  {
-   "id": "ollama.starcoder2-15b",
-   "provider": "ollama",
-   "title": "starcoder2:15b",
-   "description": "StarCoder2 is the next generation of transparently trained open code LLMs that comes in three sizes: 3B, 7B and 15B parameters. This file: 15B parameters, Q4_0, 9.1 GB. Needs about 11 GB of memory with Arcana's default 4,096-token context; longer contexts need more. The file has no chat template, so llamafile falls back to a generic one and answers may be poorer.",
-   "category": "assistant",
-   "subcategory": "model",
-   "tags": [
-    "ai",
-    "assistant",
-    "gguf",
-    "ollama",
-    "starcoder2"
-   ],
-   "family": "ollama.starcoder2",
-   "variant": "15b",
-   "variantLabel": "15b: 9.1 GB file, about 11 GB memory",
-   "publisher": "BigCode",
-   "sourceUrl": "https://ollama.com/library/starcoder2",
-   "version": "2026-11-26",
-   "lastVerified": "2026-11-26T00:00:00Z",
-   "languages": [
-    "mul"
-   ],
-   "coverage": {
-    "scope": "none"
-   },
-   "format": "gguf",
-   "files": [
-    {
-     "name": "starcoder2-15b-Q4_0.gguf",
-     "size": 9065400160,
-     "hashes": {
-      "sha256": "dc5deb763c383b81460256a0ac7e40b320c3b01632727ea407e386002588d417"
-     },
-     "mirrors": [
-      {
-       "url": "https://registry.ollama.ai/v2/library/starcoder2/blobs/sha256:dc5deb763c383b81460256a0ac7e40b320c3b01632727ea407e386002588d417"
-      }
-     ]
-    }
-   ],
-   "downloadSize": 9065400160,
-   "installedSize": 9065400160,
-   "license": {
-    "id": "LicenseRef-BigCode-OpenRAIL-M",
-    "name": "BigCode OpenRAIL-M v1",
-    "url": "https://www.bigcode-project.org/docs/pages/bigcode-openrail/",
-    "redistribution": "restricted",
-    "verified": true,
-    "notes": "The publisher (BigCode) states this license on https://huggingface.co/bigcode/starcoder2-15b; the Ollama registry's copy of the license agrees."
-   },
-   "capabilities": {
-    "fullTextSearch": false,
-    "titleSearch": false
-   },
-   "media": {
-    "pictures": false,
-    "videos": false
-   },
-   "dependencies": [
-    "arcana.llamafile"
-   ],
-   "updateStrategy": "snapshot-replace",
-   "warnings": [
-    {
-     "kind": "content",
-     "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
-    }
-   ],
-   "stats": {
-    "contextLength": 16384,
-    "memoryBytes": 10168787288,
-    "parameters": 15957889024
-   },
-   "popularity": 1,
-   "providerRef": {
-    "architecture": "starcoder2",
-    "chatTemplate": "none",
-    "ollama": "starcoder2:15b",
-    "quantization": "Q4_0"
-   }
-  },
-  {
-   "id": "ollama.starcoder2-3b",
-   "provider": "ollama",
-   "title": "starcoder2:3b",
-   "description": "StarCoder2 is the next generation of transparently trained open code LLMs that comes in three sizes: 3B, 7B and 15B parameters. This file: 3B parameters, Q4_0, 1.7 GB. Needs about 2.5 GB of memory with Arcana's default 4,096-token context; longer contexts need more. The file has no chat template, so llamafile falls back to a generic one and answers may be poorer.",
-   "category": "assistant",
-   "subcategory": "model",
-   "tags": [
-    "ai",
-    "assistant",
-    "gguf",
-    "ollama",
-    "starcoder2"
-   ],
-   "family": "ollama.starcoder2",
-   "variant": "3b",
-   "variantLabel": "3b: 1.7 GB file, about 2.5 GB memory",
-   "publisher": "BigCode",
-   "sourceUrl": "https://ollama.com/library/starcoder2",
-   "version": "2026-11-26",
-   "lastVerified": "2026-11-26T00:00:00Z",
-   "languages": [
-    "mul"
-   ],
-   "coverage": {
-    "scope": "none"
-   },
-   "format": "gguf",
-   "files": [
-    {
-     "name": "starcoder2-3b-Q4_0.gguf",
-     "size": 1709888576,
-     "hashes": {
-      "sha256": "28bfdfaeba9f51611c00ed322ba684ce6db076756dbc46643f98a8a748c5199e"
-     },
-     "mirrors": [
-      {
-       "url": "https://registry.ollama.ai/v2/library/starcoder2/blobs/sha256:28bfdfaeba9f51611c00ed322ba684ce6db076756dbc46643f98a8a748c5199e"
-      }
-     ]
-    }
-   ],
-   "downloadSize": 1709888576,
-   "installedSize": 1709888576,
-   "license": {
-    "id": "LicenseRef-BigCode-OpenRAIL-M",
-    "name": "BigCode OpenRAIL-M v1",
-    "url": "https://www.bigcode-project.org/docs/pages/bigcode-openrail/",
-    "redistribution": "restricted",
-    "verified": true,
-    "notes": "The publisher (BigCode) states this license on https://huggingface.co/bigcode/starcoder2-3b; the Ollama registry's copy of the license agrees."
-   },
-   "capabilities": {
-    "fullTextSearch": false,
-    "titleSearch": false
-   },
-   "media": {
-    "pictures": false,
-    "videos": false
-   },
-   "dependencies": [
-    "arcana.llamafile"
-   ],
-   "updateStrategy": "snapshot-replace",
-   "warnings": [
-    {
-     "kind": "content",
-     "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
-    }
-   ],
-   "stats": {
-    "contextLength": 16384,
-    "memoryBytes": 2235784924,
-    "parameters": 3030371328
-   },
-   "popularity": 1,
-   "providerRef": {
-    "architecture": "starcoder2",
-    "chatTemplate": "none",
-    "ollama": "starcoder2:3b",
-    "quantization": "Q4_0"
-   }
-  },
-  {
-   "id": "ollama.starcoder2-7b",
-   "provider": "ollama",
-   "title": "starcoder2:7b",
-   "description": "StarCoder2 is the next generation of transparently trained open code LLMs that comes in three sizes: 3B, 7B and 15B parameters. This file: 7B parameters, Q4_0, 4.0 GB. Needs about 5 GB of memory with Arcana's default 4,096-token context; longer contexts need more. The file has no chat template, so llamafile falls back to a generic one and answers may be poorer.",
-   "category": "assistant",
-   "subcategory": "model",
-   "tags": [
-    "ai",
-    "assistant",
-    "gguf",
-    "ollama",
-    "starcoder2"
-   ],
-   "family": "ollama.starcoder2",
-   "variant": "7b",
-   "variantLabel": "7b: 4.0 GB file, about 5 GB memory",
-   "publisher": "BigCode",
-   "sourceUrl": "https://ollama.com/library/starcoder2",
-   "version": "2026-11-26",
-   "lastVerified": "2026-11-26T00:00:00Z",
-   "languages": [
-    "mul"
-   ],
-   "coverage": {
-    "scope": "none"
-   },
-   "format": "gguf",
-   "files": [
-    {
-     "name": "starcoder2-7b-Q4_0.gguf",
-     "size": 4042799936,
-     "hashes": {
-      "sha256": "cf866ccad4e444eb559c9389867d3b67cf1dc93d79e9cc976049367ce3519adb"
-     },
-     "mirrors": [
-      {
-       "url": "https://registry.ollama.ai/v2/library/starcoder2/blobs/sha256:cf866ccad4e444eb559c9389867d3b67cf1dc93d79e9cc976049367ce3519adb"
-      }
-     ]
-    }
-   ],
-   "downloadSize": 4042799936,
-   "installedSize": 4042799936,
-   "license": {
-    "id": "LicenseRef-BigCode-OpenRAIL-M",
-    "name": "BigCode OpenRAIL-M v1",
-    "url": "https://www.bigcode-project.org/docs/pages/bigcode-openrail/",
-    "redistribution": "restricted",
-    "verified": true,
-    "notes": "The publisher (BigCode) states this license on https://huggingface.co/bigcode/starcoder2-7b; the Ollama registry's copy of the license agrees."
-   },
-   "capabilities": {
-    "fullTextSearch": false,
-    "titleSearch": false
-   },
-   "media": {
-    "pictures": false,
-    "videos": false
-   },
-   "dependencies": [
-    "arcana.llamafile"
-   ],
-   "updateStrategy": "snapshot-replace",
-   "warnings": [
-    {
-     "kind": "content",
-     "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
-    }
-   ],
-   "stats": {
-    "contextLength": 16384,
-    "memoryBytes": 4827948188,
-    "parameters": 7173923840
-   },
-   "popularity": 1,
-   "providerRef": {
-    "architecture": "starcoder2",
-    "chatTemplate": "none",
-    "ollama": "starcoder2:7b",
     "quantization": "Q4_0"
    }
   },
@@ -28185,7 +25362,6 @@
     "memoryBytes": 5165818280,
     "parameters": 7241748480
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "starling-lm:7b",
@@ -28266,7 +25442,6 @@
     "memoryBytes": 1399561784,
     "parameters": 772845888
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen35",
     "ollama": "tev1:0.8b",
@@ -28347,7 +25522,6 @@
     "memoryBytes": 5709332145,
     "parameters": 4326350848
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "qwen35",
     "ollama": "tev1:4b",
@@ -28428,7 +25602,6 @@
     "memoryBytes": 1075415550,
     "parameters": 1100056576
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -28511,7 +25684,6 @@
     "memoryBytes": 1076431916,
     "parameters": 1100048384
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "tinyllama:1.1b",
@@ -28593,7 +25765,6 @@
     "memoryBytes": 46303259388,
     "parameters": 70553837632
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "tulu3:70b",
@@ -28675,7 +25846,6 @@
     "memoryBytes": 6018263249,
     "parameters": 8030326848
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "tulu3:8b",
@@ -28754,7 +25924,6 @@
     "memoryBytes": 11404142355,
     "parameters": 13015864320
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -28834,7 +26003,6 @@
     "memoryBytes": 26131452801,
     "parameters": 32528943616
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -28914,7 +26082,6 @@
     "memoryBytes": 6479153840,
     "parameters": 6738415616
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -28994,7 +26161,6 @@
     "memoryBytes": 11404149848,
     "parameters": 13015874560
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -29074,7 +26240,6 @@
     "memoryBytes": 42472635612,
     "parameters": 68976680960
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -29156,7 +26321,6 @@
     "memoryBytes": 5165805915,
     "parameters": 7241732096
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -29236,7 +26400,6 @@
     "memoryBytes": 11404142355,
     "parameters": 13015864320
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -29316,7 +26479,6 @@
     "memoryBytes": 11404142355,
     "parameters": 13015864320
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -29396,7 +26558,6 @@
     "memoryBytes": 26131452801,
     "parameters": 32528943616
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -29476,173 +26637,10 @@
     "memoryBytes": 6479153840,
     "parameters": 6738415616
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
     "ollama": "wizard-vicuna-uncensored:7b",
-    "quantization": "Q4_0"
-   }
-  },
-  {
-   "id": "ollama.wizardcoder",
-   "provider": "ollama",
-   "title": "wizardcoder:latest",
-   "description": "State-of-the-art code generation model. This file: Q4_0, 3.8 GB. Needs about 7 GB of memory with Arcana's default 4,096-token context; longer contexts need more. The file has no chat template, so llamafile falls back to a generic one and answers may be poorer.",
-   "category": "assistant",
-   "subcategory": "model",
-   "tags": [
-    "ai",
-    "assistant",
-    "gguf",
-    "llama",
-    "ollama"
-   ],
-   "family": "ollama.wizardcoder",
-   "variant": "latest",
-   "variantLabel": "latest: 3.8 GB file, about 7 GB memory",
-   "sourceUrl": "https://ollama.com/library/wizardcoder",
-   "version": "2026-11-26",
-   "lastVerified": "2026-11-26T00:00:00Z",
-   "languages": [
-    "mul"
-   ],
-   "coverage": {
-    "scope": "none"
-   },
-   "format": "gguf",
-   "files": [
-    {
-     "name": "wizardcoder-latest-Q4_0.gguf",
-     "size": 3825812768,
-     "hashes": {
-      "sha256": "f890c9d2e6d4e9e33afa495a2890f05764787b3482c8326b6f0513741e87d475"
-     },
-     "mirrors": [
-      {
-       "url": "https://registry.ollama.ai/v2/library/wizardcoder/blobs/sha256:f890c9d2e6d4e9e33afa495a2890f05764787b3482c8326b6f0513741e87d475"
-      }
-     ]
-    }
-   ],
-   "downloadSize": 3825812768,
-   "installedSize": 3825812768,
-   "license": {
-    "id": "unknown",
-    "redistribution": "unknown",
-    "verified": false,
-    "notes": "The Ollama registry entry carries no license text. Not yet confirmed against the publisher's own statement."
-   },
-   "capabilities": {
-    "fullTextSearch": false,
-    "titleSearch": false
-   },
-   "media": {
-    "pictures": false,
-    "videos": false
-   },
-   "dependencies": [
-    "arcana.llamafile"
-   ],
-   "updateStrategy": "snapshot-replace",
-   "warnings": [
-    {
-     "kind": "content",
-     "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
-    }
-   ],
-   "stats": {
-    "contextLength": 16384,
-    "memoryBytes": 6479159854,
-    "parameters": 6738423808
-   },
-   "popularity": 1,
-   "providerRef": {
-    "architecture": "llama",
-    "chatTemplate": "none",
-    "ollama": "wizardcoder:latest",
-    "quantization": "Q4_0"
-   }
-  },
-  {
-   "id": "ollama.wizardcoder-33b",
-   "provider": "ollama",
-   "title": "wizardcoder:33b",
-   "description": "State-of-the-art code generation model. This file: 33B parameters, Q4_0, 19 GB. Needs about 22 GB of memory with Arcana's default 4,096-token context; longer contexts need more. The file has no chat template, so llamafile falls back to a generic one and answers may be poorer.",
-   "category": "assistant",
-   "subcategory": "model",
-   "tags": [
-    "ai",
-    "assistant",
-    "gguf",
-    "llama",
-    "ollama"
-   ],
-   "family": "ollama.wizardcoder",
-   "variant": "33b",
-   "variantLabel": "33b: 19 GB file, about 22 GB memory",
-   "sourceUrl": "https://ollama.com/library/wizardcoder",
-   "version": "2026-11-26",
-   "lastVerified": "2026-11-26T00:00:00Z",
-   "languages": [
-    "mul"
-   ],
-   "coverage": {
-    "scope": "none"
-   },
-   "format": "gguf",
-   "files": [
-    {
-     "name": "wizardcoder-33b-Q4_0.gguf",
-     "size": 18819440768,
-     "hashes": {
-      "sha256": "c41199acd1376e384e09f3d1d7f855fda97027d58a5ffb7e427560de83f859e8"
-     },
-     "mirrors": [
-      {
-       "url": "https://registry.ollama.ai/v2/library/wizardcoder/blobs/sha256:c41199acd1376e384e09f3d1d7f855fda97027d58a5ffb7e427560de83f859e8"
-      }
-     ]
-    }
-   ],
-   "downloadSize": 18819440768,
-   "installedSize": 18819440768,
-   "license": {
-    "id": "LicenseRef-MSR-LA",
-    "name": "Microsoft Research License",
-    "url": "https://huggingface.co/microsoft/Orca-2-7b/blob/main/LICENSE",
-    "redistribution": "unknown",
-    "verified": false,
-    "notes": "The license text in the Ollama registry is the Microsoft Research License. Not yet confirmed against the publisher's own statement."
-   },
-   "capabilities": {
-    "fullTextSearch": false,
-    "titleSearch": false
-   },
-   "media": {
-    "pictures": false,
-    "videos": false
-   },
-   "dependencies": [
-    "arcana.llamafile"
-   ],
-   "updateStrategy": "snapshot-replace",
-   "warnings": [
-    {
-     "kind": "content",
-     "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
-    }
-   ],
-   "stats": {
-    "contextLength": 16384,
-    "memoryBytes": 21115172998,
-    "parameters": 33342991360
-   },
-   "popularity": 1,
-   "providerRef": {
-    "architecture": "llama",
-    "chatTemplate": "none",
-    "ollama": "wizardcoder:33b",
     "quantization": "Q4_0"
    }
   },
@@ -29718,7 +26716,6 @@
     "memoryBytes": 6511639462,
     "parameters": 6738423808
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -29798,7 +26795,6 @@
     "memoryBytes": 11404142355,
     "parameters": 13015864320
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -29880,7 +26876,6 @@
     "memoryBytes": 5165805948,
     "parameters": 7241732096
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -29962,7 +26957,6 @@
     "memoryBytes": 84738770840,
     "parameters": 140620634112
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -30042,7 +27036,6 @@
     "memoryBytes": 11404149848,
     "parameters": 13015874560
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -30122,7 +27115,6 @@
     "memoryBytes": 6479159820,
     "parameters": 6738423808
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -30202,7 +27194,6 @@
     "memoryBytes": 11404142388,
     "parameters": 13015864320
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -30282,7 +27273,6 @@
     "memoryBytes": 6479153840,
     "parameters": 6738415616
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -30362,7 +27352,6 @@
     "memoryBytes": 5165805881,
     "parameters": 7241732096
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "chatTemplate": "none",
@@ -30445,7 +27434,6 @@
     "memoryBytes": 21761061571,
     "parameters": 34388917248
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "yi:34b",
@@ -30527,7 +27515,6 @@
     "memoryBytes": 4236301144,
     "parameters": 6061035520
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "yi:6b",
@@ -30609,7 +27596,6 @@
     "memoryBytes": 6006070540,
     "parameters": 8829407232
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "yi:9b",
@@ -30684,6 +27670,10 @@
     {
      "kind": "content",
      "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
+    },
+    {
+     "kind": "content",
+     "text": "Made for programming: it answers general questions poorly."
     }
    ],
    "stats": {
@@ -30691,7 +27681,6 @@
     "memoryBytes": 2029343472,
     "parameters": 1476495360
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "yi-coder:1.5b",
@@ -30766,6 +27755,10 @@
     {
      "kind": "content",
      "text": "Answers come from a language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
+    },
+    {
+     "kind": "content",
+     "text": "Made for programming: it answers general questions poorly."
     }
    ],
    "stats": {
@@ -30773,7 +27766,6 @@
     "memoryBytes": 6006070843,
     "parameters": 8829407232
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "yi-coder:9b",
@@ -30855,7 +27847,6 @@
     "memoryBytes": 84738771411,
     "parameters": 140620634112
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "zephyr:141b",
@@ -30937,7 +27928,6 @@
     "memoryBytes": 5166789555,
     "parameters": 7241732096
    },
-   "popularity": 1,
    "providerRef": {
     "architecture": "llama",
     "ollama": "zephyr:7b",

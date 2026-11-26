@@ -157,11 +157,18 @@ func TestJudge(t *testing.T) {
 		// The weights loaded; only the context did not fit the test machine.
 		{candidate{Model: "m", Digest: "sha256:x", Header: g, Load: &loadResult{Error: "E srv load_model: failed to create_context with model"}}, ""},
 		{candidate{Model: "m", Digest: "sha256:x", Header: g, Load: &loadResult{OK: true}}, ""},
+		// Models that do not answer questions are left out even when they load.
+		{candidate{Model: "llama-guard3", Digest: "sha256:x", Header: g, Load: &loadResult{OK: true}}, reasonNotQA},
+		{candidate{Model: "starcoder", Digest: "sha256:x", Header: g, Load: &loadResult{OK: true}}, reasonNotQA},
+		{candidate{Model: "starcoder2", Digest: "sha256:x", Header: &ggufInfo{Arch: "starcoder2", ChatTemplate: true}, Load: &loadResult{OK: true}}, ""},
 	}
 	for i, tc := range cases {
 		if got, _ := judge(&tc.cd); got != tc.reason {
 			t.Errorf("case %d: %q, want %q", i, got, tc.reason)
 		}
+	}
+	if len(warnings("qwen2.5-coder")) != 2 || len(warnings("qwen2.5")) != 1 {
+		t.Error("code models must carry the programming warning, others not")
 	}
 	if r := memoryNeeded(&candidate{Size: 1 << 30, Header: &ggufInfo{Layers: 24, Heads: 14, HeadsKV: 2, Embedding: 896}}); r <= 1<<30 {
 		t.Errorf("memory %d is not above the file size", r)

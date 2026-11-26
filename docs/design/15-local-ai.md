@@ -64,7 +64,7 @@ flowchart LR
 - **Backends**: llamafile 0.10.6 as a supervised loopback sidecar (catalog
   resources `arcana.llamafile` and three Apache-2.0 models: Qwen2.5 0.5B,
   Granite 3.3 2B, Qwen3 4B), or any OpenAI-compatible server.
-- **Ollama library models** ([ADR-0028](../adr/0028-ollama-registry-models.md)):
+- **Ollama library models** ([ADR-0029](../adr/0029-ollama-registry-models.md)):
   the models on Project NOMAD's list that llamafile loads, as the built-in
   provider `ollama`. Each entry is one GGUF file from the Ollama registry,
   pinned to its SHA-256 digest, with its memory need in the description and

@@ -63,7 +63,7 @@ not yet code-signed (see [Status](#status)).
   the library covers the question it says so instead of guessing. The
   model runs on your computer through Mozilla.ai's llamafile, or on an
   Ollama or LM Studio server you choose. The catalog has three models
-  tested with Arcana (0.5 to 2.5 GB) and 379 downloads of 197 models from
+  tested with Arcana (0.5 to 2.5 GB) and 345 downloads of 178 models from
   the Ollama registry: every model on Project NOMAD's list that llamafile
   runs, each with the memory it needs
   ([docs/ollama-models.md](docs/ollama-models.md)).
@@ -253,7 +253,7 @@ See [docs/development.md](docs/development.md).
 | **Implemented (Phase 6)** | Integration API for other programs (RadioPost and Aether HF to come) with scoped, approved tokens and citations ([docs/integration-api.md](docs/integration-api.md)); copying between Arcana libraries on a LAN; signed community catalogs |
 | **Implemented (0.8.0)** | Question answering over installed sources with citations, a relevance floor and an evaluation set; llamafile sidecar or an OpenAI-compatible server ([ADR-0021](docs/adr/0021-question-answering-over-the-library.md)). FDA drug label reference built on the user's computer ([ADR-0022](docs/adr/0022-fda-drug-label-reference.md)). Offline translation of archive pages in the reader's browser ([ADR-0023](docs/adr/0023-offline-translation-in-the-browser.md)). Getting started wizard; scheduled content updates; Meshtastic nodes on the map (listen only); optional Kolibri search ([docs/kolibri.md](docs/kolibri.md)); OpenAPI document for the integration API |
 | **Implemented (0.13.0)** | Entertainment page: seven built-in board games with a computer opponent, 13 hash-pinned public-domain films with an in-app player ([ADR-0027](docs/adr/0027-entertainment-board-games-and-films.md)) |
-| **Not yet verified** | Question answering on Windows, macOS, ARM64 and graphics cards (24 Ollama library models were run with llamafile on x86-64 Linux, ADR-0028), speed on a Raspberry Pi; Meshtastic with a real radio and Kolibri with a real server (tested against fakes); the built-in classroom with Kolibri itself on Windows and macOS (checked with Kolibri 0.19.5 on Linux: setup, imports, guest learning, [ADR-0024](docs/adr/0024-kolibri-built-in.md)) |
+| **Not yet verified** | Question answering on Windows, macOS, ARM64 and graphics cards (24 Ollama library models were run with llamafile on x86-64 Linux, ADR-0029), speed on a Raspberry Pi; Meshtastic with a real radio and Kolibri with a real server (tested against fakes); the built-in classroom with Kolibri itself on Windows and macOS (checked with Kolibri 0.19.5 on Linux: setup, imports, guest learning, [ADR-0024](docs/adr/0024-kolibri-built-in.md)) |
 | **Planned** | Ready-made Raspberry Pi SD image; hardware and power-loss tests. Terrain and contours; road networks for the largest countries; scheduled peer sync |
 | **Not yet** | Code-signed programs (releases are not code-signed yet; Windows and macOS warn on first start) |
 

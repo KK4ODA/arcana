@@ -50,7 +50,33 @@ const (
 	reasonEmbedding = "embedding"
 	reasonEngine    = "engine"
 	reasonUntested  = "untested"
+	reasonNotQA     = "not-qa"
 )
+
+// notAnswering lists models made for one narrow task whose output is not an
+// answer to a question: safety classifiers reply "safe" or "unsafe", the OCR
+// model reads images, the text-to-SQL models write queries.
+var notAnswering = map[string]string{
+	"granite3-guardian":   "safety classifier",
+	"granite4.1-guardian": "safety classifier",
+	"llama-guard3":        "safety classifier",
+	"shieldgemma":         "safety classifier",
+	"glm-ocr":             "OCR model for images (looped on a question in testing)",
+	"duckdb-nsql":         "text-to-SQL model",
+	"sqlcoder":            "text-to-SQL model",
+}
+
+// codeModels are trained for programming. They are offered with a warning;
+// those whose file has no chat template are left out, because without one
+// they continue the prompt instead of answering (starcoder:1b in testing).
+var codeModels = map[string]bool{
+	"codebooga": true, "codegeex4": true, "codegemma": true, "codellama": true, "codeqwen": true,
+	"codestral": true, "codeup": true, "deepcoder": true, "deepseek-coder": true, "deepseek-coder-v2": true,
+	"devstral": true, "devstral-2": true, "dolphincoder": true, "granite-code": true, "magicoder": true,
+	"north-mini-code-1.0": true, "opencoder": true, "phind-codellama": true, "qwen2.5-coder": true,
+	"qwen3-coder": true, "stable-code": true, "starcoder": true, "starcoder2": true, "wizardcoder": true,
+	"yi-coder": true,
+}
 
 var reasonText = map[string]string{
 	reasonCloud:     "Cloud only: every tag runs on Ollama's servers, there is no file to download.",
@@ -58,6 +84,8 @@ var reasonText = map[string]string{
 	reasonEmbedding: "Embedding model: turns text into vectors and cannot write answers; Arcana's retrieval does not use embeddings (ADR-0021).",
 	reasonEngine:    "llamafile 0.10.6 cannot load the file.",
 	reasonUntested:  "Not load-tested with llamafile.",
+	reasonNotQA: "Cannot answer questions: made for one narrow task (safety classification, OCR, text-to-SQL), " +
+		"or a code model whose file has no chat template, so it continues the prompt instead of answering.",
 }
 
 type exclusion struct {
@@ -122,7 +150,7 @@ func build(ctx context.Context, c *cache, models []nomadModel, survey map[string
 			// The most telling reason: an embedding model, then a GGUF
 			// file the engine refused, then no GGUF file at all.
 			reason, detail := reasonNotGGUF, ""
-			rank := map[string]int{reasonEmbedding: 3, reasonEngine: 2, reasonUntested: 1}
+			rank := map[string]int{reasonNotQA: 4, reasonEmbedding: 3, reasonEngine: 2, reasonUntested: 1}
 			for _, d := range dropped {
 				if rank[d.Reason] > rank[reason] {
 					reason, detail = d.Reason, d.Detail
@@ -157,6 +185,10 @@ func judge(cd *candidate) (string, string) {
 		return reasonNotGGUF, cd.Error
 	case cd.Header.Pooling || strings.Contains(cd.Model, "embed"):
 		return reasonEmbedding, "architecture " + cd.Header.Arch
+	case notAnswering[cd.Model] != "":
+		return reasonNotQA, notAnswering[cd.Model]
+	case codeModels[cd.Model] && !cd.Header.ChatTemplate:
+		return reasonNotQA, "code model without a chat template"
 	case cd.Load == nil:
 		return reasonUntested, ""
 	case !cd.Load.OK && !contextOnly(cd.Load):
@@ -297,11 +329,9 @@ func resource(ctx context.Context, c *cache, cd *candidate, description string, 
 		License:        lic,
 		Dependencies:   []string{"arcana.llamafile"},
 		UpdateStrategy: catalog.UpdateReplace,
-		Warnings: []catalog.Warning{{Kind: "content", Text: "Answers come from a language model reading passages of your library. " +
-			"It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."}},
-		Stats:       map[string]int64{"memoryBytes": mem, "parameters": int64(g.Params), "contextLength": int64(g.Context)},
-		ProviderRef: map[string]string{"ollama": cd.Model + ":" + tag, "architecture": g.Arch, "quantization": quant},
-		Popularity:  1,
+		Warnings:       warnings(cd.Model),
+		Stats:          map[string]int64{"memoryBytes": mem, "parameters": int64(g.Params), "contextLength": int64(g.Context)},
+		ProviderRef:    map[string]string{"ollama": cd.Model + ":" + tag, "architecture": g.Arch, "quantization": quant},
 	}
 	if hasMedia(cd, "projector") {
 		r.ProviderRef["textOnly"] = "true"
@@ -310,6 +340,15 @@ func resource(ctx context.Context, c *cache, cd *candidate, description string, 
 		r.ProviderRef["chatTemplate"] = "none"
 	}
 	return r
+}
+
+func warnings(model string) []catalog.Warning {
+	w := []catalog.Warning{{Kind: "content", Text: "Answers come from a language model reading passages of your library. " +
+		"It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."}}
+	if codeModels[model] {
+		w = append(w, catalog.Warning{Kind: "content", Text: "Made for programming: it answers general questions poorly."})
+	}
+	return w
 }
 
 // memoryNeeded estimates the memory a model needs in Arcana: the weights,

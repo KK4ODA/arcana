@@ -308,6 +308,10 @@ type Query struct {
 	// (stats.memoryBytes, set on language models) is at most this many
 	// bytes. Resources that state none are kept.
 	MaxMemory int64
+	// RankFirst orders by the providers' own rank before titles when there
+	// are no search words (the question-answering models: Arcana's tested
+	// models above hundreds from the Ollama library).
+	RankFirst bool
 	// Sort is "relevance", "title", "size", "size-desc", "date".
 	Sort   string
 	Limit  int
@@ -369,9 +373,7 @@ func (s *Store) SearchResources(ctx context.Context, q Query) ([]catalog.Resourc
 	case "relevance", "":
 		if match != "" {
 			order = "bm25(resources_fts, 0, 10.0, 2.0, 1.0)"
-		} else {
-			// Without words to rank by, providers' own ranks come first:
-			// Arcana's tested models above hundreds of library models.
+		} else if q.RankFirst {
 			order = "r.popularity DESC, r.title COLLATE NOCASE"
 		}
 	}
