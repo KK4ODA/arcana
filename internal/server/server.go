@@ -86,6 +86,8 @@ type Server struct {
 	kolibriPort int
 	lk          net.Listener
 	startedAt   time.Time
+	// apps serves each installed app on its own port (ADR-0030).
+	apps appListeners
 }
 
 // New creates a server. a may be nil (setup mode).
@@ -183,6 +185,7 @@ func (s *Server) Serve(ctx context.Context, la, lc net.Listener) error {
 		lk := tlsutil.NewSniffer(s.lk, s.tlsConfig)
 		go func() { errc <- s.kolibriSrv.Serve(lk) }()
 	}
+	s.serveApps(ctx)
 	// Interface addresses change (Wi-Fi joins, hotspot starts); keep the
 	// Host allowlist current.
 	go func() {
@@ -270,6 +273,7 @@ func (s *Server) appHandler() http.Handler {
 	s.registerDrugs(mux)
 	s.registerTranslate(mux)
 	s.registerClassroom(mux)
+	s.registerApps(mux)
 	mux.HandleFunc("GET /api/mesh", s.withApp(s.handleMesh))
 	mux.HandleFunc("GET /api/kolibri", s.withApp(s.handleKolibri))
 	mux.HandleFunc("GET /api/kolibri/search", s.withApp(s.handleKolibriSearch))
@@ -487,9 +491,10 @@ func (s *Server) installedViews(r *http.Request, a *app.App) ([]installedView, e
 			v.OpenPath = b.ContentPath
 			v.Search = res.Capabilities.FullTextSearch
 		} else if res.Format == "gguf" || res.Format == "llamafile" || res.Format == "druglabels" ||
-			res.Format == "bergamot" || res.Format == "translation-models" || res.Format == "kolibri" {
+			res.Format == "bergamot" || res.Format == "translation-models" || res.Format == "kolibri" || res.Format == "app" {
 			// Models and the engine are used by the assistant; the drug
-			// reference has its own view, Kolibri the Classroom page.
+			// reference has its own view, Kolibri the Classroom page, apps
+			// the Apps page.
 		} else if res.Format != "zim" && len(in.Files) > 0 {
 			v.OpenPath = "/files/" + in.ResourceID + "/" + path.Base(in.Files[0].Path)
 		} else if res.Format == "zim" {
@@ -1270,6 +1275,8 @@ func (s *Server) SetApp(a *app.App) {
 	if a != nil && s.content > 0 {
 		a.SetPorts(s.content, s.kolibriPort)
 	}
+	s.watchApps(a)
+	s.syncAppListeners()
 }
 
 // App returns the open library, if any.

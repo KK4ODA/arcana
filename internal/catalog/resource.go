@@ -191,6 +191,8 @@ var knownFormats = map[string]bool{
 	"bergamot": true, "translation-models": true,
 	// Kolibri and the Python runtimes Arcana runs it with (ADR-0024).
 	"kolibri": true,
+	// Apps: web applications and programs Arcana serves (ADR-0030).
+	"app": true,
 }
 
 var hashLengths = map[string]int{"sha256": 64, "sha512": 128, "sha1": 40, "md5": 32}

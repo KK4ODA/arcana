@@ -16,6 +16,7 @@ import { settingsView } from './views/settings.js';
 import { setupView } from './views/setup.js';
 import { readerView, documentView } from './views/reader.js';
 import { entertainmentView } from './views/entertainment.js';
+import { appsView } from './views/apps.js';
 import { watchView } from './views/watch.js';
 import { playView } from './views/play.js';
 
@@ -27,6 +28,8 @@ const views = {
   // Offered to administrators (to set it up) and to everyone once it is.
   classroom: { title: 'Classroom', render: classroomView, when: (st) => st?.kolibri?.builtIn || getSession().admin },
   entertainment: { title: 'Entertainment', render: entertainmentView },
+  // Offered to administrators (to add apps) and to everyone once one is.
+  apps: { title: 'Apps', render: appsView, when: (st) => st?.apps?.installed > 0 || getSession().admin },
   discover: { title: 'Discover', render: discoverView },
   maps: { title: 'Maps', render: mapsView },
   downloads: { title: 'Downloads', render: downloadsView },

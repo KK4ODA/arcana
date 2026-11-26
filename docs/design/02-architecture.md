@@ -104,6 +104,7 @@ Dependencies point downward; nothing below `app` imports `app` or `server`.
 | `internal/download` | Persistent queue, resumable verified transfers, safe HTTP client | store, content, storage, library |
 | `internal/content` | Publish/remove resources, sidecars, integrity check, garbage collection | store, library, fsutil |
 | `internal/kiwix` | kiwix-serve discovery, supervision, proxy, search federation | buildinfo |
+| `internal/apps` | Apps from the catalog (ADR-0030): specs, unpacking for this platform, web app serving | — |
 | `internal/store` | SQLite schema, migrations, queries (index only) | catalog |
 | `internal/storage` | Volume detection per OS, file-system rules, capacity plan | — |
 | `internal/library` | Layout, marker, discovery, lock, settings | fsutil |

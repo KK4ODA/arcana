@@ -82,7 +82,7 @@ func NewClientFor(allowPrivate func() bool, allowAddr func(address string) bool)
 		DisableCompression: true,
 	}
 	return &http.Client{
-		Transport: tr,
+		Transport: &registryAuth{base: tr},
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			if len(via) >= 10 {
 				return errors.New("too many redirects")

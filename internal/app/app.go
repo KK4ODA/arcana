@@ -14,6 +14,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/KK4ODA/arcana/internal/apps"
 	"github.com/KK4ODA/arcana/internal/appupdate"
 	"github.com/KK4ODA/arcana/internal/assistant"
 	"github.com/KK4ODA/arcana/internal/auth"
@@ -79,6 +80,9 @@ type App struct {
 	Mesh *mesh.Manager
 	// class runs Kolibri for the classroom (ADR-0024).
 	class *classroom
+	// Apps prepares and runs the apps installed from the catalog
+	// (ADR-0030).
+	Apps *apps.Manager
 	// contentUpd runs scheduled content updates.
 	contentUpd contentUpdater
 	events     eventHub
@@ -133,6 +137,7 @@ func Open(root string, opts Options) (*App, error) {
 		a.reloadRoads()
 		a.reloadDrugs()
 		a.reloadClassroom()
+		a.reloadApps()
 		a.RequestReindex()
 		a.publish(Event{Type: "library"})
 	}
@@ -156,6 +161,7 @@ func Open(root string, opts Options) (*App, error) {
 	a.Mesh = mesh.New(a.Log)
 	a.openAssistant()
 	a.openClassroom()
+	a.openApps()
 	a.Admin = auth.NewStore(lib.User())
 	if a.Integrations, err = integration.Open(lib.User(), lib.ReadOnly); err != nil {
 		a.Close()
@@ -220,6 +226,7 @@ func (a *App) Start(ctx context.Context) error {
 	a.reloadRoads()
 	a.reloadDrugs()
 	a.reloadClassroom()
+	a.reloadApps()
 	go a.placesLoop(ctx)
 	a.ApplyGPSSettings()
 	a.ApplyMeshSettings()
@@ -249,6 +256,9 @@ func (a *App) Close() {
 	a.closeAssistant()
 	a.closeDrugs()
 	a.closeClassroom()
+	if a.Apps != nil {
+		a.Apps.Close()
+	}
 	if a.Kiwix != nil {
 		a.Kiwix.Stop()
 	}

@@ -1786,6 +1786,369 @@
         "minutes": 105
       },
       "popularity": 7
+    },
+    {
+      "id": "arcana.app.cyberchef",
+      "provider": "arcana",
+      "title": "CyberChef",
+      "description": "GCHQ's CyberChef 10.24.0: hundreds of operations for encoding, decoding, encryption, hashing, compression and data analysis, in the browser. Nothing you paste leaves the device.",
+      "category": "computing",
+      "subcategory": "apps",
+      "tags": [
+        "app",
+        "encoding",
+        "encryption",
+        "hashing",
+        "data"
+      ],
+      "family": "arcana.app.cyberchef",
+      "variant": "standard",
+      "publisher": "GCHQ",
+      "sourceUrl": "https://github.com/gchq/CyberChef",
+      "version": "10.24.0",
+      "published": "2026-04-27",
+      "lastVerified": "2026-11-26T00:00:00Z",
+      "languages": [
+        "mul"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "app",
+      "files": [
+        {
+          "name": "cyberchef_any_10.24.0.zip",
+          "size": 74982747,
+          "hashes": {
+            "sha256": "29947b4d7805b74135c8370f3cba19b609d63e8ece6e33b2cb8ee0dfbbf1393c"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/gchq/CyberChef/releases/download/v10.24.0/CyberChef_v10.24.0.zip"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 74982747,
+      "installedSize": 74982747,
+      "license": {
+        "redistribution": "permitted",
+        "id": "Apache-2.0",
+        "name": "Apache License 2.0",
+        "url": "https://github.com/gchq/CyberChef/blob/master/LICENSE",
+        "verified": true
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": false,
+        "videos": false
+      },
+      "updateStrategy": "snapshot-replace",
+      "providerRef": {
+        "kind": "web",
+        "platforms": "any"
+      },
+      "popularity": 5
+    },
+    {
+      "id": "arcana.app.it-tools",
+      "provider": "arcana",
+      "title": "IT Tools",
+      "description": "IT Tools 2024.10.22: about 80 small tools for developers and administrators, such as converters, generators (UUIDs, passwords, QR codes), network calculators and text utilities, in the browser.",
+      "category": "computing",
+      "subcategory": "apps",
+      "tags": [
+        "app",
+        "developer",
+        "network",
+        "converters"
+      ],
+      "family": "arcana.app.it-tools",
+      "variant": "standard",
+      "publisher": "Corentin Thomasset",
+      "sourceUrl": "https://github.com/CorentinTh/it-tools",
+      "version": "2024.10.22-7ca5933",
+      "published": "2024-10-22",
+      "lastVerified": "2026-11-26T00:00:00Z",
+      "languages": [
+        "mul"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "app",
+      "files": [
+        {
+          "name": "it-tools_any_2024.10.22-7ca5933.zip",
+          "size": 4071978,
+          "hashes": {
+            "sha256": "eef276d675db6053bdc65cd8482a566785561c70eed5035a0e05b0e627b0989d"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/CorentinTh/it-tools/releases/download/v2024.10.22-7ca5933/it-tools-2024.10.22-7ca5933.zip"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 4071978,
+      "installedSize": 4071978,
+      "license": {
+        "redistribution": "permitted",
+        "id": "GPL-3.0-only",
+        "name": "GNU General Public License v3.0",
+        "url": "https://github.com/CorentinTh/it-tools/blob/main/LICENSE",
+        "verified": true
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": false,
+        "videos": false
+      },
+      "updateStrategy": "snapshot-replace",
+      "providerRef": {
+        "kind": "web",
+        "platforms": "any"
+      },
+      "popularity": 5
+    },
+    {
+      "id": "arcana.app.excalidraw",
+      "provider": "arcana",
+      "title": "Excalidraw",
+      "description": "Excalidraw (build 4bfc5bb of November 2021, the one Project NOMAD ships): a whiteboard for hand-drawn sketches, diagrams and plans. Drawings stay in the browser that made them; save them as files to keep or share. Live collaboration needs Excalidraw's servers and does not work offline.",
+      "category": "computing",
+      "subcategory": "apps",
+      "tags": [
+        "app",
+        "drawing",
+        "diagrams",
+        "whiteboard"
+      ],
+      "family": "arcana.app.excalidraw",
+      "variant": "standard",
+      "publisher": "Excalidraw",
+      "sourceUrl": "https://github.com/excalidraw/excalidraw",
+      "version": "sha-4bfc5bb",
+      "published": "2021-11-04",
+      "lastVerified": "2026-11-26T00:00:00Z",
+      "languages": [
+        "mul"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "app",
+      "files": [
+        {
+          "name": "excalidraw_any_sha-4bfc5bb.tar.gz",
+          "size": 2997441,
+          "hashes": {
+            "sha256": "9f511868bea49e4bf8086c51cbb5dd908a8ecea8fd98cb65c41881ff500a13d9"
+          },
+          "mirrors": [
+            {
+              "url": "https://registry-1.docker.io/v2/excalidraw/excalidraw/blobs/sha256:9f511868bea49e4bf8086c51cbb5dd908a8ecea8fd98cb65c41881ff500a13d9"
+            },
+            {
+              "url": "https://mirror.gcr.io/v2/excalidraw/excalidraw/blobs/sha256:9f511868bea49e4bf8086c51cbb5dd908a8ecea8fd98cb65c41881ff500a13d9"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 2997441,
+      "installedSize": 2997441,
+      "license": {
+        "redistribution": "permitted",
+        "id": "MIT",
+        "name": "MIT License",
+        "url": "https://github.com/excalidraw/excalidraw/blob/master/LICENSE",
+        "verified": true,
+        "notes": "The site is one layer of Excalidraw's official image excalidraw/excalidraw:sha-4bfc5bb on Docker Hub (Excalidraw publishes no other build of the app); mirror.gcr.io, Google's Docker Hub mirror, serves the same digest when Docker Hub limits downloads."
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": false,
+        "videos": false
+      },
+      "updateStrategy": "snapshot-replace",
+      "providerRef": {
+        "kind": "web",
+        "platforms": "any"
+      },
+      "popularity": 5
+    },
+    {
+      "id": "arcana.app.meshtastic-web",
+      "provider": "arcana",
+      "title": "Meshtastic Web",
+      "description": "Meshtastic's web client 2.7.1: connect to a Meshtastic radio over USB or Bluetooth from the browser to send messages, see nodes and change the radio's settings. Needs Chrome or Edge, opened on the computer running Arcana or over Arcana's HTTPS address.",
+      "category": "radio-communications",
+      "subcategory": "apps",
+      "tags": [
+        "app",
+        "meshtastic",
+        "lora",
+        "mesh",
+        "radio"
+      ],
+      "family": "arcana.app.meshtastic-web",
+      "variant": "standard",
+      "publisher": "Meshtastic",
+      "sourceUrl": "https://github.com/meshtastic/web",
+      "version": "2.7.1",
+      "published": "2026-06-15",
+      "lastVerified": "2026-11-26T00:00:00Z",
+      "languages": [
+        "mul"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "app",
+      "files": [
+        {
+          "name": "meshtastic-web_any_2.7.1.tar",
+          "size": 1832960,
+          "hashes": {
+            "sha256": "dfb36b72f092d6e8cd0f202c0c4c01c4742dd3feb49758c574727f251299dbfe"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/meshtastic/web/releases/download/v2.7.1/build.tar"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 1832960,
+      "installedSize": 1832960,
+      "license": {
+        "redistribution": "permitted",
+        "id": "GPL-3.0-only",
+        "name": "GNU General Public License v3.0",
+        "url": "https://github.com/meshtastic/web/blob/main/LICENSE",
+        "verified": true
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": false,
+        "videos": false
+      },
+      "updateStrategy": "snapshot-replace",
+      "providerRef": {
+        "kind": "web",
+        "platforms": "any"
+      },
+      "popularity": 5
+    },
+    {
+      "id": "arcana.app.meshcore-web",
+      "provider": "arcana",
+      "title": "MeshCore Web",
+      "description": "The MeshCore companion app 1.45.0 for the browser: connect to a MeshCore radio over USB or Bluetooth to send messages and manage contacts, channels and repeaters. Needs Chrome or Edge, opened on the computer running Arcana or over Arcana's HTTPS address. Arcana downloads it from its author's site.",
+      "category": "radio-communications",
+      "subcategory": "apps",
+      "tags": [
+        "app",
+        "meshcore",
+        "lora",
+        "mesh",
+        "radio"
+      ],
+      "family": "arcana.app.meshcore-web",
+      "variant": "standard",
+      "publisher": "Liam Cottle",
+      "sourceUrl": "https://meshcore.io",
+      "version": "1.45.0",
+      "published": "2026-06-14",
+      "lastVerified": "2026-11-26T00:00:00Z",
+      "languages": [
+        "mul"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "app",
+      "files": [
+        {
+          "name": "meshcore-web_any_1.45.0.zip",
+          "size": 12188651,
+          "hashes": {
+            "sha256": "2fcd1731efa548eb861f793d4be1a53ebea377df1b2b6354dc3b570e4f5f23df"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.liamcottle.net/MeshCore/v1.45.0/MeshCore-v1.45.0%2B71-dc3a209-web.zip"
+            }
+          ]
+        },
+        {
+          "name": "fonts_any_roboto-v32.woff2",
+          "size": 63464,
+          "hashes": {
+            "sha256": "35b02ca266b79eb4996590f15817425a1ce9ebf48f84471843233ff614656bf2"
+          },
+          "mirrors": [
+            {
+              "url": "https://fonts.gstatic.com/s/roboto/v32/KFOmCnqEu92Fr1Me4GZLCzYlKw.woff2"
+            }
+          ]
+        },
+        {
+          "name": "fonts_any_notosanssymbols-v43.woff2",
+          "size": 69116,
+          "hashes": {
+            "sha256": "08202e258ea583254c036cff46a7077bb5af4f82c41a6c0a6775f6e44d99f1aa"
+          },
+          "mirrors": [
+            {
+              "url": "https://fonts.gstatic.com/s/notosanssymbols/v43/rP2up3q65FkAtHfwd-eIS2brbDN6gxP34F9jRRCe4W3gfQ8gb_VFRkzrbQ.woff2"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 12321231,
+      "installedSize": 12321231,
+      "license": {
+        "redistribution": "restricted",
+        "id": "LicenseRef-MeshCore-App",
+        "name": "MeshCore companion app: closed source, free to use",
+        "url": "https://github.com/aXistem-dev/meshcore-web#license--privacy",
+        "verified": true,
+        "notes": "The author publishes the app as closed source and free for anyone to use, with no license to redistribute it. Arcana does not ship it: each library downloads it from files.liamcottle.net. The two fonts (Roboto, Noto Sans Symbols; SIL OFL 1.1) come from Google Fonts, from which the app would otherwise load them at run time."
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": false,
+        "videos": false
+      },
+      "updateStrategy": "snapshot-replace",
+      "providerRef": {
+        "kind": "web",
+        "platforms": "any"
+      },
+      "popularity": 5,
+      "warnings": [
+        {
+          "kind": "license",
+          "text": "Closed source. Its author lets anyone use it but grants no right to pass it on, so Arcana downloads it from the author's site for this library. Remove it before copying this library for someone else."
+        }
+      ]
     }
   ]
 }

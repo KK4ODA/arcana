@@ -56,6 +56,27 @@ care and herbs that Arcana lacked. Both gaps are closed.
   registry, and loads every file in llamafile with zeros in place of the
   weights to check that the engine accepts it.
 
+- **Apps** (ADR-0030). A new *Apps* page installs web applications from
+  the catalog and opens each in a tab of its own: CyberChef 10.24.0 (GCHQ's
+  data toolkit), IT Tools 2024.10.22, Excalidraw (the whiteboard, in the
+  build Project NOMAD ships) and Meshtastic Web 2.7.1, which configures a
+  Meshtastic radio and sends messages through it over USB or Bluetooth.
+  Arcana serves each app itself on a port of its own (8473 and up by
+  default), so an app cannot read Arcana's session or another app's saved
+  drawings and settings, and no app can contact anything outside its own
+  address. Meshtastic Web needs Chrome or Edge, on the computer running
+  Arcana or over its HTTPS address.
+- **Container image layers as downloads.** The downloader fetches the
+  anonymous token container registries ask for, so a layer of an official
+  image, pinned by its digest, downloads like any other file. Excalidraw's
+  site comes this way.
+- **MeshCore Web 1.45.0**, the MeshCore radio app for the browser. It is
+  closed source and free to use, without a right to pass it on, so Arcana
+  downloads it from its author's site for each library and marks it
+  restricted; remove it before copying the library for someone else.
+  Arcana serves it with its own rendering engine and two fonts from the
+  drive, which it otherwise loads from Google's servers.
+
 ### Changed
 - Collections settle for Wikipedia's most-read articles ("Best of
   Wikipedia", 296 MB to 2.7 GB) when no full edition fits. Before, the

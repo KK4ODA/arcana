@@ -35,7 +35,7 @@ the Go type is `catalog.Resource`.
 | `lastVerified` | When the entry was last confirmed against its source | — |
 | `languages` | BCP 47 tags; ISO 639-3 converted to 639-1 when possible | Pattern-checked |
 | `coverage` | `{scope: global\|regional\|none, regions: ["US","US-VA"], bbox}` | bbox has exactly 4 numbers |
-| `format` | `zim`, `pdf`, `epub`, `html`, `markdown`, `text`, `image`, `audio`, `video`, `pmtiles`, `mbtiles`, `gpx`, `archive` | Allow-list |
+| `format` | `zim`, `pdf`, `epub`, `html`, `markdown`, `text`, `image`, `audio`, `video`, `pmtiles`, `mbtiles`, `gpx`, `archive`, and Arcana's own formats such as `app` (ADR-0030), whose files are named `part_platform_rest` | Allow-list |
 | `files[]` | `{name, size, hashes{sha256,sha512,sha1,md5}, mirrors[{url,priority,location}], metalinkUrl}` | Name is one safe path component; hashes are hex of the right length; at least one location |
 | `downloadSize`, `installedSize`, `sizeEstimated` | Planning sizes | ≤ 64 TB |
 | `license` | `{id (SPDX), name, url, redistribution, attribution, verified, notes}` | `redistribution` ∈ permitted / noncommercial / restricted / unknown; `permitted` downgraded to `unknown` unless `verified` |

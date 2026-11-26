@@ -31,3 +31,4 @@
 | [0027](0027-entertainment-board-games-and-films.md) | Entertainment: built-in board games and public-domain films | Accepted |
 | [0028](0028-home-care-and-herbs-built-in.md) | Home care and herbs built into the medicines reference | Accepted |
 | [0029](0029-ollama-registry-models.md) | Models from the Ollama registry, as many as llamafile runs | Accepted |
+| [0030](0030-apps-from-the-catalog.md) | Apps from the catalog, each on an origin of its own | Accepted |
