@@ -23,7 +23,7 @@
 # Usage: scripts/package.sh [version] [platform ...]
 set -eu
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
-VERSION=${1:-0.14.0-dev}
+VERSION=${1:-0.14.1-dev}
 [ "$#" -gt 0 ] && shift
 PLATFORMS=${*:-"windows-amd64 linux-amd64 linux-arm64 darwin-arm64 darwin-amd64"}
 COMMIT=$(git -C "$ROOT" rev-parse --short HEAD 2>/dev/null || echo unknown)

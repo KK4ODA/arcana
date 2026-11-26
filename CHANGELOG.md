@@ -3,6 +3,21 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
+## 0.14.1 — 2026-11-26
+
+The same program as 0.14.0, built again. Windows Defender removed the
+0.14.0 `Arcana.exe` as `Trojan:Win32/Bearfoos.A!ml`, a guess by its
+machine-learning model rather than a match with known malware. A rebuild of
+the same code passed Defender both when copied and when run, so this
+release changes no code and gives Windows a different file. The detection
+of 0.14.0 has been reported to Microsoft as a false positive. If Defender
+removed `Arcana.exe` after an update, rename `Arcana.exe.previous` in the
+Arcana folder to `Arcana.exe`: that starts 0.13.0, which offers this
+version. Arcana 0.6.0 to 0.14.0 offer this version by themselves within a
+day of being online: choose *Update now* in the banner at the top of the
+page, or *Settings → Application updates → Check now* to look straight
+away.
+
 ## 0.14.0 — 2026-11-26
 
 Arcana now offers what Project NOMAD v1.35.2 has and it lacked, found by
