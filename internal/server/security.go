@@ -204,8 +204,10 @@ func appHeaders(contentPort int) func(http.Handler) http.Handler {
 			contentOrigin := scheme + host + ":" + itoa(contentPort)
 			// 'wasm-unsafe-eval' lets the translation worker compile the
 			// Bergamot engine; it does not permit eval() of JavaScript.
+			// Films play in the interface from the content origin
+			// (media-src), which keeps the session token out of reach.
 			h.Set("Content-Security-Policy", "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' data: blob:; worker-src 'self'; "+
-				"connect-src 'self'; frame-src "+contentOrigin+"; frame-ancestors 'none'; base-uri 'none'; form-action 'self'; object-src 'none'")
+				"connect-src 'self'; media-src "+contentOrigin+"; frame-src "+contentOrigin+"; frame-ancestors 'none'; base-uri 'none'; form-action 'self'; object-src 'none'")
 			h.Set("X-Content-Type-Options", "nosniff")
 			h.Set("Referrer-Policy", "no-referrer")
 			h.Set("X-Frame-Options", "DENY")

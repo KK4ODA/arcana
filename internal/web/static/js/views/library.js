@@ -45,7 +45,7 @@ export async function libraryView(main, params, ctx) {
   const results = h('div');
   const input = h('input', { type: 'search', placeholder: 'Search installed content and documents', 'aria-label': 'Search installed content', value: params.get('q') || '' });
   const archives = lib.resources.filter((r) => r.openPath && r.openPath.startsWith('/kiwix/'));
-  const docSources = lib.resources.filter((r) => r.openPath && r.openPath.startsWith('/files/') && r.format !== 'pmtiles' && r.format !== 'arcroute');
+  const docSources = lib.resources.filter((r) => r.openPath && r.openPath.startsWith('/files/') && !['pmtiles', 'arcroute', 'video'].includes(r.format));
   const scope = h('select', { 'aria-label': 'Search in' },
     h('option', { value: '' }, 'Everything installed'),
     archives.length ? h('optgroup', { label: 'Archives' }, archives.map((r) => h('option', { value: r.resourceId }, r.title))) : null,
@@ -266,7 +266,7 @@ export async function libraryView(main, params, ctx) {
           h('td', { class: 'right' }, h('div', { class: 'row actions' },
             r.format === 'gguf' || r.format === 'llamafile' ? h('a', { class: 'button', href: '#/ask', title: 'Used by the assistant to answer questions' }, 'Ask') :
             r.format === 'druglabels' ? h('a', { class: 'button', href: '#/medicines' }, 'Open') :
-            r.openPath ? h('a', { class: 'button', href: openHref(r) }, 'Open') :
+            r.openPath ? h('a', { class: 'button', href: openHref(r) }, r.format === 'video' ? 'Watch' : 'Open') :
               h('a', { class: 'small', href: `#/read/${encodeURIComponent(r.resourceId)}`, title: r.openError || 'The archive reader is not available.' }, 'Cannot open — why?'),
             canChange ? h('button', { class: 'danger', onclick: () => remove(r) }, 'Remove') : null)),
         ))))));
@@ -387,10 +387,12 @@ export function noteEditor(note, onSaved, ref) {
   return h('div', { class: 'note-editor' }, title, text, h('div', { class: 'row' }, save));
 }
 
-// Maps and road networks open in the map view; everything else in the reader.
+// Maps and road networks open in the map view, films in the player;
+// everything else in the reader.
 function openHref(r) {
   if (r.format === 'pmtiles') return `#/maps?set=${encodeURIComponent(r.resourceId)}`;
   if (r.format === 'arcroute') return '#/maps';
+  if (r.format === 'video') return `#/watch/${encodeURIComponent(r.resourceId)}`;
   return `#/read/${encodeURIComponent(r.resourceId)}`;
 }
 

@@ -39,7 +39,8 @@ const { chromium } = require('playwright');
     await page.waitForTimeout(400);
   };
 
-  const views = ['library', 'discover', 'maps', 'downloads', 'updates', 'server', 'settings', 'classroom', 'library?q=morse', 'read/arcana.sample'];
+  const views = ['library', 'discover', 'maps', 'downloads', 'updates', 'server', 'settings', 'classroom', 'library?q=morse', 'read/arcana.sample',
+    'entertainment', 'play/chess', 'play/checkers', 'play/backgammon', 'play/reversi', 'play/fourinarow', 'play/mancala', 'play/go'];
   for (const v of views) await open(v);
   // On a phone: each view loaded at that width, with its folded sections
   // opened, must fit it.
