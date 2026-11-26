@@ -92,6 +92,15 @@ not yet code-signed (see [Status](#status)).
   Waypoints, track recording and GPX import and export.
   A Meshtastic radio (Wi-Fi or USB) puts the mesh's nodes on the map and
   lists its messages; Arcana only listens.
+- **Entertainment.** Seven board games are built in: chess, checkers,
+  backgammon, reversi, four in a row, mancala and Go, for two players on
+  one device or against the computer (three levels; Go is two-player only).
+  They run in the browser showing them, so phones on the network can play
+  too. Thirteen classic feature films in the US public domain (7.4 GB
+  together, from the Internet Archive) can be downloaded, checked against
+  the SHA-256 recorded when each was reviewed, and watched in Arcana's
+  player, which remembers where each device stopped. The *Films and Games*
+  collection adds question-and-answer archives about board games and chess.
 - **Share on the local network** (`--lan`). Phones and other computers can
   browse and search; only the host computer can make changes. Other
   devices find the library as `arcana.local` or by scanning a QR code.
@@ -240,6 +249,7 @@ See [docs/development.md](docs/development.md).
 | **Implemented (Phase 5), not yet run on hardware** | Raspberry Pi / Linux appliance: installer, confined systemd service with watchdog, Wi-Fi access point with captive portal ([docs/appliance.md](docs/appliance.md)) |
 | **Implemented (Phase 6)** | Integration API for other programs (RadioPost and Aether HF to come) with scoped, approved tokens and citations ([docs/integration-api.md](docs/integration-api.md)); copying between Arcana libraries on a LAN; signed community catalogs |
 | **Implemented (0.8.0)** | Question answering over installed sources with citations, a relevance floor and an evaluation set; llamafile sidecar or an OpenAI-compatible server ([ADR-0021](docs/adr/0021-question-answering-over-the-library.md)). FDA drug label reference built on the user's computer ([ADR-0022](docs/adr/0022-fda-drug-label-reference.md)). Offline translation of archive pages in the reader's browser ([ADR-0023](docs/adr/0023-offline-translation-in-the-browser.md)). Getting started wizard; scheduled content updates; Meshtastic nodes on the map (listen only); optional Kolibri search ([docs/kolibri.md](docs/kolibri.md)); OpenAPI document for the integration API |
+| **Implemented (unreleased)** | Entertainment page: seven built-in board games with a computer opponent, 13 hash-pinned public-domain films with an in-app player ([ADR-0027](docs/adr/0027-entertainment-board-games-and-films.md)) |
 | **Not yet verified** | Question answering with the real llamafile engine and models (tested with stand-ins), speed on a Raspberry Pi; Meshtastic with a real radio and Kolibri with a real server (tested against fakes); the built-in classroom with Kolibri itself on Windows and macOS (checked with Kolibri 0.19.5 on Linux: setup, imports, guest learning, [ADR-0024](docs/adr/0024-kolibri-built-in.md)) |
 | **Planned** | Ready-made Raspberry Pi SD image; hardware and power-loss tests. Terrain and contours; road networks for the largest countries; scheduled peer sync |
 | **Not yet** | Code-signed programs (releases are not code-signed yet; Windows and macOS warn on first start) |

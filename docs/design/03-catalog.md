@@ -27,7 +27,7 @@ the Go type is `catalog.Resource`.
 | `id` | Stable identifier, `<provider>.<name>` | `^[a-z0-9]+(\.[a-z0-9][a-z0-9._-]*)?$`, ≤128 chars, must be a portable directory name (no Windows device names), prefix must equal `provider` |
 | `provider` | Namespace that published the entry | Forced to the configured provider ID; feeds cannot choose it |
 | `title`, `description` | Display text | Control characters stripped, length-capped, always rendered as text |
-| `category`, `subcategory` | One of 16 categories (extensible) | Unknown values fall back to `reference` |
+| `category`, `subcategory` | One of 18 categories (extensible) | Unknown values fall back to `reference` |
 | `family`, `variant`, `variantLabel` | Alternative editions | — |
 | `publisher`, `creator`, `sourceUrl` | Provenance | URLs must be `http(s)` without credentials |
 | `version` | Edition (`2026-10`, `1.4.2`, `2026-11a`) | `^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$` |
@@ -82,7 +82,7 @@ type Fetcher interface {
 
 | Provider | Source | Notes |
 |---|---|---|
-| `arcana` (bundled) | `internal/catalog/bundled/catalog.json`, compiled in | Curated, license-verified entries with SHA-256: the sample library and 47 CFR Part 97 |
+| `arcana` (bundled) | `internal/catalog/bundled/catalog.json`, compiled in | Curated, license-verified entries with SHA-256: the sample library, 47 CFR Parts 95 and 97, U.S. Army manuals, the assistant and translation engines, Kolibri, and 13 public-domain feature films (ADR-0027) |
 | `kiwix` | `library.kiwix.org/catalog/v2/entries` (OPDS v2, paginated) | 3,682 entries on 2026-11-22, all accepted by validation. Maps Kiwix categories and names to Arcana's 16 categories, assigns reviewed licenses per family, adds warnings. Resolves `.meta4` at download for exact size, SHA-256 and geo-ranked mirrors |
 | `gutenberg` (opt-in) | `pg_catalog.csv.gz` from the official mirror (gutenberg.pglaf.org) | 6,572 practical titles (health, farming, cooking, engineering, crafts, sciences, scouting) mapped to categories; EPUB downloads from the mirror; no checksums published, so installs are marked unverified; historical medical books carry an "obsolete or dangerous" warning |
 | feeds (user-added) | Any URL serving an Arcana feed | Namespace = the ID the user gives the feed; may use metalinks |
@@ -168,7 +168,7 @@ Presets (`bundled/presets.json`) list resource **families** with the
 curator's preferred editions (most detailed first), a priority (1
 essential, 2 recommended, 3 optional) and a reason. `{lang}` in a family
 name is replaced with the chosen language, falling back to English with an
-explanation. Nine presets ship:
+explanation. Ten presets ship:
 
 - Essential Knowledge
 - Family Emergency Preparedness
@@ -179,6 +179,7 @@ explanation. Nine presets ship:
 - Education and Learning
 - Community Knowledge Server
 - Comprehensive Reference Library
+- Films and Games
 
 The recommender (`catalog.Recommend`) is a pure function. Its budget is the
 planner's headroom: free space after queued downloads and the reserve. It
