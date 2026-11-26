@@ -3,6 +3,36 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
+## Unreleased
+
+### Added
+- **Position symbol.** Your position is an arrow pointing along your
+  course while you move, and a dot when you stand still or the source
+  gives no course. It is blue when current, amber when stale and grey
+  when lost.
+- **Record a track from the map.** A Record button on the map and
+  *Record track* under Position start and stop recording; Settings →
+  Track recording is the same switch, so recording resumes after a
+  restart. The track being recorded is drawn on the map as it grows,
+  with its length so far, and stays on the map when you stop.
+- **Show and follow my position** button on the map, under the zoom
+  buttons. It zooms in to street level and follows the position; pressed
+  again, it stops following.
+
+### Changed
+- Turning track recording on or off no longer restarts the position
+  source, so the fix is kept and a receiver's port is not reopened.
+- Recording stopped and started again within the same second starts a
+  new file instead of overwriting the track just saved.
+
+### Fixed
+- **The map did not show your position or the directions route.** Since
+  0.8.0 the Maps view could finish loading the map before its own
+  variables existed, and the error stopped it before it added the
+  position, the route and its start and end markers. In testing this
+  happened on every load of the Maps view; changing the theme brought
+  them back. The UI check in the acceptance test now reports such errors.
+
 ## 0.11.0 — 2026-11-25
 
 Arcana can now find its position without a GPS receiver: from a Starlink

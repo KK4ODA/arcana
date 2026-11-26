@@ -117,6 +117,45 @@ const STATE_TEXT = {
   current: 'Position current', stale: 'Position stale', lost: 'Signal lost', manual: 'Fixed position', error: 'Receiver problem',
 };
 const ZOOM_FOR_KIND = { country: 5, region: 7, macroregion: 7, county: 9, locality: 12, city: 11, town: 13, village: 14, neighbourhood: 15, suburb: 14 };
+// Mesh nodes not heard for this long (seconds) are drawn grey.
+const MESH_STALE_AFTER = 2 * 3600;
+// The track being recorded starts a new segment after this long without a
+// point, as the recorder on the server does.
+const TRACK_GAP_MS = 60000;
+
+// arrowImage draws the marker for a moving position: an arrow pointing up,
+// which the map turns to the course. It is drawn at twice the screen
+// resolution or more so it stays sharp.
+function arrowImage(color) {
+  const ratio = Math.max(2, Math.ceil(window.devicePixelRatio || 1));
+  const size = 34;
+  const c = document.createElement('canvas');
+  c.width = c.height = size * ratio;
+  const x = c.getContext('2d');
+  x.scale(ratio, ratio);
+  x.translate(size / 2, size / 2);
+  x.beginPath();
+  x.moveTo(0, -13);
+  x.lineTo(10, 11);
+  x.lineTo(0, 5.5);
+  x.lineTo(-10, 11);
+  x.closePath();
+  x.lineJoin = 'round';
+  x.shadowColor = 'rgba(0, 0, 0, 0.45)';
+  x.shadowBlur = 4;
+  x.shadowOffsetY = 1;
+  x.lineWidth = 3;
+  x.strokeStyle = '#ffffff';
+  x.stroke();
+  x.shadowColor = 'transparent';
+  x.fillStyle = color;
+  x.fill();
+  return { image: x.getImageData(0, 0, c.width, c.height), ratio };
+}
+
+// canRecord says whether the position source produces a track: a fixed
+// position does not move.
+const canRecord = (g) => !!g && !g.private && !!g.source && g.source !== 'manual';
 
 // ---------------------------------------------------------------- view
 
@@ -134,10 +173,20 @@ export async function mapsView(main, params) {
   let scale = null;
   // measure: { mode: 'distance' | 'area', pts: [[lon, lat]], cursor, done }
   let measure = null;
+  // Everything addOverlays reads is declared here, before the first await:
+  // the map's style can finish loading while this function still waits for
+  // the server, and a variable declared further down would not exist yet.
+  let mesh = { state: 'off', nodes: [], messages: [] };
+  let gpsPrivate = false;
+  // The track being recorded, drawn as it grows: its file name, the number
+  // of points the server has recorded, and one [[lon, lat]] line per
+  // segment.
+  let live = null;
   const disposers = [];
 
   main.classList.add('main-map');
   disposers.push(() => main.classList.remove('main-map'));
+  disposers.push(() => { if (live) clearTimeout(live.timer); });
 
   const mapEl = h('div', { class: 'map-canvas', role: 'region', 'aria-label': 'Map' });
   const side = h('aside', { class: 'map-side' });
@@ -169,6 +218,13 @@ export async function mapsView(main, params) {
   });
   disposers.push(() => dirs.dispose());
   mapEl.appendChild(dirs.navEl);
+
+  // Map buttons under the zoom buttons: show and follow the position, and
+  // start or stop recording a track.
+  const locateBtn = h('button', { type: 'button', class: 'ctrl-locate', onclick: () => locate() }, h('span', { class: 'ctrl-icon', 'aria-hidden': 'true' }));
+  const recBtn = h('button', { type: 'button', class: 'ctrl-rec', hidden: true, onclick: () => setRecording(!(lastGPS && lastGPS.recording)) },
+    h('span', { class: 'ctrl-icon', 'aria-hidden': 'true' }));
+  const posCtrl = h('div', { class: 'maplibregl-ctrl maplibregl-ctrl-group map-pos-ctrl' }, locateBtn, recBtn);
 
   side.append(
     h('section', { class: 'map-sec' }, searchInput, searchResults),
@@ -231,9 +287,13 @@ export async function mapsView(main, params) {
         hash: false,
       });
       map.addControl(new ml.NavigationControl({ visualizePitch: false }), 'top-right');
+      map.addControl({ onAdd: () => posCtrl, onRemove: () => posCtrl.remove() }, 'top-right');
       scale = new ml.ScaleControl({ unit: getUnits() });
       map.addControl(scale, 'bottom-left');
-      map.on('style.load', addOverlays);
+      // MapLibre swallows exceptions thrown by style.load listeners. Throw
+      // them again outside it, so a broken overlay is reported as a script
+      // error instead of silently leaving the position and route off the map.
+      map.on('style.load', () => { try { addOverlays(); } catch (e) { setTimeout(() => { throw e; }); } });
       map.on('moveend', (ev) => {
         const m = ev.target;
         try { sessionStorage.setItem('arcana-map-view', JSON.stringify({ center: m.getCenter().toArray(), zoom: m.getZoom() })); } catch (_) { /* unavailable */ }
@@ -275,7 +335,7 @@ export async function mapsView(main, params) {
     const surface = cssVar('--surface') || '#fff';
     const text = cssVar('--text') || '#111';
     const empty = { type: 'FeatureCollection', features: [] };
-    for (const id of ['arcana-area', 'arcana-tracks', 'arcana-waypoints', 'arcana-measure', 'arcana-position', 'arcana-position-check', 'arcana-mesh']) {
+    for (const id of ['arcana-area', 'arcana-tracks', 'arcana-live-track', 'arcana-waypoints', 'arcana-measure', 'arcana-position', 'arcana-position-check', 'arcana-mesh']) {
       if (!map.getSource(id)) map.addSource(id, { type: 'geojson', data: empty });
     }
     map.addLayer({ id: 'arcana-area-line', type: 'line', source: 'arcana-area',
@@ -283,6 +343,14 @@ export async function mapsView(main, params) {
     map.addLayer({ id: 'arcana-tracks-line', type: 'line', source: 'arcana-tracks',
       layout: { 'line-cap': 'round', 'line-join': 'round' },
       paint: { 'line-color': '#d9480f', 'line-width': 3, 'line-opacity': 0.85 } });
+    // The track being recorded: the same colour as saved tracks, drawn
+    // over a pale casing so it stands out from roads.
+    map.addLayer({ id: 'arcana-live-casing', type: 'line', source: 'arcana-live-track',
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: { 'line-color': '#ffffff', 'line-width': 7, 'line-opacity': 0.7 } });
+    map.addLayer({ id: 'arcana-live-line', type: 'line', source: 'arcana-live-track',
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: { 'line-color': '#d9480f', 'line-width': 4 } });
     map.addLayer({ id: 'arcana-wpt-dot', type: 'circle', source: 'arcana-waypoints',
       paint: { 'circle-radius': 5, 'circle-color': '#b02a6b', 'circle-stroke-width': 2, 'circle-stroke-color': surface } });
     map.addLayer({ id: 'arcana-wpt-label', type: 'symbol', source: 'arcana-waypoints',
@@ -310,14 +378,30 @@ export async function mapsView(main, params) {
     dirs.addLayers(map);
     map.addLayer({ id: 'arcana-pos-check', type: 'circle', source: 'arcana-position-check',
       paint: { 'circle-radius': 8, 'circle-color': 'rgba(0,0,0,0)', 'circle-stroke-width': 3, 'circle-stroke-color': ['get', 'color'] } });
-    map.addLayer({ id: 'arcana-pos-halo', type: 'circle', source: 'arcana-position',
-      paint: { 'circle-radius': 15, 'circle-color': ['get', 'color'], 'circle-opacity': 0.18 } });
-    map.addLayer({ id: 'arcana-pos-dot', type: 'circle', source: 'arcana-position',
-      paint: { 'circle-radius': 6, 'circle-color': ['get', 'color'], 'circle-stroke-width': 2, 'circle-stroke-color': surface } });
+    // The position: an arrow along the course while moving, otherwise a dot
+    // (positionData chooses). One arrow image per freshness colour, made
+    // again on every style load so a theme change recolours it.
+    for (const [state, color] of Object.entries(positionColors())) {
+      const id = `arcana-pos-arrow-${state}`;
+      const { image, ratio } = arrowImage(color);
+      if (map.hasImage(id)) map.updateImage(id, image);
+      else map.addImage(id, image, { pixelRatio: ratio });
+    }
+    const moving = ['==', ['get', 'arrow'], true];
+    map.addLayer({ id: 'arcana-pos-halo', type: 'circle', source: 'arcana-position', filter: ['!=', ['get', 'state'], 'lost'],
+      paint: { 'circle-radius': ['case', moving, 21, 17], 'circle-color': ['get', 'color'], 'circle-opacity': 0.16 } });
+    map.addLayer({ id: 'arcana-pos-shadow', type: 'circle', source: 'arcana-position', filter: ['!', moving],
+      paint: { 'circle-radius': 10, 'circle-color': '#000000', 'circle-opacity': 0.3, 'circle-blur': 0.6, 'circle-translate': [0, 1] } });
+    map.addLayer({ id: 'arcana-pos-dot', type: 'circle', source: 'arcana-position', filter: ['!', moving],
+      paint: { 'circle-radius': 7.5, 'circle-color': ['get', 'color'], 'circle-stroke-width': 3, 'circle-stroke-color': '#ffffff' } });
+    map.addLayer({ id: 'arcana-pos-arrow', type: 'symbol', source: 'arcana-position', filter: moving,
+      layout: { 'icon-image': ['get', 'icon'], 'icon-rotate': ['get', 'course'], 'icon-rotation-alignment': 'map',
+        'icon-pitch-alignment': 'map', 'icon-allow-overlap': true, 'icon-ignore-placement': true } });
     map.getSource('arcana-position').setData(positionData());
     map.getSource('arcana-position-check').setData(checkData());
     map.getSource('arcana-waypoints').setData(waypointData());
     map.getSource('arcana-tracks').setData({ type: 'FeatureCollection', features: [...shownTracks.values()] });
+    map.getSource('arcana-live-track').setData(liveData());
     if (areaBox) drawArea(areaBox);
     drawMeasure();
   }
@@ -372,16 +456,66 @@ export async function mapsView(main, params) {
     return { type: 'FeatureCollection', features: [{ type: 'Feature', properties: { color }, geometry: { type: 'Point', coordinates: [c.fix.lon, c.fix.lat] } }] };
   }
 
+  // Blue while the position is current, amber when stale, grey when lost.
+  function positionColors() {
+    return { current: cssVar('--accent') || '#1f5a85', stale: cssVar('--warn') || '#9a6200', lost: cssVar('--faint') || '#888' };
+  }
+
+  // positionData is the marker: an arrow turned to the course when the
+  // source reports one (it does only while moving), otherwise a dot. A lost
+  // position keeps a grey dot at the last place known.
   function positionData() {
     const f = lastGPS && lastGPS.fix;
     if (!f) return { type: 'FeatureCollection', features: [] };
-    const color = lastGPS.state === 'current' || lastGPS.state === 'manual' ? (cssVar('--accent') || '#1f5a85')
-      : lastGPS.state === 'stale' ? (cssVar('--warn') || '#9a6200') : (cssVar('--faint') || '#888');
-    return { type: 'FeatureCollection', features: [{ type: 'Feature', properties: { color }, geometry: { type: 'Point', coordinates: [f.lon, f.lat] } }] };
+    const st = lastGPS.state;
+    const state = st === 'current' || st === 'manual' ? 'current' : st === 'stale' ? 'stale' : 'lost';
+    const arrow = f.course != null && state !== 'lost';
+    return { type: 'FeatureCollection', features: [{ type: 'Feature',
+      properties: { state, color: positionColors()[state], arrow, course: arrow ? f.course : 0, icon: `arcana-pos-arrow-${state}` },
+      geometry: { type: 'Point', coordinates: [f.lon, f.lat] } }] };
+  }
+
+  // locate centres the map on the position and follows it; pressed again,
+  // it stops following.
+  function locate() {
+    const f = lastGPS && lastGPS.fix;
+    if (!map) return;
+    if (!f) {
+      toast(lastGPS && lastGPS.private ? 'The host has not shared its position.' : 'No position yet. Choose a position source in Settings.');
+      return;
+    }
+    follow = !follow;
+    if (follow) map.easeTo({ center: [f.lon, f.lat], zoom: Math.max(map.getZoom(), 15), duration: 600 });
+    renderPosition();
+  }
+
+  async function setRecording(on) {
+    try {
+      onGPS(await api.post('/api/gps/recording', { on }));
+      if (!on) toast('Track saved under Tracks.');
+    } catch (e) { toast(e.message); }
+  }
+
+  // renderControls updates the map buttons from the latest position.
+  function renderControls() {
+    const g = lastGPS;
+    const f = g && g.fix;
+    locateBtn.disabled = !map;
+    locateBtn.setAttribute('aria-pressed', follow ? 'true' : 'false');
+    const where = f ? (follow ? 'Stop following my position' : 'Show and follow my position') : 'My position (none yet)';
+    locateBtn.title = where;
+    locateBtn.setAttribute('aria-label', where);
+    recBtn.hidden = !canChange || !canRecord(g);
+    const rec = !!(g && g.recording);
+    recBtn.setAttribute('aria-pressed', rec ? 'true' : 'false');
+    const what = rec ? `Stop recording (${fmtDistance(g.trackLength || 0)} so far)` : 'Record a track';
+    recBtn.title = what;
+    recBtn.setAttribute('aria-label', what);
   }
 
   function renderPosition() {
     const g = lastGPS;
+    renderControls();
     if (!g) { fill(posBox, h('p', { class: 'small muted' }, 'Loading…')); return; }
     if (g.private) {
       fill(posBox, h('p', { class: 'small muted' }, 'The host has not shared its position with network clients.'));
@@ -421,7 +555,10 @@ export async function mapsView(main, params) {
       rows.push(h('div', { class: 'small muted' }, 'If the browser asks, allow it to use your location.'));
     }
     if (g.error) rows.push(h('div', { class: 'small', style: 'color:var(--err)' }, g.error));
-    if (g.recording) rows.push(h('div', { class: 'small muted' }, `Recording ${g.track || 'track'} · ${g.points || 0} points`));
+    if (g.recording) {
+      rows.push(h('div', { class: 'small rec-status' }, h('span', { class: 'rec-dot', 'aria-hidden': 'true' }),
+        h('b', null, 'Recording'), ` · ${fmtDistance(g.trackLength || 0)} · ${g.points || 0} point${g.points === 1 ? '' : 's'}`));
+    }
     if (g.state !== 'off' && g.sentences + g.rejected > 0 && g.rejected > g.sentences) {
       rows.push(h('div', { class: 'small', style: 'color:var(--warn)' }, `Most data from the receiver is unreadable (${g.rejected} rejected). Check the baud rate.`));
     }
@@ -430,6 +567,8 @@ export async function mapsView(main, params) {
       h('button', { disabled: !f || !map, onclick: () => { follow = false; flyTo(f.lon, f.lat, Math.max(map.getZoom(), 14)); } }, 'Center'),
       h('button', { disabled: !f || !map, 'aria-pressed': follow ? 'true' : 'false', onclick: () => { follow = !follow; renderPosition(); if (follow && f) map.easeTo({ center: [f.lon, f.lat] }); } }, follow ? 'Following' : 'Follow'),
       canChange ? h('button', { disabled: !f, onclick: () => addWaypointAt(f.lat, f.lon) }, 'Save as waypoint') : null,
+      canChange && canRecord(g) ? h('button', { class: 'rec-btn', onclick: () => setRecording(!g.recording) },
+        h('span', { class: g.recording ? 'rec-icon stop' : 'rec-icon', 'aria-hidden': 'true' }), g.recording ? 'Stop recording' : 'Record track') : null,
       f && dirs.hasNetworks() ? h('button', { onclick: () => dirs.fromMyPosition() }, 'Directions from here') : null));
     fill(posBox, rows);
   }
@@ -471,13 +610,88 @@ export async function mapsView(main, params) {
     if (!!(g && g.fix) !== hadFix) { hadFix = !!(g && g.fix); dirs.gpsChanged(); }
     setData('arcana-position', positionData());
     setData('arcana-position-check', checkData());
-    if (follow && g.fix && map) map.easeTo({ center: [g.fix.lon, g.fix.lat], duration: 400 });
+    updateLive(g);
+    // While the map is still moving (zooming in after the locate button),
+    // the next position waits rather than cutting the animation short.
+    if (follow && g.fix && map && !map.isMoving()) map.easeTo({ center: [g.fix.lon, g.fix.lat], duration: 400 });
+  }
+
+  // ------------------------------------------------------------ live track
+  // The track being recorded is drawn as it grows: each point the server
+  // records is added from the position stream, and the whole track is
+  // fetched when the page opens or when points were missed (a slow
+  // connection, a tab in the background).
+  function liveData() {
+    if (!live || !live.coords.some((s) => s.length > 1)) return { type: 'FeatureCollection', features: [] };
+    return { type: 'Feature', properties: {}, geometry: { type: 'MultiLineString', coordinates: live.coords } };
+  }
+
+  function updateLive(g) {
+    if (!g || !g.recording || !g.track) {
+      if (live) finishLive();
+      return;
+    }
+    if (live && live.name !== g.track) finishLive();
+    if (!live) {
+      live = { name: g.track, points: 0, coords: [[]], at: 0, loading: false, fetched: 0, timer: 0 };
+      fetchLive();
+      return;
+    }
+    if (g.points <= live.points) return;
+    const missed = g.points > live.points + 1;
+    live.points = g.points;
+    if (g.fix) {
+      const now = Date.now();
+      if (live.at && now - live.at > TRACK_GAP_MS) live.coords.push([]);
+      live.coords[live.coords.length - 1].push([g.fix.lon, g.fix.lat]);
+      live.at = now;
+      setData('arcana-live-track', liveData());
+    }
+    if (missed) fetchLive();
+  }
+
+  // fetchLive replaces the line with the server's copy, at most every 3 s.
+  async function fetchLive() {
+    const l = live;
+    if (!l || l.loading || l.timer) return;
+    const wait = 3000 - (Date.now() - l.fetched);
+    if (wait > 0) {
+      l.timer = setTimeout(() => { l.timer = 0; if (live === l) fetchLive(); }, wait);
+      return;
+    }
+    l.loading = true;
+    l.fetched = Date.now();
+    try {
+      const f = await api.get(`/api/gps/tracks/${encodeURIComponent(l.name)}`);
+      if (live !== l) return;
+      l.coords = f.geometry.coordinates.length ? f.geometry.coordinates : [[]];
+      l.points = f.properties.points;
+      l.at = Date.now();
+      setData('arcana-live-track', liveData());
+    } catch (_) {
+      // Drawn from the next points instead.
+    } finally {
+      l.loading = false;
+    }
+  }
+
+  // finishLive keeps a track that has just stopped recording on the map, as
+  // a saved track shown from the list.
+  function finishLive() {
+    const l = live;
+    live = null;
+    clearTimeout(l.timer);
+    setData('arcana-live-track', liveData());
+    if (l.coords.some((s) => s.length > 1)) {
+      shownTracks.set(l.name, { type: 'Feature', properties: { name: l.name }, geometry: { type: 'MultiLineString', coordinates: l.coords.filter((s) => s.length) } });
+      setData('arcana-tracks', { type: 'FeatureCollection', features: [...shownTracks.values()] });
+    }
+    if (!gpsPrivate) loadTracks();
   }
 
   // The position, waypoints and tracks are private to the host unless it
   // shares them; the dashboard status says which, so nothing is requested
   // that would be refused.
-  let gpsPrivate = false;
   try {
     const st = await api.get('/api/status');
     gpsPrivate = st.gps && st.gps.state === 'private';
@@ -499,16 +713,14 @@ export async function mapsView(main, params) {
   // ------------------------------------------------------------ mesh
   // Nodes heard by a Meshtastic radio connected to Arcana (Settings → Maps
   // and position). Arcana only listens; it never transmits.
-  let mesh = { state: 'off', nodes: [], messages: [] };
   const meshName = (num) => {
     const n = mesh.nodes.find((x) => x.num === num);
     return n ? (n.shortName || n.longName || n.id) : `!${num.toString(16).padStart(8, '0')}`;
   };
-  const staleAfter = 2 * 3600;
   function meshData() {
     const now = Date.now() / 1000;
     return { type: 'FeatureCollection', features: mesh.nodes.filter((n) => n.position).map((n) => ({ type: 'Feature',
-      properties: { num: n.num, short: n.shortName || n.id, local: !!n.local, stale: !n.lastHeard || now - n.lastHeard > staleAfter },
+      properties: { num: n.num, short: n.shortName || n.id, local: !!n.local, stale: !n.lastHeard || now - n.lastHeard > MESH_STALE_AFTER },
       geometry: { type: 'Point', coordinates: [n.position.lon, n.position.lat] } })) };
   }
   function meshDetails(n) {
@@ -612,14 +824,22 @@ export async function mapsView(main, params) {
     let tracks = [];
     try { tracks = (await api.get('/api/gps/tracks')).tracks; } catch (_) { /* private or unavailable */ }
     if (!tracks.length) {
-      fill(trkBox, h('p', { class: 'small muted' }, 'No tracks. Turn on track recording in Settings, or import a GPX file.'));
+      fill(trkBox, h('p', { class: 'small muted' }, canChange ? 'No tracks. Press Record track under Position, or import a GPX file.' : 'No tracks.'));
       return;
     }
     fill(trkBox, h('ul', { class: 'map-list' }, tracks.map((t) => {
+      const title = t.name.replace(/\.gpx$/, '');
+      // The track being recorded is already drawn as it grows.
+      if (t.recording) {
+        return h('li', null,
+          h('span', { class: 'track-row' }, h('span', { class: 'rec-dot', 'aria-hidden': 'true' }), h('span', null, title)),
+          h('span', { class: 'sub' }, `Recording now${t.start ? ` · started ${fmtAgo(t.start)}` : ''}`),
+          h('span', { class: 'row' }, h('a', { class: 'small', href: `/api/gps/export?tracks=${encodeURIComponent(t.name)}`, download: t.name }, 'GPX')));
+      }
       const cb = h('input', { type: 'checkbox', checked: shownTracks.has(t.name), 'aria-label': `Show ${t.name} on the map` });
       cb.addEventListener('change', () => toggleTrack(t, cb.checked));
       return h('li', null,
-        h('label', { class: 'track-row' }, cb, h('span', null, t.name.replace(/\.gpx$/, ''))),
+        h('label', { class: 'track-row' }, cb, h('span', null, title)),
         h('span', { class: 'sub' }, `${fmtDistance(t.length)} · ${t.points} points${t.start ? ` · ${fmtAgo(t.start)}` : ''}`),
         h('span', { class: 'row' },
           h('a', { class: 'small', href: `/api/gps/export?tracks=${encodeURIComponent(t.name)}`, download: t.name }, 'GPX'),

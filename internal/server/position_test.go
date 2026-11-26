@@ -47,6 +47,63 @@ func TestNetworkPositionSettings(t *testing.T) {
 	}
 }
 
+// TestRecordingFromTheMap checks the map's Record button: it needs a moving
+// source, keeps the setting so recording resumes after a restart, and the
+// track being recorded can be drawn before its file is written.
+func TestRecordingFromTheMap(t *testing.T) {
+	e := newEnv(t)
+	hdr := map[string]string{"X-Arcana-Token": localToken(t, e), "Content-Type": "application/json"}
+	send := func(method, url, body string) (int, string) {
+		rec := e.do(e.appH, method, url, local, "127.0.0.1:18470", hdr, strings.NewReader(body))
+		return rec.Code, rec.Body.String()
+	}
+	if code, body := send("POST", "/api/gps/recording", `{"on":true}`); code != 409 {
+		t.Fatalf("recording without a source: %d %s", code, body)
+	}
+	if code, body := send("PUT", "/api/settings", `{"gps":{"source":"simulator","simulatorSpeed":60}}`); code != 200 {
+		t.Fatalf("settings: %d %s", code, body)
+	}
+	var st struct {
+		State       string  `json:"state"`
+		Recording   bool    `json:"recording"`
+		Track       string  `json:"track"`
+		Points      int     `json:"points"`
+		TrackLength float64 `json:"trackLength"`
+	}
+	code, body := send("POST", "/api/gps/recording", `{"on":true}`)
+	if code != 200 || json.Unmarshal([]byte(body), &st) != nil || !st.Recording || st.Track == "" {
+		t.Fatalf("start: %d %s", code, body)
+	}
+	if !e.app.Lib.Settings.Get().GPS.RecordTrack {
+		t.Fatal("the setting was not kept")
+	}
+	deadline := time.Now().Add(10 * time.Second)
+	for st.Points < 2 {
+		if time.Now().After(deadline) {
+			t.Fatalf("no points recorded: %+v", st)
+		}
+		time.Sleep(50 * time.Millisecond)
+		_, body := send("GET", "/api/gps", "")
+		json.Unmarshal([]byte(body), &st)
+	}
+	var line struct {
+		Geometry struct {
+			Coordinates [][][2]float64 `json:"coordinates"`
+		} `json:"geometry"`
+	}
+	code, body = send("GET", "/api/gps/tracks/"+st.Track, "")
+	if code != 200 || json.Unmarshal([]byte(body), &line) != nil || len(line.Geometry.Coordinates) != 1 || len(line.Geometry.Coordinates[0]) < 2 {
+		t.Fatalf("live track: %d %s", code, body)
+	}
+	code, body = send("POST", "/api/gps/recording", `{"on":false}`)
+	if code != 200 || json.Unmarshal([]byte(body), &st) != nil || st.Recording || st.State != "current" {
+		t.Fatalf("stop: %d %s", code, body)
+	}
+	if e.app.Lib.Settings.Get().GPS.RecordTrack {
+		t.Fatal("the setting is still on")
+	}
+}
+
 func TestBrowserPositionAndSavedRoutes(t *testing.T) {
 	e := newEnv(t)
 	hdr := map[string]string{"X-Arcana-Token": localToken(t, e), "Content-Type": "application/json"}

@@ -394,6 +394,28 @@ ol.steps .step:hover { background: var(--surface-2); }
 .maplibregl-popup-content { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
 .maplibregl-popup-tip { display: none; }
 .maplibregl-ctrl-attrib { font-size: 11px; }
+/* Position and recording buttons under the zoom buttons. MapLibre's
+   stylesheet loads after this one, so these rules name the control group
+   twice to win; the group stays white in both themes, like MapLibre's own. */
+.maplibregl-ctrl-group.map-pos-ctrl button { display: grid; place-items: center; color: #333; }
+.maplibregl-ctrl-group.map-pos-ctrl button[hidden] { display: none; }
+.maplibregl-ctrl-group.map-pos-ctrl button:disabled .ctrl-icon { opacity: .3; }
+.maplibregl-ctrl-group.map-pos-ctrl .ctrl-icon { position: relative; display: block; box-sizing: border-box; }
+.maplibregl-ctrl-group.map-pos-ctrl .ctrl-locate .ctrl-icon { width: 16px; height: 16px; border: 2px solid currentColor; border-radius: 50%; }
+.maplibregl-ctrl-group.map-pos-ctrl .ctrl-locate .ctrl-icon::after { content: ""; position: absolute; inset: 3px; border-radius: 50%; background: currentColor; }
+.maplibregl-ctrl-group.map-pos-ctrl .ctrl-locate[aria-pressed="true"] { background: #1f5a85; color: #fff; }
+.maplibregl-ctrl-group.map-pos-ctrl .ctrl-rec .ctrl-icon { width: 13px; height: 13px; border-radius: 50%; background: #c8261b; }
+.maplibregl-ctrl-group.map-pos-ctrl .ctrl-rec[aria-pressed="true"] { background: #fbe3e1; }
+.maplibregl-ctrl-group.map-pos-ctrl .ctrl-rec[aria-pressed="true"] .ctrl-icon { width: 11px; height: 11px; border-radius: 2px; }
+@media (prefers-reduced-motion: no-preference) {
+  .maplibregl-ctrl-group.map-pos-ctrl .ctrl-rec[aria-pressed="true"] .ctrl-icon { animation: rec-pulse 1.6s ease-in-out infinite; }
+}
+@keyframes rec-pulse { 50% { opacity: .35; } }
+.rec-dot, .rec-icon { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--err); flex: none; }
+.rec-status { margin-top: 4px; }
+.rec-status .rec-dot { margin-right: 6px; }
+.rec-icon { margin-right: 6px; }
+.rec-icon.stop { border-radius: 1px; }
 @media (max-width: 820px) {
   .map-layout { grid-template-columns: 1fr; grid-template-rows: 60vh auto; height: auto; }
   .map-side { border-left: 0; border-top: 1px solid var(--border); }
