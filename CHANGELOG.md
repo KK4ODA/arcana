@@ -3,6 +3,47 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
+## Unreleased
+
+Arcana now offers all the reference content Project NOMAD v1.35.2
+recommends. Running both on 2026-11-26 showed that every Kiwix archive and
+map region NOMAD offers was already in Arcana's catalog, but 38 of those
+archives were in no collection, and NOMAD's medicines reference had home
+care and herbs that Arcana lacked. Both gaps are closed.
+
+### Added
+- **Home care and herbs** (ADR-0028). The Medicines page lists 20
+  home-care measures (such as honey for cough, oral rehydration and cool
+  water on burns) and 18 herbs and supplements, each summarizing a CDC,
+  MedlinePlus, FDA or NCCIH page, with its cautions, uses and the evidence.
+  *By situation* shows them after the medicines for each problem, and a
+  new *Home care and herbs* tab lists them all. They are built in, so the
+  Medicines page is now always there; without the FDA label reference it
+  shows the remedies and says how to get the labels. The lists come from
+  Project NOMAD (Apache-2.0).
+- **Five more medicine situations:** common cold or flu; dry, chapped or
+  cracked skin; earwax, water in the ear or earache; dehydration or heat
+  cramps; and pinworm. Their wording was checked against current Drug
+  Facts labels.
+- **Food, Gardening and Homesteading** and **Computing and Programming**
+  collections, also offered in Getting started.
+- **More archives in collections:** NHS Medicines A to Z, MedlinePlus and
+  LibrePathology (Medical and Public Health); Ready.gov, the Canadian
+  Prepper and Urban Prepper videos and Project Gutenberg's military science
+  books (Family Emergency Preparedness); CD3WD and woodworking questions
+  (Field Technician); Hundred Rabbits (Remote Expedition); four more
+  LibreTexts subjects, TED-Ed and TED talks (Education and Learning).
+
+### Changed
+- Collections settle for Wikipedia's most-read articles ("Best of
+  Wikipedia", 296 MB to 2.7 GB) when no full edition fits. Before, the
+  Essential tier of Getting started (8 GB) left Wikipedia out, because the
+  smallest full edition is 14.4 GB.
+- Ready.gov is recorded as a US government work, redistribution permitted,
+  from FEMA's web policy. MedlinePlus is recorded as restricted: NLM says
+  the A.D.A.M. encyclopedia, drug and herb monographs and many images in it
+  are copyrighted.
+
 ## 0.13.0 — 2026-11-26
 
 Arcana now has an Entertainment page. Seven board games are built in and
