@@ -249,6 +249,7 @@ mark.current { background: var(--accent); color: var(--accent-text); }
 /* Search results grouped by source. */
 .search-sec { border-top: 1px solid var(--border); }
 .search-sec > h3, .search-group-head { padding: 10px 12px 4px; margin: 0; }
+.search-sec > h4 { padding: 8px 12px 2px; margin: 0; font-size: 13px; color: var(--muted); }
 .search-group-head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
 .search-group-head h3 { margin: 0; }
 .search-group-head button { margin-left: auto; }

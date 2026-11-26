@@ -32,6 +32,9 @@ export async function discoverView(main, params) {
     q: params.get('q') || '', category: params.get('category') || '',
     lang: params.has('lang') ? params.get('lang') : preferredLanguage(),
     sort: params.get('sort') || 'relevance', offset: 0, active: null,
+    // Question answering lists hundreds of models: filter by source and by
+    // the memory they need.
+    provider: params.get('provider') || '', mem: params.get('mem') || '',
   };
   const facets = await api.get(`/api/catalog/facets${state.lang ? `?lang=${state.lang}` : ''}`);
 
@@ -70,6 +73,15 @@ export async function discoverView(main, params) {
   const sortSel = h('select', { 'aria-label': 'Sort' }, [['relevance', 'Relevance'], ['title', 'Title'], ['size', 'Smallest first'],
     ['size-desc', 'Largest first'], ['date', 'Newest first']].map(([v, t]) => h('option', { value: v, selected: v === state.sort }, t)));
   sortSel.addEventListener('change', () => { state.sort = sortSel.value; load(); });
+  const providerSel = h('select', { 'aria-label': 'Source' }, [['', 'All models'], ['arcana', 'Tested with Arcana'],
+    ['ollama', 'Ollama library (NOMAD’s list)']].map(([v, t]) => h('option', { value: v, selected: v === state.provider }, t)));
+  providerSel.addEventListener('change', () => { state.provider = providerSel.value; state.offset = 0; load(); });
+  const memSel = h('select', { 'aria-label': 'Memory' }, [['', 'Any memory'], ...[2, 4, 8, 16, 32, 64, 128].map((g) => [String(g), `Needs up to ${g} GB`])]
+    .map(([v, t]) => h('option', { value: v, selected: v === state.mem }, t)));
+  memSel.addEventListener('change', () => { state.mem = memSel.value; state.offset = 0; load(); });
+  const modelFilters = h('div', { class: 'toolbar small', hidden: true },
+    h('span', { class: 'grow muted' }, 'Models run on this computer’s processor and memory. Choose one that needs less memory than the computer has free.'),
+    providerSel, memSel);
 
   const list = h('div', { class: 'body flush table-wrap' });
   let lastPage = [];
@@ -84,12 +96,19 @@ export async function discoverView(main, params) {
     h('div', null,
       h('section', { class: 'panel' },
         h('div', { class: 'toolbar' }, h('div', { class: 'grow' }, search), langSel, sortSel),
-        list, pager),
+        modelFilters, list, pager),
       detail, selBar)));
 
   async function load() {
+    const models = state.category === 'assistant';
+    modelFilters.hidden = !models;
+    const filters = models ? { provider: state.provider, mem: state.mem } : {};
     const q = new URLSearchParams({ q: state.q, category: state.category, lang: state.lang, sort: state.sort, offset: state.offset, limit: 100 });
-    history.replaceState(null, '', `#/discover?${new URLSearchParams({ q: state.q, category: state.category, lang: state.lang, sort: state.sort })}`);
+    if (filters.provider) q.set('provider', filters.provider);
+    if (filters.mem) q.set('maxMemory', String(Number(filters.mem) * 1e9));
+    const shown = new URLSearchParams({ q: state.q, category: state.category, lang: state.lang, sort: state.sort });
+    for (const [k, v] of Object.entries(filters)) if (v) shown.set(k, v);
+    history.replaceState(null, '', `#/discover?${shown}`);
     let r;
     try { r = await api.get(`/api/catalog?${q}`); } catch (e) { clear(list).appendChild(h('div', { class: 'banner err' }, e.message)); return; }
     clear(list);
@@ -177,11 +196,16 @@ export async function discoverView(main, params) {
       ['Coverage', r.coverage?.scope === 'regional' ? (r.coverage.regions || []).join(', ') : r.coverage?.scope === 'global' ? 'Worldwide' : null],
       ['Format', r.format.toUpperCase()],
       ['Download size', `${(r.sizeEstimated ? '≈ ' : '') + fmtBytes(r.downloadSize)}${f.name ? ` (${f.name})` : ''}`],
-      ['Content', [r.media?.pictures ? 'images' : 'no images', r.media?.videos ? 'video' : null, r.media?.detail].filter(Boolean).join(', ')],
-      ['Search', r.capabilities?.fullTextSearch ? 'Full-text index included' : 'Title only'],
+      // A model or the engine has no pages to show or search.
+      ...(r.category === 'assistant' ? [] : [
+        ['Content', [r.media?.pictures ? 'images' : 'no images', r.media?.videos ? 'video' : null, r.media?.detail].filter(Boolean).join(', ')],
+        ['Search', r.capabilities?.fullTextSearch ? 'Full-text index included' : 'Title only']]),
       ['Integrity', f.hashes?.sha256 ? 'SHA-256 published in catalog' : f.metalinkUrl ? 'SHA-256 obtained from the publisher\'s metalink at download' : 'No checksum published'],
       ['License', h('span', null, licenseBadge(r.license), ' ', r.license.name || r.license.id, r.license.notes ? h('div', { class: 'small muted' }, r.license.notes) : null)],
       ['Articles', r.stats?.articles ? r.stats.articles.toLocaleString() : null],
+      ['Memory needed', r.stats?.memoryBytes ? `About ${fmtBytes(r.stats.memoryBytes)} with a 4,096-token context` : null],
+      ['Parameters', r.stats?.parameters ? `${(r.stats.parameters / 1e9).toFixed(r.stats.parameters < 1e10 ? 1 : 0)} billion` : null],
+      ['Longest context', r.stats?.contextLength ? `${r.stats.contextLength.toLocaleString()} tokens` : null],
     ].filter(([, v]) => v);
 
     closeDetail();
@@ -197,7 +221,8 @@ export async function discoverView(main, params) {
           h('table', null, h('thead', null, h('tr', null, h('th', null, 'Edition'), h('th', null, 'Content'), h('th', { class: 'right' }, 'Size'), h('th', null, 'Date'), h('th', null, ''))),
             h('tbody', null, d.alternatives.map((a) => h('tr', { class: a.id === r.id ? 'active' : null },
               h('td', null, a.variantLabel || a.variant),
-              h('td', { class: 'small muted' }, [a.media?.pictures ? 'images' : 'no images', a.media?.detail].filter(Boolean).join(', ')),
+              h('td', { class: 'small muted' }, a.stats?.memoryBytes ? `needs about ${fmtBytes(a.stats.memoryBytes)} memory`
+                : [a.media?.pictures ? 'images' : 'no images', a.media?.detail].filter(Boolean).join(', ')),
               h('td', { class: 'right num' }, fmtBytes(a.downloadSize)), h('td', { class: 'num small' }, fmtDate(a.published)),
               h('td', { class: 'right' }, canChange && a.status === 'available' && a.fits
                 ? h('button', { onclick: () => { selectOnly(a, d.alternatives); } }, selection.has(a.id) ? 'Selected' : 'Select')

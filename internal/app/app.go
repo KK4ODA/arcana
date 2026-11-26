@@ -316,11 +316,14 @@ func (a *App) reloadKiwix() {
 
 // ---------------------------------------------------------------- catalog
 
-// Providers returns the catalog providers enabled in settings. The bundled
-// catalog is always present.
+// Providers returns the catalog providers enabled in settings. The built-in
+// catalogs are always present.
 func (a *App) Providers() []catalog.Provider {
 	s := a.Lib.Settings.Get()
-	ps := []catalog.Provider{catalog.Bundled()}
+	var ps []catalog.Provider
+	for _, b := range catalog.BuiltIn() {
+		ps = append(ps, b)
+	}
 	if s.Catalog.KiwixEnabled {
 		ps = append(ps, &catalog.KiwixProvider{BaseURL: s.Catalog.KiwixURL})
 	}
@@ -365,18 +368,19 @@ type catalogCache struct {
 	Resources []catalog.Resource `json:"resources"`
 }
 
-// loadCatalogCaches imports cached catalogs into the index. The bundled
-// catalog is always imported from the binary, so a fresh library can be used
-// without ever going online.
+// loadCatalogCaches imports cached catalogs into the index. The built-in
+// catalogs are always imported from the binary, so a fresh library can be
+// used without ever going online.
 func (a *App) loadCatalogCaches(ctx context.Context) error {
-	b := catalog.Bundled()
-	res, err := b.Fetch(ctx, nil)
-	if err != nil {
-		return err
-	}
-	valid, _ := catalog.ValidateAll(b.ID(), res)
-	if err := a.Store.ReplaceProviderResources(ctx, b.ID(), b.Name(), valid, time.Now()); err != nil {
-		return err
+	for _, b := range catalog.BuiltIn() {
+		res, err := b.Fetch(ctx, nil)
+		if err != nil {
+			return err
+		}
+		valid, _ := catalog.ValidateAll(b.ID(), res)
+		if err := a.Store.ReplaceProviderResources(ctx, b.ID(), b.Name(), valid, time.Now()); err != nil {
+			return err
+		}
 	}
 	existing := map[string]string{}
 	if ps, err := a.Store.Providers(ctx); err == nil {
@@ -402,7 +406,7 @@ func (a *App) loadCatalogCaches(ctx context.Context) error {
 			continue
 		}
 		var c catalogCache
-		if err := json.Unmarshal(data, &c); err != nil || c.Format != "arcana-catalog-cache" || c.Provider == "arcana" {
+		if err := json.Unmarshal(data, &c); err != nil || c.Format != "arcana-catalog-cache" || catalog.IsBuiltIn(c.Provider) {
 			continue
 		}
 		if existing[c.Provider] == c.FetchedAt.UTC().Format(time.RFC3339) {
@@ -453,7 +457,7 @@ func (a *App) RefreshCatalog(ctx context.Context) ([]RefreshResult, error) {
 			}
 		}
 		now := time.Now().UTC().Truncate(time.Second)
-		if p.ID() != "arcana" {
+		if !catalog.IsBuiltIn(p.ID()) {
 			cache := catalogCache{Format: "arcana-catalog-cache", Provider: p.ID(), Name: p.Name(), FetchedAt: now, Resources: valid}
 			data, err := json.Marshal(cache)
 			if err == nil {
@@ -659,7 +663,7 @@ func (a *App) recommendWithin(ctx context.Context, presetID, lang string, budget
 	}
 	var families []string
 	for _, it := range preset.Items {
-		families = append(families, strings.ReplaceAll(it.Family, "{lang}", lang), strings.ReplaceAll(it.Family, "{lang}", "en"))
+		families = append(families, it.FamilyIDs(lang)...)
 	}
 	fam, err := a.Store.FamilyVariants(ctx, families)
 	if err != nil {
