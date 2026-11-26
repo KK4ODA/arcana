@@ -148,6 +148,7 @@ docs/design/14-radio-and-integrations.md.
 | `GET /api/gps/ports` | Serial ports (host only) |
 | `GET/POST /api/gps/waypoints`, `DELETE /api/gps/waypoints/{id}` | Waypoints |
 | `GET /api/gps/tracks`, `GET/DELETE /api/gps/tracks/{name}` | Recorded and imported tracks (single track as GeoJSON) |
+| `POST /api/gps/recording` | Start (`{"on":true}`) or stop track recording; sets the *Track recording* setting without restarting the position source |
 | `GET /api/gps/export?tracks=a.gpx,b.gpx`, `POST /api/gps/import?name=` | GPX export (waypoints plus chosen tracks); import (body is the GPX file) |
 
 The content origin (port + 1) serves `/kiwix/*` (proxied kiwix-serve, with

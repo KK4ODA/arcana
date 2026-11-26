@@ -31,6 +31,7 @@ type recorder struct {
 	name      string
 	segments  [][]Point
 	last      *Point
+	length    float64 // metres, summed within segments
 	dirty     bool
 	lastFlush time.Time
 }
@@ -42,7 +43,16 @@ const (
 )
 
 func newRecorder(dir string, now time.Time) *recorder {
-	name := "track-" + now.UTC().Format("20060102-150405") + ".gpx"
+	base := "track-" + now.UTC().Format("20060102-150405")
+	name := base + ".gpx"
+	// Recording stopped and started again within a second must not
+	// overwrite the track just saved.
+	for n := 2; ; n++ {
+		if _, err := os.Lstat(filepath.Join(dir, name)); err != nil {
+			break
+		}
+		name = fmt.Sprintf("%s-%d.gpx", base, n)
+	}
 	return &recorder{path: filepath.Join(dir, name), name: name, lastFlush: now}
 }
 
@@ -60,6 +70,8 @@ func (r *recorder) add(f Fix) error {
 		}
 		if p.Time.Sub(r.last.Time) >= maxTrackGap {
 			r.segments = append(r.segments, nil)
+		} else {
+			r.length += Distance(r.last.Lat, r.last.Lon, p.Lat, p.Lon)
 		}
 	}
 	if len(r.segments) == 0 {
@@ -83,14 +95,29 @@ func Alt2Ele(a *float64) *float64 {
 	return &v
 }
 
-func (r *recorder) status() (string, int) {
+func (r *recorder) status() (name string, points int, length float64) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	n := 0
 	for _, s := range r.segments {
-		n += len(s)
+		points += len(s)
 	}
-	return r.name, n
+	return r.name, points, r.length
+}
+
+// snapshot copies the track recorded so far when it is the one named.
+func (r *recorder) snapshot(name string) (Track, bool) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if name != r.name {
+		return Track{}, false
+	}
+	t := Track{Name: strings.TrimSuffix(r.name, ".gpx")}
+	for _, s := range r.segments {
+		if len(s) > 0 {
+			t.Segments = append(t.Segments, append([]Point(nil), s...))
+		}
+	}
+	return t, true
 }
 
 func (r *recorder) flush() error {
@@ -138,6 +165,8 @@ type TrackInfo struct {
 	End      time.Time `json:"end,omitempty"`
 	Size     int64     `json:"size"`
 	Modified time.Time `json:"modified"`
+	// Recording marks the track still being recorded.
+	Recording bool `json:"recording,omitempty"`
 }
 
 var trackNameRe = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._ -]{0,120}\.gpx$`)
@@ -153,7 +182,7 @@ func (m *Manager) trackPath(name string) (string, error) {
 
 // Tracks lists stored GPX tracks, newest first.
 func (m *Manager) Tracks() ([]TrackInfo, error) {
-	m.flushRecording()
+	recording := m.flushRecording()
 	entries, err := os.ReadDir(m.tracksDir())
 	if errors.Is(err, os.ErrNotExist) {
 		return []TrackInfo{}, nil
@@ -170,7 +199,7 @@ func (m *Manager) Tracks() ([]TrackInfo, error) {
 		if err != nil {
 			continue
 		}
-		info := TrackInfo{Name: e.Name(), Size: fi.Size(), Modified: fi.ModTime().UTC()}
+		info := TrackInfo{Name: e.Name(), Size: fi.Size(), Modified: fi.ModTime().UTC(), Recording: e.Name() == recording}
 		if t, err := m.Track(e.Name()); err == nil {
 			info.Points, info.Length = t.Points(), math.Round(t.Length())
 			if n := t.Points(); n > 0 {
@@ -184,20 +213,34 @@ func (m *Manager) Tracks() ([]TrackInfo, error) {
 	return out, nil
 }
 
-func (m *Manager) flushRecording() {
+// flushRecording writes the track being recorded and returns its file name
+// ("" when nothing is recorded).
+func (m *Manager) flushRecording() string {
 	m.mu.Lock()
 	rec := m.rec
 	m.mu.Unlock()
-	if rec != nil {
-		_ = rec.flush()
+	if rec == nil {
+		return ""
 	}
+	_ = rec.flush()
+	return rec.name
 }
 
-// Track reads a stored track, merging all tracks in the file.
+// Track reads a stored track, merging all tracks in the file. The track
+// being recorded is read from memory, so it is complete up to the latest
+// point although its file is rewritten only every 30 seconds.
 func (m *Manager) Track(name string) (Track, error) {
 	p, err := m.trackPath(name)
 	if err != nil {
 		return Track{}, err
+	}
+	m.mu.Lock()
+	rec := m.rec
+	m.mu.Unlock()
+	if rec != nil {
+		if t, ok := rec.snapshot(name); ok {
+			return t, nil
+		}
 	}
 	f, err := os.Open(p)
 	if err != nil {

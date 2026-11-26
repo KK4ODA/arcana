@@ -191,7 +191,7 @@ export async function settingsView(main) {
     field('Compare with', checkSource, 'Optional. A second source shown beside the first and checked against it, so a GPS that is jammed, spoofed or simply wrong is noticed. Only the first source moves the map, records tracks and guides you; the map offers to switch them when they disagree.'),
     sourceFields,
     field('Track recording', h('label', { class: 'inline' }, record, 'Record a track while a position is available'),
-      'Tracks are saved as GPX files in user/tracks on the drive.'),
+      'Tracks are saved as GPX files in user/tracks on the drive. The Record button on the map turns this on and off too.'),
     field('Share position', h('label', { class: 'inline' }, shareGPS, 'Show the position, waypoints and tracks to network clients'),
       'Off by default. Applies only when network sharing is on.'),
     field('Meshtastic radio', meshSource, 'Show the nodes a Meshtastic radio hears on the map, with their positions and the text messages on its channels. Arcana only listens; it never transmits.'),

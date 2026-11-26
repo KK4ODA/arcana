@@ -54,6 +54,8 @@ type Status struct {
 	Recording bool    `json:"recording"`
 	Track     string  `json:"track,omitempty"`
 	Points    int     `json:"points,omitempty"`
+	// TrackLength is the length in metres of the track being recorded.
+	TrackLength float64 `json:"trackLength,omitempty"`
 	// Check is the second source's state, when one is set.
 	Check *Status `json:"check,omitempty"`
 	// Apart is the distance in metres between the two sources' positions
@@ -107,6 +109,7 @@ type Manager struct {
 	browser  chan BrowserFix
 	subs     map[chan Status]struct{}
 	rec      *recorder
+	running  bool       // Apply started the sources and Stop has not ended them
 	wmu      sync.Mutex // serializes waypoint file updates
 	rmu      sync.Mutex // serializes route file updates
 }
@@ -126,24 +129,69 @@ func NewManager(dir string, readOnly bool, log *slog.Logger) *Manager {
 }
 
 // Apply (re)starts the configured sources. It returns immediately; failures
-// show up in Status and are retried with backoff.
+// show up in Status and are retried with backoff. When only track recording
+// changes, the sources keep running and only the recorder starts or stops,
+// so recording can be switched from the map without losing the fix or
+// reopening the receiver's port.
 func (m *Manager) Apply(ctx context.Context, s Settings) {
-	m.Stop()
 	if s.CheckSource == s.Source || s.CheckSource == "manual" || s.CheckSource == "simulator" {
 		s.CheckSource = ""
 	}
+	m.mu.Lock()
+	keep := m.running && sameSources(m.settings, s)
+	m.mu.Unlock()
+	if keep {
+		m.setRecording(s.RecordTrack)
+		return
+	}
+	m.Stop()
 	m.mu.Lock()
 	m.settings = s
 	m.browser = nil
 	if s.Source == "browser" || s.CheckSource == "browser" {
 		m.browser = make(chan BrowserFix, 1)
 	}
-	if s.RecordTrack && !m.ReadOnly && s.Source != "" && s.Source != "manual" {
-		m.rec = newRecorder(filepath.Join(m.Dir, "tracks"), m.now())
+	if m.canRecord(s) {
+		m.rec = newRecorder(m.tracksDir(), m.now())
 	}
+	m.running = true
 	m.mu.Unlock()
 	m.start(ctx, &m.main, s.Source, s)
 	m.start(ctx, &m.alt, s.CheckSource, s)
+	m.broadcast()
+}
+
+// sameSources says whether two settings run the same sources, differing at
+// most in whether a track is recorded.
+func sameSources(a, b Settings) bool {
+	a.RecordTrack = b.RecordTrack
+	return a == b
+}
+
+// canRecord says whether settings s record a track: a fixed position has
+// nothing to record, and a read-only library cannot keep it.
+func (m *Manager) canRecord(s Settings) bool {
+	return s.RecordTrack && !m.ReadOnly && s.Source != "" && s.Source != "manual"
+}
+
+// setRecording starts a new track or saves and ends the current one,
+// leaving the sources running.
+func (m *Manager) setRecording(on bool) {
+	m.mu.Lock()
+	m.settings.RecordTrack = on
+	var done *recorder
+	switch {
+	case on && m.rec == nil && m.canRecord(m.settings):
+		m.rec = newRecorder(m.tracksDir(), m.now())
+	case !on && m.rec != nil:
+		done, m.rec = m.rec, nil
+	}
+	m.mu.Unlock()
+	if done != nil {
+		if err := done.flush(); err != nil {
+			m.Log.Warn("save track", "err", err)
+		}
+	}
 	m.broadcast()
 }
 
@@ -319,6 +367,7 @@ func (m *Manager) Stop() {
 	}
 	rec := m.rec
 	m.rec = nil
+	m.running = false
 	m.mu.Unlock()
 	for _, c := range cancels {
 		c()
@@ -362,15 +411,16 @@ func (m *Manager) Status() Status {
 	var recording bool
 	var track string
 	var points int
+	var length float64
 	if m.rec != nil {
 		recording = true
-		track, points = m.rec.status()
+		track, points, length = m.rec.status()
 	}
 	m.mu.Unlock()
 
 	now := m.now()
 	st := feedStatus(main, &m.main.t, now)
-	st.Recording, st.Track, st.Points = recording, track, points
+	st.Recording, st.Track, st.Points, st.TrackLength = recording, track, points, math.Round(length)
 	if alt.kind != "" {
 		c := feedStatus(alt, &m.alt.t, now)
 		st.Check = &c

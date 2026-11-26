@@ -19,7 +19,8 @@ rest of this document is the original design, kept for reference.
 | Coordinates | Partly | Decimal degrees, DMS and Maidenhead locator. DDM and MGRS/UTM are not implemented. |
 | Waypoints | Implemented, **differs** | Stored in `user/waypoints.json` (not GeoJSON under `user/maps/`). |
 | GPX import/export | Implemented | GPX 1.1 waypoints, routes (imported as tracks) and tracks; coordinates range-checked; 64 MB limit. |
-| Track recording | Implemented | `user/tracks/track-*.gpx`, 5 m minimum spacing, new segment after a 60 s gap, rewritten atomically at most every 30 s. |
+| Track recording | Implemented | `user/tracks/track-*.gpx`, 5 m minimum spacing, new segment after a 60 s gap, rewritten atomically at most every 30 s. Started and stopped from the map (Record button, `POST /api/gps/recording`) or in Settings; both change the same setting, so recording resumes after a restart. Switching recording leaves the source running. The track being recorded is drawn as it grows and is read from memory, not from its file. |
+| Position marker | Implemented | An arrow turned to the course while the source reports one (only when moving), otherwise a dot; blue when current, amber when stale, grey when lost. The second source is a ring. A map button centres on the position and follows it. |
 | Distance and bearing tools | Implemented | Map view → Tools: *Measure distance* (multi-point great-circle path, bearing of the last leg) and *Measure area* (spherical polygon area and perimeter), computed in the browser (`static/js/geo.js`) and labelled "straight line". |
 | Units | Implemented | Metric or imperial, per browser (`static/js/units.js`); applies to the scale bar, GPS speed and altitude, track lengths and measurements. |
 | Terrain, contours, emergency overlays | Not implemented | |

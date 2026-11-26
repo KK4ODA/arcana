@@ -13,6 +13,7 @@ import (
 
 	"github.com/KK4ODA/arcana/internal/app"
 	"github.com/KK4ODA/arcana/internal/gps"
+	"github.com/KK4ODA/arcana/internal/library"
 )
 
 func (s *Server) registerGPS(mux *http.ServeMux) {
@@ -22,6 +23,7 @@ func (s *Server) registerGPS(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/gps/waypoints", s.withApp(s.gpsVisible(s.handleWaypoints)))
 	mux.HandleFunc("POST /api/gps/waypoints", s.withApp(s.handleAddWaypoint))
 	mux.HandleFunc("DELETE /api/gps/waypoints/{id}", s.withApp(s.handleDeleteWaypoint))
+	mux.HandleFunc("POST /api/gps/recording", s.withApp(s.handleRecording))
 	mux.HandleFunc("GET /api/gps/tracks", s.withApp(s.gpsVisible(s.handleTracks)))
 	mux.HandleFunc("GET /api/gps/tracks/{name}", s.withApp(s.gpsVisible(s.handleTrack)))
 	mux.HandleFunc("DELETE /api/gps/tracks/{name}", s.withApp(s.handleDeleteTrack))
@@ -240,6 +242,36 @@ func (s *Server) handleDeleteWaypoint(w http.ResponseWriter, r *http.Request, a 
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]bool{"ok": true})
+}
+
+// handleRecording starts or stops track recording from the map. It changes
+// the same setting as Settings → Track recording, so the choice survives a
+// restart, and the position source keeps running.
+func (s *Server) handleRecording(w http.ResponseWriter, r *http.Request, a *app.App) {
+	var req struct {
+		On bool `json:"on"`
+	}
+	if err := readJSON(r, &req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid request")
+		return
+	}
+	if src := a.Lib.Settings.Get().GPS.Source; req.On && (src == "" || src == "manual") {
+		writeError(w, http.StatusConflict, "There is no moving position to record. Choose a GPS receiver, a Starlink dish or this browser's location in Settings first.")
+		return
+	}
+	if _, err := a.Lib.Settings.Update(func(st *library.Settings) error {
+		st.GPS.RecordTrack = req.On
+		return nil
+	}); err != nil {
+		code := http.StatusInternalServerError
+		if errors.Is(err, library.ErrReadOnly) {
+			code = http.StatusConflict
+		}
+		writeError(w, code, err.Error())
+		return
+	}
+	a.ApplyGPSSettings()
+	writeJSON(w, http.StatusOK, gpsStatusResponse{a.GPS.Status(), a.Lib.Settings.Get().GPS.ShareWithClients})
 }
 
 func (s *Server) handleTracks(w http.ResponseWriter, r *http.Request, a *app.App) {

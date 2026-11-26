@@ -123,6 +123,74 @@ func TestSimulatorAndRecording(t *testing.T) {
 	}
 }
 
+// TestRecordingSwitchKeepsSource checks that turning recording on and off
+// (the map's Record button) leaves the source running, that the track being
+// recorded can be read before its file is written, and that a new track
+// started within the same second does not overwrite the last one.
+func TestRecordingSwitchKeepsSource(t *testing.T) {
+	dir := t.TempDir()
+	m := NewManager(dir, false, nil)
+	m.SimCenter = func() (float64, float64, bool) { return 49.61, 6.13, true }
+	s := Settings{Source: "simulator", SimulatorSpeed: 60}
+	m.Apply(context.Background(), s)
+	defer m.Stop()
+	waitState(t, m, "current")
+	m.main.t.mu.Lock()
+	sentences := m.main.t.sentences
+	m.main.t.mu.Unlock()
+
+	s.RecordTrack = true
+	m.Apply(context.Background(), s)
+	st := m.Status()
+	if !st.Recording || st.State != "current" || st.Sentences < sentences {
+		t.Fatalf("switching recording on restarted the source: %+v (had %d sentences)", st, sentences)
+	}
+	first := st.Track
+	deadline := time.Now().Add(10 * time.Second)
+	for m.Status().Points < 3 {
+		if time.Now().After(deadline) {
+			t.Fatalf("no points recorded: %+v", m.Status())
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	if st := m.Status(); st.TrackLength < 10 {
+		t.Fatalf("track length %v m after %d points", st.TrackLength, st.Points)
+	}
+	live, err := m.Track(first)
+	if err != nil || live.Points() < 3 {
+		t.Fatalf("live track: %d points, %v", live.Points(), err)
+	}
+	if _, err := os.Stat(filepath.Join(dir, "tracks", first)); err == nil {
+		t.Fatal("the file was written before the first 30 s flush; the live read proves nothing")
+	}
+
+	s.RecordTrack = false
+	m.Apply(context.Background(), s)
+	if st := m.Status(); st.Recording || st.State != "current" {
+		t.Fatalf("after stopping: %+v", st)
+	}
+	saved, err := m.Track(first)
+	if err != nil || saved.Points() < live.Points() {
+		t.Fatalf("saved track: %d points (live had %d), %v", saved.Points(), live.Points(), err)
+	}
+
+	s.RecordTrack = true
+	m.Apply(context.Background(), s)
+	second := m.Status().Track
+	if second == "" || second == first {
+		t.Fatalf("second recording %q reuses %q", second, first)
+	}
+	tracks, err := m.Tracks()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, tr := range tracks {
+		if tr.Name == first && tr.Recording {
+			t.Fatalf("finished track marked as recording: %+v", tr)
+		}
+	}
+}
+
 func TestSimulatorReplaysGPX(t *testing.T) {
 	dir := t.TempDir()
 	os.MkdirAll(filepath.Join(dir, "tracks"), 0o755)
