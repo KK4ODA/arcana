@@ -46,7 +46,7 @@ func (a *App) autoRefreshLoop(ctx context.Context) {
 		providers, _ := a.Store.Providers(ctx)
 		last := time.Time{}
 		for _, p := range providers {
-			if p.ID == "arcana" {
+			if catalog.IsBuiltIn(p.ID) {
 				continue
 			}
 			if ts, err := time.Parse(time.RFC3339, p.LastAttempt); err == nil && ts.After(last) {

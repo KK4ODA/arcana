@@ -320,6 +320,9 @@
           "text": "Answers come from a small language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
         }
       ],
+      "stats": {
+        "memoryBytes": 1000000000
+      },
       "popularity": 3
     },
     {
@@ -391,6 +394,9 @@
           "text": "Answers come from a small language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
         }
       ],
+      "stats": {
+        "memoryBytes": 3000000000
+      },
       "popularity": 5
     },
     {
@@ -462,6 +468,9 @@
           "text": "Answers come from a small language model reading passages of your library. It can misread or leave things out: check the cited passages before acting, especially for medical, legal or safety questions."
         }
       ],
+      "stats": {
+        "memoryBytes": 3500000000
+      },
       "popularity": 4
     },
     {

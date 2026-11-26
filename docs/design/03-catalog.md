@@ -168,7 +168,14 @@ Presets (`bundled/presets.json`) list resource **families** with the
 curator's preferred editions (most detailed first), a priority (1
 essential, 2 recommended, 3 optional) and a reason. `{lang}` in a family
 name is replaced with the chosen language, falling back to English with an
-explanation. Ten presets ship:
+explanation. An item may also name **fallbacks**: smaller families tried,
+in order, after every edition of its own family. Wikipedia's items fall
+back to its most-read articles ("Best of Wikipedia", 296 MB to 2.7 GB in
+the editions offered), because the smallest full edition (14.4 GB in the
+2026-09 export) is larger than the 8 GB Essential tier of Getting started.
+A fallback missing in the chosen language is left out, not replaced with
+English, and an installed fallback edition counts as the item being
+present. Twelve presets ship:
 
 - Essential Knowledge
 - Family Emergency Preparedness
@@ -177,9 +184,18 @@ explanation. Ten presets ship:
 - Field Technician
 - Remote Expedition
 - Education and Learning
+- Food, Gardening and Homesteading
+- Computing and Programming
 - Community Knowledge Server
 - Comprehensive Reference Library
 - Films and Games
+
+Since 0.14.0 the presets include every Kiwix archive Project NOMAD v1.35.2
+recommends: its six content categories and its Wikipedia choices (65
+archives, compared on 2026-11-26). 38 of them were in Arcana's catalog
+but in no preset; they now sit in the preset closest to NOMAD's category,
+at NOMAD's tier where the preset is new and one step lower in Arcana's
+existing presets, so their core items keep priority.
 
 The recommender (`catalog.Recommend`) is a pure function. Its budget is the
 planner's headroom: free space after queued downloads and the reserve. It
@@ -199,6 +215,8 @@ the user can change every choice. Tested outcomes:
   dictionary.
 - 115 GB picks "full articles, no images" plus the dictionary.
 - 2 TB picks every full edition.
+- 8 GB with the Wikipedia fallback picks "Best of Wikipedia", full
+  articles without images, and names it in the decision.
 
 ## Download and update model
 

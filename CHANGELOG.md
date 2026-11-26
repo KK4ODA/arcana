@@ -5,7 +5,57 @@ the library format version is tracked separately (docs/design/09-storage-and-dat
 
 ## Unreleased
 
+Arcana now offers all the reference content Project NOMAD v1.35.2
+recommends. Running both on 2026-11-26 showed that every Kiwix archive and
+map region NOMAD offers was already in Arcana's catalog, but 38 of those
+archives were in no collection, and NOMAD's medicines reference had home
+care and herbs that Arcana lacked. Both gaps are closed.
+
 ### Added
+- **Home care and herbs** (ADR-0028). The Medicines page lists 20
+  home-care measures (such as honey for cough, oral rehydration and cool
+  water on burns) and 18 herbs and supplements, each summarizing a CDC,
+  MedlinePlus, FDA or NCCIH page, with its cautions, uses and the evidence.
+  *By situation* shows them after the medicines for each problem, and a
+  new *Home care and herbs* tab lists them all. They are built in, so the
+  Medicines page is now always there; without the FDA label reference it
+  shows the remedies and says how to get the labels. The lists come from
+  Project NOMAD (Apache-2.0).
+- **Five more medicine situations:** common cold or flu; dry, chapped or
+  cracked skin; earwax, water in the ear or earache; dehydration or heat
+  cramps; and pinworm. Their wording was checked against current Drug
+  Facts labels.
+- **Food, Gardening and Homesteading** and **Computing and Programming**
+  collections, also offered in Getting started.
+- **More archives in collections:** NHS Medicines A to Z, MedlinePlus and
+  LibrePathology (Medical and Public Health); Ready.gov, the Canadian
+  Prepper and Urban Prepper videos and Project Gutenberg's military science
+  books (Family Emergency Preparedness); CD3WD and woodworking questions
+  (Field Technician); Hundred Rabbits (Remote Expedition); four more
+  LibreTexts subjects, TED-Ed and TED talks (Education and Learning).
+
+- **The models on Project NOMAD's list, from the Ollama registry**
+  (ADR-0029). NOMAD lists 272 models; 178 of them run in Arcana's engine
+  (llamafile 0.10.6) and can answer questions. They are offered as 345
+  downloads, one per size at Ollama's default quantization. Each is the GGUF file the registry
+  serves, checked against its SHA-256 digest, and its description states
+  the memory it needs. Left out: 19 cloud-only models, 4 with no GGUF
+  file, 13 embedding models, 19 that cannot answer questions (safety
+  classifiers, OCR, text-to-SQL, code models without a chat template) and
+  39 that llamafile cannot load
+  ([docs/ollama-models.md](docs/ollama-models.md) names each and why).
+  Code models carry a warning that they answer general questions poorly.
+  Licenses of 178 entries are confirmed against the publisher's statement
+  on Hugging Face; the rest are marked unconfirmed.
+- **Filters for the model list.** *Discover → Question answering* filters
+  by source (tested with Arcana, Ollama library) and by the memory a model
+  needs, lists Arcana's three tested models first, and shows a model's
+  memory need, parameters and other sizes in its details. Settings →
+  Assistant groups installed models by source.
+- `tools/ollama-models` regenerates the list: it reads NOMAD's list and the
+  registry, and loads every file in llamafile with zeros in place of the
+  weights to check that the engine accepts it.
+
 - **Apps** (ADR-0030). A new *Apps* page installs web applications from
   the catalog and opens each in a tab of its own: CyberChef 10.24.0 (GCHQ's
   data toolkit), IT Tools 2024.10.22, Excalidraw (the whiteboard, in the
@@ -26,6 +76,16 @@ the library format version is tracked separately (docs/design/09-storage-and-dat
   restricted; remove it before copying the library for someone else.
   Arcana serves it with its own rendering engine and two fonts from the
   drive, which it otherwise loads from Google's servers.
+
+### Changed
+- Collections settle for Wikipedia's most-read articles ("Best of
+  Wikipedia", 296 MB to 2.7 GB) when no full edition fits. Before, the
+  Essential tier of Getting started (8 GB) left Wikipedia out, because the
+  smallest full edition is 14.4 GB.
+- Ready.gov is recorded as a US government work, redistribution permitted,
+  from FEMA's web policy. MedlinePlus is recorded as restricted: NLM says
+  the A.D.A.M. encyclopedia, drug and herb monographs and many images in it
+  are copyrighted.
 
 ## 0.13.0 — 2026-11-26
 

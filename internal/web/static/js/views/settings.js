@@ -459,8 +459,15 @@ export function assistantPanel(st, info, ro, field) {
     ['external', 'A model server: Ollama, LM Studio or another OpenAI-compatible program']]
     .map(([v, t]) => h('option', { value: v, selected: v === a.backend }, t)));
   const models = status.models || [];
+  // Installed models only, grouped by source and listed by name, so the
+  // list stays readable when many Ollama library models are installed.
+  const option = (m) => h('option', { value: m.resourceId, selected: m.resourceId === a.model }, `${m.title} (${fmtBytes(m.size)})`);
+  const byTitle = (x, y) => x.title.localeCompare(y.title, undefined, { numeric: true });
+  const tested = models.filter((m) => !m.resourceId.startsWith('ollama.')).sort(byTitle);
+  const library = models.filter((m) => m.resourceId.startsWith('ollama.')).sort(byTitle);
   const model = h('select', { disabled: ro }, h('option', { value: '' }, 'Largest installed model'),
-    models.map((m) => h('option', { value: m.resourceId, selected: m.resourceId === a.model }, `${m.title} (${fmtBytes(m.size)})`)));
+    tested.length && library.length ? [h('optgroup', { label: 'Tested with Arcana' }, tested.map(option)),
+      h('optgroup', { label: 'Ollama library' }, library.map(option))] : models.map(option));
   const ctx = h('select', { disabled: ro }, [[2048, '2,048 tokens (least memory)'], [4096, '4,096 tokens (default)'], [8192, '8,192 tokens'], [16384, '16,384 tokens']]
     .map(([v, t]) => h('option', { value: v, selected: v === a.contextSize }, t)));
   const threads = h('input', { type: 'number', min: 0, max: 256, value: a.threads || '', placeholder: 'automatic', style: 'width:110px', disabled: ro });
@@ -494,7 +501,7 @@ export function assistantPanel(st, info, ro, field) {
 
   const localFields = h('div', null,
     field('Model', models.length ? model : h('span', null, 'No model installed. ', h('a', { href: '#/discover?category=assistant' }, 'Download one in Discover'), '.'),
-      'Larger models answer better but need more memory and time. The tiny model suits a Raspberry Pi; the balanced model most laptops.'),
+      'Larger models answer better but need more memory and time. The tiny model suits a Raspberry Pi; the balanced model most laptops. Models from the Ollama library state the memory they need in Discover.'),
     field('Engine', h('span', null, status.engineInstalled ? `llamafile, ${engineState}. ` : 'Not installed (downloaded with the first model). ', status.engineInstalled ? stopBtn : null,
       status.engine?.error ? h('div', { class: 'banner err' }, status.engine.error) : null),
       'Runs only on this computer, only while answering, and stops after the idle time below.'),

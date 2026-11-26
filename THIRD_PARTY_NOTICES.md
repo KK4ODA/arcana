@@ -84,6 +84,7 @@ against the SHA-256 in the bundled catalog and serves them (ADR-0030).
 | Arcana sample library (`testdata/sample/`) | CC0-1.0 — written for this project |
 | 47 CFR Parts 95 and 97 (bundled catalog entries; downloaded, not shipped) | US federal government work, public domain in the US |
 | Map region boundaries used to build `internal/maps/regions.json` (bounding boxes only) | Natural Earth, public domain |
+| Home care and herbs (`internal/drugs/remedies.json`, compiled into the program) | Apache-2.0. Copyright 2024-2026 Crosstalk Solutions LLC (Project NOMAD, github.com/Crosstalk-Solutions/project-nomad, `collections/home_remedies.json` and `collections/natural_remedies.json` at commit 8dcb8ea). Changed for Arcana: condition names replaced by Arcana's situation names; text unchanged. The entries summarize pages of the CDC, MedlinePlus (NLM), the FDA and NCCIH, which are US federal works. License text: `licenses/PROJECT-NOMAD-LICENSE.txt` in the release. |
 | llamafile 0.10.6 model engine (bundled catalog entry; downloaded on request, not shipped) | Apache-2.0 (Mozilla.ai); bundles llama.cpp (MIT) and Cosmopolitan Libc (ISC) |
 | Question-answering models: Qwen2.5 0.5B Instruct, Granite 3.3 2B Instruct, Qwen3 4B (bundled catalog entries; downloaded on request, not shipped) | Apache-2.0 (Qwen team, Alibaba Cloud; IBM) |
 | Bergamot translation engine (WebAssembly) and Mozilla's translation models (downloaded on request, not shipped) | MPL-2.0 (Mozilla) |

@@ -304,6 +304,14 @@ type Query struct {
 	Provider string
 	Format   string
 	Family   string
+	// MaxMemory, when positive, keeps resources whose stated memory need
+	// (stats.memoryBytes, set on language models) is at most this many
+	// bytes. Resources that state none are kept.
+	MaxMemory int64
+	// RankFirst orders by the providers' own rank before titles when there
+	// are no search words (the question-answering models: Arcana's tested
+	// models above hundreds from the Ollama library).
+	RankFirst bool
 	// Sort is "relevance", "title", "size", "size-desc", "date".
 	Sort   string
 	Limit  int
@@ -342,6 +350,10 @@ func (s *Store) SearchResources(ctx context.Context, q Query) ([]catalog.Resourc
 		where = append(where, "r.family = ?")
 		args = append(args, q.Family)
 	}
+	if q.MaxMemory > 0 {
+		where = append(where, "COALESCE(json_extract(r.data, '$.stats.memoryBytes'), 0) <= ?")
+		args = append(args, q.MaxMemory)
+	}
 	cond := ""
 	if len(where) > 0 {
 		cond = " WHERE " + strings.Join(where, " AND ")
@@ -361,6 +373,8 @@ func (s *Store) SearchResources(ctx context.Context, q Query) ([]catalog.Resourc
 	case "relevance", "":
 		if match != "" {
 			order = "bm25(resources_fts, 0, 10.0, 2.0, 1.0)"
+		} else if q.RankFirst {
+			order = "r.popularity DESC, r.title COLLATE NOCASE"
 		}
 	}
 	limit := q.Limit

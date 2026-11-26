@@ -1,0 +1,664 @@
+{
+ "version": "2026-06-10",
+ "compiledBy": "Project NOMAD (Crosstalk Solutions, LLC), collections/home_remedies.json and collections/natural_remedies.json at commit 8dcb8ea2f05e7edda7292b15d565b77f6b9b14ad (v1.35.2), github.com/Crosstalk-Solutions/project-nomad",
+ "license": "Apache-2.0",
+ "converted": "2026-11-26: NOMAD condition names replaced by Arcana situation slugs; text unchanged.",
+ "sources": [
+  {
+   "kind": "home",
+   "name": "US government health guidance (CDC, NIH/NHLBI, MedlinePlus/NLM, FDA)",
+   "url": "https://www.cdc.gov",
+   "license": "Public domain (US government works)"
+  },
+  {
+   "kind": "herbal",
+   "name": "NCCIH — Herbs at a Glance",
+   "url": "https://www.nccih.nih.gov/health/herbsataglance",
+   "license": "Public domain (US government work; NCCIH)"
+  }
+ ],
+ "remedies": [
+  {
+   "slug": "honey-for-cough",
+   "kind": "home",
+   "name": "Honey (for cough)",
+   "commonNames": [],
+   "situations": [
+    "cough",
+    "sore-throat",
+    "cold"
+   ],
+   "uses": "Honey may be used to relieve cough in adults and children at least 1 year old. One to two teaspoons can be taken directly or stirred into a warm (not hot) beverage.",
+   "how": "Give one to two teaspoons of honey directly by mouth, or stir it into a warm (not hot) drink. The CDC recommends this as a home measure for cough associated with the common cold.",
+   "evidence": "CDC lists honey among recommended home measures for easing cough and sore throat associated with the common cold; it is one of several non-medication strategies mentioned alongside rest, fluids, and humidifier use.",
+   "cautions": "Never give honey to infants under 1 year old — it can contain Clostridium botulinum spores that cause infant botulism, a rare but serious illness. This warning applies regardless of honey type or brand.",
+   "sourceUrl": "https://www.cdc.gov/common-cold/treatment/index.html"
+  },
+  {
+   "slug": "fluids-and-rest",
+   "kind": "home",
+   "name": "Fluids and rest",
+   "commonNames": [],
+   "situations": [
+    "cold",
+    "fever",
+    "diarrhea",
+    "nausea"
+   ],
+   "uses": "Getting plenty of rest and drinking adequate fluids (water, clear broths, juice, or sports drinks) supports recovery from colds, fever, diarrhea, and nausea. Adults with diarrhea should drink water, fruit juices, sports drinks, sodas without caffeine, and salty broths.",
+   "how": "Get plenty of rest and drink plenty of fluids. If keeping liquids down is difficult, take small sips of water or suck on ice chips frequently rather than trying to drink large amounts at once.",
+   "evidence": "CDC recommends rest and fluids as primary home care measures for the common cold. MedlinePlus (NIH/NIDDK) similarly lists these as the foundation of diarrhea self-care, and advises nausea patients to take in small amounts of clear liquids often to stay hydrated.",
+   "cautions": "Severely ill individuals, those with signs of dehydration (no urination, sunken eyes, extreme thirst), or those unable to keep any fluid down should seek medical care promptly. Caffeine and alcohol are not effective rehydration choices.",
+   "sourceUrl": "https://www.cdc.gov/common-cold/treatment/index.html"
+  },
+  {
+   "slug": "oral-rehydration",
+   "kind": "home",
+   "name": "Oral rehydration solution (ORS)",
+   "commonNames": [
+    "ORS",
+    "rehydration salts"
+   ],
+   "situations": [
+    "dehydration",
+    "diarrhea"
+   ],
+   "uses": "Oral rehydration solutions replace fluids and electrolytes lost through diarrhea or other causes of dehydration. For mild to moderate dehydration, drinking water is the first step; sports drinks or oral rehydration solutions (such as Pedialyte) are recommended when electrolytes are also depleted, especially for children.",
+   "how": "Use a commercially prepared oral rehydration solution (available without a prescription) and follow the package directions. For adults with electrolyte losses, sports drinks can help; if liquids are hard to keep down, take small sips frequently or suck on ice chips rather than drinking large amounts at once.",
+   "evidence": "MedlinePlus (NIH/NIDDK) states that treatment for dehydration involves replacing lost fluids and electrolytes, and that oral rehydration solutions for children are available without a prescription. The same source recommends sports drinks for adults when electrolytes have been lost alongside fluids.",
+   "cautions": "Seek immediate medical care for signs of severe dehydration: no urination for 8 or more hours, rapid heartbeat, confusion, or inability to keep fluids down. Infants and small children with diarrhea should use formulated ORS (not plain water) to replace electrolytes safely.",
+   "sourceUrl": "https://medlineplus.gov/dehydration.html"
+  },
+  {
+   "slug": "cool-compress-fever",
+   "kind": "home",
+   "name": "Cool compress (for fever and insect bites)",
+   "commonNames": [],
+   "situations": [
+    "fever",
+    "bites",
+    "eyes"
+   ],
+   "uses": "A clean cloth soaked in cool (not ice-cold) water and placed on the forehead or bitten area can help reduce discomfort from fever, insect bites, and eye allergy symptoms. For insect stings, ice wrapped in a washcloth should be applied for 10 minutes on and 10 minutes off.",
+   "how": "Soak a clean cloth in cool water, wring it out, and place it on the forehead or affected area. For insect stings, wrap ice in a cloth and apply for 10 minutes on, then 10 minutes off — never place ice directly on bare skin.",
+   "evidence": "MedlinePlus (NIH/NIAID) notes that applying cool compresses is recommended for allergic conjunctivitis and eye burning and irritation. For insect bites and stings, a cool or iced compress is a standard first-line self-care step described in MedlinePlus search guidance consistent with NIH resources.",
+   "cautions": "Do not apply ice or an ice-cold compress directly to bare skin for extended periods — wrap ice in cloth and limit applications to 10–15 minutes to avoid frostbite or tissue damage. For fever, cool compresses supplement (but do not replace) appropriate fever-reducing medicine when indicated; consult a healthcare provider if fever is high, prolonged, or accompanied by severe symptoms.",
+   "sourceUrl": "https://medlineplus.gov/insectbitesandstings.html"
+  },
+  {
+   "slug": "ice-and-elevation",
+   "kind": "home",
+   "name": "Ice and elevation (RICE method)",
+   "commonNames": [
+    "RICE",
+    "Rest-Ice-Compression-Elevation"
+   ],
+   "situations": [
+    "muscle-joint-pain",
+    "bites"
+   ],
+   "uses": "Applying ice wrapped in cloth to a strained muscle, sprain, or bite site — combined with rest, compression, and elevation of the injured area — reduces swelling and pain. Ice should be applied for 10–15 minutes every 1–3 hours during the first few days of injury.",
+   "how": "Wrap ice in a cloth or towel and apply to the injured area for 10–15 minutes at a time. Rest the area, wrap it snugly with a bandage to reduce swelling, and elevate it above heart level when possible.",
+   "evidence": "MedlinePlus (NIH/NIAMS) describes the RICE method as standard first-line treatment for sprains and strains: resting the area, icing it, compressing it with a bandage, and elevating it above heart level when possible. Ice use for the first 3 days is specifically mentioned.",
+   "cautions": "Never apply ice directly to skin — always wrap it in a cloth or towel. If swelling worsens significantly, numbness develops, or you suspect a fracture, seek medical evaluation. Do not use heat during the first 48–72 hours of an acute soft-tissue injury.",
+   "sourceUrl": "https://medlineplus.gov/sprainsandstrains.html"
+  },
+  {
+   "slug": "heating-pad",
+   "kind": "home",
+   "name": "Heating pad or warm compress",
+   "commonNames": [],
+   "situations": [
+    "menstrual-cramps",
+    "muscle-joint-pain",
+    "ears"
+   ],
+   "uses": "Applying a heating pad or hot water bottle to the lower abdomen eases menstrual cramps. A warm compress applied to the ear can relieve earache discomfort. Heat may also be used on strained muscles after the first 48–72 hours of an acute injury.",
+   "how": "Place a heating pad or hot water bottle on the lower abdomen for menstrual cramps, or hold a warm cloth against the affected ear for earache. Use a low or medium heat setting and put a cloth between the pad and skin to prevent burns.",
+   "evidence": "MedlinePlus (NIH/NLM) lists using a heating pad or hot water bottle on the lower abdomen, along with taking a warm bath, as home care measures for period pain. For earache, placing a warm cloth on the affected ear is listed among comfort measures in NIH/NLM resources for acute ear infection self-care.",
+   "cautions": "Never fall asleep with a heating pad on — burns can result. Use a low or medium setting and place a cloth between the pad and skin. For ear pain, do not insert anything into the ear canal; if pain is severe, accompanied by drainage, hearing loss, or fever, see a healthcare provider to rule out infection requiring antibiotics.",
+   "sourceUrl": "https://medlineplus.gov/periodpain.html"
+  },
+  {
+   "slug": "humidifier-and-steam",
+   "kind": "home",
+   "name": "Humidifier or steam inhalation",
+   "commonNames": [
+    "cool-mist vaporizer",
+    "steam inhalation"
+   ],
+   "situations": [
+    "congestion",
+    "cough",
+    "cold"
+   ],
+   "uses": "Using a clean humidifier or cool-mist vaporizer adds moisture to the air and can help relieve nasal congestion and cough. Breathing steam from a bowl of hot water or a running shower 2–4 times daily also loosens nasal secretions.",
+   "how": "Fill a clean cool-mist humidifier or vaporizer with water and run it in the room. Clean the device daily per the manufacturer's instructions to prevent mold and bacteria buildup.",
+   "evidence": "CDC recommends using a clean humidifier or cool-mist vaporizer as a home care measure for common cold symptoms including congestion and cough. MedlinePlus similarly notes that a humidifier can break up mucus and that steam inhalation from a shower is a recognized congestion-relief strategy.",
+   "cautions": "Clean the humidifier daily per manufacturer instructions to prevent mold and bacterial growth. Use cool-mist humidifiers rather than warm-mist (steam) versions for children to avoid burn risk. When inhaling steam from hot water, use caution to avoid scalding; keep a safe distance and do not cover your head over a pot of boiling water.",
+   "sourceUrl": "https://www.cdc.gov/common-cold/treatment/index.html"
+  },
+  {
+   "slug": "saline-nasal-rinse",
+   "kind": "home",
+   "name": "Saline nasal rinse",
+   "commonNames": [
+    "neti pot",
+    "nasal irrigation",
+    "saline nasal wash"
+   ],
+   "situations": [
+    "congestion",
+    "cold"
+   ],
+   "uses": "Saline nasal rinses flush pollen, dust, and excess mucus from the nasal passages and add moisture. They can be performed with a neti pot, squeeze bottle, or bulb syringe using a prepared saline solution.",
+   "how": "Use only distilled, sterile, or previously boiled-and-cooled water — never tap water. After each use, rinse the device with the same safe water, then air-dry it thoroughly or wipe dry before storing.",
+   "evidence": "CDC recommends saline nasal spray or drops as a home care measure for the common cold. The FDA confirms that nasal irrigation devices are 'usually safe and effective products when used and cleaned properly,' with the critical safety requirement being the type of water used.",
+   "cautions": "Use only distilled, sterile, or previously boiled (and cooled) water — never tap water. The FDA warns that tap water can harbor organisms including amoebas that are safe to swallow but can cause serious or potentially fatal infections in the nasal passages. Boiled water should be cooled to lukewarm and stored in a clean, closed container for no more than 24 hours. Always clean and dry the device after each use.",
+   "sourceUrl": "https://www.fda.gov/consumers/consumer-updates/rinsing-your-sinuses-neti-pots-safe"
+  },
+  {
+   "slug": "oatmeal-bath",
+   "kind": "home",
+   "name": "Oatmeal or cool bath",
+   "commonNames": [
+    "colloidal oatmeal bath"
+   ],
+   "situations": [
+    "itch",
+    "poison-ivy",
+    "dry-skin"
+   ],
+   "uses": "Soaking in a lukewarm oatmeal bath or taking a cool bath can relieve itching and skin irritation from rashes, poison ivy, eczema, and dry skin. Colloidal oatmeal bath products are available at drugstores.",
+   "how": "Fill a tub with lukewarm (not hot) water and add a colloidal oatmeal bath product according to package directions, or use plain cool water. After soaking, pat skin dry gently and apply a fragrance-free moisturizer immediately to lock in moisture.",
+   "evidence": "MedlinePlus (NLM) recommends taking 'lukewarm or oatmeal baths' as a self-care measure for itching, alongside cool compresses and moisturizing lotion. Oatmeal bath products are specifically noted to relieve symptoms of eczema and psoriasis; short, cooler baths are described as better than long, hot baths for skin conditions.",
+   "cautions": "Use lukewarm — not hot — water; hot water can worsen skin dryness and irritation. After bathing, pat skin dry gently (do not rub) and immediately apply a fragrance-free moisturizer to lock in moisture. If a rash is spreading rapidly, is accompanied by fever, or involves the face or genitals, consult a healthcare provider.",
+   "sourceUrl": "https://medlineplus.gov/itching.html"
+  },
+  {
+   "slug": "cool-running-water-on-burns",
+   "kind": "home",
+   "name": "Cool running water on burns",
+   "commonNames": [],
+   "situations": [
+    "burn"
+   ],
+   "uses": "For minor burns, immediately run cool (not cold) water slowly over the burned area for 10–15 minutes to stop the burning process and reduce pain. After cooling, cover the burn with a clean, dry cloth or sterile bandage.",
+   "how": "Run cool water slowly over the burned area for several minutes, then cover with a clean, dry cloth or bandage. Do not apply ice, butter, or any creams — these can worsen tissue damage.",
+   "evidence": "CDC burn first-aid materials instruct: run cool water slowly over the burn area for several minutes, then cover with a clean, dry cloth or bandage. MedlinePlus (NIH/NIGMS) similarly specifies cool running water for 10–15 minutes followed by a dry sterile dressing as the appropriate first-aid response for minor burns.",
+   "cautions": "Do not apply ice, ice water, butter, first-aid creams, sprays, or home remedies — these can worsen tissue damage or introduce infection. Do not break blisters unless directed by a healthcare provider. Do not try to remove clothing or debris stuck to the burn. Seek immediate medical care for large burns, burns on the face, eyes, hands, or feet, burns from chemicals or electricity, or any burn with extreme pain, numbness, or deep tissue involvement.",
+   "sourceUrl": "https://medlineplus.gov/burns.html"
+  },
+  {
+   "slug": "clean-and-cover-wounds",
+   "kind": "home",
+   "name": "Clean and cover wounds and cuts",
+   "commonNames": [],
+   "situations": [
+    "cuts"
+   ],
+   "uses": "For minor cuts and scrapes, rinse the wound thoroughly with cool clean water to remove dirt, apply gentle pressure with gauze to stop bleeding, then cover with a clean bandage. Wash with soap and water to reduce infection risk.",
+   "how": "Apply firm but gentle pressure with gauze to stop bleeding; if blood soaks through, add more gauze on top without removing the first layer. Rinse the wound with cool clean water, then cover it with a clean dry bandage.",
+   "evidence": "CDC guidance on wound care states: put pressure on a bleeding cut until it stops, gently pour clean water over the wound to clean it, then apply a clean, dry bandage. MedlinePlus (NLM) similarly advises rinsing cuts with cool water and applying firm but gentle pressure to stop bleeding.",
+   "cautions": "Watch for signs of infection in the days following — increasing redness, swelling, warmth, pus, or red streaks spreading from the wound require prompt medical evaluation. Seek immediate care for wounds that are deep, gaping, caused by an animal or human bite, or associated with a puncture from a potentially contaminated object (tetanus risk).",
+   "sourceUrl": "https://medlineplus.gov/firstaid.html"
+  },
+  {
+   "slug": "salt-water-gargle",
+   "kind": "home",
+   "name": "Salt-water gargle",
+   "commonNames": [],
+   "situations": [
+    "sore-throat",
+    "cold",
+    "toothache"
+   ],
+   "uses": "Gargling with warm salt water several times a day can ease sore throat pain and may also help relieve canker sore discomfort. A standard preparation is ½ teaspoon (3 grams) of salt dissolved in 1 cup (240 mL) of warm water.",
+   "how": "Dissolve salt in a cup of warm water, take a mouthful, tilt your head back, and gargle for several seconds before spitting it out. Repeat as needed throughout the day to help ease sore throat pain.",
+   "evidence": "MedlinePlus (NLM) states that gargling may ease sore throat pain, listing it alongside lozenges and fluids. The same resource notes that salt-water rinses may help with canker sore discomfort, though mouthwashes containing alcohol should be avoided as they irritate the tissue.",
+   "cautions": "Gargling with salt water provides symptomatic relief only and does not treat the underlying cause of a sore throat. Sore throat accompanied by high fever, difficulty swallowing or breathing, drooling, a stiff neck, or lasting more than a week should be evaluated by a healthcare provider, as strep throat and other conditions require different treatment.",
+   "sourceUrl": "https://medlineplus.gov/sorethroat.html"
+  },
+  {
+   "slug": "fiber-and-water-constipation",
+   "kind": "home",
+   "name": "Dietary fiber and water (for constipation and hemorrhoids)",
+   "commonNames": [],
+   "situations": [
+    "constipation",
+    "hemorrhoids"
+   ],
+   "uses": "Eating more fruits, vegetables, and whole grains (which are high in fiber) and drinking plenty of water each day are the foundational self-care steps for preventing and relieving constipation and reducing hemorrhoid discomfort.",
+   "how": "Eat more fruits, vegetables, and whole grains each day and drink plenty of fluids. Increase fiber gradually to avoid gas and bloating.",
+   "evidence": "MedlinePlus (NIH/NIDDK) lists increased dietary fiber and adequate fluid intake as primary self-care measures for both constipation and hemorrhoids. The hemorrhoids topic page specifically recommends eating high-fiber foods and drinking enough fluids every day as the first-line home treatment.",
+   "cautions": "Increase dietary fiber gradually to avoid gas and bloating. If constipation is new, severe, accompanied by blood in the stool, or associated with significant weight loss, see a healthcare provider to rule out underlying conditions. Hemorrhoid symptoms persisting beyond one week of home treatment, or any rectal bleeding, warrant medical evaluation.",
+   "sourceUrl": "https://medlineplus.gov/constipation.html"
+  },
+  {
+   "slug": "sitz-bath",
+   "kind": "home",
+   "name": "Sitz bath (for hemorrhoids)",
+   "commonNames": [],
+   "situations": [
+    "hemorrhoids"
+   ],
+   "uses": "A sitz bath — sitting in a few inches of warm water for 10–15 minutes, several times a day — relieves the pain and itching of hemorrhoids. A special sitz bath tub that fits over a toilet is available at pharmacies.",
+   "how": "Fill a tub or sitz bath basin with a few inches of comfortably warm water and sit in it for 10 to 15 minutes. Repeat several times a day, keeping the area clean and dry between baths.",
+   "evidence": "MedlinePlus (NLM) lists taking warm baths several times a day, including sitz baths, as a recommended home care measure to relieve hemorrhoid pain. The recommendation is to sit in warm water for 10 to 15 minutes per session.",
+   "cautions": "The water should be comfortably warm — not hot — to avoid burns. Keep the area clean and dry between baths. If hemorrhoid symptoms do not improve after one week of home treatment, or if there is rectal bleeding, see a healthcare provider.",
+   "sourceUrl": "https://medlineplus.gov/hemorrhoids.html"
+  },
+  {
+   "slug": "elevate-head-heartburn",
+   "kind": "home",
+   "name": "Elevate head of bed (for heartburn)",
+   "commonNames": [],
+   "situations": [
+    "heartburn",
+    "upset-stomach"
+   ],
+   "uses": "Raising the head of the bed 4–6 inches (using blocks under the bed frame or a wedge support) prevents stomach acid from backing up into the esophagus during sleep, reducing nighttime heartburn and GERD symptoms.",
+   "how": "Place blocks under the legs at the head of the bed frame, or use a foam wedge under the mattress, to raise the sleeping surface about 6 inches. Using extra pillows under only the head is less effective because it bends the body at the waist rather than tilting the whole torso.",
+   "evidence": "MedlinePlus heartburn resources (sourced from NIH/NIDDK) consistently recommend elevating the head during sleep as a lifestyle measure for heartburn and GERD, noting that this position helps prevent reflux. Sleeping with the head raised about 6 inches is a specific recommendation described in the Medical Encyclopedia entry.",
+   "cautions": "Using extra pillows under the head is less effective than raising the entire upper body — pillows can cause neck strain and do not sufficiently change the angle. Heartburn that is frequent, severe, or accompanied by difficulty swallowing, unexplained weight loss, or vomiting blood requires medical evaluation.",
+   "sourceUrl": "https://medlineplus.gov/heartburn.html"
+  },
+  {
+   "slug": "bland-small-meals",
+   "kind": "home",
+   "name": "Small, frequent bland meals",
+   "commonNames": [
+    "BRAT diet",
+    "bland diet"
+   ],
+   "situations": [
+    "nausea",
+    "upset-stomach",
+    "diarrhea"
+   ],
+   "uses": "Eating 6–8 small bland meals throughout the day (crackers, toast, baked chicken, rice, potatoes) instead of 3 large meals reduces nausea and eases indigestion. As diarrhea symptoms improve, soft bland foods can be introduced gradually.",
+   "how": "Eat smaller meals more often and stick to bland foods, avoiding spicy, fatty, or salty options. If you have trouble keeping food down, start with small sips of clear liquids frequently and add bland solids only when tolerated.",
+   "evidence": "MedlinePlus (NLM) recommends small, frequent bland meals and avoiding spicy, fatty, or salty foods as the primary dietary self-care for nausea and vomiting. For indigestion, MedlinePlus notes that avoiding foods and situations that trigger symptoms is the main home strategy. For diarrhea, 'soft, bland food' is recommended as symptoms improve.",
+   "cautions": "The BRAT diet (bananas, rice, applesauce, toast) was historically promoted but MedlinePlus notes there is not strong evidence it is better than a standard bland diet; it probably does not cause harm. If nausea or vomiting persists beyond 24–48 hours, is accompanied by severe pain, or prevents adequate fluid intake, seek medical care.",
+   "sourceUrl": "https://medlineplus.gov/nauseaandvomiting.html"
+  },
+  {
+   "slug": "dark-quiet-room-headache",
+   "kind": "home",
+   "name": "Rest in a dark, quiet room (for headache)",
+   "commonNames": [],
+   "situations": [
+    "headache",
+    "sleep"
+   ],
+   "uses": "Resting with eyes closed in a dark, quiet room is a recommended non-medication self-care measure during a headache or migraine. Drinking water to prevent dehydration and placing a cool cloth on the forehead are often combined with this rest.",
+   "how": "Go to a quiet, darkened room, close your eyes, and rest. Drink water and place a cool damp cloth on your forehead to help ease discomfort.",
+   "evidence": "MedlinePlus (NLM) describes resting in a quiet, darkened room as one of the key things you can do to feel better during a headache or migraine, alongside drinking water and using relaxation techniques. These recommendations are attributed to NIH sources on headache and migraine management.",
+   "cautions": "Sudden severe ('thunderclap') headache, headache with fever, stiff neck, confusion, or vision changes may signal a serious condition and require emergency evaluation. Frequent headaches that disrupt daily life should be discussed with a healthcare provider rather than managed solely at home.",
+   "sourceUrl": "https://medlineplus.gov/headache.html"
+  },
+  {
+   "slug": "sleep-hygiene",
+   "kind": "home",
+   "name": "Sleep hygiene practices",
+   "commonNames": [
+    "good sleep habits"
+   ],
+   "situations": [
+    "sleep"
+   ],
+   "uses": "A consistent set of behavioral practices — consistent bedtime and wake time, a cool and dark bedroom, avoiding screens and caffeine near bedtime, and regular exercise — helps adults achieve and maintain adequate sleep.",
+   "how": "Go to bed and wake up at the same time every day. Keep the bedroom quiet, dark, and cool; turn off electronic devices at least 30 minutes before bedtime; and avoid caffeine in the afternoon and evening and large meals or alcohol before bed.",
+   "evidence": "CDC and NHLBI both recommend these specific practices for healthy sleep: going to bed and waking at the same time daily, keeping the bedroom quiet, cool, and dark, turning off screens at least 30 minutes before bed, avoiding caffeine in the afternoon and evening, and avoiding large meals or alcohol before sleep. NHLBI notes these habits are particularly important for shift workers and people with insomnia.",
+   "cautions": "Good sleep hygiene can help relieve short-term insomnia; persistent insomnia lasting more than a few weeks should be evaluated by a healthcare provider. Sleep difficulties accompanied by snoring, gasping during sleep, or excessive daytime sleepiness may indicate obstructive sleep apnea, which requires medical diagnosis.",
+   "sourceUrl": "https://www.cdc.gov/sleep/about/index.html"
+  },
+  {
+   "slug": "pinworm-hygiene",
+   "kind": "home",
+   "name": "Hygiene measures for pinworm",
+   "commonNames": [],
+   "situations": [
+    "pinworm"
+   ],
+   "uses": "Thorough handwashing with soap and warm water (especially after toilet use and before eating), daily morning bathing with soap and water, daily underwear changes, short and clean fingernails, and laundering of bedding and pajamas in hot water are the key household self-care measures for managing pinworm infection.",
+   "how": "Bathe after waking up each morning and wash hands regularly, especially after using the bathroom. Change underwear daily, wash pajamas and bed sheets often, and avoid nail biting to prevent reinfection.",
+   "evidence": "CDC identifies handwashing as 'the most important way to prevent the spread of pinworms.' MedlinePlus (NIH/NIAID) lists bathe after waking up, wash pajamas and bed sheets often, wash hands regularly, change underwear every day, and avoid nail biting and scratching the anal area as the core preventive hygiene steps.",
+   "cautions": "Hygiene alone typically cannot eliminate an active pinworm infection — over-the-counter antiparasitic medication (pyrantel pamoate) is generally needed, and all household members should be treated simultaneously. Medication is typically repeated after 2 weeks because it kills worms but not eggs; the second dose treats worms that hatched after the first dose.",
+   "sourceUrl": "https://medlineplus.gov/pinworms.html"
+  },
+  {
+   "slug": "keep-feet-dry-athlete-foot",
+   "kind": "home",
+   "name": "Keep feet clean and dry (for fungal infection)",
+   "commonNames": [
+    "athlete's foot self-care"
+   ],
+   "situations": [
+    "fungal"
+   ],
+   "uses": "Keeping the feet clean, dry, and cool — including washing daily with soap and water, drying carefully between the toes, wearing clean cotton socks, and not walking barefoot in public showers or locker rooms — supports treatment and prevents spread of athlete's foot and other tinea infections.",
+   "how": "Keep feet clean, dry, and cool; wear clean socks and avoid walking barefoot in public areas such as locker room showers (use flip-flops instead). Apply an over-the-counter antifungal cream as directed on the package for most cases of athlete's foot.",
+   "evidence": "MedlinePlus (CDC-sourced) advises: keep your feet clean, dry, and cool; wear clean socks; avoid walking barefoot in public areas; wear flip-flops in locker room showers; keep toenails clean and clipped short. Over-the-counter antifungal creams work for most cases of athlete's foot.",
+   "cautions": "If over-the-counter antifungal treatment does not improve the infection within 2–4 weeks, see a healthcare provider. Spreading or worsening redness, warmth, and swelling — especially in people with diabetes or circulatory problems — warrants prompt medical care. Nail fungal infections are more difficult to treat than skin infections and often require prescription therapy.",
+   "sourceUrl": "https://medlineplus.gov/athletesfoot.html"
+  },
+  {
+   "slug": "aloe-vera",
+   "kind": "herbal",
+   "name": "Aloe Vera",
+   "commonNames": [
+    "Aloe barbadensis miller"
+   ],
+   "situations": [
+    "burn",
+    "acne",
+    "dry-skin"
+   ],
+   "uses": "Aloe vera gel is applied topically for burns, acne, and various skin conditions including psoriasis and radiation-related skin damage. Oral use is promoted for digestive conditions, though topical applications have more research support.",
+   "how": "Apply gel from the inner leaf of the aloe plant (or a commercially prepared aloe gel) directly to the affected skin area. Topical use is the application with the most research support; oral aloe products carry more serious risks and should not be used without consulting a healthcare provider.",
+   "evidence": "Research suggests topical aloe gel may speed burn healing and reduce burn-related pain. Two small studies indicate aloe gel, combined with other treatments, may improve acne; evidence for other skin uses is limited.",
+   "cautions": "Topical use is generally well tolerated, though occasional burning or itching may occur. Oral use carries more serious risks: the latex can cause abdominal pain and diarrhea, oral extracts have been linked to cases of acute hepatitis, and animal studies associated non-decolorized extracts with gastrointestinal cancer. Likely unsafe during pregnancy; may interact with medications such as digoxin.",
+   "sourceUrl": "https://www.nccih.nih.gov/health/aloe-vera"
+  },
+  {
+   "slug": "boswellia",
+   "kind": "herbal",
+   "name": "Boswellia",
+   "commonNames": [
+    "Boswellia serrata",
+    "Indian frankincense"
+   ],
+   "situations": [
+    "muscle-joint-pain"
+   ],
+   "uses": "Boswellia resin extract is traditionally used to reduce inflammation and pain, and is promoted as a dietary supplement to support joint health and mobility, particularly for osteoarthritis.",
+   "how": "Boswellia is taken orally as a dietary supplement. Clinical trials have used doses up to 1,000 mg daily for up to 6 months; follow the product label and consult a healthcare provider before starting.",
+   "evidence": "Some studies suggest oral boswellia may help reduce inflammation and pain associated with osteoarthritis, but larger rigorous trials are needed; topical use lacks sufficient evidence of effectiveness.",
+   "cautions": "Extracts up to 1,000 mg daily have been used safely in clinical trials lasting up to 6 months. Consult a healthcare provider before use, especially if pregnant, breastfeeding, managing asthma, or taking medications, as interactions remain unclear.",
+   "sourceUrl": "https://www.nccih.nih.gov/health/boswellia"
+  },
+  {
+   "slug": "bromelain",
+   "kind": "herbal",
+   "name": "Bromelain",
+   "commonNames": [
+    "pineapple enzyme",
+    "Ananas comosus extract"
+   ],
+   "situations": [
+    "muscle-joint-pain",
+    "congestion"
+   ],
+   "uses": "Bromelain, an enzyme from pineapple, is promoted for reducing postoperative pain and swelling, sinusitis, osteoarthritis, and exercise-induced muscle soreness. A topical formulation has FDA approval for debridement of severe burns.",
+   "how": "",
+   "evidence": "Some studies suggest oral bromelain may reduce certain symptoms after wisdom tooth surgery; evidence for sinusitis is insufficient. The topical formulation has been successfully used by health professionals for burn debridement as an alternative to surgical debridement.",
+   "cautions": "Oral bromelain is generally well tolerated; the most common side effects are stomach upset and diarrhea. Talk with a healthcare provider before use alongside any medications, as harmful interactions are possible. Safety during pregnancy and breastfeeding is unclear.",
+   "sourceUrl": "https://www.nccih.nih.gov/health/bromelain"
+  },
+  {
+   "slug": "butterbur",
+   "kind": "herbal",
+   "name": "Butterbur",
+   "commonNames": [
+    "Petasites hybridus"
+   ],
+   "situations": [
+    "headache",
+    "allergy"
+   ],
+   "uses": "Butterbur root extract is used for migraine prevention and for reducing symptoms of allergic rhinitis (hay fever). It has been studied for reducing migraine frequency in both adults and children.",
+   "how": "Butterbur is taken orally as a root extract for migraine prevention or as a leaf extract for allergic rhinitis symptoms. Use only products that are certified and labeled as free of pyrrolizidine alkaloids (PA-free), as the untreated plant contains compounds that can damage the liver.",
+   "evidence": "Studies of a butterbur root extract suggest it may reduce migraine frequency; a leaf extract may help with allergic rhinitis symptoms. However, the American Academy of Neurology withdrew its 2012 recommendation in 2015 due to safety concerns.",
+   "cautions": "The plant naturally contains pyrrolizidine alkaloids (PAs) that can damage the liver and lungs and may cause cancer; only PA-free certified products should be used. Even PA-free products have been linked to rare cases of liver injury. Side effects include belching, diarrhea, drowsiness, rash, and stomach upset. Avoid during pregnancy; people allergic to ragweed or related plants are at higher risk of reactions.",
+   "sourceUrl": "https://www.nccih.nih.gov/health/butterbur"
+  },
+  {
+   "slug": "chamomile",
+   "kind": "herbal",
+   "name": "Chamomile",
+   "commonNames": [
+    "Matricaria chamomilla",
+    "German chamomile",
+    "Chamaemelum nobile"
+   ],
+   "situations": [
+    "sleep",
+    "upset-stomach",
+    "cold",
+    "sore-throat",
+    "itch"
+   ],
+   "uses": "Chamomile is promoted for insomnia, indigestion, anxiety, the common cold, and infant colic; it is also used topically for skin conditions and as a mouthwash for oral inflammation.",
+   "how": "Chamomile is commonly consumed as a tea (considered safe in amounts typically found in teas), taken as an oral supplement, applied topically to skin, or used as a mouthwash for oral inflammation. Consult a healthcare provider before using oral supplements rather than tea.",
+   "evidence": "Evidence is limited: some preliminary studies suggest chamomile supplements may help with anxiety, and combination products may help childhood diarrhea and infant colic. A 2019 review found minimal evidence for insomnia, with one study showing no benefit. Evidence for cold, sore throat, and skin uses in people is insufficient.",
+   "cautions": "Generally considered safe in typical amounts. Side effects may include nausea, dizziness, and allergic reactions, including severe hypersensitivity; risk is higher for those sensitive to ragweed, chrysanthemums, marigolds, or daisies. May interact with blood thinners, birth control pills, sedatives, and liver-metabolized drugs. Safety during pregnancy and breastfeeding is unknown.",
+   "sourceUrl": "https://www.nccih.nih.gov/health/chamomile"
+  },
+  {
+   "slug": "echinacea",
+   "kind": "herbal",
+   "name": "Echinacea",
+   "commonNames": [
+    "Echinacea purpurea",
+    "purple coneflower"
+   ],
+   "situations": [
+    "cold"
+   ],
+   "uses": "Echinacea is primarily marketed for the common cold and upper respiratory tract infections, based on the idea that it may support immune system function.",
+   "how": "",
+   "evidence": "Studies indicate that taking echinacea may slightly reduce the chances of catching a cold, though evidence regarding whether it shortens cold duration is inconclusive. Evidence for other conditions, including eczema, is unclear.",
+   "cautions": "E. purpurea extracts appear likely safe for short periods in adults; allergic reactions can occur, with digestive symptoms most common. Children may experience rashes potentially linked to allergic reactions. Theoretical interactions with immunosuppressants and certain other drugs; consult a healthcare provider before use with medications. Limited data on safety in early pregnancy.",
+   "sourceUrl": "https://www.nccih.nih.gov/health/echinacea"
+  },
+  {
+   "slug": "elderberry",
+   "kind": "herbal",
+   "name": "Elderberry",
+   "commonNames": [
+    "Sambucus nigra"
+   ],
+   "situations": [
+    "cold"
+   ],
+   "uses": "Elderberry has been used in folk medicine to treat colds and flu, and is promoted as a dietary supplement for colds, flu, and other upper respiratory infections.",
+   "how": "Elderberry is used as a prepared dietary supplement (syrup, capsule, or lozenge) rather than raw fruit. Never eat raw or unripe elderberries — they contain cyanide-producing substances that cause nausea, vomiting, and severe diarrhea; cooking the berries eliminates this toxin.",
+   "evidence": "A small number of studies suggest elderberry may relieve symptoms of flu, colds, or other upper respiratory infections; however, the overall evidence is limited and insufficient for most other claimed benefits.",
+   "cautions": "Raw or unripe elderberries contain cyanide-producing substances that can cause nausea, vomiting, and severe diarrhea; cooking eliminates this toxin. Consult a healthcare provider before use, especially if taking medications. Limited safety data for pregnancy and breastfeeding.",
+   "sourceUrl": "https://www.nccih.nih.gov/health/elderberry"
+  },
+  {
+   "slug": "feverfew",
+   "kind": "herbal",
+   "name": "Feverfew",
+   "commonNames": [
+    "Tanacetum parthenium"
+   ],
+   "situations": [
+    "headache"
+   ],
+   "uses": "Feverfew is promoted for migraine headache prevention and for minor head and tension pain. Topically, it is marketed for itching and skin irritation.",
+   "how": "",
+   "evidence": "A 2020 systematic review of seven migraine studies found inconsistent results, though some evidence suggests feverfew may reduce migraine frequency and associated symptoms such as nausea and light sensitivity. There is little or no evidence supporting feverfew for other health conditions.",
+   "cautions": "Side effects include nausea, digestive issues, bloating, and mouth sores from chewing fresh leaves. People sensitive to ragweed may experience allergic reactions. Feverfew may slow blood clotting and should be stopped at least 2 weeks before scheduled surgery. It may interact with migraine medications and should be avoided during pregnancy due to potential effects on uterine contractions.",
+   "sourceUrl": "https://www.nccih.nih.gov/health/feverfew"
+  },
+  {
+   "slug": "ginger",
+   "kind": "herbal",
+   "name": "Ginger",
+   "commonNames": [
+    "Zingiber officinale"
+   ],
+   "situations": [
+    "nausea",
+    "menstrual-cramps",
+    "upset-stomach"
+   ],
+   "uses": "Ginger is traditionally and commonly used for nausea and vomiting, indigestion, menstrual cramps, and osteoarthritis.",
+   "how": "",
+   "evidence": "Research shows ginger may be helpful for nausea and vomiting associated with pregnancy. Studies suggest ginger dietary supplements might be helpful for reducing the severity of menstrual cramps and for knee osteoarthritis symptoms; effectiveness for chemotherapy- or post-surgery-related nausea remains uncertain.",
+   "cautions": "Side effects when taken orally include abdominal discomfort, heartburn, diarrhea, and mouth and throat irritation. Possible interactions with medications exist; consult a healthcare provider before use, especially during pregnancy or breastfeeding.",
+   "sourceUrl": "https://www.nccih.nih.gov/health/ginger"
+  },
+  {
+   "slug": "goldenseal",
+   "kind": "herbal",
+   "name": "Goldenseal",
+   "commonNames": [
+    "Hydrastis canadensis"
+   ],
+   "situations": [
+    "cold",
+    "diarrhea",
+    "cuts"
+   ],
+   "uses": "Goldenseal is marketed for the common cold and upper respiratory infections, diarrhea, constipation, and other digestive conditions. Historically, Native Americans used it for digestive disorders, wounds, and skin conditions.",
+   "how": "",
+   "evidence": "There is not enough evidence to determine whether goldenseal is useful for any health condition; no rigorous studies have been done in people. Very little of the active compound berberine is absorbed when goldenseal is taken orally, making findings from berberine studies potentially inapplicable.",
+   "cautions": "Short-term use at approximately 3 grams daily appears to be without serious adverse effects, though longer-term safety is uncertain. Goldenseal significantly affects drug metabolism; one study found it decreased metformin levels by about 25%. Some commercial products contain unlisted ingredients or substitute herbs. Avoid during pregnancy, breastfeeding, and in infants due to potential harm from berberine.",
+   "sourceUrl": "https://www.nccih.nih.gov/health/goldenseal"
+  },
+  {
+   "slug": "horse-chestnut",
+   "kind": "herbal",
+   "name": "Horse Chestnut",
+   "commonNames": [
+    "Aesculus hippocastanum"
+   ],
+   "situations": [
+    "hemorrhoids"
+   ],
+   "uses": "Horse chestnut seed extract is promoted for chronic venous insufficiency (leg pain and swelling from poor circulation) and has historically been used for hemorrhoids, arthritis, and menstrual cramps.",
+   "how": "Use only standardized horse chestnut seed extract (a dietary supplement) — never raw seeds, bark, flowers, or leaves, which are toxic when taken orally. Research has used standardized extract for up to 12 weeks; follow the product label and consult a healthcare provider before use.",
+   "evidence": "A 2012 systematic review found horse chestnut seed extract can improve symptoms of chronic venous insufficiency, comparable to compression stockings in one study; however, more rigorous trials are needed. Evidence for other uses, including hemorrhoids, is insufficient.",
+   "cautions": "Raw seeds, bark, flowers, and leaves are unsafe to take orally due to toxic components; only standardized extracts with the toxin removed should be used, and research shows safety for up to 12 weeks. Side effects include dizziness, digestive upset, headache, and itching. Safety during pregnancy and breastfeeding is unknown; consult a healthcare provider before use.",
+   "sourceUrl": "https://www.nccih.nih.gov/health/horse-chestnut"
+  },
+  {
+   "slug": "lavender",
+   "kind": "herbal",
+   "name": "Lavender",
+   "commonNames": [
+    "Lavandula angustifolia"
+   ],
+   "situations": [
+    "sleep"
+   ],
+   "uses": "Lavender is promoted as an oral supplement and aromatherapy agent for calming anxiety, stress, and sleep difficulties; it is also used topically and in aromatherapy for depression symptoms and pain.",
+   "how": "Lavender is used as an oral supplement (capsule or tea), as an aromatherapy oil (inhaled or diffused), or applied topically to skin. Oral lavender oil products have been studied for anxiety; aromatherapy involves inhaling the scent from a diffuser or a few drops on a cloth.",
+   "evidence": "Studies suggest oral lavender oil might be beneficial for anxiety, including anxiety with co-occurring depression; evidence for sleep improvement is insufficient, and it is unclear whether aromatherapy with lavender benefits anxiety, stress, or depression.",
+   "cautions": "Oral lavender products may cause diarrhea, headache, nausea, or burping. Topical application can trigger allergic skin reactions. Potential interactions with sedative drugs warrant discussion with a healthcare provider. Safety during pregnancy and breastfeeding is unknown.",
+   "sourceUrl": "https://www.nccih.nih.gov/health/lavender"
+  },
+  {
+   "slug": "licorice-root",
+   "kind": "herbal",
+   "name": "Licorice Root",
+   "commonNames": [
+    "Glycyrrhiza glabra"
+   ],
+   "situations": [
+    "toothache",
+    "sore-throat",
+    "burn",
+    "itch"
+   ],
+   "uses": "Licorice root is promoted for digestive and respiratory support and is used topically for skin conditions. Research has focused on mouth rinses for canker sores, gargles or lozenges for sore throat prevention, and topical gels for eczema and burn healing.",
+   "how": "For canker sores, licorice is used as a mouth rinse or gargle; for sore throat prevention around surgery, as a gargle or lozenge; for eczema or burn healing, as a topical gel applied to the skin. Avoid long-term or high-dose oral use due to serious cardiovascular risks.",
+   "evidence": "Preliminary studies suggest licorice mouth rinses may reduce canker sore pain and size, and lozenges or gargles may prevent sore throat after surgical intubation. Topical gels show some promise for eczema symptoms and burn healing, though more research is needed. There is not enough high-quality evidence to support its use for most conditions.",
+   "cautions": "Licorice contains glycyrrhizin, which can cause serious adverse effects including irregular heartbeat and cardiac arrest, especially with long-term or large-dose use. Even small amounts can be risky for people with high blood pressure, high salt intake, or heart or kidney conditions. Large amounts during pregnancy increase miscarriage risk and are considered unsafe. Interactions with corticosteroids have been documented; consult a healthcare provider before use.",
+   "sourceUrl": "https://www.nccih.nih.gov/health/licorice-root"
+  },
+  {
+   "slug": "passionflower",
+   "kind": "herbal",
+   "name": "Passionflower",
+   "commonNames": [
+    "Passiflora incarnata"
+   ],
+   "situations": [
+    "sleep"
+   ],
+   "uses": "Passionflower is marketed as a dietary supplement for anxiety, sleep problems, and stress.",
+   "how": "Passionflower is taken as a tea (studied for up to 7 nights) or as an oral extract supplement (studied for up to 8 weeks). Follow package directions and consult a healthcare provider before use, especially if you take other medications or are scheduled for surgery.",
+   "evidence": "Some research suggests oral passionflower may help reduce anxiety symptoms and improve total sleep time in adults with insomnia, though findings on falling or staying asleep are mixed and conclusions are not definite.",
+   "cautions": "Taking passionflower alongside anesthesia or other surgical medications may slow the nervous system too much; avoid use before surgery. Should not be used during pregnancy as it may induce uterine contractions. Possible side effects include drowsiness, dizziness, and confusion. Discuss with a healthcare provider before combining with medications.",
+   "sourceUrl": "https://www.nccih.nih.gov/health/passionflower"
+  },
+  {
+   "slug": "peppermint-oil",
+   "kind": "herbal",
+   "name": "Peppermint Oil",
+   "commonNames": [
+    "Mentha x piperita"
+   ],
+   "situations": [
+    "headache",
+    "nausea",
+    "upset-stomach"
+   ],
+   "uses": "Peppermint oil is promoted for irritable bowel syndrome, indigestion, headaches, muscle tension, and nausea. Topical application is used for tension headaches, and inhaled peppermint oil is used for nausea.",
+   "how": "For IBS, peppermint oil is taken as enteric-coated capsules (which reduce heartburn compared to plain capsules). For tension headaches, apply peppermint oil topically to the skin. For nausea, peppermint oil is inhaled as aromatherapy.",
+   "evidence": "A 2022 review found peppermint oil was better than placebo at improving overall IBS symptoms and abdominal pain. A 2024 review concluded that inhaling peppermint oil was particularly effective at reducing nausea and vomiting in patients with cancer. Evidence suggests potential benefit for tension headaches when applied topically, though peppermint oil taken alone may worsen indigestion in some people.",
+   "cautions": "Oral side effects may include heartburn, nausea, abdominal pain, and dry mouth; enteric-coated capsules reduce heartburn risk. Never apply topically to infants' or young children's faces due to menthol's respiratory effects. Skin irritation is possible with topical use. Consult a healthcare provider before use with medications, as interactions may occur.",
+   "sourceUrl": "https://www.nccih.nih.gov/health/peppermint-oil"
+  },
+  {
+   "slug": "tea-tree-oil",
+   "kind": "herbal",
+   "name": "Tea Tree Oil",
+   "commonNames": [
+    "Melaleuca alternifolia"
+   ],
+   "situations": [
+    "fungal",
+    "acne",
+    "cuts",
+    "bites",
+    "burn"
+   ],
+   "uses": "Tea tree oil is marketed for external use including acne, athlete's foot, toenail fungus, and lice. Traditional Aboriginal uses included treating wounds, burns, and insect bites.",
+   "how": "Apply tea tree oil topically to the affected skin area only — for acne or athlete's foot, use a product containing tea tree oil as directed on the label. Never swallow tea tree oil; oral ingestion can cause serious symptoms including confusion, unsteadiness, and coma.",
+   "evidence": "A small amount of research suggests tea tree oil might be helpful for acne and athlete's foot (fungal infection), though more studies are needed. Evidence for toenail fungus, lice, eyelid inflammation, and oral health uses is insufficient or uncertain. Traditional wound, burn, and insect bite uses lack rigorous clinical research.",
+   "cautions": "Critical warning: tea tree oil must not be swallowed — oral ingestion can cause serious symptoms including confusion, unsteadiness, inability to walk, and coma. Topical use is generally safe for most adults, though some experience skin redness or irritation. Older products or those exposed to heat, light, or air may increase reaction risk. Products appear safe during pregnancy and breastfeeding when used topically only.",
+   "sourceUrl": "https://www.nccih.nih.gov/health/tea-tree-oil"
+  },
+  {
+   "slug": "turmeric",
+   "kind": "herbal",
+   "name": "Turmeric",
+   "commonNames": [
+    "Curcuma longa",
+    "curcumin"
+   ],
+   "situations": [
+    "muscle-joint-pain",
+    "upset-stomach",
+    "itch"
+   ],
+   "uses": "Turmeric is promoted for osteoarthritis, itching, depression, allergies, and high cholesterol; topical applications target joint pain. Historically, it was used in traditional medicine for indigestion, colds, skin infections, and liver disease.",
+   "how": "Turmeric is taken orally as a dietary supplement or applied topically to the skin. Conventionally formulated oral turmeric or curcumin supplements are considered likely safe in recommended amounts for up to 2 to 3 months; follow the product label and consult a healthcare provider before use.",
+   "evidence": "For osteoarthritis, initial evidence is positive for knee pain relief and joint function, though higher-quality research is needed. For most other claimed uses, researchers cannot definitively confirm turmeric's effectiveness, and overall evidence remains inconclusive.",
+   "cautions": "Standard turmeric formulations are likely safe in recommended amounts for up to 2–3 months. Common side effects include nausea, vomiting, acid reflux, and digestive issues. Enhanced bioavailability products have caused liver damage in some users; symptoms include fatigue, dark urine, and jaundice. Use during pregnancy may be unsafe; breastfeeding safety is unclear. Consult a healthcare provider before use with medications.",
+   "sourceUrl": "https://www.nccih.nih.gov/health/turmeric"
+  },
+  {
+   "slug": "valerian",
+   "kind": "herbal",
+   "name": "Valerian",
+   "commonNames": [
+    "Valeriana officinalis"
+   ],
+   "situations": [
+    "sleep"
+   ],
+   "uses": "Valerian is promoted for insomnia, anxiety, stress, and depression; historically, it was also used for migraine, fatigue, and stomach issues.",
+   "how": "Valerian is taken orally as a dietary supplement; clinical studies have used doses of 300 to 600 mg daily for up to 6 weeks. Follow the product label and consult a healthcare provider before use, particularly if combining with sedatives or alcohol.",
+   "evidence": "Evidence is limited and inconsistent. The American Academy of Sleep Medicine recommended against using valerian for chronic insomnia in adults (2017). Studies on anxiety, menstrual cramps, and other conditions show inadequate evidence of benefit.",
+   "cautions": "Appears generally safe for short-term use at 300–600 mg daily for up to 6 weeks; long-term safety is unknown. Common side effects include headache, stomach upset, mental dullness, and vivid dreams. Abrupt discontinuation after long-term use may cause withdrawal symptoms including anxiety and insomnia. Avoid combining with alcohol or sedatives. Safety during pregnancy and breastfeeding is unclear.",
+   "sourceUrl": "https://www.nccih.nih.gov/health/valerian"
+  }
+ ]
+}

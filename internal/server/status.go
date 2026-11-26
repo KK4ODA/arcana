@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/KK4ODA/arcana/internal/app"
+	"github.com/KK4ODA/arcana/internal/catalog"
 	"github.com/KK4ODA/arcana/internal/kiwix"
 	"github.com/KK4ODA/arcana/internal/store"
 )
@@ -96,7 +97,7 @@ func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request, a *app.App
 	providers, _ := a.Store.Providers(ctx)
 	lastCheck := ""
 	for _, p := range providers {
-		if p.ID != "arcana" && p.FetchedAt > lastCheck {
+		if !catalog.IsBuiltIn(p.ID) && p.FetchedAt > lastCheck {
 			lastCheck = p.FetchedAt
 		}
 	}

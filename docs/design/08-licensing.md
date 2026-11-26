@@ -123,6 +123,10 @@ in the export manifest.
 | PhET simulations | CC BY 4.0 for sims published before 2026-03-29; newer unverified | Unknown until reviewed | Yes (unverified) |
 | Project Gutenberg | Public domain in the US; PG trademark license (20 % royalty if charging with the PG name; strip PG references otherwise) | Permitted with conditions; check local law outside the US | Yes (verified, notes) |
 | CIA World Factbook, CDC travel health (Kiwix) | US federal works (17 U.S.C. §105); logos and third-party images excepted | Permitted | Yes (verified) |
+| Ready.gov (Kiwix, English and Spanish) | FEMA's web policy: "Most material on FEMA.gov is free of copyright and may be copied and distributed without permission"; licensed photos and graphics are credited and excepted | Permitted | Yes (verified 2026-11-26) |
+| Home care and herbs (Project NOMAD's remedies lists) | Apache-2.0 compilation of summaries of CDC, MedlinePlus, FDA and NCCIH pages (US federal works) | Permitted with the Apache-2.0 notice | Yes (built in; ADR-0028) |
+| Canadian Prepper, Urban Prepper, Learning Self-Reliance videos (Kiwix) | Creators' videos; terms not yet reviewed | Unknown | Yes (unverified) |
+| MedlinePlus (Kiwix) | NLM pages are US federal work; the A.D.A.M. Medical Encyclopedia, ASHP drug monographs, Natural Medicines herb monographs and many images are copyrighted and licensed to NLM | **Restricted** | Yes (verified 2026-11-26, restricted) |
 | 47 CFR Part 97 (govinfo annual CFR) | US federal work | Permitted | Yes (bundled, hash-pinned) |
 | zimgit-* collections (water, medicine, post-disaster…) | Bundled documents' licenses unverified | Unknown | Yes (unverified) |
 | freeCodeCamp curriculum | Code BSD-3; curriculum no stated license | Unknown | Unverified |
