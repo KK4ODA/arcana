@@ -135,6 +135,9 @@ func main() {
 		}
 	}
 	if *report != "" {
+		if err := checkADRLink(*report); err != nil {
+			log.Fatal(err)
+		}
 		if err := os.WriteFile(*report, []byte(res.report(*engineVersion)), 0o644); err != nil {
 			log.Fatal(err)
 		}

@@ -2,7 +2,7 @@
  "format": "arcana-catalog",
  "formatVersion": 1,
  "title": "Models on Project NOMAD's list that llamafile runs, from the Ollama registry",
- "generated": "2026-11-26T17:55:46Z",
+ "generated": "2026-11-26T18:05:02Z",
  "resources": [
   {
    "id": "ollama.alfred-40b",

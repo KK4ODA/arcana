@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -172,5 +173,23 @@ func TestJudge(t *testing.T) {
 	}
 	if r := memoryNeeded(&candidate{Size: 1 << 30, Header: &ggufInfo{Layers: 24, Heads: 14, HeadsKV: 2, Embedding: 896}}); r <= 1<<30 {
 		t.Errorf("memory %d is not above the file size", r)
+	}
+}
+
+// TestReportADRLink: the generated report links to the decision record, so
+// renumbering the ADR without updating the generator fails here.
+func TestReportADRLink(t *testing.T) {
+	if err := checkADRLink(filepath.Join("..", "..", "docs", "ollama-models.md")); err != nil {
+		t.Fatal(err)
+	}
+	if err := checkADRLink(filepath.Join(t.TempDir(), "report.md")); err == nil {
+		t.Fatal("a missing ADR passed the check")
+	}
+	b, err := os.ReadFile(filepath.Join("..", "..", "docs", "ollama-models.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(b), "("+adrLink+")") {
+		t.Errorf("docs/ollama-models.md does not link to %s; regenerate it", adrLink)
 	}
 }
