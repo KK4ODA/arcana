@@ -18,6 +18,9 @@ func (a *App) openApps() {
 		Platform: buildinfo.Platform(),
 		ReadOnly: a.Lib.ReadOnly,
 		Data:     a.AppData,
+		Files:    filepath.Join(a.Lib.User(), "files"),
+		// Beside kolibri.json: what Arcana set up, not what the user made.
+		StateFile: filepath.Join(a.Lib.State(), "apps.json"),
 	}
 }
 

@@ -5,6 +5,7 @@ import (
 	"net"
 	"net/http"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -32,6 +33,41 @@ type appServer struct {
 
 func (s *Server) registerApps(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/apps", s.withApp(s.handleApps))
+	mux.HandleFunc("POST /api/apps/{id}/{action}", s.adminOnly(s.withApp(s.handleAppAction)))
+}
+
+// handleAppAction starts or stops a native app, or allows or refuses it
+// to devices on the network.
+func (s *Server) handleAppAction(w http.ResponseWriter, r *http.Request, a *app.App) {
+	spec, ok := a.Apps.Installed(r.PathValue("id"))
+	if !ok || spec.Service == nil {
+		writeError(w, http.StatusNotFound, "No such app is installed.")
+		return
+	}
+	var err error
+	switch r.PathValue("action") {
+	case "start":
+		err = a.Apps.Start(spec.ID)
+	case "stop":
+		a.Apps.Stop(spec.ID)
+	case "network":
+		var req struct {
+			Allow bool `json:"allow"`
+		}
+		if err := readJSON(r, &req); err != nil {
+			writeError(w, http.StatusBadRequest, "invalid request")
+			return
+		}
+		err = a.Apps.SetNetwork(spec.ID, req.Allow)
+	default:
+		writeError(w, http.StatusNotFound, "unknown action")
+		return
+	}
+	if err != nil {
+		writeError(w, http.StatusConflict, err.Error())
+		return
+	}
+	s.handleApps(w, r, a)
 }
 
 // appURL is an app's address as the browser reaches it.
@@ -47,6 +83,13 @@ type appView struct {
 	Secure bool `json:"secure"`
 	// PortProblem says why the app's port could not be opened.
 	PortProblem string `json:"portProblem,omitempty"`
+	// Password is the administrator password Arcana set, shown to
+	// Arcana's administrators.
+	Password string `json:"password,omitempty"`
+	// Allowed says whether this device may open the app.
+	Allowed bool `json:"allowed"`
+	// HTTPS says whether Arcana offers HTTPS, which some apps need.
+	HTTPS bool `json:"https"`
 }
 
 func (s *Server) handleApps(w http.ResponseWriter, r *http.Request, a *app.App) {
@@ -61,7 +104,14 @@ func (s *Server) handleApps(w http.ResponseWriter, r *http.Request, a *app.App) 
 		if !ok {
 			continue
 		}
-		v := appView{Status: st, URL: s.appURL(r, spec), Secure: secure}
+		v := appView{Status: st, URL: s.appURL(r, spec), Secure: secure, Allowed: spec.Service == nil || s.mayUseService(r, a, spec),
+			HTTPS: s.nw.tlsCfg.Load() != nil}
+		if spec.NeedsHTTPS != "" && v.HTTPS && r.TLS == nil {
+			v.URL = "https://" + strings.TrimPrefix(v.URL, "http://")
+		}
+		if spec.Service != nil && s.isAdmin(r) {
+			v.Password = a.Apps.Password(spec.ID)
+		}
 		s.apps.mu.Lock()
 		if as := s.apps.open[st.ID]; as != nil {
 			v.PortProblem = as.err
@@ -84,14 +134,37 @@ func (s *Server) appOriginHandler(spec *apps.Spec) http.Handler {
 			apps.NotReady(w, apps.Status{Title: spec.Title, Problem: spec.Title + " is not installed. Install it from Arcana's Apps page."})
 			return
 		}
+		if spec.Service != nil && !s.mayUseService(r, a, spec) {
+			apps.Refused(w, spec.Title+" is available on the computer running Arcana. To use it from this device, sign in to Arcana as an administrator, or ask the owner to allow devices on the network on Arcana's Apps page.")
+			return
+		}
 		// Browsers send Arcana's cookies to every port of the host; no
 		// app needs them.
 		dropCookies(r, sessionCookie)
+		if spec.Service != nil {
+			a.Apps.ServiceHandler(spec).ServeHTTP(w, r)
+			return
+		}
 		w.Header().Set("Cross-Origin-Opener-Policy", "same-origin")
 		w.Header().Set("X-Frame-Options", "DENY")
 		a.Apps.WebHandler(spec).ServeHTTP(w, r)
 	})
 	return s.policy.guardHost(h)
+}
+
+// mayUseService decides who may use a native app (ADR-0017, ADR-0030): the
+// computer running Arcana, administrators signed in from the network, and
+// every device on the network once the owner allows it for that app.
+// These apps keep accounts, files and passwords; Arcana's own read-only
+// access for network devices does not extend to them by itself.
+func (s *Server) mayUseService(r *http.Request, a *app.App, spec *apps.Spec) bool {
+	if isLocal(r) {
+		return true
+	}
+	if a.Apps.NetworkAllowed(spec.ID) {
+		return true
+	}
+	return s.remoteSession(r) != nil
 }
 
 // dropCookies removes the named cookies from a request.

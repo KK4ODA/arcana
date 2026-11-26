@@ -2140,6 +2140,1889 @@
           "text": "Closed source. Its author lets anyone use it but grants no right to pass it on, so Arcana downloads it from the author's site for this library. Remove it before copying this library for someone else."
         }
       ]
+    },
+    {
+      "id": "arcana.app.filebrowser",
+      "provider": "arcana",
+      "title": "File Browser",
+      "description": "File Browser 2.63.23: upload, download, rename and share files in a folder on the drive (Arcana/user/files) from any browser. Arcana creates its administrator account and shows you the password.",
+      "category": "computing",
+      "subcategory": "apps",
+      "tags": [
+        "app",
+        "files",
+        "upload",
+        "share"
+      ],
+      "family": "arcana.app.filebrowser",
+      "variant": "standard",
+      "publisher": "File Browser",
+      "sourceUrl": "https://github.com/filebrowser/filebrowser",
+      "version": "2.63.23",
+      "published": "2026-07-27",
+      "lastVerified": "2026-11-26T00:00:00Z",
+      "languages": [
+        "mul"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "app",
+      "files": [
+        {
+          "name": "filebrowser_linux-amd64_2.63.23.tar.gz",
+          "size": 15767666,
+          "hashes": {
+            "sha256": "b14db2bb8033caa3f80205eb6578b2ed0744ebd9e716b790bc4a9703ce909e88"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/filebrowser/filebrowser/releases/download/v2.63.23/linux-amd64-filebrowser.tar.gz"
+            }
+          ]
+        },
+        {
+          "name": "filebrowser_linux-arm64_2.63.23.tar.gz",
+          "size": 14809727,
+          "hashes": {
+            "sha256": "c55b3450b6ac07ef73b5b49f0b2955a8e755100b71af1df73f9e5d25b12fd27a"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/filebrowser/filebrowser/releases/download/v2.63.23/linux-arm64-filebrowser.tar.gz"
+            }
+          ]
+        },
+        {
+          "name": "filebrowser_darwin-amd64_2.63.23.tar.gz",
+          "size": 15931280,
+          "hashes": {
+            "sha256": "6117f440538d442e7ef831749f6ca085f9928c27fc4c62d9944c96b2d20333a1"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/filebrowser/filebrowser/releases/download/v2.63.23/darwin-amd64-filebrowser.tar.gz"
+            }
+          ]
+        },
+        {
+          "name": "filebrowser_darwin-arm64_2.63.23.tar.gz",
+          "size": 15258752,
+          "hashes": {
+            "sha256": "b7d451cb6e31497d649895d410df5e2786fe23c58b6c2341073c967388959f8e"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/filebrowser/filebrowser/releases/download/v2.63.23/darwin-arm64-filebrowser.tar.gz"
+            }
+          ]
+        },
+        {
+          "name": "filebrowser_windows-amd64_2.63.23.zip",
+          "size": 16005055,
+          "hashes": {
+            "sha256": "fdb1d86dfafff8b3861867c7797ce786570013088678e03de17cfd9476c72384"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/filebrowser/filebrowser/releases/download/v2.63.23/windows-amd64-filebrowser.zip"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 77772480,
+      "installedSize": 77772480,
+      "license": {
+        "redistribution": "permitted",
+        "id": "Apache-2.0",
+        "name": "Apache License 2.0",
+        "url": "https://github.com/filebrowser/filebrowser/blob/master/LICENSE",
+        "verified": true
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": false,
+        "videos": false
+      },
+      "updateStrategy": "snapshot-replace",
+      "providerRef": {
+        "kind": "service",
+        "platforms": "windows-amd64 darwin-arm64 darwin-amd64 linux-amd64 linux-arm64"
+      },
+      "popularity": 5
+    },
+    {
+      "id": "arcana.app.homebox",
+      "provider": "arcana",
+      "title": "Homebox",
+      "description": "Homebox 0.26.2: an inventory of what you own and store, with locations, labels, quantities, photos, warranties and maintenance. Its data stays on the drive.",
+      "category": "preparedness",
+      "subcategory": "apps",
+      "tags": [
+        "app",
+        "inventory",
+        "supplies"
+      ],
+      "family": "arcana.app.homebox",
+      "variant": "standard",
+      "publisher": "Sysadmins Media",
+      "sourceUrl": "https://github.com/sysadminsmedia/homebox",
+      "version": "0.26.2",
+      "published": "2026-06-14",
+      "lastVerified": "2026-11-26T00:00:00Z",
+      "languages": [
+        "mul"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "app",
+      "files": [
+        {
+          "name": "homebox_linux-amd64_0.26.2.tar.gz",
+          "size": 35267134,
+          "hashes": {
+            "sha256": "078f50ee25de546483d84c0f9ccc587edac6039cde87142fbea39c9ca87dcb05"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/sysadminsmedia/homebox/releases/download/v0.26.2/homebox_Linux_x86_64.tar.gz"
+            }
+          ]
+        },
+        {
+          "name": "homebox_linux-arm64_0.26.2.tar.gz",
+          "size": 32591241,
+          "hashes": {
+            "sha256": "a7197a54b830a21be0142c5b4b3dd3a730d5d6a0599aa680d089b4e128d82f12"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/sysadminsmedia/homebox/releases/download/v0.26.2/homebox_Linux_arm64.tar.gz"
+            }
+          ]
+        },
+        {
+          "name": "homebox_darwin-amd64_0.26.2.tar.gz",
+          "size": 35861362,
+          "hashes": {
+            "sha256": "ff171c0dc49e7aa86c1b075a6af083cb87a42b95736db2a394d419f12c93ba17"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/sysadminsmedia/homebox/releases/download/v0.26.2/homebox_Darwin_x86_64.tar.gz"
+            }
+          ]
+        },
+        {
+          "name": "homebox_darwin-arm64_0.26.2.tar.gz",
+          "size": 33999391,
+          "hashes": {
+            "sha256": "12ffd3005afd2d5418077294d5440bc8dfdbd8386bd6001578399dcc7db4039a"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/sysadminsmedia/homebox/releases/download/v0.26.2/homebox_Darwin_arm64.tar.gz"
+            }
+          ]
+        },
+        {
+          "name": "homebox_windows-amd64_0.26.2.zip",
+          "size": 35880240,
+          "hashes": {
+            "sha256": "d063cf95cdbfd76323596d2d5b401e9b888676c46f09eaea30670e886adab0ff"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/sysadminsmedia/homebox/releases/download/v0.26.2/homebox_Windows_x86_64.zip"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 173599368,
+      "installedSize": 173599368,
+      "license": {
+        "redistribution": "permitted",
+        "id": "AGPL-3.0-only",
+        "name": "GNU Affero General Public License v3.0",
+        "url": "https://github.com/sysadminsmedia/homebox/blob/main/LICENSE",
+        "verified": true,
+        "notes": "AGPL-3.0: Arcana runs the publisher's unmodified program, so section 13 (offering source to network users) asks nothing more of Arcana; the source is at the publisher's repository."
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": false,
+        "videos": false
+      },
+      "updateStrategy": "snapshot-replace",
+      "providerRef": {
+        "kind": "service",
+        "platforms": "windows-amd64 darwin-arm64 darwin-amd64 linux-amd64 linux-arm64"
+      },
+      "popularity": 5
+    },
+    {
+      "id": "arcana.app.vaultwarden",
+      "provider": "arcana",
+      "title": "Vaultwarden",
+      "description": "Vaultwarden 1.36.0 with the Bitwarden web vault: a password manager that Bitwarden's apps and browser extensions can use, kept on the drive. Linux only: Vaultwarden publishes its server only as Linux container images. Its web vault works only over HTTPS, so it needs Arcana's HTTPS (Server page).",
+      "category": "personal-community",
+      "subcategory": "apps",
+      "tags": [
+        "app",
+        "passwords",
+        "bitwarden"
+      ],
+      "family": "arcana.app.vaultwarden",
+      "variant": "standard",
+      "publisher": "Vaultwarden",
+      "sourceUrl": "https://github.com/dani-garcia/vaultwarden",
+      "version": "1.36.0",
+      "published": "2026-05-03",
+      "lastVerified": "2026-11-26T00:00:00Z",
+      "languages": [
+        "mul"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "app",
+      "files": [
+        {
+          "name": "vaultwarden_linux-amd64_1.36.0.tar.gz",
+          "size": 17004716,
+          "hashes": {
+            "sha256": "46d5b22765989415c2cfe4373ac4ffd39addde4c2b7823be79cc2701eb94b4a0"
+          },
+          "mirrors": [
+            {
+              "url": "https://ghcr.io/v2/dani-garcia/vaultwarden/blobs/sha256:46d5b22765989415c2cfe4373ac4ffd39addde4c2b7823be79cc2701eb94b4a0"
+            }
+          ]
+        },
+        {
+          "name": "vaultwarden_linux-arm64_1.36.0.tar.gz",
+          "size": 16745544,
+          "hashes": {
+            "sha256": "3225ae8e561acd57c642414a5cb371d111bb9b935756dcf0edc1d327e818d270"
+          },
+          "mirrors": [
+            {
+              "url": "https://ghcr.io/v2/dani-garcia/vaultwarden/blobs/sha256:3225ae8e561acd57c642414a5cb371d111bb9b935756dcf0edc1d327e818d270"
+            }
+          ]
+        },
+        {
+          "name": "web-vault_any_1.36.0.tar.gz",
+          "size": 29295303,
+          "hashes": {
+            "sha256": "d2faf6972ffe6bd3bf9467c9a4ac0b560c9cecad7d74b1aa0e5156c4b189588d"
+          },
+          "mirrors": [
+            {
+              "url": "https://ghcr.io/v2/dani-garcia/vaultwarden/blobs/sha256:d2faf6972ffe6bd3bf9467c9a4ac0b560c9cecad7d74b1aa0e5156c4b189588d"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 63045563,
+      "installedSize": 63045563,
+      "license": {
+        "redistribution": "permitted",
+        "id": "AGPL-3.0-only",
+        "name": "GNU Affero General Public License v3.0",
+        "url": "https://github.com/dani-garcia/vaultwarden/blob/main/LICENSE.txt",
+        "verified": true,
+        "notes": "Server and web vault are layers of the official image vaultwarden/server:1.36.0-alpine (ghcr.io/dani-garcia/vaultwarden), whose server is a static Linux program. The web vault (bw_web_builds) is GPL-3.0. AGPL-3.0: Arcana runs the publisher's unmodified program, so section 13 (offering source to network users) asks nothing more of Arcana; the source is at the publisher's repository."
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": false,
+        "videos": false
+      },
+      "updateStrategy": "snapshot-replace",
+      "providerRef": {
+        "kind": "service",
+        "platforms": "linux-amd64 linux-arm64"
+      },
+      "popularity": 5
+    },
+    {
+      "id": "arcana.app.jellyfin",
+      "provider": "arcana",
+      "title": "Jellyfin",
+      "description": "Jellyfin 10.11.11 with jellyfin-ffmpeg 7.1.4: a media server for your own films, series, music and photos, with apps for phones and televisions. Put media in Arcana/user/files/Media (File Browser can upload it) and add that folder as a library in Jellyfin.",
+      "category": "entertainment",
+      "subcategory": "apps",
+      "tags": [
+        "app",
+        "media",
+        "video",
+        "music"
+      ],
+      "family": "arcana.app.jellyfin",
+      "variant": "standard",
+      "publisher": "The Jellyfin Project",
+      "sourceUrl": "https://jellyfin.org",
+      "version": "10.11.11",
+      "published": "2026-06-06",
+      "lastVerified": "2026-11-26T00:00:00Z",
+      "languages": [
+        "mul"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "app",
+      "files": [
+        {
+          "name": "jellyfin_linux-amd64_10.11.11.tar.gz",
+          "size": 110228765,
+          "hashes": {
+            "sha256": "9f7f194a7e37777cfde0d107c088fc47e81c7904440046ac0ceb7a289546cf79"
+          },
+          "mirrors": [
+            {
+              "url": "https://repo.jellyfin.org/files/server/linux/stable/v10.11.11/amd64/jellyfin_10.11.11-amd64.tar.gz"
+            }
+          ]
+        },
+        {
+          "name": "jellyfin_linux-arm64_10.11.11.tar.gz",
+          "size": 107416274,
+          "hashes": {
+            "sha256": "31f86f51f72f006dfe2d9daabc25e75a9bbbfdad8dc1cbac7d14ea616de1fa40"
+          },
+          "mirrors": [
+            {
+              "url": "https://repo.jellyfin.org/files/server/linux/stable/v10.11.11/arm64/jellyfin_10.11.11-arm64.tar.gz"
+            }
+          ]
+        },
+        {
+          "name": "jellyfin_darwin-amd64_10.11.11.tar.xz",
+          "size": 84729536,
+          "hashes": {
+            "sha256": "4289c359560d563a5725ed10ee68bd601ff2abe47861380f438bce3bd3272e43"
+          },
+          "mirrors": [
+            {
+              "url": "https://repo.jellyfin.org/files/server/macos/stable/v10.11.11/amd64/jellyfin_10.11.11-amd64.tar.xz"
+            }
+          ]
+        },
+        {
+          "name": "jellyfin_darwin-arm64_10.11.11.tar.xz",
+          "size": 81165952,
+          "hashes": {
+            "sha256": "27c0bcbeac7a698cf0fd034e347f124f69083bc4463816099b52bebead614a47"
+          },
+          "mirrors": [
+            {
+              "url": "https://repo.jellyfin.org/files/server/macos/stable/v10.11.11/arm64/jellyfin_10.11.11-arm64.tar.xz"
+            }
+          ]
+        },
+        {
+          "name": "jellyfin_windows-amd64_10.11.11.zip",
+          "size": 167773527,
+          "hashes": {
+            "sha256": "3b5d3e904415ac6bd2c0ee9fe93235b4145d41c4c85ae782d244ac9767f77374"
+          },
+          "mirrors": [
+            {
+              "url": "https://repo.jellyfin.org/files/server/windows/stable/v10.11.11/amd64/jellyfin_10.11.11-amd64.zip"
+            }
+          ]
+        },
+        {
+          "name": "ffmpeg_linux-amd64_7.1.4-3.tar.xz",
+          "size": 58599712,
+          "hashes": {
+            "sha256": "cab9ff40a47e4232d231e4eb7e4e85fabfeec56c6905266bc94291fc0881f83f"
+          },
+          "mirrors": [
+            {
+              "url": "https://repo.jellyfin.org/files/ffmpeg/linux/7.x/7.1.4-3/amd64/jellyfin-ffmpeg_7.1.4-3_portable_linux64-gpl.tar.xz"
+            }
+          ]
+        },
+        {
+          "name": "ffmpeg_linux-arm64_7.1.4-3.tar.xz",
+          "size": 51640084,
+          "hashes": {
+            "sha256": "77e4b5d044ab73e1f26c9aadaa5d6014d1782500bf2c29afb3ab81f5bea98b1f"
+          },
+          "mirrors": [
+            {
+              "url": "https://repo.jellyfin.org/files/ffmpeg/linux/7.x/7.1.4-3/arm64/jellyfin-ffmpeg_7.1.4-3_portable_linuxarm64-gpl.tar.xz"
+            }
+          ]
+        },
+        {
+          "name": "ffmpeg_darwin-amd64_7.1.4-3.tar.xz",
+          "size": 36614016,
+          "hashes": {
+            "sha256": "943f78e94d2760d3925fc0d9cc15f8329b11dbcdae7b0fd0d225b64e5a1aae29"
+          },
+          "mirrors": [
+            {
+              "url": "https://repo.jellyfin.org/files/ffmpeg/macos/7.x/7.1.4-3/x86_64/jellyfin-ffmpeg_7.1.4-3_portable_mac64-gpl.tar.xz"
+            }
+          ]
+        },
+        {
+          "name": "ffmpeg_darwin-arm64_7.1.4-3.tar.xz",
+          "size": 31063636,
+          "hashes": {
+            "sha256": "99d689816a41075574928a0b3059101fd454fc58f465c99105a73b5c415ac86d"
+          },
+          "mirrors": [
+            {
+              "url": "https://repo.jellyfin.org/files/ffmpeg/macos/7.x/7.1.4-3/arm64/jellyfin-ffmpeg_7.1.4-3_portable_macarm64-gpl.tar.xz"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 729231502,
+      "installedSize": 729231502,
+      "license": {
+        "redistribution": "permitted",
+        "id": "GPL-2.0-only",
+        "name": "GNU General Public License v2.0",
+        "url": "https://github.com/jellyfin/jellyfin/blob/master/LICENSE",
+        "verified": true,
+        "notes": "jellyfin-ffmpeg is GPL-3.0. Jellyfin's Windows build carries its own copy; the other platforms get the portable build."
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": false,
+        "videos": false
+      },
+      "updateStrategy": "snapshot-replace",
+      "providerRef": {
+        "kind": "service",
+        "platforms": "windows-amd64 darwin-arm64 darwin-amd64 linux-amd64 linux-arm64"
+      },
+      "popularity": 5
+    },
+    {
+      "id": "arcana.app.calibre-web",
+      "provider": "arcana",
+      "title": "Calibre-Web",
+      "description": "Calibre-Web 0.6.26, with Python 3.11: an e-book library to upload, organize, read in the browser and send to readers, kept in a Calibre library on the drive (Arcana/user/apps/calibre-web/library). Arcana sets the administrator password at the first start and shows it on the Apps page.",
+      "category": "history-culture",
+      "subcategory": "apps",
+      "tags": [
+        "app",
+        "ebooks",
+        "calibre",
+        "reading"
+      ],
+      "family": "arcana.app.calibre-web",
+      "variant": "standard",
+      "publisher": "Calibre-Web",
+      "sourceUrl": "https://github.com/janeczku/calibre-web",
+      "version": "0.6.26",
+      "published": "2026-02-06",
+      "lastVerified": "2026-11-26T00:00:00Z",
+      "languages": [
+        "mul"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "app",
+      "files": [
+        {
+          "name": "python_windows-amd64_3.11.17.tar.gz",
+          "size": 25222085,
+          "hashes": {
+            "sha256": "861f9a03b0c4ca537da1754ed0556e0628dd2114a1be36e8aae6b1e2bb1304a0"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261003/cpython-3.11.17%2B20261003-x86_64-pc-windows-msvc-install_only_stripped.tar.gz"
+            },
+            {
+              "url": "https://releases.astral.sh/github/python-build-standalone/releases/download/20261003/cpython-3.11.17%2B20261003-x86_64-pc-windows-msvc-install_only_stripped.tar.gz"
+            }
+          ]
+        },
+        {
+          "name": "python_darwin-arm64_3.11.17.tar.gz",
+          "size": 26974674,
+          "hashes": {
+            "sha256": "0c9fbd0b2ddfbb6877493a650259bf379ee71a91b17f0f5f06dd2dcd52fbcade"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261003/cpython-3.11.17%2B20261003-aarch64-apple-darwin-install_only_stripped.tar.gz"
+            },
+            {
+              "url": "https://releases.astral.sh/github/python-build-standalone/releases/download/20261003/cpython-3.11.17%2B20261003-aarch64-apple-darwin-install_only_stripped.tar.gz"
+            }
+          ]
+        },
+        {
+          "name": "python_darwin-amd64_3.11.17.tar.gz",
+          "size": 26888478,
+          "hashes": {
+            "sha256": "ba62d0fb634c4e347341a4f3e29d7fb0b27920be6326c614d541c316e4da7693"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261003/cpython-3.11.17%2B20261003-x86_64-apple-darwin-install_only_stripped.tar.gz"
+            },
+            {
+              "url": "https://releases.astral.sh/github/python-build-standalone/releases/download/20261003/cpython-3.11.17%2B20261003-x86_64-apple-darwin-install_only_stripped.tar.gz"
+            }
+          ]
+        },
+        {
+          "name": "python_linux-amd64_3.11.17.tar.gz",
+          "size": 30785899,
+          "hashes": {
+            "sha256": "aadcba18994cb8f9ee752aceb31d61e04f75b5d900d76fb575c6fbfabadec434"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261003/cpython-3.11.17%2B20261003-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz"
+            },
+            {
+              "url": "https://releases.astral.sh/github/python-build-standalone/releases/download/20261003/cpython-3.11.17%2B20261003-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz"
+            }
+          ]
+        },
+        {
+          "name": "python_linux-arm64_3.11.17.tar.gz",
+          "size": 31111705,
+          "hashes": {
+            "sha256": "41f16793d33161dcd9bfa2622332b8af870cfdb4540bd1fdc477f9e6b7c58c26"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261003/cpython-3.11.17%2B20261003-aarch64-unknown-linux-gnu-install_only_stripped.tar.gz"
+            },
+            {
+              "url": "https://releases.astral.sh/github/python-build-standalone/releases/download/20261003/cpython-3.11.17%2B20261003-aarch64-unknown-linux-gnu-install_only_stripped.tar.gz"
+            }
+          ]
+        },
+        {
+          "name": "library_any_metadata.db",
+          "size": 409600,
+          "hashes": {
+            "sha256": "ad8a3bc3612725ef761a089ccc820a91d6b228117403514837356a0b366b6af3"
+          },
+          "mirrors": [
+            {
+              "url": "https://raw.githubusercontent.com/Crosstalk-Solutions/project-nomad/932d2a5de9a40108de74e97d3ccfcc52345ce30e/install/calibre-empty-library/metadata.db"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_Flask-Principal-0.4.0.tar.gz",
+          "size": 5452,
+          "hashes": {
+            "sha256": "f5d6134b5caebfdbb86f32d56d18ee44b080876a27269560a96ea35f75c99453"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/14/c7/2531aca6ab7baa3774fde2dfc9c9dd6d5a42576a1013a93701bfdc402fdd/Flask-Principal-0.4.0.tar.gz"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_Unidecode-1.3.8-py3-none-any.whl",
+          "size": 235494,
+          "hashes": {
+            "sha256": "d130a61ce6696f8148a3bd8fe779c99adeb4b870584eeb9526584e9aa091fd39"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/84/b7/6ec57841fb67c98f52fc8e4a2d96df60059637cba077edc569a302a8ffc7/Unidecode-1.3.8-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_Wand-0.6.13-py2.py3-none-any.whl",
+          "size": 143789,
+          "hashes": {
+            "sha256": "e5dda0ac2204a40c29ef5c4cb310770c95d3d05c37b1379e69c94ea79d7d19c0"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/59/d5/1bdd7c9662d5e9078e25ba0eb69bdb122859295746d40ab8dfef3a7b4d42/Wand-0.6.13-py2.py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_apscheduler-3.11.3-py3-none-any.whl",
+          "size": 66024,
+          "hashes": {
+            "sha256": "bbeb2ec02d23d3c06a6c07ed7f0f3939ada6680eb121fae809a69bb42c537a30"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/42/c9/8638db32514dbb9157b3d82680c6faea89283523edf9ed2415ea3884f2ae/apscheduler-3.11.3-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_babel-2.19.0-py3-none-any.whl",
+          "size": 10983582,
+          "hashes": {
+            "sha256": "6d49734aed1d595b2c065d012174df8c83964692f26fc461702281634dd7555b"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/71/3b/ddf4b07be846bfa361683729b5948c9c61a87fbdf09e69540d8e586bb7c5/babel-2.19.0-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_bleach-6.2.0-py3-none-any.whl",
+          "size": 163406,
+          "hashes": {
+            "sha256": "117d9c6097a7c3d22fd578fcd8d35ff1e125df6736f554da4e432fdd63f31e5e"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/fc/55/96142937f66150805c25c4d0f31ee4132fd33497753400734f9dfdcbdc66/bleach-6.2.0-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_blinker-1.9.0-py3-none-any.whl",
+          "size": 8458,
+          "hashes": {
+            "sha256": "ba0efaa9080b619ff2f3459d1d500c57bddea4a6b424b60a91141db6fd2f08bc"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/10/cb/f2ad4230dc2eb1a74edf38f1a38b9b52277f75bef262d8908e60d957e13c/blinker-1.9.0-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_calibreweb-0.6.26-py3-none-any.whl",
+          "size": 8056604,
+          "hashes": {
+            "sha256": "393c1a00d47a1ae4c67192afc2d9b8dfa9cfae44ddb750599c7a9f1228055b97"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/0c/03/e9081bfd3f3f5036b8441e84c3aed0e7088df19684009bd137fe5c70b500/calibreweb-0.6.26-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_certifi-2025.8.3-py3-none-any.whl",
+          "size": 161216,
+          "hashes": {
+            "sha256": "f6c12493cfb1b06ba2ff328595af9350c65d6644968e5d3a2ffd78699af217a5"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/e5/48/1549795ba7742c948d2ad169c1c8cdbae65bc450d6cd753d124b17c8cd32/certifi-2025.8.3-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_chardet-5.2.0-py3-none-any.whl",
+          "size": 199385,
+          "hashes": {
+            "sha256": "e1cf59446890a00105fe7b7912492ea04b6e6f06d4b742b2c788469e34c82970"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/38/6f/f5fbc992a329ee4e0f288c1fe0e2ad9485ed064cac731ed2fe47dcc38cbf/chardet-5.2.0-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_click-8.5.1-py3-none-any.whl",
+          "size": 126163,
+          "hashes": {
+            "sha256": "8bb5376d2006950386f8c6427613334a2acadc5f559cb80e638d00b4df957e37"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/31/7d/164b7ffc8624fe9efb4221bf9af485d5c1e41b9ae118045d2b6dc5457d8b/click-8.5.1-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_deprecated-1.3.1-py2.py3-none-any.whl",
+          "size": 11298,
+          "hashes": {
+            "sha256": "597bfef186b6f60181535a29fbe44865ce137a5079f295b479886c82729d5f3f"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/84/d0/205d54408c08b13550c733c4b85429e7ead111c7f0014309637425520a9a/deprecated-1.3.1-py2.py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_flask-3.1.3-py3-none-any.whl",
+          "size": 103424,
+          "hashes": {
+            "sha256": "f4bcbefc124291925f1a26446da31a5178f9483862233b23c0c96a20701f670c"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/7f/9c/34f6962f9b9e9c71f6e5ed806e0d0ff03c9d1b0b2340088a0cf4bce09b18/flask-3.1.3-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_flask_babel-4.0.0-py3-none-any.whl",
+          "size": 9602,
+          "hashes": {
+            "sha256": "638194cf91f8b301380f36d70e2034c77ee25b98cb5d80a1626820df9a6d4625"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/14/c2/e0ab5abe37882e118482884f2ec660cd06da644ddfbceccf5f88f546b574/flask_babel-4.0.0-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_flask_httpauth-4.8.1-py3-none-any.whl",
+          "size": 9651,
+          "hashes": {
+            "sha256": "0080393d70e12327781f7509115175ec5e47209816489a620d4fd39e20cea2e8"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/72/da/624c87bf6c13107ceab8ee23815d9468e47d89c7480c1dc9af39b08eb290/flask_httpauth-4.8.1-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_flask_limiter-3.12-py3-none-any.whl",
+          "size": 28490,
+          "hashes": {
+            "sha256": "b94c9e9584df98209542686947cf647f1ede35ed7e4ab564934a2bb9ed46b143"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/66/ba/40dafa278ee6a4300179d2bf59a1aa415165c26f74cfa17462132996186b/flask_limiter-3.12-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_flask_wtf-1.2.2-py3-none-any.whl",
+          "size": 12779,
+          "hashes": {
+            "sha256": "e93160c5c5b6b571cf99300b6e01b72f9a101027cab1579901f8b10c5daf0b70"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/dc/19/354449145fbebb65e7c621235b6ad69bebcfaec2142481f044d0ddc5b5c5/flask_wtf-1.2.2-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_idna-3.20-py3-none-any.whl",
+          "size": 69583,
+          "hashes": {
+            "sha256": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/58/a2/bb081bab032533a855d44de1d56f8e8426114ff1ba5d1f07a438a0a654f8/idna-3.20-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_iso-639-0.4.5.tar.gz",
+          "size": 167421,
+          "hashes": {
+            "sha256": "dc9cd4b880b898d774c47fe9775167404af8a85dd889d58f9008035109acce49"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/5a/8d/27969852f4e664525c3d070e44b2b719bc195f4d18c311c52e57bb93614e/iso-639-0.4.5.tar.gz"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_itsdangerous-2.2.0-py3-none-any.whl",
+          "size": 16234,
+          "hashes": {
+            "sha256": "c6242fc49e35958c8b15141343aa660db5fc54d4f13a1db01a3f5891b98700ef"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/04/96/92447566d16df59b2a776c0fb82dbc4d9e07cd95062562af01e408583fc4/itsdangerous-2.2.0-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_jinja2-3.1.6-py3-none-any.whl",
+          "size": 134899,
+          "hashes": {
+            "sha256": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/62/a1/3d680cbfd5f4b8f15abc1d571870c5fc3e594bb582bc3b64ea099db13e56/jinja2-3.1.6-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_limits-5.8.0-py3-none-any.whl",
+          "size": 60954,
+          "hashes": {
+            "sha256": "ae1b008a43eb43073c3c579398bd4eb4c795de60952532dc24720ab45e1ac6b8"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/b9/98/cb5ca20618d205a09d5bec7591fbc4130369c7e6308d9a676a28ff3ab22c/limits-5.8.0-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_markdown_it_py-4.3.0-py3-none-any.whl",
+          "size": 96951,
+          "hashes": {
+            "sha256": "7aa1511a46c39138de78d9eba92ce47e63124d8003fc98b3a351909e04239efa"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/c9/31/5f0ac2f1a1c67423c995c731a11cd4ad05d081a2be969d74f868bdb9cc70/markdown_it_py-4.3.0-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_mdurl-0.1.2-py3-none-any.whl",
+          "size": 9979,
+          "hashes": {
+            "sha256": "84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/b3/38/89ba8ad64ae25be8de66a6d463314cf1eb366222074cfda9ee839c56a4b4/mdurl-0.1.2-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_ordered_set-4.1.0-py3-none-any.whl",
+          "size": 7634,
+          "hashes": {
+            "sha256": "046e1132c71fcf3330438a539928932caf51ddbc582496833e23de611de14562"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/33/55/af02708f230eb77084a299d7b08175cff006dea4f2721074b92cdb0296c0/ordered_set-4.1.0-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_packaging-26.4-py3-none-any.whl",
+          "size": 140049,
+          "hashes": {
+            "sha256": "81383611a09c1bc0b08b76e0fd5829d7c6824c65b27a6aee339da133f4233ea2"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/ba/7b/5504f91c9c2733f693d7759e50ede5d27119d4da7e5836c46d3b5ff81d56/packaging-26.4-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_pycparser-3.12-py3-none-any.whl",
+          "size": 62600,
+          "hashes": {
+            "sha256": "a076f3f489b39b43ed13563a1dafe42447445bec2e294154ec5c57fcdda4c85e"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/b6/ae/315bbeee126a769cbde43cf4908acb4b40408d8bf8bbf334dd7368d8dadf/pycparser-3.12-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_pygments-2.21.0-py3-none-any.whl",
+          "size": 1250147,
+          "hashes": {
+            "sha256": "2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/71/46/17f022dd3e953bf20a04a028a21ec746d942f8d2af30fa0f124fa0e6a684/pygments-2.21.0-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_pypdf-6.4.2-py3-none-any.whl",
+          "size": 328212,
+          "hashes": {
+            "sha256": "014dcff867fd99fc0b6fc90ed1f7e1347ef2317ae038a489c2caa64106d268f4"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/38/99/3147435e15ccd97c0451efc3d13495dc22602e9887f81e64f1b135bae821/pypdf-6.4.2-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_python_magic-0.4.27-py2.py3-none-any.whl",
+          "size": 13840,
+          "hashes": {
+            "sha256": "c212960ad306f700aa0d01e5d7a325d20548ff97eb9920dcd29513174f0294d3"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/6c/73/9f872cb81fc5c3bb48f7227872c28975f998f3e7c2b1c16e95e6432bbb90/python_magic-0.4.27-py2.py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_pytz-2026.6-py2.py3-none-any.whl",
+          "size": 506321,
+          "hashes": {
+            "sha256": "7fed3fee8fd6bd4a2b7b75a8d56021d0624127bf69bd5691f115db929ac570b3"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/b6/25/564f3fc5b70c1398d706c51f2b1470d0ea0b1b2f96fee67877b6f5bdf3b6/pytz-2026.6-py2.py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_requests-2.32.5-py3-none-any.whl",
+          "size": 64738,
+          "hashes": {
+            "sha256": "2462f94637a34fd532264295e186976db0f5d453d1cdd31473c85a6a161affb6"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/1e/db/4254e3eabe8020b458f1a747140d32277ec7a271daf1d235b70dc0b4e6e3/requests-2.32.5-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_rich-13.9.4-py3-none-any.whl",
+          "size": 242424,
+          "hashes": {
+            "sha256": "6049d5e6ec054bf2779ab3358186963bac2ea89175919d699e378b99738c2a90"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/19/71/39c7c0d87f8d4e6c020a393182060eaefeeae6c01dab6a84ec346f2567df/rich-13.9.4-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_sqlalchemy-2.0.58-py3-none-any.whl",
+          "size": 1969678,
+          "hashes": {
+            "sha256": "cc1b78ba0ed1f32156d1582f94ca4aca74633e4dcdde3eb1562dd4742493f594"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/61/4a/32a002e26025be40cbbd979e77bcc27b6e3de37b26277eade76e82cc1e8b/sqlalchemy-2.0.58-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_typing_extensions-4.16.0-py3-none-any.whl",
+          "size": 45571,
+          "hashes": {
+            "sha256": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/49/d3/b8441a820a491ddfc024b0b0cf0393375b75ea13866d9c66727e54c2fc80/typing_extensions-4.16.0-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_tzlocal-5.4.5-py3-none-any.whl",
+          "size": 18215,
+          "hashes": {
+            "sha256": "ecab534f6d65d9deb4c4ea52c121ab6dd5958e9b878e71dcb102578269752454"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/7b/c1/9be4e1a8a30db8729a86628073910e56f85aaf8a659e053f376a2e6ea5a8/tzlocal-5.4.5-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_urllib3-2.8.0-py3-none-any.whl",
+          "size": 135717,
+          "hashes": {
+            "sha256": "0cf3cae568d36aa9576b28dfb35f11328f1cb974ca7647d9475ebb86c75ac6e3"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/92/9d/c4e665119135114480843e7ab388fa94d8480650450e6f8e26b70d323a4c/urllib3-2.8.0-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_webencodings-0.6.1-py3-none-any.whl",
+          "size": 8745,
+          "hashes": {
+            "sha256": "7fab6269c8bf237c657876b52058ccb182e861518d1c695c1a9aaa8c1c105d5b"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/77/c6/040cbc72480d789a5f40d63fb484d3106554c4dfa2d2b70ad5022057750f/webencodings-0.6.1-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_werkzeug-3.1.9-py3-none-any.whl",
+          "size": 228700,
+          "hashes": {
+            "sha256": "6392e50c78460ba618e5b21f08a71f59c99ce99cdc6cf6e3dd7e6ccca8754fab"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/a1/38/df03f564f43cec2684823f3cccae1a652ee7face1cbaa76fb223096e64d7/werkzeug-3.1.9-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_wtforms-3.3.2-py3-none-any.whl",
+          "size": 172021,
+          "hashes": {
+            "sha256": "2fac992f39102d6268b06e05cdbdf37a7e9b9a4e103916d2dff1d09a080b531d"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/0f/8f/3c9a0d834a308f71316c3518d8059578e185115d763d0fb0e2027184626a/wtforms-3.3.2-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-amd64_cffi-2.1.1-cp311-cp311-macosx_10_15_x86_64.whl",
+          "size": 183838,
+          "hashes": {
+            "sha256": "c8d2c9fd1f2d16f780d15127abb050d13d1a76c03a4bd87d7e4980e45e511e12"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/70/d2/16d99a0c4948febc0ebd133a13b2f688ff7f8cb04da971e1128872ce0c03/cffi-2.1.1-cp311-cp311-macosx_10_15_x86_64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-amd64_charset_normalizer-3.5.3-cp311-cp311-macosx_10_9_universal2.whl",
+          "size": 409498,
+          "hashes": {
+            "sha256": "01b35bec964b92b89bdf94adf931d2e80a15f1c7b93bf850b4430cca23f7a2a2"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/20/f2/fe2bc8a01ed1f3ede348d8afb8e416e81abe801a4ad789a8c5276d95b370/charset_normalizer-3.5.3-cp311-cp311-macosx_10_9_universal2.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-amd64_cryptography-44.0.3-cp39-abi3-macosx_10_9_universal2.whl",
+          "size": 6673501,
+          "hashes": {
+            "sha256": "5639c2b16764c6f76eedf722dbad9a0914960d3489c0cc38694ddf9464f1bb2f"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/34/a3/ad08e0bcc34ad436013458d7528e83ac29910943cea42ad7dd4141a27bbb/cryptography-44.0.3-cp39-abi3-macosx_10_9_universal2.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-amd64_greenlet-3.5.6-cp311-cp311-macosx_11_0_universal2.whl",
+          "size": 294075,
+          "hashes": {
+            "sha256": "a6a4b98a9132e0f45c9fc245a63894cfd8c45fb7a0d6bffc5eab3ec327cf7324"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/f1/d7/41511ee2696f14be4200b524d9553dc4295e2bdeb20aa8962c3cb25e71c6/greenlet-3.5.6-cp311-cp311-macosx_11_0_universal2.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-amd64_lxml-5.3.2-cp311-cp311-macosx_10_9_x86_64.whl",
+          "size": 4433445,
+          "hashes": {
+            "sha256": "856dfd7eda0b75c29ac80a31a6411ca12209183e866c33faf46e77ace3ce8a79"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/91/84/23135b2dc72b3440d68c8f39ace2bb00fe78e3a2255f7c74f7e76f22498e/lxml-5.3.2-cp311-cp311-macosx_10_9_x86_64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-amd64_markupsafe-3.0.4-cp311-cp311-macosx_10_9_x86_64.whl",
+          "size": 11520,
+          "hashes": {
+            "sha256": "9e25feb9e330b63edb0278a0acdf85e50d0cb0fbf49c3084abbe4e24ae195346"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/32/55/18dbb4778b30ada5ce071608503cc3edc9e14e13d868c17a6d178fc30f7a/markupsafe-3.0.4-cp311-cp311-macosx_10_9_x86_64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-amd64_netifaces_plus-0.12.5-cp311-cp311-macosx_10_9_x86_64.whl",
+          "size": 13848,
+          "hashes": {
+            "sha256": "d1e704382e932dc0862d7fff0d161812b1a214b867182f878a63e4b7d5e7d42f"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/0f/37/82e8b615df8d2c377fdb83fc5a3b6f61b15a0028317264f7fcf37216d7df/netifaces_plus-0.12.5-cp311-cp311-macosx_10_9_x86_64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-amd64_regex-2024.11.6-cp311-cp311-macosx_10_9_x86_64.whl",
+          "size": 287684,
+          "hashes": {
+            "sha256": "2c89a8cc122b25ce6945f0423dc1352cb9593c68abd19223eebbd4e56612c5b7"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/34/4c/8f8e631fcdc2ff978609eaeef1d6994bf2f028b59d9ac67640ed051f1218/regex-2024.11.6-cp311-cp311-macosx_10_9_x86_64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-amd64_tornado-6.5.10-cp39-abi3-macosx_10_9_x86_64.whl",
+          "size": 464046,
+          "hashes": {
+            "sha256": "83e6cf438b106c6b3852d70960967bb1b70c87438050dca0981e4b9aa751a4c1"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/ad/f5/cd7be26c34a3315532f3aef5f092465da8f59c334dd439d3c14aaef16461/tornado-6.5.10-cp39-abi3-macosx_10_9_x86_64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-amd64_wrapt-2.5.2-cp311-cp311-macosx_10_9_x86_64.whl",
+          "size": 105761,
+          "hashes": {
+            "sha256": "8b240a879405591da10e2d20c2d1ad29b978d40ec37e24801296cfee1d4c04f9"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/4d/c2/b4bbaabf73ea9ccc2e322a11455a95d7d9dcae5bbcc6fd836c5f676a082f/wrapt-2.5.2-cp311-cp311-macosx_10_9_x86_64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-arm64_cffi-2.1.1-cp311-cp311-macosx_11_0_arm64.whl",
+          "size": 184168,
+          "hashes": {
+            "sha256": "398aff33cee2767e3e781d2554c54bd0dff386bb437581e0d8011fde1a942ec1"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/cd/95/31b535a9f0220ae9f357de4a08d57ce89cb417653c2fd9f075f50822a388/cffi-2.1.1-cp311-cp311-macosx_11_0_arm64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-arm64_charset_normalizer-3.5.3-cp311-cp311-macosx_10_9_universal2.whl",
+          "size": 409498,
+          "hashes": {
+            "sha256": "01b35bec964b92b89bdf94adf931d2e80a15f1c7b93bf850b4430cca23f7a2a2"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/20/f2/fe2bc8a01ed1f3ede348d8afb8e416e81abe801a4ad789a8c5276d95b370/charset_normalizer-3.5.3-cp311-cp311-macosx_10_9_universal2.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-arm64_cryptography-44.0.3-cp39-abi3-macosx_10_9_universal2.whl",
+          "size": 6673501,
+          "hashes": {
+            "sha256": "5639c2b16764c6f76eedf722dbad9a0914960d3489c0cc38694ddf9464f1bb2f"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/34/a3/ad08e0bcc34ad436013458d7528e83ac29910943cea42ad7dd4141a27bbb/cryptography-44.0.3-cp39-abi3-macosx_10_9_universal2.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-arm64_greenlet-3.5.6-cp311-cp311-macosx_11_0_universal2.whl",
+          "size": 294075,
+          "hashes": {
+            "sha256": "a6a4b98a9132e0f45c9fc245a63894cfd8c45fb7a0d6bffc5eab3ec327cf7324"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/f1/d7/41511ee2696f14be4200b524d9553dc4295e2bdeb20aa8962c3cb25e71c6/greenlet-3.5.6-cp311-cp311-macosx_11_0_universal2.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-arm64_lxml-5.3.2-cp311-cp311-macosx_10_9_universal2.whl",
+          "size": 8163457,
+          "hashes": {
+            "sha256": "9d61a7d0d208ace43986a92b111e035881c4ed45b1f5b7a270070acae8b0bfb4"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/84/b8/2b727f5a90902f7cc5548349f563b60911ca05f3b92e35dfa751349f265f/lxml-5.3.2-cp311-cp311-macosx_10_9_universal2.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-arm64_markupsafe-3.0.4-cp311-cp311-macosx_11_0_arm64.whl",
+          "size": 12063,
+          "hashes": {
+            "sha256": "7d3391b2188d18737cb2fa147028b1096236eaa7e156446c650a489fa2cadc91"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/6c/14/0b05f79b4733e264a18d08fe08fa1df7347630ff32a6cb82180d9dccec55/markupsafe-3.0.4-cp311-cp311-macosx_11_0_arm64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-arm64_netifaces_plus-0.12.5-cp311-cp311-macosx_11_0_arm64.whl",
+          "size": 14309,
+          "hashes": {
+            "sha256": "8800b82e63cba6253c9ac2c81bf0c668091666d7717a3daa9f158e97b2cb6fcf"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/5e/1a/a00541f5981f043ce965797e971be58e93446b557295a1a168db877f03ab/netifaces_plus-0.12.5-cp311-cp311-macosx_11_0_arm64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-arm64_regex-2024.11.6-cp311-cp311-macosx_11_0_arm64.whl",
+          "size": 284589,
+          "hashes": {
+            "sha256": "94d87b689cdd831934fa3ce16cc15cd65748e6d689f5d2b8f4f4df2065c9fa20"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/c5/1b/f0e4d13e6adf866ce9b069e191f303a30ab1277e037037a365c3aad5cc9c/regex-2024.11.6-cp311-cp311-macosx_11_0_arm64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-arm64_sqlalchemy-2.0.58-cp311-cp311-macosx_11_0_arm64.whl",
+          "size": 2199394,
+          "hashes": {
+            "sha256": "213bb891991c71286c7149df147c8dfbce2e228e1b2f5177bf2b67435a33db13"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/6d/58/c32d1f92729e9eac59029d0fc6cb98f5f359bc30682e9df3b358ec766b83/sqlalchemy-2.0.58-cp311-cp311-macosx_11_0_arm64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-arm64_tornado-6.5.10-cp39-abi3-macosx_10_9_universal2.whl",
+          "size": 465883,
+          "hashes": {
+            "sha256": "9261783640e23258694a9ff0795df430a5a7b0a651d3dd53dd0969ad6be16da7"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/cd/5b/ff5fc58fa2427c30dea74c90053f4fc5eda1e7f3833ed3ecc7147fe2b311/tornado-6.5.10-cp39-abi3-macosx_10_9_universal2.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-arm64_wrapt-2.5.2-cp311-cp311-macosx_11_0_arm64.whl",
+          "size": 105933,
+          "hashes": {
+            "sha256": "b632d90ac0d04e3ba8821b19954d6c36ea8f714b75db53c58015025fefccb1ac"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/f7/d4/57db9384ffb339f29b6712cc1d7d4ace29d07670756becf9ad336728ca42/wrapt-2.5.2-cp311-cp311-macosx_11_0_arm64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-amd64_cffi-2.1.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+          "size": 217807,
+          "hashes": {
+            "sha256": "34e261f78cb6ceaaa36f42f2613f4380d94d9c759a9c73c769ee6e0247364632"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/f7/a4/4399daaf8f7dfee9d7c3327fdb0426ee041cc63edc358b93911ceb2bfc7a/cffi-2.1.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-amd64_charset_normalizer-3.5.3-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl",
+          "size": 263382,
+          "hashes": {
+            "sha256": "2a6f937e0b70133d1f826d0a253331b6fe1a4c874808cc12e16f2fb8177042f4"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/98/ff/6b85c4ee2809f4dbfcee89d128f64d2e5141f2d4c3191cb00048bb93b150/charset_normalizer-3.5.3-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-amd64_cryptography-44.0.3-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+          "size": 4170876,
+          "hashes": {
+            "sha256": "192ed30fac1728f7587c6f4613c29c584abdc565d7417c13904708db10206645"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/f7/c8/e5c5d0e1364d3346a5747cdcd7ecbb23ca87e6dea4f942a44e88be349f06/cryptography-44.0.3-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-amd64_greenlet-3.5.6-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl",
+          "size": 624428,
+          "hashes": {
+            "sha256": "1c20ea32a73d17b9b60e3371240e17b0068120c98a5ec01a224a7dd8c89733ba"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/ec/d3/63d4477ce31dff2fd802a9a20240f6606aac85977e0fb18443aae33de3f6/greenlet-3.5.6-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-amd64_lxml-5.3.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+          "size": 4918028,
+          "hashes": {
+            "sha256": "a1ef20f1851ccfbe6c5a04c67ec1ce49da16ba993fdbabdce87a92926e505412"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/b6/c6/663b5d87d51d00d4386a2d52742a62daa486c5dc6872a443409d9aeafece/lxml-5.3.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-amd64_markupsafe-3.0.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+          "size": 22961,
+          "hashes": {
+            "sha256": "6da83a088f8ef93b2d483a8232a4dbf4d69d3d8496b568a03c56becac43e1808"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/81/a5/a513b76c139a3915b43404324e55c0b7979ae4f0d39eb6f075b0282e90a8/markupsafe-3.0.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-amd64_netifaces_plus-0.12.5-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl",
+          "size": 37691,
+          "hashes": {
+            "sha256": "45b0c3fd91545fc75194b615d738bcb1e7c2fc1bcf282f87fb74f0e8ddf46be6"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/25/a0/2f4a3f11ddde8f70239f95dc7428d4f99f3a0916ccc6683105bc6e3db04d/netifaces_plus-0.12.5-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-amd64_regex-2024.11.6-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+          "size": 792727,
+          "hashes": {
+            "sha256": "f2a19f302cd1ce5dd01a9099aaa19cae6173306d1302a43b627f62e21cf18ac0"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/bf/ce/0d0e61429f603bac433910d99ef1a02ce45a8967ffbe3cbee48599e62d88/regex-2024.11.6-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-amd64_sqlalchemy-2.0.58-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+          "size": 3440588,
+          "hashes": {
+            "sha256": "3be707b48a7aa68f987ed82b219dff32de67677402a0c05356a631ec0ed86e4d"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/3f/97/0e8ab2e98f4d9a2e3e65cc08dedd10470b2e149629f3736fbcfc5818e0d0/sqlalchemy-2.0.58-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-amd64_tornado-6.5.10-cp39-abi3-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl",
+          "size": 467096,
+          "hashes": {
+            "sha256": "bdf942448169e5336451d0494d7e3d81cfa726d5aa312affdc4682dd62a62f6d"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/60/33/df6d7d04854a58619f8349a51e3edb138324130a7562b0bb21f115bb940f/tornado-6.5.10-cp39-abi3-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-amd64_wrapt-2.5.2-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl",
+          "size": 240286,
+          "hashes": {
+            "sha256": "0743950d3dda9940e56f81f5334ba051c4fe2e1421e4e4a4ef8eb8fb86a90894"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/98/00/a0effd5872aed3271b28b4740a71bc2d7406d33b4e03eac01ae099ac8569/wrapt-2.5.2-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-arm64_cffi-2.1.1-cp311-cp311-manylinux2014_aarch64.manylinux_2_17_aarch64.whl",
+          "size": 218716,
+          "hashes": {
+            "sha256": "3311ed60d36f83378794e1009ac6258bafbf81f7888b4caa7b35a521e3f95813"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/ad/66/c19feabb28485b6e0bbaaafa90837a1ef5d302e90f2178bd33f17a49879b/cffi-2.1.1-cp311-cp311-manylinux2014_aarch64.manylinux_2_17_aarch64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-arm64_charset_normalizer-3.5.3-cp311-cp311-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl",
+          "size": 245172,
+          "hashes": {
+            "sha256": "90b1ff6cb9c7a204a3b79b1b0ed6ac8a1d8fed3b6dc69e50ae5de0f358ee81d4"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/45/16/fcd396b14758f491a8dcb6c81373f0d2e3ba8a28d3cec4c1dea24ec0bea0/charset_normalizer-3.5.3-cp311-cp311-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-arm64_cryptography-44.0.3-cp39-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl",
+          "size": 3960307,
+          "hashes": {
+            "sha256": "f3ffef566ac88f75967d7abd852ed5f182da252d23fac11b4766da3957766759"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/b1/f0/7491d44bba8d28b464a5bc8cc709f25a51e3eac54c0a4444cf2473a57c37/cryptography-44.0.3-cp39-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-arm64_greenlet-3.5.6-cp311-cp311-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl",
+          "size": 613429,
+          "hashes": {
+            "sha256": "45bfd2b51e38aaa5f9849f114d9c7c1d75f69187c849b3549cd64c465283abfa"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/f8/7b/b509624970909294cd064ff7346148ca9941c21bec9026d7873dd254e9fa/greenlet-3.5.6-cp311-cp311-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-arm64_lxml-5.3.2-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl",
+          "size": 4771236,
+          "hashes": {
+            "sha256": "b6b37b4c3acb8472d191816d4582379f64d81cecbdce1a668601745c963ca5cc"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/2f/e9/31dbe5deaccf0d33ec279cf400306ad4b32dfd1a0fee1fca40c5e90678fe/lxml-5.3.2-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-arm64_markupsafe-3.0.4-cp311-cp311-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl",
+          "size": 24321,
+          "hashes": {
+            "sha256": "849dd2bb0e5e4ab2b71c7191726a4a8d5aa8a610daa584728cbee0b710ddc4ef"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/ca/3a/63ba10b6c1463216b3e4df669a9f0e5a3b0c3071557d2e8229e3968c79fb/markupsafe-3.0.4-cp311-cp311-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-arm64_netifaces_plus-0.12.5-cp311-cp311-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl",
+          "size": 38683,
+          "hashes": {
+            "sha256": "fa583053ee487a447c903dbc424fedfb5c4adb26f45cf20951222a47ee7b3090"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/ff/64/7dac66e2aa9e763a816f974c74516f240f39dea74d6b1ed38aaf2532bb8e/netifaces_plus-0.12.5-cp311-cp311-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-arm64_regex-2024.11.6-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl",
+          "size": 792121,
+          "hashes": {
+            "sha256": "1062b39a0a2b75a9c694f7a08e7183a80c63c0d62b301418ffd9c35f55aaa114"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/25/4d/ab21047f446693887f25510887e6820b93f791992994f6498b0318904d4a/regex-2024.11.6-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-arm64_sqlalchemy-2.0.58-cp311-cp311-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl",
+          "size": 3442427,
+          "hashes": {
+            "sha256": "ec4785da1b73083bd36046af672bca430a739d13bbd359e5b0a0c42e76df9896"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/12/ec/735003c6d2cfcae34892c1faf0ebe5b159b18c15063148db4458387f3032/sqlalchemy-2.0.58-cp311-cp311-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-arm64_tornado-6.5.10-cp39-abi3-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl",
+          "size": 468067,
+          "hashes": {
+            "sha256": "69acca6501eed74582b76dbbceee2a91613f54728e3e418346000d7103101676"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/29/17/cc35dff68272d685cffd8600ffafbd8067e7d05e7348d9f80caddffbbd5f/tornado-6.5.10-cp39-abi3-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-arm64_wrapt-2.5.2-cp311-cp311-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl",
+          "size": 241793,
+          "hashes": {
+            "sha256": "594c6d10b9cfb951a09f7338531a41d31194e7eee9dee206c0a8992421682719"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/69/22/8e9ef3a15115f3cc01f2460aaf9aeb04819704fefd218086642c7182be95/wrapt-2.5.2-cp311-cp311-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_windows-amd64_cffi-2.1.1-cp311-cp311-win_amd64.whl",
+          "size": 185096,
+          "hashes": {
+            "sha256": "42f6930c31dc7f50732c9ae793c2786c7b6b044195967bbdde40bb9be81c4cc0"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/73/c0/77ba02423c2f7d7091143c45cd49e0e6575c4c1967394bb542bd923a9b74/cffi-2.1.1-cp311-cp311-win_amd64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_windows-amd64_charset_normalizer-3.5.3-cp311-cp311-win_amd64.whl",
+          "size": 212879,
+          "hashes": {
+            "sha256": "cd5422fd4f8a7859846c9289e310dd95c0d1890c31819667942753e510f88f69"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/50/92/529dd4a3af41874d0cac3c495ec9622c1457cbe7b8276fa8b767235ab8d2/charset_normalizer-3.5.3-cp311-cp311-win_amd64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_windows-amd64_cryptography-44.0.3-cp39-abi3-win_amd64.whl",
+          "size": 3210375,
+          "hashes": {
+            "sha256": "5d186f32e52e66994dce4f766884bcb9c68b8da62d61d9d215bfe5fb56d21334"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/c9/ad/51f212198681ea7b0deaaf8846ee10af99fba4e894f67b353524eab2bbe5/cryptography-44.0.3-cp39-abi3-win_amd64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_windows-amd64_greenlet-3.5.6-cp311-cp311-win_amd64.whl",
+          "size": 323317,
+          "hashes": {
+            "sha256": "a6b4ff33f7e011bbaa148238d131c4fd4f8afbab3c104ddfbdb2b12b74ff7016"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/ce/6c/019d2ef898f4b9ac845167f1c6f73229e9a4e2439362a5e2ce50205a19b0/greenlet-3.5.6-cp311-cp311-win_amd64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_windows-amd64_lxml-5.3.2-cp311-cp311-win_amd64.whl",
+          "size": 3815230,
+          "hashes": {
+            "sha256": "d1a94cbb4ee64af3ab386c2d63d6d9e9cf2e256ac0fd30f33ef0a3c88f575174"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/1f/ea/9311fa1ef75b7d601c89600fc612838ee77ad3d426184941cba9cf62641f/lxml-5.3.2-cp311-cp311-win_amd64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_windows-amd64_markupsafe-3.0.4-cp311-cp311-win_amd64.whl",
+          "size": 14328,
+          "hashes": {
+            "sha256": "fdb4ca07ab75ffadab4a8b135ad59cdbb3156b99310f3d565370da74a15d6bd3"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/91/89/f2b509f7bf79352e40117824c1070dbeafd4df67031d3fa98165a3134228/markupsafe-3.0.4-cp311-cp311-win_amd64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_windows-amd64_netifaces_plus-0.12.5-cp311-cp311-win_amd64.whl",
+          "size": 17500,
+          "hashes": {
+            "sha256": "52ecff050da304ee2ea5b33c826dbb4b285cf9496f2255dd6273e138845709ea"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/79/5f/e99a14504cba2eff36ac62a7ad7dac7230aea1caf4baa292c4e681d8cbd1/netifaces_plus-0.12.5-cp311-cp311-win_amd64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_windows-amd64_python_magic_bin-0.4.14-py2.py3-none-win_amd64.whl",
+          "size": 409299,
+          "hashes": {
+            "sha256": "90be6206ad31071a36065a2fc169c5afb5e0355cbe6030e87641c6c62edc2b69"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/07/c2/094e3d62b906d952537196603a23aec4bcd7c6126bf80eb14e6f9f4be3a2/python_magic_bin-0.4.14-py2.py3-none-win_amd64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_windows-amd64_regex-2024.11.6-cp311-cp311-win_amd64.whl",
+          "size": 274052,
+          "hashes": {
+            "sha256": "02e28184be537f0e75c1f9b2f8847dc51e08e6e171c6bde130b2687e0c33cf60"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/80/32/763a6cc01d21fb3819227a1cc3f60fd251c13c37c27a73b8ff4315433a8e/regex-2024.11.6-cp311-cp311-win_amd64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_windows-amd64_sqlalchemy-2.0.58-cp311-cp311-win_amd64.whl",
+          "size": 2180944,
+          "hashes": {
+            "sha256": "372e4cbf8b189ade90f8d88440f1c1f934fb99d20416dc562a35d7e628756467"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/39/ad/25ac6d3d63816937d733e8f4f6c214275ee4afbf3ed2ead746fee7a7ff7a/sqlalchemy-2.0.58-cp311-cp311-win_amd64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_windows-amd64_tornado-6.5.10-cp39-abi3-win_amd64.whl",
+          "size": 468828,
+          "hashes": {
+            "sha256": "37ae8f150cecfdbf747fc4e12f5e9a97ecd8cf1d4cdb3f119e2de84b11196918"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/d8/d4/5901517f05affd752490f6a654ba31b7474664e8dd80bd045a00c220bd88/tornado-6.5.10-cp39-abi3-win_amd64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_windows-amd64_wrapt-2.5.2-cp311-cp311-win_amd64.whl",
+          "size": 106052,
+          "hashes": {
+            "sha256": "04703a2a4eea122c3a6b3af89e72bbbaa20779e5c7199c3d06e3fcb6601bc7d4"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/46/aa/196ab4e3584e547fcb6c4a622934aae14077c367b86f57a5ab5e76a47203/wrapt-2.5.2-cp311-cp311-win_amd64.whl"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 240382019,
+      "installedSize": 240382019,
+      "license": {
+        "redistribution": "permitted",
+        "id": "GPL-3.0-or-later",
+        "name": "GNU General Public License v3.0 or later",
+        "url": "https://github.com/janeczku/calibre-web/blob/master/LICENSE",
+        "verified": true,
+        "notes": "Its Python dependencies come from PyPI under their own licenses: BSD, MIT, Apache-2.0, PSF-2.0 and MPL-2.0, except chardet (LGPL-2.1), Unidecode (GPL-2.0-or-later) and iso-639 (AGPL-3.0). The empty Calibre library is Project NOMAD's (Apache-2.0)."
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": false,
+        "videos": false
+      },
+      "updateStrategy": "snapshot-replace",
+      "providerRef": {
+        "kind": "service",
+        "platforms": "windows-amd64 darwin-arm64 darwin-amd64 linux-amd64 linux-arm64"
+      },
+      "popularity": 5
+    },
+    {
+      "id": "arcana.app.stirling-pdf",
+      "provider": "arcana",
+      "title": "Stirling PDF",
+      "description": "Stirling PDF 2.13.1, with Eclipse Temurin Java 25: merge, split, rotate, compress, convert, sign and redact PDF files in the browser, on this computer. This is the openly licensed build (Stirling-PDF.jar), without the login and enterprise features.",
+      "category": "computing",
+      "subcategory": "apps",
+      "tags": [
+        "app",
+        "pdf",
+        "documents"
+      ],
+      "family": "arcana.app.stirling-pdf",
+      "variant": "standard",
+      "publisher": "Stirling PDF Inc.",
+      "sourceUrl": "https://github.com/Stirling-Tools/Stirling-PDF",
+      "version": "2.13.1",
+      "published": "2026-06-19",
+      "lastVerified": "2026-11-26T00:00:00Z",
+      "languages": [
+        "mul"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "app",
+      "files": [
+        {
+          "name": "stirling-pdf_any_2.13.1.jar",
+          "size": 288348031,
+          "hashes": {
+            "sha256": "8d34d1509da8f5158f3195266e94c164eb97b81f1d2a318010426049de751bfe"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/Stirling-Tools/Stirling-PDF/releases/download/v2.13.1/Stirling-PDF.jar"
+            }
+          ]
+        },
+        {
+          "name": "jre_linux-amd64_25.0.5.1-2.tar.gz",
+          "size": 61751939,
+          "hashes": {
+            "sha256": "2edef9e4f81ec5ee426d023336d4cfbd7b4644e99884e7a73a6a867b70b17acf"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.5.1%2B2/OpenJDK25U-jre_x64_linux_hotspot_25.0.5.1_2.tar.gz"
+            }
+          ]
+        },
+        {
+          "name": "jre_linux-arm64_25.0.5.1-2.tar.gz",
+          "size": 60526698,
+          "hashes": {
+            "sha256": "c6161dcfb365024fbfbcda265343d562d6f821c78dd8e7aeaeaf294893f6ff8b"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.5.1%2B2/OpenJDK25U-jre_aarch64_linux_hotspot_25.0.5.1_2.tar.gz"
+            }
+          ]
+        },
+        {
+          "name": "jre_darwin-amd64_25.0.5.1-2.tar.gz",
+          "size": 42215950,
+          "hashes": {
+            "sha256": "fac7e81bba96b45cfc3381dbc8bbca6ffd129e3e30aed70493245b61dde7d639"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.5.1%2B2/OpenJDK25U-jre_x64_mac_hotspot_25.0.5.1_2.tar.gz"
+            }
+          ]
+        },
+        {
+          "name": "jre_darwin-arm64_25.0.5.1-2.tar.gz",
+          "size": 56303568,
+          "hashes": {
+            "sha256": "70adbb3ce5cf924c8b60dd84272fdd5fba6d021014aa0c1f5cf66a198bd270c5"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.5.1%2B2/OpenJDK25U-jre_aarch64_mac_hotspot_25.0.5.1_2.tar.gz"
+            }
+          ]
+        },
+        {
+          "name": "jre_windows-amd64_25.0.5.1-2.zip",
+          "size": 58599439,
+          "hashes": {
+            "sha256": "3260a1b9899f30ac80d737daafc053042c525249f52d066101fbf81d78d73f25"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.5.1%2B2/OpenJDK25U-jre_x64_windows_hotspot_25.0.5.1_2.zip"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 567745625,
+      "installedSize": 567745625,
+      "license": {
+        "redistribution": "permitted",
+        "id": "MIT",
+        "name": "MIT License",
+        "url": "https://github.com/Stirling-Tools/Stirling-PDF/blob/main/LICENSE",
+        "verified": true,
+        "notes": "Stirling-PDF.jar is built with DISABLE_ADDITIONAL_FEATURES and holds none of the proprietary app/proprietary code. Eclipse Temurin is GPL-2.0 with the Classpath Exception."
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": false,
+        "videos": false
+      },
+      "updateStrategy": "snapshot-replace",
+      "providerRef": {
+        "kind": "service",
+        "platforms": "windows-amd64 darwin-arm64 darwin-amd64 linux-amd64 linux-arm64"
+      },
+      "popularity": 5
     }
   ]
 }

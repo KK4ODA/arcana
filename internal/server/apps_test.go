@@ -137,3 +137,35 @@ func TestWebAppOrigin(t *testing.T) {
 		time.Sleep(20 * time.Millisecond)
 	}
 }
+
+// Native apps keep accounts and files: devices on the network may open
+// one only when the owner allows it, or after signing in to Arcana as an
+// administrator.
+func TestServiceAccess(t *testing.T) {
+	e := newEnv(t)
+	installApp(t, e, "filebrowser", "filebrowser_any_1.zip", map[string]string{"filebrowser": "not a program"})
+	installApp(t, e, "filebrowser-other", "x_any_1.zip", nil) // unknown to this build: ignored
+	waitAppsReady(t, e)
+	spec, _ := apps.Lookup("filebrowser")
+	h := e.srv.appOriginHandler(spec)
+	if rec := e.do(h, "GET", "/", lanClient, "arcana.local:18477", nil, nil); rec.Code != http.StatusForbidden {
+		t.Fatalf("network device: %d", rec.Code)
+	}
+	if rec := e.do(h, "GET", "/", local, "127.0.0.1:18477", nil, nil); rec.Code == http.StatusForbidden {
+		t.Fatal("host refused")
+	}
+	// Allowing devices is for administrators.
+	if rec := e.do(e.appH, "POST", "/api/apps/filebrowser/network", lanClient, "arcana.local:18470",
+		map[string]string{"Content-Type": "application/json"}, strings.NewReader(`{"allow":true}`)); rec.Code != http.StatusForbidden {
+		t.Fatalf("network device changed access: %d", rec.Code)
+	}
+	rec := e.do(e.appH, "POST", "/api/apps/filebrowser/network", local, "127.0.0.1:18470",
+		map[string]string{"Content-Type": "application/json", "X-Arcana-Token": e.token()}, strings.NewReader(`{"allow":true}`))
+	if rec.Code != 200 {
+		t.Fatalf("allow: %d %s", rec.Code, rec.Body.String())
+	}
+	if rec := e.do(h, "GET", "/", lanClient, "arcana.local:18477", nil, nil); rec.Code == http.StatusForbidden {
+		t.Fatal("still refused after the owner allowed it")
+	}
+	e.app.Apps.Stop("filebrowser")
+}

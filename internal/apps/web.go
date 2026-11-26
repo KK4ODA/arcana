@@ -19,6 +19,16 @@ const WebCSP = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-ev
 	"frame-src 'self' data: blob:; manifest-src 'self'; frame-ancestors 'none'; base-uri 'self'; " +
 	"form-action 'self'; object-src data:"
 
+// ServiceCSP is added to every response of a native app, beside the app's
+// own policy; a browser enforces both. It lets the app's pages do what
+// they do on their own origin but load and contact nothing elsewhere:
+// Jellyfin's web client fetches Google's Chromecast script and Stirling
+// PDF's pages load an analytics library, both from the internet.
+const ServiceCSP = "default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' blob:; " +
+	"style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; " +
+	"connect-src 'self' data: blob:; worker-src 'self' blob:; media-src 'self' data: blob:; " +
+	"frame-src 'self' data: blob:; manifest-src 'self'; form-action 'self'; object-src data:"
+
 // WebHandler serves a web app's files from its unpacked folder. It only
 // reads, and only files under the app's root.
 func (m *Manager) WebHandler(spec *Spec) http.Handler {
@@ -146,4 +156,14 @@ func NotReady(w http.ResponseWriter, st Status) {
 	_, _ = w.Write([]byte(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">` +
 		`<title>` + html.EscapeString(title) + `</title><style>body{font:16px system-ui,sans-serif;max-width:40em;margin:3em auto;padding:0 1em}</style>` +
 		`<h1>` + html.EscapeString(title) + `</h1><p>` + html.EscapeString(msg) + `</p>`))
+}
+
+// Refused writes the page shown to a device that may not use an app.
+func Refused(w http.ResponseWriter, msg string) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("Cache-Control", "no-store")
+	w.WriteHeader(http.StatusForbidden)
+	_, _ = w.Write([]byte(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">` +
+		`<title>Not available</title><style>body{font:16px system-ui,sans-serif;max-width:40em;margin:3em auto;padding:0 1em}</style>` +
+		`<h1>Not available on this device</h1><p>` + html.EscapeString(msg) + `</p>`))
 }

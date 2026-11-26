@@ -1,6 +1,6 @@
 # ADR-0030: Apps from the catalog, each on an origin of its own
 
-- Status: Accepted (web apps in 0.14.0; native programs follow)
+- Status: Accepted
 - Date: 2026-11-26
 
 ## Context
@@ -44,9 +44,10 @@ scheme, host and port.
   knows, and cannot make Arcana run anything else.
 - **Each app gets an origin of its own: port P+3 onwards.** The application
   origin is P, the content origin P+1 and the classroom P+2 (ADR-0013,
-  ADR-0024). Each app has a fixed slot: CyberChef 8473, IT Tools 8474,
-  Excalidraw 8475, Meshtastic Web 8476 and MeshCore Web 8483 with the
-  default port 8470. A
+  ADR-0024). Each app has a fixed slot; with the default port 8470:
+  CyberChef 8473, IT Tools 8474, Excalidraw 8475, Meshtastic Web 8476,
+  File Browser 8477, Homebox 8478, Vaultwarden 8479, Jellyfin 8480,
+  Calibre-Web 8481, Stirling PDF 8482 and MeshCore Web 8483. A
   fixed port keeps an app's saved data, which belongs to the origin, across
   restarts. A separate origin per app keeps an app's scripts away from
   Arcana's session, from archive pages and from every other app's data.
@@ -63,11 +64,44 @@ scheme, host and port.
   Arcana changes that code as it serves it (exact text replacements
   compiled into the app's spec); the files on the drive stay as published
   and verified.
-- **Native programs are supervised as sidecars**: started on demand, on
-  loopback, reached through a proxy on the app's port, stopped with
-  Arcana. Each keeps its data under `user/apps/<id>/` on the drive, which
-  travels with it and which content operations never touch. A read-only
-  library does not run them. The second change of this ADR adds them.
+- **Native programs are supervised as sidecars.** The first request to an
+  app's port starts its program on a loopback port Arcana chooses, shows
+  a page that reloads until it answers, and then proxies every request,
+  web sockets and streams included. A program that has had no request for
+  two hours is stopped; the next request starts it again. Programs stop
+  with Arcana; on Linux they also die with it (a parent-death signal), and
+  on Windows a job object ends them when Arcana's process ends. macOS has
+  no such mechanism. A program that fails to start is not retried for 30
+  seconds, and the Apps page shows the line of its output that says why.
+- **Data on the drive, programs on the computer.** Each program keeps its
+  data under `user/apps/<id>/`, which travels with the drive and which
+  content operations never touch; `user/files/` is shared (File Browser
+  manages it and Jellyfin can read media from it). Caches (Jellyfin's
+  transcodes) stay on the computer. A read-only library does not run
+  programs. What Arcana set up (passwords it chose, which apps the network
+  may use) is in `state/apps.json`, as Kolibri's is in `state/kolibri.json`.
+- **Who may use a program** (ADR-0017). These apps keep accounts, files and
+  passwords, so Arcana's read-only access for network devices does not
+  extend to them. The computer running Arcana may use every app; a device
+  on the network may use one after its owner signs in to Arcana as an
+  administrator, or when the owner allows devices on the network for that
+  app on the Apps page. Web apps are open to everyone who can reach
+  Arcana: they keep nothing on the computer.
+- **Programs' pages are held to their origin too.** Arcana adds its own
+  Content-Security-Policy to every response of a program, beside the
+  program's own; a browser enforces both. Without it, Jellyfin's web client
+  fetches Google's Chromecast script and Stirling PDF's pages load PostHog
+  analytics, both from the internet. Changes sent from another origin are
+  refused, except to Vaultwarden and Jellyfin, whose APIs authenticate
+  each request with a token in a header and whose own clients (Bitwarden's
+  browser extensions, Jellyfin's apps) call them from elsewhere.
+- **Passwords Arcana sets.** File Browser and Calibre-Web start with a
+  known administrator (File Browser prints a random password to a log no
+  one reads; Calibre-Web's is the published `admin123`). Arcana gives
+  each a random password at the first start (17 characters with a hyphen,
+  about 95 bits) and shows it to its administrators on the Apps page.
+  Homebox, Vaultwarden and Jellyfin ask for the first account themselves;
+  Stirling PDF runs without accounts.
 - **No build for a platform: official artifacts only.** Taking a program
   out of the publisher's official container image is acceptable when its
   license allows it and the layer's digest is pinned. Otherwise the app is
@@ -78,11 +112,12 @@ scheme, host and port.
   URLs (`/v2/<name>/blobs/sha256:<hex>`) by fetching an anonymous, pull-only
   token from the realm the registry names, over HTTPS. It sends no
   credentials of its own.
-- **Secure contexts.** Web Serial and Web Bluetooth (Meshtastic Web) and the
-  Web Crypto API (Vaultwarden's web vault) work only in a secure context.
-  `http://localhost` and `http://127.0.0.1` are secure on the host; devices
-  on the network need Arcana's HTTPS. The Apps page says so when an app
-  needs it and the page is not secure.
+- **Secure contexts.** Web Serial and Web Bluetooth (Meshtastic Web) work
+  only in a secure context. `http://localhost` and `http://127.0.0.1` are
+  secure on the host; devices on the network need Arcana's HTTPS. The Apps
+  page says so when an app needs it and the page is not secure.
+  Vaultwarden's web vault goes further and accepts only HTTPS addresses
+  (below).
 - **An Apps page** lists the installed apps with their state and an *Open*
   button that opens the app's origin in a new tab, and offers the
   administrator the apps not yet installed, with the platforms each runs
@@ -96,6 +131,59 @@ scheme, host and port.
 | Excalidraw `sha-4bfc5bb` | the site layer of `excalidraw/excalidraw:sha-4bfc5bb` on Docker Hub, the image NOMAD pins (built November 2021; Excalidraw publishes no other build of the app); Docker Hub limits anonymous downloads by address, so `mirror.gcr.io`, Google's Docker Hub mirror serving the same digest, is a second source | MIT |
 | Meshtastic Web 2.7.1 | `build.tar` from the GitHub release; every file is gzip-compressed, and Arcana decompresses them as it unpacks | GPL-3.0 |
 | MeshCore Web 1.45.0 | the author's own web build, `MeshCore-v1.45.0+71-dc3a209-web.zip` from files.liamcottle.net, with Roboto and Noto Sans Symbols from Google Fonts | closed source, free to use; fonts SIL OFL 1.1 |
+
+### The native apps
+| App | Upstream artifacts | Platforms | License |
+|---|---|---|---|
+| File Browser 2.63.23 | GitHub release archives | all five | Apache-2.0 |
+| Homebox 0.26.2 | GitHub release archives, checked against its `checksums.txt` | all five | AGPL-3.0 |
+| Vaultwarden 1.36.0 | the server and web-vault layers of the official `vaultwarden/server:1.36.0-alpine` image (ghcr.io); its server is a static Linux program | Linux x86-64 and ARM64 | AGPL-3.0; web vault GPL-3.0 |
+| Jellyfin 10.11.11 | portable builds from repo.jellyfin.org, with jellyfin-ffmpeg 7.1.4-3 (the Windows build carries its own) | all five | GPL-2.0; ffmpeg GPL-3.0 |
+| Calibre-Web 0.6.26 | the wheel from PyPI, 94 files of its dependencies from PyPI for the five platforms, CPython 3.11.17 from python-build-standalone (as ADR-0024), and Project NOMAD's empty Calibre library | all five | GPL-3.0-or-later |
+| Stirling PDF 2.13.1 | `Stirling-PDF.jar` from the GitHub release, with Eclipse Temurin 25 JREs from Adoptium | all five | MIT; Temurin GPL-2.0 with the Classpath Exception |
+
+Per-app setup:
+- **File Browser** serves `user/files/` with its database in its data
+  folder, and gets Arcana's password as a bcrypt hash at its first start.
+- **Homebox** runs in its data folder. It refuses to start without a
+  secret of at least 32 bytes for its API keys; Arcana makes one at the
+  first start and keeps it with the data, since changing it invalidates
+  every key issued. Its release check is off.
+- **Vaultwarden** gets `DATA_FOLDER`, the web vault folder and loopback
+  through its environment, with icon downloads off. Its web vault accepts
+  only HTTPS addresses, even on `localhost` ("Insecure URL not allowed"),
+  so it needs Arcana's HTTPS mode; the Apps page says so, and opens its
+  `https://` address once HTTPS is on. Vaultwarden publishes no build for
+  Windows or macOS, and no Windows or macOS program can be taken from its
+  images, so it is unavailable there.
+- **Jellyfin** keeps configuration, database and logs on the drive and its
+  cache on the computer. Its port lives in `network.xml`; before each start
+  Arcana sets its own entries there (port, loopback, discovery and UPnP
+  off, Arcana trusted as a proxy, published address taken from each
+  request) and keeps the rest.
+- **Calibre-Web** is installed on each computer at its first start by the
+  standalone Python's own pip, offline, from the wheels on the drive
+  (`--no-index --find-links`): pip picks the files for the computer. Two
+  dependencies are published only as source (Flask-Principal and iso-639);
+  pip builds them with the setuptools that ships with the Python runtime.
+  A bootstrap sets Calibre-Web's port and library in its settings database
+  on every start, because Calibre-Web reads both from there and has no
+  option for the library. Arcana seeds the library with Project NOMAD's
+  empty Calibre database (Calibre-Web cannot create one) and sets the
+  administrator password with Calibre-Web's own `-s` option.
+- **Stirling PDF** runs with login, analytics and update checks off. Its
+  repository holds proprietary parts (`app/proprietary`, under the
+  Stirling PDF User License); the release's `Stirling-PDF.jar` is built
+  with `DISABLE_ADDITIONAL_FEATURES` and contains none of them, which was
+  checked by listing the jar (no `proprietary` module), and the build that
+  has them (`Stirling-PDF-with-login.jar`) is not used. It needs Java 25.
+
+**AGPL-3.0 (Homebox, Vaultwarden).** Arcana downloads and runs the
+publishers' unmodified programs. Section 13 obliges whoever *modifies* the
+program to offer its source to network users; Arcana modifies nothing,
+and the catalog entries link the publishers' repositories. Arcana is not a
+derivative work: it starts them as separate programs and speaks HTTP to
+them.
 
 **MeshCore Web is downloaded from its author, not shipped.** The MeshCore
 companion app is closed source; its author's statement is that it is
@@ -123,7 +211,7 @@ offline. The map tab draws OpenStreetMap tiles from the internet and is
 blank offline.
 
 ## Consequences
-- Four more ports for the web apps, ten when all apps are installed. The
+- Up to ten more ports, one per installed app. The
   firewall's rule for Arcana covers them. A port already in use by another
   program leaves that app unopenable, and the Apps page says which port.
 - If Arcana falls back to other ports because 8470 is busy, every app
@@ -137,6 +225,36 @@ blank offline.
 - Meshtastic Web asks for `en-US` translations and a font that its build
   does not contain (404s that nginx would give too); it falls back to its
   English text and a system font.
+- The drive holds every platform's files: 729 MB for Jellyfin, 567 MB for
+  Stirling PDF and 240 MB for Calibre-Web, against 160 to 270 MB for one
+  platform's. Calibre-Web brings its own Python (140 MB), the same files as
+  Kolibri's but a second copy, since resources do not share files.
+- The first start on each computer unpacks the app (Jellyfin: about 10
+  seconds on a local disk) and, for Calibre-Web, installs its packages
+  (about 4 seconds). On Linux x86-64 a first start took from about a
+  second (File Browser, Vaultwarden, Jellyfin) to 3 seconds (Homebox) and
+  10 to 14 seconds (Calibre-Web with its package installation, Stirling
+  PDF).
+- Offline, some features cannot work and say so in the app: Vaultwarden's
+  "Check known data breaches" (on by default when creating an account;
+  left on, sign-up does not finish, so the Apps page says to untick it),
+  metadata and artwork lookups in Jellyfin and Calibre-Web, and Stirling
+  PDF's conversions that need LibreOffice, Tesseract or other programs its
+  container image adds (merging, splitting, rotating, compressing,
+  signing and redacting work with Java alone).
+- On macOS a program left running by a crashed Arcana runs on until it is
+  stopped or the computer restarts; the next Arcana starts another on a
+  new port, and both use the same data.
+- Tested on Linux x86-64 in Chromium through Arcana (2026-11-26): every
+  native app started on demand from its port and was used: File Browser
+  signed in with Arcana's password and took an upload that appeared in
+  `user/files`; Homebox registered a user and signed in; Vaultwarden
+  created an account and signed in over Arcana's HTTPS; Jellyfin finished
+  its setup, signed in and found the bundled ffmpeg 7.1.4; Calibre-Web
+  refused `admin123`, accepted Arcana's password and opened the seeded
+  library; Stirling PDF merged two PDFs into a two-page file. No request
+  left the computer. Windows, macOS and Linux ARM64 builds were not run;
+  their files are pinned and verified like the others.
 - Tested on Linux x86-64 in Chromium through Arcana (2026-11-26): every web
   app opened from the Apps page; MeshCore Web drew its contacts page with
   text in a secure context with Web Serial present; CyberChef converted text to Base64,

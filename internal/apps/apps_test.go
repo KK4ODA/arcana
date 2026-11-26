@@ -47,21 +47,29 @@ func TestSelect(t *testing.T) {
 		{Name: "server_linux-amd64_1.tar.gz"}, {Name: "server_linux-arm64_1.tar.gz"},
 		{Name: "site_any_1.tar.gz"}, {Name: "tool_linux-amd64_1.zip"},
 	}
-	got, err := Select(files, "linux-amd64")
+	got, err := Select(files, "linux-amd64", nil)
 	if err != nil || len(got) != 3 {
 		t.Fatalf("linux-amd64: %v %v", got, err)
 	}
 	// linux-arm64 has a server but no tool.
-	if _, err := Select(files, "linux-arm64"); !errors.Is(err, ErrNotForPlatform) {
+	if _, err := Select(files, "linux-arm64", nil); !errors.Is(err, ErrNotForPlatform) {
 		t.Fatalf("linux-arm64: %v", err)
 	}
-	if _, err := Select(files, "windows-amd64"); !errors.Is(err, ErrNotForPlatform) {
+	if _, err := Select(files, "windows-amd64", nil); !errors.Is(err, ErrNotForPlatform) {
 		t.Fatalf("windows: %v", err)
 	}
-	if p := Platforms(files); len(p) != 1 || p[0] != "linux-amd64" {
+	if p := Platforms(files, nil); len(p) != 1 || p[0] != "linux-amd64" {
 		t.Fatalf("platforms %v", p)
 	}
-	if p := Platforms([]Packed{{Name: "site_any_1.zip"}}); len(p) != 0 {
+	// A part some platforms do without.
+	optional := map[string]Part{"tool": {NotNeededOn: []string{"linux-arm64"}}}
+	if got, err := Select(files, "linux-arm64", optional); err != nil || len(got) != 2 {
+		t.Fatalf("linux-arm64 without the tool: %v %v", got, err)
+	}
+	if p := Platforms(files, optional); len(p) != 2 {
+		t.Fatalf("platforms with an optional part %v", p)
+	}
+	if p := Platforms([]Packed{{Name: "site_any_1.zip"}}, nil); len(p) != 0 {
 		t.Fatalf("platforms of a web app %v", p)
 	}
 }

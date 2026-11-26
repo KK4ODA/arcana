@@ -33,12 +33,12 @@ export async function appsView(main) {
       api.get('/api/apps'),
       canChange ? api.get('/api/catalog?format=app&limit=100').catch(() => null) : null,
     ]);
-    fill(yours, apps.length ? h('div', { class: 'app-list' }, apps.map(appCard))
+    fill(yours, apps.length ? h('div', { class: 'app-list' }, apps.map((a) => appCard(a, act)))
       : h('p', { class: 'empty' }, canChange ? 'No apps on this drive yet. Choose some below; they download in the background.'
         : 'No apps on this drive yet. Apps are added on the computer running Arcana.'));
     if (catalog) renderCatalog(catalog.resources.filter((r) => r.status !== 'installed'));
     clearTimeout(timer);
-    if (apps.some((a) => a.state === 'preparing')) timer = setTimeout(() => load().catch(() => {}), 2000);
+    if (apps.some((a) => a.state === 'preparing' || a.service?.state === 'starting')) timer = setTimeout(() => load().catch(() => {}), 2000);
   }
 
   function renderCatalog(available) {
@@ -69,17 +69,46 @@ export async function appsView(main) {
     } catch (e) { btn.disabled = false; toast(e.message); }
   }
 
+  async function act(a, action, body) {
+    try {
+      await api.post(`/api/apps/${encodeURIComponent(a.id)}/${action}`, body);
+    } catch (e) { toast(e.message); }
+    load().catch((e) => toast(e.message));
+  }
+
   await load();
   return () => clearTimeout(timer);
 }
 
-function appCard(a) {
+const SERVICE_TEXT = { stopped: 'Stopped (starts when opened)', starting: 'Starting', running: 'Running', failed: 'Stopped after an error' };
+
+function appCard(a, act) {
+  const s = getSession();
+  const canChange = s.admin && !s.readOnly;
   const ready = a.state === 'ready' && !a.portProblem;
   const badgeClass = { ready: 'ok', preparing: 'info', unavailable: 'warn', failed: 'err' }[a.state] || '';
   const notes = [];
   if (a.portProblem) notes.push(h('p', { class: 'small err-text' }, a.portProblem));
   else if (a.problem) notes.push(h('p', { class: 'small err-text' }, a.problem));
   if (a.secureContext && !a.secure) notes.push(h('p', { class: 'small warn-text' }, a.secureContext));
+  const needsHttps = a.needsHttps && !a.https;
+  if (needsHttps) notes.push(h('p', { class: 'small warn-text' }, a.needsHttps));
+  const svc = a.service;
+  if (svc && ready) {
+    notes.push(h('p', { class: 'small' }, h('span', { class: 'muted' }, 'Program: '), SERVICE_TEXT[svc.state] || svc.state,
+      svc.state === 'starting' && svc.activity ? ` (${svc.activity})` : ''));
+    if (svc.state === 'failed' && svc.lastError) notes.push(h('p', { class: 'small err-text' }, svc.lastError));
+    if (a.firstUse) notes.push(h('p', { class: 'small' }, a.firstUse));
+    if (a.password) notes.push(h('p', { class: 'small' }, 'Administrator: ', h('code', null, 'admin'), ', password ', h('code', { class: 'secret' }, a.password)));
+    if (!a.allowed) notes.push(h('p', { class: 'small warn-text' }, 'Available on the computer running Arcana, and to administrators who sign in. The owner can allow devices on the network below.'));
+  }
+  const controls = [];
+  if (svc && ready && canChange) {
+    if (svc.state === 'running' || svc.state === 'starting') controls.push(h('button', { onclick: () => act(a, 'stop') }, 'Stop'));
+    else controls.push(h('button', { onclick: () => act(a, 'start') }, 'Start'));
+    const box = h('input', { type: 'checkbox', checked: a.network ? true : null, onchange: (e) => act(a, 'network', { allow: e.target.checked }) });
+    controls.push(h('label', { class: 'small' }, box, ' Devices on the network may open it'));
+  }
   return h('div', { class: 'app-card' },
     h('div', { class: 'app-head' },
       h('b', null, a.title), ' ',
@@ -88,7 +117,8 @@ function appCard(a) {
     h('span', { class: 'small' }, a.summary),
     ...notes,
     h('div', { class: 'row' },
-      ready ? h('a', { class: 'button primary', href: a.url, target: '_blank', rel: 'noopener noreferrer' }, `Open ${a.title}`)
+      ready && a.allowed && !needsHttps ? h('a', { class: 'button primary', href: a.url, target: '_blank', rel: 'noopener noreferrer' }, `Open ${a.title}`)
         : h('span', { class: 'small muted' }, a.state === 'preparing' ? 'Being unpacked on this computer…' : ''),
-      h('span', { class: 'small muted' }, a.url)));
+      h('span', { class: 'small muted' }, a.url)),
+    controls.length ? h('div', { class: 'row' }, controls) : null);
 }
