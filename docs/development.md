@@ -65,6 +65,7 @@ test/acceptance/       offline acceptance test and UI tripwire
 testdata/sample/       CC0 sample ZIM
 tools/sample-zim/      generator for the sample ZIM
 tools/map-regions/     generator for internal/maps/regions.json (measured region sizes)
+tools/ollama-models/   generator for internal/catalog/bundled/ollama-models.json and docs/ollama-models.md
 tools/fetch-map-assets.sh  refreshes vendored MapLibre, map styles, glyphs and sprites
 docs/                  design package, ADRs, specs, guides
 ```
@@ -236,6 +237,26 @@ The first run downloads the planet's leaf directories (about 350 MB) into
 the cache; planning all regions then takes about 15 minutes. Map styles,
 glyphs, sprites and MapLibre are refreshed with `tools/fetch-map-assets.sh`
 (needs node and npm).
+
+## Ollama library models
+
+`internal/catalog/bundled/ollama-models.json` lists the models on Project
+NOMAD's list that llamafile loads (ADR-0029). To regenerate it:
+
+```sh
+go build -o /tmp/ollama-models ./tools/ollama-models
+/tmp/ollama-models -cache /tmp/ollama-cache -llamafile /path/to/llamafile-0.10.6 \
+  -out internal/catalog/bundled/ollama-models.json -report docs/ollama-models.md
+```
+
+It reads NOMAD's list, the registry manifests, the start of each model file
+(until its GGUF header ends, a few megabytes) and the license layers, then
+loads every file in llamafile's server as a sparse copy: the real header
+with zeros in place of the weights. The first run takes about 45 minutes on
+four cores, mostly loading; everything is cached, so later runs only fetch
+and test what changed. Publisher license statements are looked up on
+Hugging Face from the repositories in `tools/ollama-models/licenses.json`.
+Entries keep their version while their file's digest is unchanged.
 
 To try GPS without hardware, choose Settings → Maps and position →
 Simulator, or send NMEA over UDP:

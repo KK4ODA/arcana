@@ -34,6 +34,28 @@ care and herbs that Arcana lacked. Both gaps are closed.
   (Field Technician); Hundred Rabbits (Remote Expedition); four more
   LibreTexts subjects, TED-Ed and TED talks (Education and Learning).
 
+- **The models on Project NOMAD's list, from the Ollama registry**
+  (ADR-0029). NOMAD lists 272 models; 178 of them run in Arcana's engine
+  (llamafile 0.10.6) and can answer questions. They are offered as 345
+  downloads, one per size at Ollama's default quantization. Each is the GGUF file the registry
+  serves, checked against its SHA-256 digest, and its description states
+  the memory it needs. Left out: 19 cloud-only models, 4 with no GGUF
+  file, 13 embedding models, 19 that cannot answer questions (safety
+  classifiers, OCR, text-to-SQL, code models without a chat template) and
+  39 that llamafile cannot load
+  ([docs/ollama-models.md](docs/ollama-models.md) names each and why).
+  Code models carry a warning that they answer general questions poorly.
+  Licenses of 178 entries are confirmed against the publisher's statement
+  on Hugging Face; the rest are marked unconfirmed.
+- **Filters for the model list.** *Discover → Question answering* filters
+  by source (tested with Arcana, Ollama library) and by the memory a model
+  needs, lists Arcana's three tested models first, and shows a model's
+  memory need, parameters and other sizes in its details. Settings →
+  Assistant groups installed models by source.
+- `tools/ollama-models` regenerates the list: it reads NOMAD's list and the
+  registry, and loads every file in llamafile with zeros in place of the
+  weights to check that the engine accepts it.
+
 ### Changed
 - Collections settle for Wikipedia's most-read articles ("Best of
   Wikipedia", 296 MB to 2.7 GB) when no full edition fits. Before, the
