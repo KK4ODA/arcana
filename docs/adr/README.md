@@ -29,3 +29,4 @@
 | [0025](0025-more-classroom-channels.md) | More channels in the classroom | Accepted |
 | [0026](0026-network-position-sources.md) | Positions from the network: a Starlink dish and the browser | Accepted |
 | [0027](0027-entertainment-board-games-and-films.md) | Entertainment: built-in board games and public-domain films | Accepted |
+| [0030](0030-apps-from-the-catalog.md) | Apps from the catalog, each on an origin of its own | Accepted |

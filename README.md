@@ -134,6 +134,11 @@ not yet code-signed (see [Status](#status)).
   downloads and runs Kolibri for Windows, macOS and Linux from the drive
   ([docs/kolibri.md](docs/kolibri.md)). A Kolibri server installed
   separately can be searched instead.
+- **Apps** (optional, [ADR-0030](docs/adr/0030-apps-from-the-catalog.md)):
+  CyberChef, IT Tools, Excalidraw and Meshtastic Web, installed from the
+  catalog and opened from the *Apps* page. Each runs in the browser on an
+  address of its own and contacts nothing outside it; Meshtastic Web
+  configures and messages a radio over USB or Bluetooth.
 - **Integration API** for other programs: search with citations, article
   excerpts and position, with scoped tokens the operator approves
   ([docs/integration-api.md](docs/integration-api.md)). RadioPost and
@@ -250,6 +255,7 @@ See [docs/development.md](docs/development.md).
 | **Implemented (Phase 6)** | Integration API for other programs (RadioPost and Aether HF to come) with scoped, approved tokens and citations ([docs/integration-api.md](docs/integration-api.md)); copying between Arcana libraries on a LAN; signed community catalogs |
 | **Implemented (0.8.0)** | Question answering over installed sources with citations, a relevance floor and an evaluation set; llamafile sidecar or an OpenAI-compatible server ([ADR-0021](docs/adr/0021-question-answering-over-the-library.md)). FDA drug label reference built on the user's computer ([ADR-0022](docs/adr/0022-fda-drug-label-reference.md)). Offline translation of archive pages in the reader's browser ([ADR-0023](docs/adr/0023-offline-translation-in-the-browser.md)). Getting started wizard; scheduled content updates; Meshtastic nodes on the map (listen only); optional Kolibri search ([docs/kolibri.md](docs/kolibri.md)); OpenAPI document for the integration API |
 | **Implemented (0.13.0)** | Entertainment page: seven built-in board games with a computer opponent, 13 hash-pinned public-domain films with an in-app player ([ADR-0027](docs/adr/0027-entertainment-board-games-and-films.md)) |
+| **Implemented (Unreleased)** | Apps from the catalog, each on its own origin: CyberChef, IT Tools, Excalidraw and Meshtastic Web, checked in Chromium on Linux x86-64 ([ADR-0030](docs/adr/0030-apps-from-the-catalog.md)) |
 | **Not yet verified** | Question answering with the real llamafile engine and models (tested with stand-ins), speed on a Raspberry Pi; Meshtastic with a real radio and Kolibri with a real server (tested against fakes); the built-in classroom with Kolibri itself on Windows and macOS (checked with Kolibri 0.19.5 on Linux: setup, imports, guest learning, [ADR-0024](docs/adr/0024-kolibri-built-in.md)) |
 | **Planned** | Ready-made Raspberry Pi SD image; hardware and power-loss tests. Terrain and contours; road networks for the largest countries; scheduled peer sync |
 | **Not yet** | Code-signed programs (releases are not code-signed yet; Windows and macOS warn on first start) |

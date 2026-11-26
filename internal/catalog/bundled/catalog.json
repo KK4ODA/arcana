@@ -1777,6 +1777,269 @@
         "minutes": 105
       },
       "popularity": 7
+    },
+    {
+      "id": "arcana.app.cyberchef",
+      "provider": "arcana",
+      "title": "CyberChef",
+      "description": "GCHQ's CyberChef 10.24.0: hundreds of operations for encoding, decoding, encryption, hashing, compression and data analysis, in the browser. Nothing you paste leaves the device.",
+      "category": "computing",
+      "subcategory": "apps",
+      "tags": [
+        "app",
+        "encoding",
+        "encryption",
+        "hashing",
+        "data"
+      ],
+      "family": "arcana.app.cyberchef",
+      "variant": "standard",
+      "publisher": "GCHQ",
+      "sourceUrl": "https://github.com/gchq/CyberChef",
+      "version": "10.24.0",
+      "published": "2026-04-27",
+      "lastVerified": "2026-11-26T00:00:00Z",
+      "languages": [
+        "mul"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "app",
+      "files": [
+        {
+          "name": "cyberchef_any_10.24.0.zip",
+          "size": 74982747,
+          "hashes": {
+            "sha256": "29947b4d7805b74135c8370f3cba19b609d63e8ece6e33b2cb8ee0dfbbf1393c"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/gchq/CyberChef/releases/download/v10.24.0/CyberChef_v10.24.0.zip"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 74982747,
+      "installedSize": 74982747,
+      "license": {
+        "id": "Apache-2.0",
+        "name": "Apache License 2.0",
+        "url": "https://github.com/gchq/CyberChef/blob/master/LICENSE",
+        "redistribution": "permitted",
+        "verified": true
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": false,
+        "videos": false
+      },
+      "updateStrategy": "snapshot-replace",
+      "providerRef": {
+        "kind": "web",
+        "platforms": "any"
+      },
+      "popularity": 5
+    },
+    {
+      "id": "arcana.app.it-tools",
+      "provider": "arcana",
+      "title": "IT Tools",
+      "description": "IT Tools 2024.10.22: about 80 small tools for developers and administrators, such as converters, generators (UUIDs, passwords, QR codes), network calculators and text utilities, in the browser.",
+      "category": "computing",
+      "subcategory": "apps",
+      "tags": [
+        "app",
+        "developer",
+        "network",
+        "converters"
+      ],
+      "family": "arcana.app.it-tools",
+      "variant": "standard",
+      "publisher": "Corentin Thomasset",
+      "sourceUrl": "https://github.com/CorentinTh/it-tools",
+      "version": "2024.10.22-7ca5933",
+      "published": "2024-10-22",
+      "lastVerified": "2026-11-26T00:00:00Z",
+      "languages": [
+        "mul"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "app",
+      "files": [
+        {
+          "name": "it-tools_any_2024.10.22-7ca5933.zip",
+          "size": 4071978,
+          "hashes": {
+            "sha256": "eef276d675db6053bdc65cd8482a566785561c70eed5035a0e05b0e627b0989d"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/CorentinTh/it-tools/releases/download/v2024.10.22-7ca5933/it-tools-2024.10.22-7ca5933.zip"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 4071978,
+      "installedSize": 4071978,
+      "license": {
+        "id": "GPL-3.0-only",
+        "name": "GNU General Public License v3.0",
+        "url": "https://github.com/CorentinTh/it-tools/blob/main/LICENSE",
+        "redistribution": "permitted",
+        "verified": true
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": false,
+        "videos": false
+      },
+      "updateStrategy": "snapshot-replace",
+      "providerRef": {
+        "kind": "web",
+        "platforms": "any"
+      },
+      "popularity": 5
+    },
+    {
+      "id": "arcana.app.excalidraw",
+      "provider": "arcana",
+      "title": "Excalidraw",
+      "description": "Excalidraw (build 4bfc5bb of November 2021, the one Project NOMAD ships): a whiteboard for hand-drawn sketches, diagrams and plans. Drawings stay in the browser that made them; save them as files to keep or share. Live collaboration needs Excalidraw's servers and does not work offline.",
+      "category": "computing",
+      "subcategory": "apps",
+      "tags": [
+        "app",
+        "drawing",
+        "diagrams",
+        "whiteboard"
+      ],
+      "family": "arcana.app.excalidraw",
+      "variant": "standard",
+      "publisher": "Excalidraw",
+      "sourceUrl": "https://github.com/excalidraw/excalidraw",
+      "version": "sha-4bfc5bb",
+      "published": "2021-11-04",
+      "lastVerified": "2026-11-26T00:00:00Z",
+      "languages": [
+        "mul"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "app",
+      "files": [
+        {
+          "name": "excalidraw_any_sha-4bfc5bb.tar.gz",
+          "size": 2997441,
+          "hashes": {
+            "sha256": "9f511868bea49e4bf8086c51cbb5dd908a8ecea8fd98cb65c41881ff500a13d9"
+          },
+          "mirrors": [
+            {
+              "url": "https://registry-1.docker.io/v2/excalidraw/excalidraw/blobs/sha256:9f511868bea49e4bf8086c51cbb5dd908a8ecea8fd98cb65c41881ff500a13d9"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 2997441,
+      "installedSize": 2997441,
+      "license": {
+        "id": "MIT",
+        "name": "MIT License",
+        "url": "https://github.com/excalidraw/excalidraw/blob/master/LICENSE",
+        "redistribution": "permitted",
+        "verified": true,
+        "notes": "The site is one layer of Excalidraw's official image excalidraw/excalidraw:sha-4bfc5bb on Docker Hub (Excalidraw publishes no other build of the app)."
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": false,
+        "videos": false
+      },
+      "updateStrategy": "snapshot-replace",
+      "providerRef": {
+        "kind": "web",
+        "platforms": "any"
+      },
+      "popularity": 5
+    },
+    {
+      "id": "arcana.app.meshtastic-web",
+      "provider": "arcana",
+      "title": "Meshtastic Web",
+      "description": "Meshtastic's web client 2.7.1: connect to a Meshtastic radio over USB or Bluetooth from the browser to send messages, see nodes and change the radio's settings. Needs Chrome or Edge, opened on the computer running Arcana or over Arcana's HTTPS address.",
+      "category": "radio-communications",
+      "subcategory": "apps",
+      "tags": [
+        "app",
+        "meshtastic",
+        "lora",
+        "mesh",
+        "radio"
+      ],
+      "family": "arcana.app.meshtastic-web",
+      "variant": "standard",
+      "publisher": "Meshtastic",
+      "sourceUrl": "https://github.com/meshtastic/web",
+      "version": "2.7.1",
+      "published": "2026-06-15",
+      "lastVerified": "2026-11-26T00:00:00Z",
+      "languages": [
+        "mul"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "app",
+      "files": [
+        {
+          "name": "meshtastic-web_any_2.7.1.tar",
+          "size": 1832960,
+          "hashes": {
+            "sha256": "dfb36b72f092d6e8cd0f202c0c4c01c4742dd3feb49758c574727f251299dbfe"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/meshtastic/web/releases/download/v2.7.1/build.tar"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 1832960,
+      "installedSize": 1832960,
+      "license": {
+        "id": "GPL-3.0-only",
+        "name": "GNU General Public License v3.0",
+        "url": "https://github.com/meshtastic/web/blob/main/LICENSE",
+        "redistribution": "permitted",
+        "verified": true
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": false,
+        "videos": false
+      },
+      "updateStrategy": "snapshot-replace",
+      "providerRef": {
+        "kind": "web",
+        "platforms": "any"
+      },
+      "popularity": 5
     }
   ]
 }

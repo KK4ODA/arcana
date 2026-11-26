@@ -600,7 +600,12 @@ func (t *segTransfer) fetchSegment(ctx context.Context, seg *segment, att *segAt
 // HTTP/1.1 connections: over HTTP/2, parallel requests to one mirror would
 // share a single connection and its per-connection limit.
 func segmentClient(c *http.Client) *http.Client {
-	tr, ok := c.Transport.(*http.Transport)
+	var reg *registryAuth
+	base := c.Transport
+	if ra, ok := base.(*registryAuth); ok {
+		reg, base = ra, ra.base
+	}
+	tr, ok := base.(*http.Transport)
 	if !ok {
 		return c
 	}
@@ -618,5 +623,8 @@ func segmentClient(c *http.Client) *http.Client {
 	tr.MaxIdleConnsPerHost = 8
 	cc := *c
 	cc.Transport = tr
+	if reg != nil {
+		cc.Transport = &registryAuth{base: tr}
+	}
 	return &cc
 }

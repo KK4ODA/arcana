@@ -669,3 +669,11 @@ dialog.promo { width: min(460px, calc(100vw - 24px)); }
 .stone.last::after { content: ""; position: absolute; inset: 32%; border-radius: 50%; border: 2px solid #c98a1e; }
 .terr { width: 34%; height: 34%; pointer-events: none; }
 .terr.b { background: #111; } .terr.w { background: #fff; border: 1px solid #555; }
+
+/* Apps (ADR-0030) */
+.app-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px; }
+.app-card { display: flex; flex-direction: column; gap: 6px; padding: 10px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-2); min-width: 0; }
+.app-card p { margin: 0; }
+.app-card .row .small.muted { overflow-wrap: anywhere; }
+.err-text { color: var(--err); }
+.warn-text { color: var(--warn); }

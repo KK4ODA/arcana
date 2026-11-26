@@ -59,6 +59,26 @@
   to the host unless sharing is enabled. GPS sources only read; Arcana
   never sends position data.
 
+## Apps (ADR-0030)
+
+- **Each app on its own origin.** Apps from the catalog are served on
+  port P+3 onwards, one fixed port each, so an app's scripts cannot read
+  Arcana's session token, archive pages or another app's saved data.
+  Arcana's session cookie is removed from requests to app ports; the Host
+  check applies to them as to the other ports.
+- **Web apps reach nothing outside their origin.** Their CSP allows the
+  scripts they ship (inline and evaluated, as their authors wrote them)
+  but limits every load and connection to the app's own origin, and the
+  origin is read-only.
+- **The catalog chooses files, not behaviour.** What an app runs and how
+  is compiled into Arcana (`internal/apps`); a catalog entry for an app
+  Arcana does not know is ignored. Files are verified against their
+  SHA-256 before they are unpacked, and unpacking refuses paths and links
+  that leave the app's folder.
+- **Registry tokens.** For container image layers the downloader fetches
+  an anonymous, pull-only token over HTTPS from the realm the registry
+  names, and only for blob URLs addressed by digest.
+
 ## Remote administration (implemented in 0.4.0)
 
 - **Off until the host sets a password.** Only the host can set, change or

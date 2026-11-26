@@ -3,6 +3,28 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
+## Unreleased
+
+### Added
+- **Apps** (ADR-0030). A new *Apps* page installs web applications from
+  the catalog and opens each in a tab of its own: CyberChef 10.24.0 (GCHQ's
+  data toolkit), IT Tools 2024.10.22, Excalidraw (the whiteboard, in the
+  build Project NOMAD ships) and Meshtastic Web 2.7.1, which configures a
+  Meshtastic radio and sends messages through it over USB or Bluetooth.
+  Arcana serves each app itself on a port of its own (8473 to 8476 by
+  default), so an app cannot read Arcana's session or another app's saved
+  drawings and settings, and no app can contact anything outside its own
+  address. Meshtastic Web needs Chrome or Edge, on the computer running
+  Arcana or over its HTTPS address.
+- **Container image layers as downloads.** The downloader fetches the
+  anonymous token container registries ask for, so a layer of an official
+  image, pinned by its digest, downloads like any other file. Excalidraw's
+  site comes this way.
+
+### Not included
+- **MeshCore Web**, which Project NOMAD offers: the MeshCore app is closed
+  source and published without a license to redistribute it.
+
 ## 0.13.0 — 2026-11-26
 
 Arcana now has an Entertainment page. Seven board games are built in and
