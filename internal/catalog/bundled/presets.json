@@ -12,6 +12,15 @@
             "nopic",
             "mini"
           ],
+          "fallbacks": [
+            {
+              "family": "kiwix.wikipedia_{lang}_top",
+              "variants": [
+                "nopic",
+                "mini"
+              ]
+            }
+          ],
           "priority": 1,
           "reason": "General encyclopedia covering almost every topic."
         },
@@ -121,6 +130,15 @@
             "nopic",
             "mini"
           ],
+          "fallbacks": [
+            {
+              "family": "kiwix.wikipedia_{lang}_top",
+              "variants": [
+                "nopic",
+                "mini"
+              ]
+            }
+          ],
           "priority": 3,
           "reason": "General encyclopedia."
         },
@@ -138,6 +156,36 @@
           "family": "arcana.us-army-atp-3-50-21",
           "priority": 2,
           "reason": "Survival skills: water, shelter, fire, signaling."
+        },
+        {
+          "family": "kiwix.ready.gov_en_all",
+          "priority": 2,
+          "reason": "Official US guidance on preparing for disasters and emergencies (FEMA)."
+        },
+        {
+          "family": "kiwix.canadian-prepper_en_winterprepping",
+          "priority": 3,
+          "reason": "Videos on staying warm and safe through winter power and supply outages."
+        },
+        {
+          "family": "kiwix.canadian-prepper_en_bugoutroll",
+          "priority": 3,
+          "reason": "Videos on packing a compact evacuation kit."
+        },
+        {
+          "family": "kiwix.canadian-prepper_en_bugoutconcepts",
+          "priority": 3,
+          "reason": "Videos on planning an evacuation."
+        },
+        {
+          "family": "kiwix.urban-prepper_en_all",
+          "priority": 3,
+          "reason": "Videos on preparedness in cities and apartments."
+        },
+        {
+          "family": "kiwix.gutenberg_en_lcc-u",
+          "priority": 3,
+          "reason": "Public-domain books on military science, including field craft and survival."
         }
       ]
     },
@@ -171,6 +219,15 @@
           "variants": [
             "nopic",
             "mini"
+          ],
+          "fallbacks": [
+            {
+              "family": "kiwix.wikipedia_{lang}_top",
+              "variants": [
+                "nopic",
+                "mini"
+              ]
+            }
           ],
           "priority": 2,
           "reason": "Background on radio, propagation and geography."
@@ -230,6 +287,21 @@
           "family": "kiwix.libretexts.org_en_med",
           "priority": 3,
           "reason": "Medicine textbooks."
+        },
+        {
+          "family": "kiwix.nhs.uk_en_medicines",
+          "priority": 2,
+          "reason": "What common medicines are for, how to take them and their side effects (NHS, UK)."
+        },
+        {
+          "family": "kiwix.medlineplus.gov_en_all",
+          "priority": 2,
+          "reason": "Health topics, medical tests and an encyclopedia from the US National Library of Medicine. Parts are copyrighted: for personal use, not for sharing."
+        },
+        {
+          "family": "kiwix.librepathology_en_all",
+          "priority": 3,
+          "reason": "Pathology reference for clinicians."
         }
       ]
     },
@@ -271,6 +343,16 @@
           "family": "kiwix.libretexts.org_en_eng",
           "priority": 3,
           "reason": "Engineering textbooks."
+        },
+        {
+          "family": "kiwix.cd3wdproject.org_en_all",
+          "priority": 2,
+          "reason": "Appropriate technology: water, farming, building and energy for places without infrastructure."
+        },
+        {
+          "family": "kiwix.woodworking.stackexchange.com_en_all",
+          "priority": 2,
+          "reason": "Woodworking questions and answers."
         }
       ]
     },
@@ -319,6 +401,15 @@
             "mini",
             "nopic"
           ],
+          "fallbacks": [
+            {
+              "family": "kiwix.wikipedia_{lang}_top",
+              "variants": [
+                "nopic",
+                "mini"
+              ]
+            }
+          ],
           "priority": 3,
           "reason": "General encyclopedia."
         },
@@ -336,6 +427,11 @@
           "family": "arcana.us-army-fm-4-25-11",
           "priority": 3,
           "reason": "First aid in the field."
+        },
+        {
+          "family": "kiwix.100r.co_en_all",
+          "priority": 3,
+          "reason": "Living on a sailboat with little power: resilience, repairs and low-tech computing."
         }
       ]
     },
@@ -389,8 +485,156 @@
             "nopic",
             "mini"
           ],
+          "fallbacks": [
+            {
+              "family": "kiwix.wikipedia_{lang}_top",
+              "variants": [
+                "nopic",
+                "mini"
+              ]
+            }
+          ],
           "priority": 1,
           "reason": "General encyclopedia."
+        },
+        {
+          "family": "kiwix.libretexts.org_en_bio",
+          "priority": 3,
+          "reason": "Biology textbooks."
+        },
+        {
+          "family": "kiwix.libretexts.org_en_geo",
+          "priority": 3,
+          "reason": "Geosciences textbooks."
+        },
+        {
+          "family": "kiwix.libretexts.org_en_human",
+          "priority": 3,
+          "reason": "Humanities textbooks."
+        },
+        {
+          "family": "kiwix.libretexts.org_en_biz",
+          "priority": 3,
+          "reason": "Business textbooks."
+        },
+        {
+          "family": "kiwix.ted_mul_ted-ed",
+          "priority": 3,
+          "reason": "Short animated TED-Ed lessons. Personal viewing only under TED’s terms."
+        },
+        {
+          "family": "kiwix.ted_mul_ted-conference",
+          "priority": 3,
+          "reason": "TED conference talks (18 GB). Personal viewing only under TED’s terms."
+        }
+      ]
+    },
+    {
+      "id": "food-homestead",
+      "title": "Food, Gardening and Homesteading",
+      "description": "Cooking, preserving food, gardening and self-reliant living: recipes, questions and answers, homesteading videos and public-domain books on agriculture.",
+      "items": [
+        {
+          "family": "kiwix.zimgit-food-preparation_en",
+          "priority": 1,
+          "reason": "Food preparation and preservation."
+        },
+        {
+          "family": "kiwix.foss.cooking_en_all",
+          "priority": 1,
+          "reason": "Simple recipes from a community cookbook."
+        },
+        {
+          "family": "kiwix.based.cooking_en_all",
+          "priority": 1,
+          "reason": "Short recipes without advertising."
+        },
+        {
+          "family": "kiwix.gardening.stackexchange.com_en_all",
+          "priority": 2,
+          "reason": "Gardening and landscaping questions and answers."
+        },
+        {
+          "family": "kiwix.cooking.stackexchange.com_en_all",
+          "priority": 2,
+          "reason": "Cooking questions and answers."
+        },
+        {
+          "family": "kiwix.canadian-prepper_en_preppingfood",
+          "priority": 3,
+          "reason": "Videos on storing food for emergencies."
+        },
+        {
+          "family": "kiwix.lrnselfreliance_en_all",
+          "priority": 3,
+          "reason": "Homesteading videos: gardens, animals, food preservation and off-grid skills."
+        },
+        {
+          "family": "kiwix.gutenberg_en_lcc-s",
+          "priority": 3,
+          "reason": "Public-domain books on agriculture, animal husbandry, forestry and fishing."
+        }
+      ]
+    },
+    {
+      "id": "computing",
+      "title": "Computing and Programming",
+      "description": "Programming lessons and reference documentation that work offline: freeCodeCamp, documentation for common languages and tools, and robotics questions and answers.",
+      "items": [
+        {
+          "family": "kiwix.freecodecamp_en_all",
+          "priority": 1,
+          "reason": "Programming lessons and exercises."
+        },
+        {
+          "family": "kiwix.devdocs_en_python",
+          "priority": 1,
+          "reason": "Python documentation."
+        },
+        {
+          "family": "kiwix.devdocs_en_javascript",
+          "priority": 1,
+          "reason": "JavaScript documentation."
+        },
+        {
+          "family": "kiwix.devdocs_en_html",
+          "priority": 1,
+          "reason": "HTML documentation."
+        },
+        {
+          "family": "kiwix.devdocs_en_css",
+          "priority": 1,
+          "reason": "CSS documentation."
+        },
+        {
+          "family": "kiwix.devdocs_en_node",
+          "priority": 2,
+          "reason": "Node.js documentation."
+        },
+        {
+          "family": "kiwix.devdocs_en_react",
+          "priority": 2,
+          "reason": "React documentation."
+        },
+        {
+          "family": "kiwix.devdocs_en_git",
+          "priority": 2,
+          "reason": "Git documentation."
+        },
+        {
+          "family": "kiwix.robotics.stackexchange.com_en_all",
+          "priority": 3,
+          "reason": "Robotics questions and answers."
+        },
+        {
+          "family": "kiwix.devdocs_en_docker",
+          "priority": 3,
+          "reason": "Docker documentation."
+        },
+        {
+          "family": "kiwix.devdocs_en_bash",
+          "priority": 3,
+          "reason": "Bash shell documentation."
         }
       ]
     },
@@ -405,6 +649,15 @@
             "maxi",
             "nopic",
             "mini"
+          ],
+          "fallbacks": [
+            {
+              "family": "kiwix.wikipedia_{lang}_top",
+              "variants": [
+                "nopic",
+                "mini"
+              ]
+            }
           ],
           "priority": 1,
           "reason": "General encyclopedia."
@@ -466,6 +719,15 @@
           "variants": [
             "maxi",
             "nopic"
+          ],
+          "fallbacks": [
+            {
+              "family": "kiwix.wikipedia_{lang}_top",
+              "variants": [
+                "nopic",
+                "mini"
+              ]
+            }
           ],
           "priority": 1,
           "reason": "General encyclopedia with images."

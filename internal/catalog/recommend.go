@@ -23,9 +23,31 @@ type Preset struct {
 type PresetItem struct {
 	Family   string   `json:"family"`
 	Variants []string `json:"variants,omitempty"`
+	// Fallbacks are smaller families offered after every edition of Family,
+	// in order, for when none of those fits: Wikipedia's most-read articles
+	// after the whole encyclopedia. "{lang}" is replaced with the language
+	// Family resolved to; a fallback missing in that language is left out.
+	Fallbacks []PresetFallback `json:"fallbacks,omitempty"`
 	// Priority 1 is essential, 2 recommended, 3 optional.
 	Priority int    `json:"priority"`
 	Reason   string `json:"reason"`
+}
+
+// PresetFallback is a smaller family a preset item may settle for, with the
+// curator's preferred variants, most detailed first.
+type PresetFallback struct {
+	Family   string   `json:"family"`
+	Variants []string `json:"variants,omitempty"`
+}
+
+// FamilyIDs lists the family IDs a preset item may draw from in a language:
+// Family in that language and in English, then each fallback in both.
+func (pi PresetItem) FamilyIDs(lang string) []string {
+	ids := []string{strings.ReplaceAll(pi.Family, "{lang}", lang), strings.ReplaceAll(pi.Family, "{lang}", "en")}
+	for _, fb := range pi.Fallbacks {
+		ids = append(ids, strings.ReplaceAll(fb.Family, "{lang}", lang), strings.ReplaceAll(fb.Family, "{lang}", "en"))
+	}
+	return ids
 }
 
 // RecommendInput is everything the recommender needs. It is a pure function
@@ -95,6 +117,19 @@ func Recommend(in RecommendInput) Recommendation {
 		family, note := resolveFamily(pi.Family, in.Language, in.Families)
 		it.Family = family
 		cands := orderedCandidates(in.Families[family], pi.Variants)
+		families := []string{family}
+		lang := strings.ToLower(in.Language)
+		if lang == "" || note != "" {
+			lang = "en"
+		}
+		for _, fb := range pi.Fallbacks {
+			f := strings.ReplaceAll(fb.Family, "{lang}", lang)
+			if f == family || len(in.Families[f]) == 0 {
+				continue
+			}
+			families = append(families, f)
+			cands = append(cands, orderedCandidates(in.Families[f], fb.Variants)...)
+		}
 		it.candidates = cands
 		if len(cands) == 0 {
 			it.Status = "unavailable"
@@ -105,13 +140,19 @@ func Recommend(in RecommendInput) Recommendation {
 		}
 		it.Title = cands[0].Title
 		for _, c := range cands {
-			it.Alternatives = append(it.Alternatives, RecAlt{ResourceID: c.ID, Variant: c.Variant, Label: c.VariantLabel, Size: c.DownloadSize})
+			label := c.VariantLabel
+			if c.Family != family {
+				label = c.Title + ": " + label
+			}
+			it.Alternatives = append(it.Alternatives, RecAlt{ResourceID: c.ID, Variant: c.Variant, Label: label, Size: c.DownloadSize})
 		}
-		for _, c := range in.Families[family] {
-			if in.Present[c.ID] {
-				it.Status = "present"
-				it.ResourceID, it.Variant = c.ID, c.Variant
-				it.Decision = "Already in the library or download queue."
+		for _, f := range families {
+			for _, c := range in.Families[f] {
+				if in.Present[c.ID] {
+					it.Status = "present"
+					it.ResourceID, it.Variant = c.ID, c.Variant
+					it.Decision = "Already in the library or download queue."
+				}
 			}
 		}
 		if note != "" {
@@ -152,13 +193,18 @@ func Recommend(in RecommendInput) Recommendation {
 					chosen = c
 					break
 				}
-				tooBig = append(tooBig, fmt.Sprintf("%s (%s)", variantName(*c), storage.FormatBytes(c.DownloadSize)))
+				tooBig = append(tooBig, fmt.Sprintf("%s (%s)", editionName(it.Family, *c), storage.FormatBytes(c.DownloadSize)))
 			}
 			if chosen != nil && chosen.ID != it.ResourceID {
 				remaining -= chosen.DownloadSize - it.Size
 				it.ResourceID, it.Variant, it.Size = chosen.ID, chosen.Variant, chosen.DownloadSize
 			}
-			msg := fmt.Sprintf("Chose %s (%s).", variantName(findByID(it.candidates, it.ResourceID)), storage.FormatBytes(it.Size))
+			chosenRes := findByID(it.candidates, it.ResourceID)
+			if chosenRes.Family != it.Family {
+				// Settled for a fallback: name what will actually be downloaded.
+				it.Title = chosenRes.Title
+			}
+			msg := fmt.Sprintf("Chose %s (%s).", editionName(it.Family, chosenRes), storage.FormatBytes(it.Size))
 			if len(tooBig) > 0 {
 				msg += " Larger editions do not fit the remaining space: " + strings.Join(tooBig, ", ") + "."
 			} else if len(it.candidates) > 1 {
@@ -234,6 +280,15 @@ func findByID(rs []Resource, id string) Resource {
 		}
 	}
 	return Resource{}
+}
+
+// editionName is variantName, prefixed with the resource's title when it
+// comes from a fallback family rather than the item's own.
+func editionName(family string, r Resource) string {
+	if r.Family != family {
+		return r.Title + ", " + variantName(r)
+	}
+	return variantName(r)
 }
 
 func variantName(r Resource) string {

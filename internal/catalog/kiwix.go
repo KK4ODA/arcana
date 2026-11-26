@@ -404,6 +404,15 @@ func KiwixLicense(name, category string) License {
 		return License{ID: "LicenseRef-PD-US", Name: "Public domain in the United States",
 			URL: "https://www.gutenberg.org/policy/license.html", Redistribution: RedistPermitted, Verified: true,
 			Notes: "Copyright status varies by country. The Project Gutenberg trademark license applies to redistributed copies that keep the Project Gutenberg name."}
+	case strings.HasPrefix(n, "medlineplus.gov_"):
+		return License{ID: "LicenseRef-MedlinePlus", Name: "Mostly US federal work, with parts licensed to NLM for MedlinePlus only",
+			URL: "https://medlineplus.gov/copyright.html", Redistribution: RedistRestricted, Verified: true,
+			Notes: "NLM's own pages are public domain. The A.D.A.M. Medical Encyclopedia, ASHP drug monographs, Natural Medicines herb monographs and many images are copyrighted; reusing them beyond fair use needs the copyright holders' permission. Do not redistribute this archive."}
+	case strings.HasPrefix(n, "ready.gov_"):
+		// Ready.gov is FEMA's; FEMA's web policies cover it.
+		return License{ID: "LicenseRef-PD-USGov", Name: "US federal government work (public domain in the US)",
+			URL: "https://www.fema.gov/about/website-information", Redistribution: RedistPermitted, Verified: true,
+			Notes: "FEMA: most material is free of copyright and may be copied and distributed without permission. Some photos and graphics are licensed or restricted and are credited where they appear."}
 	case strings.HasPrefix(n, "theworldfactbook"), strings.HasPrefix(n, "wwwnc.cdc.gov"):
 		return License{ID: "LicenseRef-PD-USGov", Name: "US federal government work (public domain in the US)",
 			Redistribution: RedistPermitted, Verified: true,
