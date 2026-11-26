@@ -5,18 +5,19 @@
 
 ## Context
 Project NOMAD (v1.35.2, `admin/database/seeders/service_seeder.ts`) installs
-eleven applications as Docker containers besides its library: CyberChef, IT
-Tools, Excalidraw, Meshtastic Web, MeshCore Web, File Browser, Homebox,
-Vaultwarden, Jellyfin, Calibre-Web and Stirling PDF, and Flatnotes beside
-them. The owner asked for all of them in Arcana (2026-11-26), MeshCore Web
-included once it turned out to be closed source.
+twelve applications as Docker containers besides its library: CyberChef,
+IT Tools, Excalidraw, Meshtastic Web, MeshCore Web, File Browser, Homebox,
+Vaultwarden, Jellyfin, Calibre-Web, Stirling PDF and Flatnotes. The owner
+asked for all of them in Arcana (2026-11-26), MeshCore Web included once
+it turned out to be closed source.
 
 Arcana is one portable Go program without Docker (ADR-0002) that runs from
 a drive on Windows, macOS and Linux, on x86-64 and ARM64. It already runs
 three programs beside itself: kiwix-serve (ADR-0003), llamafile (ADR-0021)
 and Kolibri with a standalone Python (ADR-0024). The applications are of
 two kinds. Five are prebuilt web sites with no server of their own (NOMAD
-serves each with nginx). Six are programs with a server and a database.
+serves each with nginx). Seven are programs with a server and their own
+data.
 
 Each of them is a web application with its own scripts, and most keep data
 in the browser (Excalidraw's drawings, Meshtastic's saved radios) or in
@@ -47,7 +48,8 @@ scheme, host and port.
   ADR-0024). Each app has a fixed slot; with the default port 8470:
   CyberChef 8473, IT Tools 8474, Excalidraw 8475, Meshtastic Web 8476,
   File Browser 8477, Homebox 8478, Vaultwarden 8479, Jellyfin 8480,
-  Calibre-Web 8481, Stirling PDF 8482 and MeshCore Web 8483. A
+  Calibre-Web 8481, Stirling PDF 8482, MeshCore Web 8483 and Flatnotes
+  8484. A
   fixed port keeps an app's saved data, which belongs to the origin, across
   restarts. A separate origin per app keeps an app's scripts away from
   Arcana's session, from archive pages and from every other app's data.
@@ -95,9 +97,11 @@ scheme, host and port.
   refused, except to Vaultwarden and Jellyfin, whose APIs authenticate
   each request with a token in a header and whose own clients (Bitwarden's
   browser extensions, Jellyfin's apps) call them from elsewhere.
-- **Passwords Arcana sets.** File Browser and Calibre-Web start with a
+- **Passwords Arcana sets.** File Browser, Calibre-Web and Flatnotes
+  (whose own default is no sign-in at all) start with a
   known administrator (File Browser prints a random password to a log no
-  one reads; Calibre-Web's is the published `admin123`). Arcana gives
+  one reads; Calibre-Web's is the published `admin123`; Flatnotes asks
+  for a password in its configuration). Arcana gives
   each a random password at the first start (17 characters with a hyphen,
   about 95 bits) and shows it to its administrators on the Apps page.
   Homebox, Vaultwarden and Jellyfin ask for the first account themselves;
@@ -141,6 +145,7 @@ scheme, host and port.
 | Jellyfin 10.11.11 | portable builds from repo.jellyfin.org, with jellyfin-ffmpeg 7.1.4-3 (the Windows build carries its own) | all five | GPL-2.0; ffmpeg GPL-3.0 |
 | Calibre-Web 0.6.26 | the wheel from PyPI, 94 files of its dependencies from PyPI for the five platforms, CPython 3.11.17 from python-build-standalone (as ADR-0024), and Project NOMAD's empty Calibre library | all five | GPL-3.0-or-later |
 | Stirling PDF 2.13.1 | `Stirling-PDF.jar` from the GitHub release, with Eclipse Temurin 25 JREs from Adoptium | all five | MIT; Temurin GPL-2.0 with the Classpath Exception |
+| Flatnotes 5.5.4 | the server and web client layers of the official `dullage/flatnotes:v5.5.4` image (the same for amd64 and arm64; Flatnotes publishes no other build), its Python dependencies at its `Pipfile.lock` versions from PyPI (64 files), and the CPython runtime Calibre-Web uses | all five | MIT |
 
 Per-app setup:
 - **File Browser** serves `user/files/` with its database in its data
@@ -171,6 +176,15 @@ Per-app setup:
   option for the library. Arcana seeds the library with Project NOMAD's
   empty Calibre database (Calibre-Web cannot create one) and sets the
   administrator password with Calibre-Web's own `-s` option.
+- **Flatnotes** is installed like Calibre-Web, by pip from the drive at
+  its first start, and runs under uvicorn in its unpacked folder (it
+  writes its base address into its own `index.html` at every start). Its
+  notes are Markdown files in its data folder. Arcana turns on its
+  password sign-in with one user, admin, with Arcana's password and a
+  session secret kept with the data; NOMAD runs it without sign-in.
+  Docker Hub limits anonymous downloads by address, so its layers also
+  list Google's Docker Hub mirror, `mirror.gcr.io`, which serves the same
+  bytes under the same digests.
 - **Stirling PDF** runs with login, analytics and update checks off. Its
   repository holds proprietary parts (`app/proprietary`, under the
   Stirling PDF User License); the release's `Stirling-PDF.jar` is built
@@ -252,7 +266,9 @@ blank offline.
   created an account and signed in over Arcana's HTTPS; Jellyfin finished
   its setup, signed in and found the bundled ffmpeg 7.1.4; Calibre-Web
   refused `admin123`, accepted Arcana's password and opened the seeded
-  library; Stirling PDF merged two PDFs into a two-page file. No request
+  library; Stirling PDF merged two PDFs into a two-page file; Flatnotes
+  signed in with Arcana's password, saved a note as a Markdown file on the
+  drive and found it by search. No request
   left the computer. Windows, macOS and Linux ARM64 builds were not run;
   their files are pinned and verified like the others.
 - Tested on Linux x86-64 in Chromium through Arcana (2026-11-26): every web

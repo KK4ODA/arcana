@@ -20,12 +20,13 @@ the library format version is tracked separately (docs/design/09-storage-and-dat
   0.26.2 (an inventory of what you own and store), Vaultwarden 1.36.0 (a
   Bitwarden-compatible password manager; Linux only, and only over
   Arcana's HTTPS), Jellyfin 10.11.11 (a media server), Calibre-Web 0.6.26
-  (an e-book library) and Stirling PDF 2.13.1. Arcana keeps each program's
+  (an e-book library), Stirling PDF 2.13.1 and Flatnotes 5.5.4 (notes in
+  Markdown, each a file on the drive). Arcana keeps each program's
   files for Windows, macOS and Linux on the drive, starts it when it is
   first opened, on this computer only, and stops it after two idle hours
   and when Arcana stops. Their data stays on the drive under `user/apps/`;
   File Browser manages `user/files/`. Arcana sets random administrator
-  passwords for File Browser and Calibre-Web and shows them on the Apps
+  passwords for File Browser, Calibre-Web and Flatnotes and shows them on the Apps
   page. Devices on the network may use the programs after signing in to
   Arcana as administrators, or when the owner allows it for an app.
 - **Container image layers as downloads.** The downloader fetches the

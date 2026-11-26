@@ -83,9 +83,9 @@
   own origin and refuses changes sent from other origins (except to the
   token-authenticated APIs of Vaultwarden and Jellyfin). Devices on the
   network may use them only after signing in to Arcana as administrators,
-  or when the owner allows it per app. Arcana replaces the published
-  default administrator passwords of File Browser and Calibre-Web with
-  random ones.
+  or when the owner allows it per app. Arcana gives File Browser,
+  Calibre-Web and Flatnotes random administrator passwords in place of
+  their defaults (a published password, or no sign-in).
 - **Registry tokens.** For container image layers the downloader fetches
   an anonymous, pull-only token over HTTPS from the realm the registry
   names, and only for blob URLs addressed by digest.

@@ -4023,6 +4023,932 @@
         "platforms": "windows-amd64 darwin-arm64 darwin-amd64 linux-amd64 linux-arm64"
       },
       "popularity": 5
+    },
+    {
+      "id": "arcana.app.flatnotes",
+      "provider": "arcana",
+      "title": "Flatnotes",
+      "description": "Flatnotes 5.5.4, with Python 3.11: notes in Markdown with full-text search, each note a plain file on the drive (Arcana/user/apps/flatnotes). Arcana sets its password and shows it on the Apps page.",
+      "category": "personal-community",
+      "subcategory": "apps",
+      "tags": [
+        "app",
+        "notes",
+        "markdown"
+      ],
+      "family": "arcana.app.flatnotes",
+      "variant": "standard",
+      "publisher": "Adam Dullage",
+      "sourceUrl": "https://github.com/dullage/flatnotes",
+      "version": "5.5.4",
+      "published": "2025-10-20",
+      "lastVerified": "2026-11-26T00:00:00Z",
+      "languages": [
+        "mul"
+      ],
+      "coverage": {
+        "scope": "none"
+      },
+      "format": "app",
+      "files": [
+        {
+          "name": "python_windows-amd64_3.11.17.tar.gz",
+          "size": 25222085,
+          "hashes": {
+            "sha256": "861f9a03b0c4ca537da1754ed0556e0628dd2114a1be36e8aae6b1e2bb1304a0"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261003/cpython-3.11.17%2B20261003-x86_64-pc-windows-msvc-install_only_stripped.tar.gz"
+            },
+            {
+              "url": "https://releases.astral.sh/github/python-build-standalone/releases/download/20261003/cpython-3.11.17%2B20261003-x86_64-pc-windows-msvc-install_only_stripped.tar.gz"
+            }
+          ]
+        },
+        {
+          "name": "python_darwin-arm64_3.11.17.tar.gz",
+          "size": 26974674,
+          "hashes": {
+            "sha256": "0c9fbd0b2ddfbb6877493a650259bf379ee71a91b17f0f5f06dd2dcd52fbcade"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261003/cpython-3.11.17%2B20261003-aarch64-apple-darwin-install_only_stripped.tar.gz"
+            },
+            {
+              "url": "https://releases.astral.sh/github/python-build-standalone/releases/download/20261003/cpython-3.11.17%2B20261003-aarch64-apple-darwin-install_only_stripped.tar.gz"
+            }
+          ]
+        },
+        {
+          "name": "python_darwin-amd64_3.11.17.tar.gz",
+          "size": 26888478,
+          "hashes": {
+            "sha256": "ba62d0fb634c4e347341a4f3e29d7fb0b27920be6326c614d541c316e4da7693"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261003/cpython-3.11.17%2B20261003-x86_64-apple-darwin-install_only_stripped.tar.gz"
+            },
+            {
+              "url": "https://releases.astral.sh/github/python-build-standalone/releases/download/20261003/cpython-3.11.17%2B20261003-x86_64-apple-darwin-install_only_stripped.tar.gz"
+            }
+          ]
+        },
+        {
+          "name": "python_linux-amd64_3.11.17.tar.gz",
+          "size": 30785899,
+          "hashes": {
+            "sha256": "aadcba18994cb8f9ee752aceb31d61e04f75b5d900d76fb575c6fbfabadec434"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261003/cpython-3.11.17%2B20261003-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz"
+            },
+            {
+              "url": "https://releases.astral.sh/github/python-build-standalone/releases/download/20261003/cpython-3.11.17%2B20261003-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz"
+            }
+          ]
+        },
+        {
+          "name": "python_linux-arm64_3.11.17.tar.gz",
+          "size": 31111705,
+          "hashes": {
+            "sha256": "41f16793d33161dcd9bfa2622332b8af870cfdb4540bd1fdc477f9e6b7c58c26"
+          },
+          "mirrors": [
+            {
+              "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261003/cpython-3.11.17%2B20261003-aarch64-unknown-linux-gnu-install_only_stripped.tar.gz"
+            },
+            {
+              "url": "https://releases.astral.sh/github/python-build-standalone/releases/download/20261003/cpython-3.11.17%2B20261003-aarch64-unknown-linux-gnu-install_only_stripped.tar.gz"
+            }
+          ]
+        },
+        {
+          "name": "flatnotes_any_5.5.4-server.tar.gz",
+          "size": 71276,
+          "hashes": {
+            "sha256": "5efda017bbc6ce3c1921f6ddc789db34b01e3d63b6553f2a55a6ceec3b2bf811"
+          },
+          "mirrors": [
+            {
+              "url": "https://registry-1.docker.io/v2/dullage/flatnotes/blobs/sha256:5efda017bbc6ce3c1921f6ddc789db34b01e3d63b6553f2a55a6ceec3b2bf811"
+            },
+            {
+              "url": "https://mirror.gcr.io/v2/dullage/flatnotes/blobs/sha256:5efda017bbc6ce3c1921f6ddc789db34b01e3d63b6553f2a55a6ceec3b2bf811"
+            }
+          ]
+        },
+        {
+          "name": "flatnotes_any_5.5.4-client.tar.gz",
+          "size": 1042764,
+          "hashes": {
+            "sha256": "1c44fb6084a553d6cabd6bb978333b54e2a311c66d40a0b35a2e3b55570b358b"
+          },
+          "mirrors": [
+            {
+              "url": "https://registry-1.docker.io/v2/dullage/flatnotes/blobs/sha256:1c44fb6084a553d6cabd6bb978333b54e2a311c66d40a0b35a2e3b55570b358b"
+            },
+            {
+              "url": "https://mirror.gcr.io/v2/dullage/flatnotes/blobs/sha256:1c44fb6084a553d6cabd6bb978333b54e2a311c66d40a0b35a2e3b55570b358b"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_Whoosh-2.7.4-py2.py3-none-any.whl",
+          "size": 468790,
+          "hashes": {
+            "sha256": "aa39c3c3426e3fd107dcb4bde64ca1e276a65a889d9085a6e4b54ba82420a852"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/ba/19/24d0f1f454a2c1eb689ca28d2f178db81e5024f42d82729a4ff6771155cf/Whoosh-2.7.4-py2.py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_aiofiles-25.1.0-py3-none-any.whl",
+          "size": 14668,
+          "hashes": {
+            "sha256": "abe311e527c862958650f9438e859c1fa7568a141b22abcd015e120e86a85695"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/bc/8a/340a1555ae33d7354dbca4faa54948d76d89a27ceef032c8c3bc661d003e/aiofiles-25.1.0-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_annotated_types-0.7.0-py3-none-any.whl",
+          "size": 13643,
+          "hashes": {
+            "sha256": "1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/78/b6/6307fbef88d9b5ee7421e68d78a9f162e0da4900bc5f5793f6d3d0e34fb8/annotated_types-0.7.0-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_anyio-4.11.0-py3-none-any.whl",
+          "size": 109097,
+          "hashes": {
+            "sha256": "0287e96f4d26d4149305414d4e3bc32f0dcd0862365a4bddea19d7a1ec38c4fc"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/15/b3/9b1a8074496371342ec1e796a96f99c82c945a339cd81a8e73de28b4cf9e/anyio-4.11.0-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_click-8.3.0-py3-none-any.whl",
+          "size": 107295,
+          "hashes": {
+            "sha256": "9b9f285302c6e3064f4330c05f05b81945b2a39544279343e6e7c5f27a9baddc"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/db/d3/9dcc0f5797f070ec8edf30fbadfb200e71d9db6b84d211e3b2085a7589a0/click-8.3.0-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_colorama-0.4.6-py2.py3-none-any.whl",
+          "size": 25335,
+          "hashes": {
+            "sha256": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/d1/d6/3965ed04c63042e047cb6a3e6ed1a63a35087b6a609aa3a15ed8ac56c221/colorama-0.4.6-py2.py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_ecdsa-0.19.1-py2.py3-none-any.whl",
+          "size": 150607,
+          "hashes": {
+            "sha256": "30638e27cf77b7e15c4c4cc1973720149e1033827cfd00661ca5c8cc0cdb24c3"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/cb/a3/460c57f094a4a165c84a1341c373b0a4f5ec6ac244b998d5021aade89b77/ecdsa-0.19.1-py2.py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_fastapi-0.118.3-py3-none-any.whl",
+          "size": 97957,
+          "hashes": {
+            "sha256": "8b9673dc083b4b9d3d295d49ba1c0a2abbfb293d34ba210fd9b0a90d5f39981e"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/24/04/2f9e8a965f4214883258a6f716fea324d1b81e97bce6346cfbafffe6b86c/fastapi-0.118.3-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_h11-0.16.0-py3-none-any.whl",
+          "size": 37515,
+          "hashes": {
+            "sha256": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/04/4b/29cac41a4d98d144bf5f6d33995617b185d14b22401f75ca86f384e87ff1/h11-0.16.0-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_idna-3.10-py3-none-any.whl",
+          "size": 70442,
+          "hashes": {
+            "sha256": "946d195a0d259cbba61165e88e65941f16e9b36ea6ddb97f00452bae8b1287d3"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/76/c6/c88e154df9c4e1a2a66ccf0005a88dfb2650c1dffb6f5ce603dfbd452ce3/idna-3.10-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_pyasn1-0.6.1-py3-none-any.whl",
+          "size": 83135,
+          "hashes": {
+            "sha256": "0d632f46f2ba09143da3a8afe9e33fb6f92fa2320ab7e886e2d0f7672af84629"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/c8/f1/d6a797abb14f6283c0ddff96bbdd46937f64122b8c925cab503dd37f8214/pyasn1-0.6.1-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_pycparser-2.23-py3-none-any.whl",
+          "size": 118140,
+          "hashes": {
+            "sha256": "e5c6e8d3fbad53479cab09ac03729e0a9faf2bee3db8208a550daf5af81a5934"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/a0/e3/59cd50310fc9b59512193629e1984c1f95e5c8ae6e5d8c69532ccc65a7fe/pycparser-2.23-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_pydantic-2.12.0-py3-none-any.whl",
+          "size": 459730,
+          "hashes": {
+            "sha256": "f6a1da352d42790537e95e83a8bdfb91c7efbae63ffd0b86fa823899e807116f"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/f4/9d/d5c855424e2e5b6b626fbc6ec514d8e655a600377ce283008b115abb7445/pydantic-2.12.0-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_pyotp-2.9.0-py3-none-any.whl",
+          "size": 13376,
+          "hashes": {
+            "sha256": "81c2e5865b8ac55e825b0358e496e1d9387c811e85bb40e71a3b29b288963612"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/c3/c0/c33c8792c3e50193ef55adb95c1c3c2786fe281123291c2dbf0eaab95a6f/pyotp-2.9.0-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_python_dotenv-1.1.1-py3-none-any.whl",
+          "size": 20556,
+          "hashes": {
+            "sha256": "31f23644fe2602f88ff55e1f5c79ba497e01224ee7737937930c448e4d0e24dc"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/5f/ed/539768cf28c661b5b068d66d96a2f155c4971a5d55684a514c1a0e0dec2f/python_dotenv-1.1.1-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_python_jose-3.5.0-py2.py3-none-any.whl",
+          "size": 34624,
+          "hashes": {
+            "sha256": "abd1202f23d34dfad2c3d28cb8617b90acf34132c7afd60abd0b0b7d3cb55771"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/d9/c3/0bd11992072e6a1c513b16500a5d07f91a24017c5909b02c72c62d7ad024/python_jose-3.5.0-py2.py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_python_multipart-0.0.20-py3-none-any.whl",
+          "size": 24546,
+          "hashes": {
+            "sha256": "8a62d3a8335e06589fe01f2a3e178cdcc632f3fbe0d492ad9ee0ec35aab1f104"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/45/58/38b5afbc1a800eeea951b9285d3912613f2603bdf897a4ab0f4bd7f405fc/python_multipart-0.0.20-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_qrcode-8.2-py3-none-any.whl",
+          "size": 45986,
+          "hashes": {
+            "sha256": "16e64e0716c14960108e85d853062c9e8bba5ca8252c0b4d0231b9df4060ff4f"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/dd/b8/d2d6d731733f51684bbf76bf34dab3b70a9148e8f2cef2bb544fccec681a/qrcode-8.2-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_rsa-4.9.1-py3-none-any.whl",
+          "size": 34696,
+          "hashes": {
+            "sha256": "68635866661c6836b8d39430f97a996acbd61bfa49406748ea243539fe239762"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/64/8d/0133e4eb4beed9e425d9a98ed6e081a55d195481b7632472be1af08d2f6b/rsa-4.9.1-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_six-1.17.0-py2.py3-none-any.whl",
+          "size": 11050,
+          "hashes": {
+            "sha256": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/b7/ce/149a00dd41f10bc29e5921b496af8b574d8413afcd5e30dfa0ed46c2cc5e/six-1.17.0-py2.py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_sniffio-1.3.1-py3-none-any.whl",
+          "size": 10235,
+          "hashes": {
+            "sha256": "2f6da418d1f1e0fddd844478f41680e794e6051915791a034ff65e5f100525a2"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/e9/44/75a9c9421471a6c4805dbf2356f7c181a29c1879239abab1ea2cc8f38b40/sniffio-1.3.1-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_starlette-0.48.0-py3-none-any.whl",
+          "size": 73736,
+          "hashes": {
+            "sha256": "0764ca97b097582558ecb498132ed0c7d942f233f365b86ba37770e026510659"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/be/72/2db2f49247d0a18b4f1bb9a5a39a0162869acf235f3a96418363947b3d46/starlette-0.48.0-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_typing_extensions-4.15.0-py3-none-any.whl",
+          "size": 44614,
+          "hashes": {
+            "sha256": "f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/18/67/36e9267722cc04a6b9f15c7f3441c2363321a3ea07da7ae0c0707beb2a9c/typing_extensions-4.15.0-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_typing_inspection-0.4.2-py3-none-any.whl",
+          "size": 14611,
+          "hashes": {
+            "sha256": "4ed1cacbdc298c220f1bd249ed5287caa16f34d44ef4e9c3d0cbad5b521545e7"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/dc/9b/47798a6c91d8bdb567fe2698fe81e0c6b7cb7ef4d13da4114b41d239f65d/typing_inspection-0.4.2-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_any_uvicorn-0.37.0-py3-none-any.whl",
+          "size": 67976,
+          "hashes": {
+            "sha256": "913b2b88672343739927ce381ff9e2ad62541f9f8289664fa1d1d3803fa2ce6c"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/85/cd/584a2ceb5532af99dd09e50919e3615ba99aa127e9850eafe5f31ddfdb9a/uvicorn-0.37.0-py3-none-any.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-amd64_cffi-2.0.0-cp311-cp311-macosx_10_13_x86_64.whl",
+          "size": 184344,
+          "hashes": {
+            "sha256": "b4c854ef3adc177950a8dfc81a86f5115d2abd545751a304c5bcf2c2c7283cfe"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/12/4a/3dfd5f7850cbf0d06dc84ba9aa00db766b52ca38d8b86e3a38314d52498c/cffi-2.0.0-cp311-cp311-macosx_10_13_x86_64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-amd64_cryptography-46.0.2-cp311-abi3-macosx_10_9_universal2.whl",
+          "size": 7261255,
+          "hashes": {
+            "sha256": "f3e32ab7dd1b1ef67b9232c4cf5e2ee4cd517d4316ea910acaaa9c5712a1c663"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/e0/98/7a8df8c19a335c8028414738490fc3955c0cecbfdd37fcc1b9c3d04bd561/cryptography-46.0.2-cp311-abi3-macosx_10_9_universal2.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-amd64_httptools-0.7.1-cp311-cp311-macosx_10_9_universal2.whl",
+          "size": 206521,
+          "hashes": {
+            "sha256": "474d3b7ab469fefcca3697a10d11a32ee2b9573250206ba1e50d5980910da657"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/9c/08/17e07e8d89ab8f343c134616d72eebfe03798835058e2ab579dcc8353c06/httptools-0.7.1-cp311-cp311-macosx_10_9_universal2.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-amd64_pydantic_core-2.41.1-cp311-cp311-macosx_10_12_x86_64.whl",
+          "size": 2111456,
+          "hashes": {
+            "sha256": "4f276a6134fe1fc1daa692642a3eaa2b7b858599c49a7610816388f5e37566a1"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/f6/a9/ec440f02e57beabdfd804725ef1e38ac1ba00c49854d298447562e119513/pydantic_core-2.41.1-cp311-cp311-macosx_10_12_x86_64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-amd64_pyyaml-6.0.3-cp311-cp311-macosx_10_13_x86_64.whl",
+          "size": 185826,
+          "hashes": {
+            "sha256": "44edc647873928551a01e7a563d7452ccdebee747728c1080d881d68af7b997e"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/6d/16/a95b6757765b7b031c9374925bb718d55e0a9ba8a1b6a12d25962ea44347/pyyaml-6.0.3-cp311-cp311-macosx_10_13_x86_64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-amd64_uvloop-0.21.0-cp311-cp311-macosx_10_9_x86_64.whl",
+          "size": 805476,
+          "hashes": {
+            "sha256": "0878c2640cf341b269b7e128b1a5fed890adc4455513ca710d77d5e93aa6d6a0"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/8c/7c/1517b0bbc2dbe784b563d6ab54f2ef88c890fdad77232c98ed490aa07132/uvloop-0.21.0-cp311-cp311-macosx_10_9_x86_64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-amd64_watchfiles-1.1.0-cp311-cp311-macosx_10_12_x86_64.whl",
+          "size": 405751,
+          "hashes": {
+            "sha256": "c9649dfc57cc1f9835551deb17689e8d44666315f2e82d337b9f07bd76ae3aa2"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/8b/78/7401154b78ab484ccaaeef970dc2af0cb88b5ba8a1b415383da444cdd8d3/watchfiles-1.1.0-cp311-cp311-macosx_10_12_x86_64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-amd64_websockets-15.0.1-cp311-cp311-macosx_10_9_x86_64.whl",
+          "size": 173082,
+          "hashes": {
+            "sha256": "678999709e68425ae2593acf2e3ebcbcf2e69885a5ee78f9eb80e6e371f1bf57"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/76/70/ba1ad96b07869275ef42e2ce21f07a5b0148936688c2baf7e4a1f60d5058/websockets-15.0.1-cp311-cp311-macosx_10_9_x86_64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-arm64_cffi-2.0.0-cp311-cp311-macosx_11_0_arm64.whl",
+          "size": 180560,
+          "hashes": {
+            "sha256": "2de9a304e27f7596cd03d16f1b7c72219bd944e99cc52b84d0145aefb07cbd3c"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/4f/8b/f0e4c441227ba756aafbe78f117485b25bb26b1c059d01f137fa6d14896b/cffi-2.0.0-cp311-cp311-macosx_11_0_arm64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-arm64_cryptography-46.0.2-cp311-abi3-macosx_10_9_universal2.whl",
+          "size": 7261255,
+          "hashes": {
+            "sha256": "f3e32ab7dd1b1ef67b9232c4cf5e2ee4cd517d4316ea910acaaa9c5712a1c663"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/e0/98/7a8df8c19a335c8028414738490fc3955c0cecbfdd37fcc1b9c3d04bd561/cryptography-46.0.2-cp311-abi3-macosx_10_9_universal2.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-arm64_httptools-0.7.1-cp311-cp311-macosx_11_0_arm64.whl",
+          "size": 110375,
+          "hashes": {
+            "sha256": "a3c3b7366bb6c7b96bd72d0dbe7f7d5eead261361f013be5f6d9590465ea1c70"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/aa/06/c9c1b41ff52f16aee526fd10fbda99fa4787938aa776858ddc4a1ea825ec/httptools-0.7.1-cp311-cp311-macosx_11_0_arm64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-arm64_pydantic_core-2.41.1-cp311-cp311-macosx_11_0_arm64.whl",
+          "size": 1915012,
+          "hashes": {
+            "sha256": "07588570a805296ece009c59d9a679dc08fab72fb337365afb4f3a14cfbfc176"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/f0/f9/6bc15bacfd8dcfc073a1820a564516d9c12a435a9a332d4cbbfd48828ddd/pydantic_core-2.41.1-cp311-cp311-macosx_11_0_arm64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-arm64_pyyaml-6.0.3-cp311-cp311-macosx_11_0_arm64.whl",
+          "size": 175577,
+          "hashes": {
+            "sha256": "652cb6edd41e718550aad172851962662ff2681490a8a711af6a4d288dd96824"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/16/19/13de8e4377ed53079ee996e1ab0a9c33ec2faf808a4647b7b4c0d46dd239/pyyaml-6.0.3-cp311-cp311-macosx_11_0_arm64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-arm64_uvloop-0.21.0-cp311-cp311-macosx_10_9_universal2.whl",
+          "size": 1447410,
+          "hashes": {
+            "sha256": "c0f3fa6200b3108919f8bdabb9a7f87f20e7097ea3c543754cabc7d717d95cf8"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/57/a7/4cf0334105c1160dd6819f3297f8700fda7fc30ab4f61fbf3e725acbc7cc/uvloop-0.21.0-cp311-cp311-macosx_10_9_universal2.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-arm64_watchfiles-1.1.0-cp311-cp311-macosx_11_0_arm64.whl",
+          "size": 397313,
+          "hashes": {
+            "sha256": "406520216186b99374cdb58bc48e34bb74535adec160c8459894884c983a149c"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/76/63/e6c3dbc1f78d001589b75e56a288c47723de28c580ad715eb116639152b5/watchfiles-1.1.0-cp311-cp311-macosx_11_0_arm64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_darwin-arm64_websockets-15.0.1-cp311-cp311-macosx_11_0_arm64.whl",
+          "size": 173330,
+          "hashes": {
+            "sha256": "d50fd1ee42388dcfb2b3676132c78116490976f1300da28eb629272d5d93e905"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/86/f2/10b55821dd40eb696ce4704a87d57774696f9451108cff0d2824c97e0f97/websockets-15.0.1-cp311-cp311-macosx_11_0_arm64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-amd64_cffi-2.0.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+          "size": 215574,
+          "hashes": {
+            "sha256": "8941aaadaf67246224cee8c3803777eed332a19d909b47e29c9842ef1e79ac26"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/d7/91/500d892b2bf36529a75b77958edfcd5ad8e2ce4064ce2ecfeab2125d72d1/cffi-2.0.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-amd64_cryptography-46.0.2-cp311-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+          "size": 4450899,
+          "hashes": {
+            "sha256": "bb7fb9cd44c2582aa5990cf61a4183e6f54eea3172e54963787ba47287edd135"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/e4/27/0f190ada240003119488ae66c897b5e97149292988f556aef4a6a2a57595/cryptography-46.0.2-cp311-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-amd64_httptools-0.7.1-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl",
+          "size": 456621,
+          "hashes": {
+            "sha256": "379b479408b8747f47f3b253326183d7c009a3936518cdb70db58cffd369d9df"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/cc/cc/10935db22fda0ee34c76f047590ca0a8bd9de531406a3ccb10a90e12ea21/httptools-0.7.1-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-amd64_pydantic_core-2.41.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+          "size": 2073794,
+          "hashes": {
+            "sha256": "f4a9543ca355e6df8fbe9c83e9faab707701e9103ae857ecb40f1c0cf8b0e94d"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/e5/4f/3aaa3bd1ea420a15acc42d7d3ccb3b0bbc5444ae2f9dbc1959f8173e16b8/pydantic_core-2.41.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-amd64_pyyaml-6.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+          "size": 806638,
+          "hashes": {
+            "sha256": "b8bb0864c5a28024fac8a632c443c87c5aa6f215c0b126c449ae1a150412f31d"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/71/60/917329f640924b18ff085ab889a11c763e0b573da888e8404ff486657602/pyyaml-6.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-amd64_uvloop-0.21.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+          "size": 3973185,
+          "hashes": {
+            "sha256": "8a375441696e2eda1c43c44ccb66e04d61ceeffcd76e4929e527b7fa401b90fb"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/8a/ca/0864176a649838b838f36d44bf31c451597ab363b60dc9e09c9630619d41/uvloop-0.21.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-amd64_watchfiles-1.1.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+          "size": 453145,
+          "hashes": {
+            "sha256": "fe4371595edf78c41ef8ac8df20df3943e13defd0efcb732b2e393b5a8a7a71f"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/2b/a1/ec0a606bde4853d6c4a578f9391eeb3684a9aea736a8eb217e3e00aa89a1/watchfiles-1.1.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-amd64_websockets-15.0.1-cp311-cp311-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+          "size": 182252,
+          "hashes": {
+            "sha256": "8dd8327c795b3e3f219760fa603dcae1dcc148172290a8ab15158cf85a953413"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/93/1f/5d6dbf551766308f6f50f8baf8e9860be6182911e8106da7a7f73785f4c4/websockets-15.0.1-cp311-cp311-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-arm64_cffi-2.0.0-cp311-cp311-manylinux2014_aarch64.manylinux_2_17_aarch64.whl",
+          "size": 216476,
+          "hashes": {
+            "sha256": "730cacb21e1bdff3ce90babf007d0a0917cc3e6492f336c2f0134101e0944f93"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/b8/56/6033f5e86e8cc9bb629f0077ba71679508bdf54a9a5e112a3c0b91870332/cffi-2.0.0-cp311-cp311-manylinux2014_aarch64.manylinux_2_17_aarch64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-arm64_cryptography-46.0.2-cp311-abi3-manylinux2014_aarch64.manylinux_2_17_aarch64.whl",
+          "size": 4297596,
+          "hashes": {
+            "sha256": "1fd1a69086926b623ef8126b4c33d5399ce9e2f3fac07c9c734c2a4ec38b6d02"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/c6/38/b2adb2aa1baa6706adc3eb746691edd6f90a656a9a65c3509e274d15a2b8/cryptography-46.0.2-cp311-abi3-manylinux2014_aarch64.manylinux_2_17_aarch64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-arm64_httptools-0.7.1-cp311-cp311-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl",
+          "size": 454954,
+          "hashes": {
+            "sha256": "cad6b591a682dcc6cf1397c3900527f9affef1e55a06c4547264796bbd17cf5e"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/0e/84/875382b10d271b0c11aa5d414b44f92f8dd53e9b658aec338a79164fa548/httptools-0.7.1-cp311-cp311-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-arm64_pydantic_core-2.41.1-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl",
+          "size": 1973762,
+          "hashes": {
+            "sha256": "28527e4b53400cd60ffbd9812ccb2b5135d042129716d71afd7e45bf42b855c0"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/38/8a/d9edcdcdfe80bade17bed424284427c08bea892aaec11438fa52eaeaf79c/pydantic_core-2.41.1-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-arm64_pyyaml-6.0.3-cp311-cp311-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl",
+          "size": 775556,
+          "hashes": {
+            "sha256": "10892704fc220243f5305762e276552a0395f7beb4dbf9b14ec8fd43b57f126c"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/0c/62/d2eb46264d4b157dae1275b573017abec435397aa59cbcdab6fc978a8af4/pyyaml-6.0.3-cp311-cp311-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-arm64_uvloop-0.21.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl",
+          "size": 3960855,
+          "hashes": {
+            "sha256": "b9fb766bb57b7388745d8bcc53a359b116b8a04c83a2288069809d2b3466c37e"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/ee/ea/0bfae1aceb82a503f358d8d2fa126ca9dbdb2ba9c7866974faec1cb5875c/uvloop-0.21.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-arm64_watchfiles-1.1.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl",
+          "size": 450792,
+          "hashes": {
+            "sha256": "cb45350fd1dc75cd68d3d72c47f5b513cb0578da716df5fba02fff31c69d5f2d"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/6c/a2/8afa359ff52e99af1632f90cbf359da46184207e893a5f179301b0c8d6df/watchfiles-1.1.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_linux-arm64_websockets-15.0.1-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl",
+          "size": 182878,
+          "hashes": {
+            "sha256": "d99e5546bf73dbad5bf3547174cd6cb8ba7273062a23808ffea025ecb1cf8562"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/a5/90/1c37ae8b8a113d3daf1065222b6af61cc44102da95388ac0018fcb7d93d9/websockets-15.0.1-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_windows-amd64_cffi-2.0.0-cp311-cp311-win_amd64.whl",
+          "size": 182820,
+          "hashes": {
+            "sha256": "66f011380d0e49ed280c789fbd08ff0d40968ee7b665575489afa95c98196ab5"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/ae/8f/dc5531155e7070361eb1b7e4c1a9d896d0cb21c49f807a6c03fd63fc877e/cffi-2.0.0-cp311-cp311-win_amd64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_windows-amd64_cryptography-46.0.2-cp311-abi3-win_amd64.whl",
+          "size": 3512585,
+          "hashes": {
+            "sha256": "758cfc7f4c38c5c5274b55a57ef1910107436f4ae842478c4989abbd24bd5acb"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/a8/cd/2f83cafd47ed2dc5a3a9c783ff5d764e9e70d3a160e0df9a9dcd639414ce/cryptography-46.0.2-cp311-abi3-win_amd64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_windows-amd64_httptools-0.7.1-cp311-cp311-win_amd64.whl",
+          "size": 86875,
+          "hashes": {
+            "sha256": "135fbe974b3718eada677229312e97f3b31f8a9c8ffa3ae6f565bf808d5b6bcb"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/b3/07/5b614f592868e07f5c94b1f301b5e14a21df4e8076215a3bccb830a687d8/httptools-0.7.1-cp311-cp311-win_amd64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_windows-amd64_pydantic_core-2.41.1-cp311-cp311-win_amd64.whl",
+          "size": 2025158,
+          "hashes": {
+            "sha256": "b92d6c628e9a338846a28dfe3fcdc1a3279388624597898b105e078cdfc59298"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/9d/72/63c9a4f1a5c950e65dd522d7dd67f167681f9d4f6ece3b80085a0329f08f/pydantic_core-2.41.1-cp311-cp311-win_amd64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_windows-amd64_pyyaml-6.0.3-cp311-cp311-win_amd64.whl",
+          "size": 158763,
+          "hashes": {
+            "sha256": "9f3bfb4965eb874431221a3ff3fdcddc7e74e3b07799e0e84ca4a0f867d449bf"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/da/e3/ea007450a105ae919a72393cb06f122f288ef60bba2dc64b26e2646fa315/pyyaml-6.0.3-cp311-cp311-win_amd64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_windows-amd64_watchfiles-1.1.0-cp311-cp311-win_amd64.whl",
+          "size": 292607,
+          "hashes": {
+            "sha256": "48aa25e5992b61debc908a61ab4d3f216b64f44fdaa71eb082d8b2de846b7d12"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/89/1b/3e39c68b68a7a171070f81fc2561d23ce8d6859659406842a0e4bebf3bba/watchfiles-1.1.0-cp311-cp311-win_amd64.whl"
+            }
+          ]
+        },
+        {
+          "name": "pypi_windows-amd64_websockets-15.0.1-cp311-cp311-win_amd64.whl",
+          "size": 176828,
+          "hashes": {
+            "sha256": "27ccee0071a0e75d22cb35849b1db43f2ecd3e161041ac1ee9d2352ddf72f065"
+          },
+          "mirrors": [
+            {
+              "url": "https://files.pythonhosted.org/packages/98/93/e36c73f78400a65f5e236cd376713c34182e6663f6889cd45a4a04d8f203/websockets-15.0.1-cp311-cp311-win_amd64.whl"
+            }
+          ]
+        }
+      ],
+      "downloadSize": 198604397,
+      "installedSize": 198604397,
+      "license": {
+        "redistribution": "permitted",
+        "id": "MIT",
+        "name": "MIT License",
+        "url": "https://github.com/dullage/flatnotes/blob/main/LICENSE",
+        "verified": true,
+        "notes": "Flatnotes publishes its built app only as the image dullage/flatnotes:v5.5.4; Arcana takes its server and web client layers, the same for every platform, by digest. Its Python dependencies (versions from its Pipfile.lock) come from PyPI under BSD, MIT, Apache-2.0 and PSF-2.0 licenses."
+      },
+      "capabilities": {
+        "fullTextSearch": false,
+        "titleSearch": false
+      },
+      "media": {
+        "pictures": false,
+        "videos": false
+      },
+      "updateStrategy": "snapshot-replace",
+      "providerRef": {
+        "kind": "service",
+        "platforms": "windows-amd64 darwin-arm64 darwin-amd64 linux-amd64 linux-arm64"
+      },
+      "popularity": 5
     }
   ]
 }

@@ -91,6 +91,17 @@ func init() {
 				FirstUse:     "No account is needed. Files you open are processed on the computer running Arcana and are not kept.",
 			},
 		},
+		&Spec{
+			ID: "flatnotes", Title: "Flatnotes", Kind: KindService, Slot: 14,
+			Summary: "Notes in Markdown, kept as plain files on the drive, with full-text search.",
+			Parts:   map[string]Part{"python": {}, "pypi": {Copy: true}, "flatnotes": {}},
+			Service: &ServiceSpec{
+				Command:   flatnotes,
+				ReadyPath: "/health",
+				AdminUser: "admin",
+				FirstUse:  "Sign in as admin with the password below. Each note is a Markdown file in Arcana/user/apps/flatnotes on the drive.",
+			},
+		},
 	)
 }
 
@@ -213,16 +224,9 @@ func writeJellyfinNetwork(path string, port int) error {
 // Calibre library, and runs Calibre-Web through a bootstrap that points
 // it at Arcana's port and that library.
 func calibreWeb(env Env) (Command, error) {
-	py := filepath.Join(env.Runtime, "python", "python", "bin", "python3")
-	if strings.HasPrefix(env.Platform, "windows-") {
-		py = filepath.Join(env.Runtime, "python", "python", "python.exe")
-	}
-	site := filepath.Join(env.Runtime, "site")
-	if _, err := os.Stat(filepath.Join(site, completeMarker)); err != nil {
-		env.Progress("Installing Calibre-Web's Python packages on this computer")
-		if err := pipInstall(py, filepath.Join(env.Runtime, "pypi"), site); err != nil {
-			return Command{}, err
-		}
+	py, site, err := pythonApp(env, "Calibre-Web", "calibreweb")
+	if err != nil {
+		return Command{}, err
 	}
 	library := filepath.Join(env.Data, "library")
 	if err := os.MkdirAll(library, 0o755); err != nil {
@@ -284,22 +288,41 @@ main()
 // behaves the same on every computer.
 var pythonVars = []string{"PYTHON", "PIP_"}
 
-// pipInstall installs Calibre-Web and its dependencies with the runtime's
+// pythonApp returns the Python runtime of an app and the folder its
+// packages are installed in, installing them at the first start on this
+// computer.
+func pythonApp(env Env, title string, packages ...string) (py, site string, err error) {
+	py = filepath.Join(env.Runtime, "python", "python", "bin", "python3")
+	if strings.HasPrefix(env.Platform, "windows-") {
+		py = filepath.Join(env.Runtime, "python", "python", "python.exe")
+	}
+	site = filepath.Join(env.Runtime, "site")
+	if _, err := os.Stat(filepath.Join(site, completeMarker)); err != nil {
+		env.Progress("Installing " + title + "'s Python packages on this computer")
+		if err := pipInstall(py, filepath.Join(env.Runtime, "pypi"), site, packages...); err != nil {
+			return "", "", fmt.Errorf("install %s's packages: %w", title, err)
+		}
+	}
+	return py, site, nil
+}
+
+// pipInstall installs packages and their dependencies with the runtime's
 // own pip from wheels on the drive, without the network: pip chooses the
-// files for this computer. Two packages are published only as source;
-// pip builds them with the runtime's setuptools.
-func pipInstall(py, wheels, site string) error {
+// files for this computer. Packages published only as source (two of
+// Calibre-Web's) are built with the runtime's setuptools.
+func pipInstall(py, wheels, site string, packages ...string) error {
 	tmp := site + ".installing"
 	_ = os.RemoveAll(tmp)
 	cmd := exec.Command(py, "-I", "-m", "pip", "install", "--no-index", "--find-links", wheels,
 		"--no-build-isolation", "--no-cache-dir", "--disable-pip-version-check", "--no-warn-script-location",
-		"--target", tmp, "calibreweb")
+		"--target", tmp)
+	cmd.Args = append(cmd.Args, packages...)
 	cmd.Env = environment(pythonVars, nil)
 	configureProcess(cmd)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		os.RemoveAll(tmp)
-		return fmt.Errorf("install Calibre-Web's packages: %v: %s", err, lastLines(string(out), 3))
+		return fmt.Errorf("%v: %s", err, errorLines(string(out)))
 	}
 	if err := os.WriteFile(filepath.Join(tmp, completeMarker), nil, 0o644); err != nil {
 		return err
@@ -367,3 +390,37 @@ func findJava(dir string, env Env) (string, error) {
 	}
 	return "", errors.New("the Java runtime has no java program for this computer")
 }
+
+// flatnotes runs Flatnotes' server (FastAPI, under uvicorn) from the
+// official image's layers, with its Python packages installed from the
+// drive like Calibre-Web's. Its notes are Markdown files in its data
+// folder. It signs in one user: Arcana's administrator password, with a
+// secret for its sessions kept with the data. Flatnotes writes its base
+// address into client/dist/index.html at every start, so it runs in its
+// unpacked folder on this computer.
+func flatnotes(env Env) (Command, error) {
+	py, site, err := pythonApp(env, "Flatnotes",
+		"whoosh", "fastapi", "uvicorn[standard]", "aiofiles", "python-jose[cryptography]", "pyotp", "qrcode", "python-multipart")
+	if err != nil {
+		return Command{}, err
+	}
+	secret, err := secretFile(filepath.Join(env.Data, ".arcana-secret-key"))
+	if err != nil {
+		return Command{}, err
+	}
+	app := filepath.Join(env.Runtime, "flatnotes", "app")
+	return Command{Path: py, Dir: app, DropEnv: append([]string{"FLATNOTES_"}, pythonVars...),
+		Args: []string{"-I", "-X", "utf8", "-c", flatnotesBootstrap, "main:app", "--app-dir", filepath.Join(app, "server"),
+			"--host", "127.0.0.1", "--port", strconv.Itoa(env.Port), "--proxy-headers", "--forwarded-allow-ips", "127.0.0.1"},
+		Env: []string{"ARCANA_SITE=" + site, "FLATNOTES_PATH=" + env.Data, "FLATNOTES_AUTH_TYPE=password",
+			"FLATNOTES_USERNAME=admin", "FLATNOTES_PASSWORD=" + env.Password, "FLATNOTES_SECRET_KEY=" + secret},
+	}, nil
+}
+
+// flatnotesBootstrap runs uvicorn from the installed packages; -I keeps
+// them off the path otherwise.
+const flatnotesBootstrap = `import os, sys, runpy
+sys.path.insert(0, os.environ["ARCANA_SITE"])
+sys.argv = ["uvicorn"] + sys.argv[1:]
+runpy.run_module("uvicorn", run_name="__main__", alter_sys=True)
+`

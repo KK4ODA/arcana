@@ -82,9 +82,10 @@ against the SHA-256 in the bundled catalog and serves them (ADR-0030).
 | Vaultwarden (server and web vault, from image `vaultwarden/server:1.36.0-alpine`; Linux only) | 1.36.0 | AGPL-3.0 (server), GPL-3.0 (web vault) | https://github.com/dani-garcia/vaultwarden, https://github.com/dani-garcia/bw_web_builds |
 | Jellyfin, with jellyfin-ffmpeg | 10.11.11, 7.1.4-3 | GPL-2.0 (server), GPL-3.0 (ffmpeg build) | https://github.com/jellyfin/jellyfin, https://github.com/jellyfin/jellyfin-ffmpeg |
 | Calibre-Web, with its Python packages from PyPI | 0.6.26 | GPL-3.0-or-later; its dependencies are under BSD, MIT, Apache-2.0, PSF-2.0 and MPL-2.0, except chardet (LGPL-2.1), Unidecode (GPL-2.0-or-later) and iso-639 (AGPL-3.0); `tools/app-catalog/calibre-web-lock.json` lists each file | https://github.com/janeczku/calibre-web |
-| CPython (python-build-standalone, for Calibre-Web) | 3.11.17 (20261003) | PSF-2.0 and the licenses of its bundled libraries | https://github.com/astral-sh/python-build-standalone |
+| CPython (python-build-standalone, for Calibre-Web and Flatnotes) | 3.11.17 (20261003) | PSF-2.0 and the licenses of its bundled libraries | https://github.com/astral-sh/python-build-standalone |
 | Empty Calibre library (`metadata.db`, from Project NOMAD) | commit 932d2a5 | Apache-2.0 | https://github.com/Crosstalk-Solutions/project-nomad |
 | Stirling PDF (`Stirling-PDF.jar`, the build without the proprietary modules) | 2.13.1 | MIT | https://github.com/Stirling-Tools/Stirling-PDF |
+| Flatnotes (server and web client layers of image `dullage/flatnotes:v5.5.4`), with its Python packages from PyPI | 5.5.4 | MIT; packages BSD, MIT, Apache-2.0 and PSF-2.0 (`tools/app-catalog/flatnotes-lock.json` lists each file) | https://github.com/dullage/flatnotes |
 | Eclipse Temurin JRE (for Stirling PDF) | 25.0.5.1+2 | GPL-2.0 with the Classpath Exception | https://github.com/adoptium/temurin25-binaries |
 
 Homebox and Vaultwarden are AGPL-3.0. Arcana runs the publishers'

@@ -51,6 +51,9 @@ HOMEBOX = {  # checksums.txt of the v0.26.2 release
     "windows-amd64": ("Windows_x86_64.zip", "d063cf95cdbfd76323596d2d5b401e9b888676c46f09eaea30670e886adab0ff"),
 }
 FB_VERSION = "2.63.23"
+# Layers of dullage/flatnotes:v5.5.4, the same in its amd64 and arm64 images.
+FN_SERVER = "5efda017bbc6ce3c1921f6ddc789db34b01e3d63b6553f2a55a6ceec3b2bf811"
+FN_CLIENT = "1c44fb6084a553d6cabd6bb978333b54e2a311c66d40a0b35a2e3b55570b358b"
 
 
 def ext(url):
@@ -68,10 +71,10 @@ def blob(registry, repo, digest):
     return f"https://{registry}/v2/{repo}/blobs/{digest}"
 
 
-def calibre_wheels():
-    """Wheels and source packages for Calibre-Web from PyPI's JSON API
-    (which states each file's SHA-256), per platform."""
-    lock = json.load(open(os.path.join(os.path.dirname(__file__), "calibre-web-lock.json")))
+def wheels(lockfile):
+    """Python packages from PyPI's JSON API (which states each file's
+    SHA-256), per platform, as listed in a lock file beside this one."""
+    lock = json.load(open(os.path.join(os.path.dirname(__file__), lockfile)))
     out = []
     for item in lock:
         out.append(f("pypi", item["platform"], item["filename"], item["url"], item["sha256"]))
@@ -195,7 +198,7 @@ APPS = [
         "files": [f("python", p, "3.11.17.tar.gz", [PY + t + "-install_only_stripped.tar.gz", PY_ASTRAL + t + "-install_only_stripped.tar.gz"], h) for p, (t, h) in PY_TRIPLES.items()]
         + [f("library", "any", "metadata.db", "https://raw.githubusercontent.com/Crosstalk-Solutions/project-nomad/932d2a5de9a40108de74e97d3ccfcc52345ce30e/install/calibre-empty-library/metadata.db",
              "ad8a3bc3612725ef761a089ccc820a91d6b228117403514837356a0b366b6af3")]
-        + ["calibre-wheels"],
+        + ["wheels:calibre-web-lock.json"],
     },
     {
         "id": "stirling-pdf", "title": "Stirling PDF", "kind": "service", "version": "2.13.1", "published": "2026-06-19",
@@ -206,6 +209,19 @@ APPS = [
         "notes": "Stirling-PDF.jar is built with DISABLE_ADDITIONAL_FEATURES and holds none of the proprietary app/proprietary code. Eclipse Temurin is GPL-2.0 with the Classpath Exception.",
         "files": [f("stirling-pdf", "any", "2.13.1.jar", GH + "Stirling-Tools/Stirling-PDF/releases/download/v2.13.1/Stirling-PDF.jar")]
         + [f("jre", p, "25.0.5.1-2" + ext(n), JRE + n, h) for p, (n, h) in TEMURIN.items()],
+    },
+    {
+        "id": "flatnotes", "title": "Flatnotes", "kind": "service", "version": "5.5.4", "published": "2025-10-20",
+        "publisher": "Adam Dullage", "sourceUrl": "https://github.com/dullage/flatnotes",
+        "description": "Flatnotes 5.5.4, with Python 3.11: notes in Markdown with full-text search, each note a plain file on the drive (Arcana/user/apps/flatnotes). Arcana sets its password and shows it on the Apps page.",
+        "license": {"id": "MIT", "name": "MIT License", "url": "https://github.com/dullage/flatnotes/blob/main/LICENSE"},
+        "tags": ["notes", "markdown"],
+        "category": "personal-community",
+        "notes": "Flatnotes publishes its built app only as the image dullage/flatnotes:v5.5.4; Arcana takes its server and web client layers, the same for every platform, by digest. Its Python dependencies (versions from its Pipfile.lock) come from PyPI under BSD, MIT, Apache-2.0 and PSF-2.0 licenses.",
+        "files": [f("python", p, "3.11.17.tar.gz", [PY + t + "-install_only_stripped.tar.gz", PY_ASTRAL + t + "-install_only_stripped.tar.gz"], h) for p, (t, h) in PY_TRIPLES.items()]
+        + [f("flatnotes", "any", "5.5.4-server.tar.gz", [blob("registry-1.docker.io", "dullage/flatnotes", "sha256:" + FN_SERVER), blob("mirror.gcr.io", "dullage/flatnotes", "sha256:" + FN_SERVER)], FN_SERVER),
+           f("flatnotes", "any", "5.5.4-client.tar.gz", [blob("registry-1.docker.io", "dullage/flatnotes", "sha256:" + FN_CLIENT), blob("mirror.gcr.io", "dullage/flatnotes", "sha256:" + FN_CLIENT)], FN_CLIENT)]
+        + ["wheels:flatnotes-lock.json"],
     },
 ]
 
@@ -292,8 +308,8 @@ def main():
     os.makedirs(cache, exist_ok=True)
     out = []
     for app in APPS:
-        if app["files"] and app["files"][-1] == "calibre-wheels":
-            app["files"] = app["files"][:-1] + calibre_wheels()
+        if app["files"] and isinstance(app["files"][-1], str):
+            app["files"] = app["files"][:-1] + wheels(app["files"][-1].split(":", 1)[1])
         out.append(resource(app, cache))
     if "--write" in sys.argv:
         path = "internal/catalog/bundled/catalog.json"
