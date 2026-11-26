@@ -40,7 +40,9 @@ diarrhea or a burn matters most on a drive that may never have had it.
   or water in the ear; labels that name earache are almost all homeopathic,
   which situations leave out. Oral rehydration solutions are not drugs, so
   dehydration finds salt tablets among the labels and oral rehydration
-  among the remedies.
+  among the remedies. The bare word "dehydration" is not a search term:
+  stemmed, it matched moisturizers for "dehydrated skin" and an insulin
+  label in the 2026-11-20 export.
 - **Shown with the labels.** "By situation" lists each situation's home
   care and herbs after its medicines. A "Home care and herbs" tab lists all
   38. Each remedy page puts the cautions first, then uses, how it is used

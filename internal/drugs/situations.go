@@ -64,8 +64,10 @@ var Situations = []Situation{
 	// that name earache are mostly homeopathic, which this search leaves out.
 	{"ears", "Earwax, water in the ear or earache", "Other", []string{"earwax", "ear wax", "water in the ears", "water-clogged ears", "swimmer's ear", "earache", "ear pain"}},
 	// Oral rehydration solutions are not drugs and have no label here; the
-	// remedies list covers them. Salt tablets name heat cramps.
-	{"dehydration", "Dehydration or heat cramps", "Other", []string{"dehydration", "heat cramps", "electrolyte replenisher"}},
+	// remedies list covers them. Salt tablets name heat cramps. The word
+	// "dehydration" itself is left out: stemmed, it matches moisturizers for
+	// "dehydrated skin" and an insulin label.
+	{"dehydration", "Dehydration or heat cramps", "Other", []string{"heat cramps", "electrolyte replenisher"}},
 	{"pinworm", "Pinworm", "Other", []string{"pinworm"}},
 	{"smoking", "Quitting smoking", "Other", []string{"stop smoking", "quit smoking", "nicotine withdrawal"}},
 	{"lice", "Head lice", "Other", []string{"head lice", "lice"}},

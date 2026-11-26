@@ -33,13 +33,12 @@ function remedyBadge(kind) {
     title: kind === 'herbal' ? 'Herbs and supplements are not approved as medicines by the FDA. The page says what the evidence shows.' : null }, REMEDY_KIND[kind] || kind);
 }
 
-// firstSentence keeps result lists short; the remedy page has the full text.
-const firstSentence = (t) => (String(t).match(/^.*?[.!?](\s|$)/) || [t])[0].trim();
-
 function remedyItem(r, names) {
   return h('li', null,
     h('a', { href: `#/medicines/remedy/${encodeURIComponent(r.slug)}` }, h('b', null, r.name)), ' ', remedyBadge(r.kind),
-    h('div', { class: 'src' }, firstSentence(r.uses)),
+    // The whole text: a remedy for several problems covers each in its own
+    // sentence, so a first sentence can be about a different one.
+    h('div', { class: 'src' }, r.uses),
     names ? h('div', { class: 'src' }, `For: ${r.situations.map((s) => names[s] || s).join(', ')}`) : null);
 }
 

@@ -99,6 +99,8 @@ func TestNewSituationsMatchLabelWording(t *testing.T) {
 		otc("P1", "Pin-X", "PYRANTEL PAMOATE", "Purpose Pinworm treatment", "Use for the treatment of pinworms"),
 		otc("S1", "Vaseline", "WHITE PETROLATUM", "Purpose Skin protectant", "Uses temporarily protects and helps relieve chapped or cracked skin and lips"),
 		otc("H1", "Salt Tablets", "SODIUM CHLORIDE", "Purpose Electrolyte Replenisher", "Uses for the preparation of normal isotonic solution of sodium chloride as an electrolyte replenisher for the prevention of heat cramps due to excessive perspiration"),
+		// "Dehydrated skin" must not count as dehydration.
+		otc("M1", "Hydrating Cream", "NIACINAMIDE", "Purpose Skin protectant", "Uses moisturizes dry, dehydrated skin"),
 		otc("C1", "Tylenol", "ACETAMINOPHEN", "Purposes Pain reliever/fever reducer", "Uses temporarily relieves minor aches and pains due to the common cold, headache, toothache"),
 		rec(map[string]any{"set_id": "X1",
 			"spl_product_data_elements": []string{"Earache Relief Belladonna Chamomilla"},
@@ -140,7 +142,7 @@ func TestNewSituationsMatchLabelWording(t *testing.T) {
 			}
 		}
 		if len(got) != len(keys) {
-			t.Errorf("%s: got %v, want only %v (homeopathic must be left out)", slug, got, keys)
+			t.Errorf("%s: got %v, want only %v (nothing else, homeopathic products included)", slug, got, keys)
 		}
 	}
 }
