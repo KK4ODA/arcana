@@ -3,14 +3,19 @@
 All notable changes are recorded here. Versions follow semantic versioning;
 the library format version is tracked separately (docs/design/09-storage-and-data.md).
 
-## Unreleased
+## 0.13.0 — 2026-11-26
 
 Arcana now has an Entertainment page. Seven board games are built in and
 need no download: chess, checkers, backgammon, reversi, four in a row,
 mancala and Go, for two players on one device or against the computer.
 Thirteen classic feature films that are in the public domain in the United
 States can be downloaded from the Internet Archive and watched in Arcana,
-on the computer running it or on any phone or tablet on the network.
+on the computer running it or on any phone or tablet on the network. The
+games and the player have been tried in Chromium on Linux, at desktop and
+phone width, not yet in Safari or on real phones. Arcana 0.6.0 to 0.12.0
+offer this version by themselves within a day of being online: choose
+*Update now* in the banner at the top of the page, or *Settings →
+Application updates → Check now* to look straight away.
 
 ### Added
 - **Board games** (ADR-0027). *Entertainment* lists chess, checkers
