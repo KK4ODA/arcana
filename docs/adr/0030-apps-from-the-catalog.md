@@ -93,7 +93,7 @@ scheme, host and port.
 |---|---|---|
 | CyberChef 10.24.0 | `CyberChef_v10.24.0.zip` from GCHQ's GitHub release | Apache-2.0 |
 | IT Tools 2024.10.22 | `it-tools-2024.10.22-7ca5933.zip` from the GitHub release | GPL-3.0 |
-| Excalidraw `sha-4bfc5bb` | the site layer of `excalidraw/excalidraw:sha-4bfc5bb` on Docker Hub, the image NOMAD pins (built November 2021; Excalidraw publishes no other build of the app) | MIT |
+| Excalidraw `sha-4bfc5bb` | the site layer of `excalidraw/excalidraw:sha-4bfc5bb` on Docker Hub, the image NOMAD pins (built November 2021; Excalidraw publishes no other build of the app); Docker Hub limits anonymous downloads by address, so `mirror.gcr.io`, Google's Docker Hub mirror serving the same digest, is a second source | MIT |
 | Meshtastic Web 2.7.1 | `build.tar` from the GitHub release; every file is gzip-compressed, and Arcana decompresses them as it unpacks | GPL-3.0 |
 | MeshCore Web 1.45.0 | the author's own web build, `MeshCore-v1.45.0+71-dc3a209-web.zip` from files.liamcottle.net, with Roboto and Noto Sans Symbols from Google Fonts | closed source, free to use; fonts SIL OFL 1.1 |
 

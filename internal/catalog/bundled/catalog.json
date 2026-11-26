@@ -1946,6 +1946,9 @@
           "mirrors": [
             {
               "url": "https://registry-1.docker.io/v2/excalidraw/excalidraw/blobs/sha256:9f511868bea49e4bf8086c51cbb5dd908a8ecea8fd98cb65c41881ff500a13d9"
+            },
+            {
+              "url": "https://mirror.gcr.io/v2/excalidraw/excalidraw/blobs/sha256:9f511868bea49e4bf8086c51cbb5dd908a8ecea8fd98cb65c41881ff500a13d9"
             }
           ]
         }
@@ -1958,7 +1961,7 @@
         "name": "MIT License",
         "url": "https://github.com/excalidraw/excalidraw/blob/master/LICENSE",
         "verified": true,
-        "notes": "The site is one layer of Excalidraw's official image excalidraw/excalidraw:sha-4bfc5bb on Docker Hub (Excalidraw publishes no other build of the app)."
+        "notes": "The site is one layer of Excalidraw's official image excalidraw/excalidraw:sha-4bfc5bb on Docker Hub (Excalidraw publishes no other build of the app); mirror.gcr.io, Google's Docker Hub mirror, serves the same digest when Docker Hub limits downloads."
       },
       "capabilities": {
         "fullTextSearch": false,

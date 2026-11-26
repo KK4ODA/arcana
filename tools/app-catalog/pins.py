@@ -65,8 +65,9 @@ APPS = [
         "description": "Excalidraw (build 4bfc5bb of November 2021, the one Project NOMAD ships): a whiteboard for hand-drawn sketches, diagrams and plans. Drawings stay in the browser that made them; save them as files to keep or share. Live collaboration needs Excalidraw's servers and does not work offline.",
         "license": {"id": "MIT", "name": "MIT License", "url": "https://github.com/excalidraw/excalidraw/blob/master/LICENSE"},
         "tags": ["drawing", "diagrams", "whiteboard"],
-        "notes": "The site is one layer of Excalidraw's official image excalidraw/excalidraw:sha-4bfc5bb on Docker Hub (Excalidraw publishes no other build of the app).",
-        "files": [f("excalidraw", "any", "sha-4bfc5bb.tar.gz", blob("registry-1.docker.io", "excalidraw/excalidraw", "sha256:9f511868bea49e4bf8086c51cbb5dd908a8ecea8fd98cb65c41881ff500a13d9"),
+        "notes": "The site is one layer of Excalidraw's official image excalidraw/excalidraw:sha-4bfc5bb on Docker Hub (Excalidraw publishes no other build of the app); mirror.gcr.io, Google's Docker Hub mirror, serves the same digest when Docker Hub limits downloads.",
+        "files": [f("excalidraw", "any", "sha-4bfc5bb.tar.gz", [blob("registry-1.docker.io", "excalidraw/excalidraw", "sha256:9f511868bea49e4bf8086c51cbb5dd908a8ecea8fd98cb65c41881ff500a13d9"),
+                    blob("mirror.gcr.io", "excalidraw/excalidraw", "sha256:9f511868bea49e4bf8086c51cbb5dd908a8ecea8fd98cb65c41881ff500a13d9")],
                     "9f511868bea49e4bf8086c51cbb5dd908a8ecea8fd98cb65c41881ff500a13d9")],
     },
     {
